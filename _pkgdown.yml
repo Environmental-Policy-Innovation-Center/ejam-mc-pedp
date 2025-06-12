@@ -8,7 +8,7 @@ deploy:
 navbar:
   structure:
     left:  [intro, reference, articles, news]
-    right: [search]
+    right: [search, github]
 news:
   cran_dates: false
 footer:
