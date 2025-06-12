@@ -6,12 +6,15 @@ EJScreenReleaseDate: 2024-08-12
 ACSVersion: 2018-2022
 ACSReleaseDate: 2023-12-07
 CensusVersion: 2020
-ejam_data_repo: USEPA/ejamdata
-URL: https://usepa.github.io/EJAM-open, https://github.com/USEPA/EJAM-open
-Author: Mark Corrales <ENVIROMAIL_GROUP@epa.gov>
-Maintainer: Mark Corrales <ENVIROMAIL_GROUP@epa.gov>
+ejam_data_repo: ejanalysis/ejamdata
+URL: https://ejanalysis.github.io/EJAM-open, https://github.com/ejanalysis/EJAM-open
+Author: Mark Corrales <ejam@ejanylsis.com>
+Maintainer: Mark Corrales <ejam@ejanylsis.com>
 License: MIT + file LICENSE.md
-Description: Web app and R tools to easily summarize
+Description: Actively maintained version of EJAM, 
+    forked from the last version EPA released before it
+    was archived.
+    Web app and R tools to easily summarize
     residential population and environmental indicators
     for residents in or near a large number of areas or specific sites.
     Sites can be specified in a variety of ways - coordinates, facility IDs,
