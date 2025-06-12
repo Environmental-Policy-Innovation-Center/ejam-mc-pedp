@@ -7,7 +7,12 @@ Contributing Guide
 
 ### code repositories and open source contributions
 
-The open source package EJAM was in a repository called [USEPA/EJAM-open](https://github.com/USEPA/EJAM-open), but *that repository will be archived in mid-2025* with no plans for it to be further developed by EPA. Any further development or open source contributions would need to take place elsewhere (not in the EPA repository), such as in forks of the package.
+This version of the EJAM package was forked from the EPA version in mid-2025. 
+
+The EPA open source package EJAM in mid-2025 had been in a repository called [USEPA/EJAM-open](https://github.com/USEPA/EJAM-open), 
+but *that repository was archived in mid-2025* with no plans for it to be further developed by EPA. 
+
+Any further development or open source contributions will take place in this non-EPA repository.
 
 ------------------------------------
 
@@ -38,13 +43,15 @@ By submitting a pull request or issue, you are agreeing to comply with a waiver 
 
 ### Contact
 
-If you have questions or comments, please email [ENVIROMAIL_GROUP\@epa.gov](mailto:ENVIROMAIL_GROUP@epa.gov?subject=EJAM%20package%20question) and put "EJAM package question" in the subject line.
+If you have questions or comments on this non-EPA version of the package, please email [ejam\@ejanalysis.com](mailto:ejam@ejanalysis.com?subject=EJAM%20package%20question) and please put "EJAM package question" in the subject line.
 
 -->
 
 ### Disclaimer for GitHub Repository Content
 
-The United States Environmental Protection Agency (EPA) GitHub project code is provided on an "as is" basis and the user assumes responsibility for its use. EPA has relinquished control of the information and no longer has responsibility to protect the integrity, confidentiality, or availability of the information. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by EPA.
+This non-EPA version of EJAM was forked from the original EPA v2.32.4 version. For that EPA version, the following disclaimer applied:
+
+The United States Environmental Protection Agency (EPA) GitHub project code was provided on an "as is" basis and the user assumes responsibility for its use. EPA has relinquished control of the information and no longer has responsibility to protect the integrity, confidentiality, or availability of the information. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by EPA.
 
 **The EPA seal and logo shall not be used in any manner to imply endorsement of any commercial product or activity by EPA or the United States Government.**
 
@@ -63,7 +70,7 @@ If you have any questions or want to read more, see the [EPA Open Source Project
 
 
 <!--   
- WHILE EPA IS NOT HOSTING THE WEB APP
+ WHILE EPA IS NOT HOSTING THE WEB APP, disclaimer removed
          
 ### Disclaimer for App
 

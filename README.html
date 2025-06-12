@@ -619,31 +619,35 @@ lets you easily and quickly see residential population and environmental
 information aggregated within and across hundreds or thousands of
 places, all at the same time.</p>
 <h2 id="what-can-you-do-with-ejam">What Can You Do with EJAM?</h2>
-<p><a href="https://usepa.github.io/EJAM-open/articles/0_whatis.html">What is
+<p><a href="https://ejanalysis.github.io/EJAM/articles/0_whatis.html">What is
 EJAM?</a></p>
-<h2 id="status-of-ejam-package-2025">Status of EJAM package 2025</h2>
-<p><em>As of mid-2025, content related to the USEPA-hosted open source R
-package EJAM may be archived and/or unpublished:</em></p>
+<h2 id="status-of-ejam-package-after-mid-june-2025">Status of EJAM
+package after mid-June 2025</h2>
+<p><em>As of mid-June 2025, content related to what had been the
+USEPA-hosted open source R package EJAM will be archived (and/or
+unpublished)</em></p>
+<p><em>Ongoing development as of mid-June 2025 is not associated with
+EPA</em>, and that development including any open source contributions,
+will take place in a separate repository, called <a href="https://github.com/ejanalysis/EJAM">ejanalysis/EJAM</a>, which a
+non-EPA, detached fork.</p>
 <h3 id="code-repositories-and-open-source-contributions">code
 repositories and open source contributions</h3>
 <p>The open source package EJAM was in a repository <em>archived and/or
 unpublished in mid-2025</em> (<a href="https://github.com/USEPA/EJAM-open">USEPA/EJAM-open</a>) with no
-plans for it to be further developed by EPA. Any further development or
-open source contributions would need to take place elsewhere (not in the
-EPA repository), such as in forks of the package.</p>
-<p>The name of the repo storing the package code needs to be recorded as
+plans for it to be further developed by EPA.</p>
+<p>The name of any repo storing the package code needs to be recorded as
 part of the URL parameter in the DESCRIPTION file in the root folder of
 the source package. The owner/name can be read from there using the
 unexported helper function <code>repo_from_desc()</code>, and the full
 URL via the function <code>repo_from_desc()</code> as
 <code>EJAM:::repo_from_desc(get_full_url=T)</code> which currently
-returns <a href="https://github.com/USEPA/EJAM-open">https://github.com/USEPA/EJAM-open</a>.</p>
+returns <a href="https://github.com/ejanalysis/EJAM">https://github.com/ejanalysis/EJAM</a>.</p>
 <h3 id="documentation">documentation</h3>
 <p>Documentation webpages had been on github pages at URLs related to
-the USEPA/EJAM and USEPA/EJAM-open repositories – but <em>those might be
+the USEPA/EJAM and USEPA/EJAM-open repositories – but <em>those will be
 archived and/or unpublished in mid-2025</em>, with any subsequent
-documentation presumably hosted by other repositories such as in forks
-of the package. The ddocumentation web pages are created via code in
+documentation hosted by a separate, non-EPA repository such as in this
+fork of the package. The documentation web pages are created via code in
 <code>EJAM/data-raw/datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R</code>,
 relying on the R package <code>{pkgdown}</code> and hosted on github
 pages.</p>
@@ -653,7 +657,7 @@ needs to be recorded as part of the URL parameter in the
 That repo URL can be read from there using the unexported helper
 function <code>repo_from_desc()</code> as
 <code>EJAM:::repo_from_desc(&#39;github.io&#39;, get_full_url=T)</code>, which
-currently returns (<a href="https://usepa.github.io/EJAM-open">https://usepa.github.io/EJAM-open</a>).</p>
+currently returns (<a href="https://ejanalysis.github.io/EJAM">https://ejanalysis.github.io/EJAM</a>).</p>
 <h3 id="datasets">datasets</h3>
 <p>Datasets had been in a repository <em>archived and/or unpublished in
 mid-2025</em> (<a href="https://github.com/USEPA/ejamdata">USEPA/ejamdata</a>) through
@@ -663,9 +667,9 @@ to be recorded as the <code>ejam_data_repo</code> parameter in the
 <code>DESCRIPTION</code> file in the root folder of the source package,
 which can be retrieved via the function <code>desc::desc()</code> as
 <code>desc::desc(file = system.file(&quot;DESCRIPTION&quot;, package = &quot;EJAM&quot;))$get(&quot;ejam_data_repo&quot;)</code>
-which currently returns USEPA/ejamdata, so the full URL would be <a href="https://github.com/USEPA/ejamdata">https://github.com/USEPA/ejamdata</a>.</p>
+which currently returns ejanalysis/ejamdata, so the full URL would be <a href="https://github.com/ejanalysis/ejamdata">https://github.com/ejanalysis/ejamdata</a>.</p>
 <h3 id="web-app-hosting">web app hosting</h3>
-<p>For information about how to host the web app, see <a href="https://usepa.github.io/EJAM-open/articles/dev_deploy-app.html">Deploying
+<p>For information about how to host the web app, see <a href="https://ejanalysis.github.io/EJAM/articles/dev_deploy-app.html">Deploying
 the Web App</a></p>
 <p>EJScreen and the EJAM/multisite tool web app were <em>no longer
 hosted by EPA starting in early 2025</em>. Changes have been taking
