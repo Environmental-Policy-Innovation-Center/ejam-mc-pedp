@@ -286,7 +286,7 @@ app_server <- function(input, output, session) {
       cat('\nThe input$ss_choose_method is ', input$ss_choose_method, '\n')
       if (input$ss_choose_method == "dropdown") {cat(' and input$ss_choose_method_drop is ', input$ss_choose_method_drop, '\n')}
       if (input$ss_choose_method == "upload")   {cat(' and input$ss_choose_method_upload is ', input$ss_choose_method_upload, '\n')}
-      }
+    }
     x <- switch(
       as.character(input$ss_choose_method),
       'dropdown' = switch(input$ss_choose_method_drop,
@@ -1115,7 +1115,7 @@ app_server <- function(input, output, session) {
       disable_buttons[[placetype]] <- TRUE
       shiny::validate(errmsg)
     } else {
-      disable_buttons[['FIPS']] <- FALSE
+      disable_buttons[[placetype]] <- FALSE
       cat("COUNT OF FIPS via fips_from_table(): ", length(fips_vec), '\n')
       # now let ejamit() do the rest for the FIPS case
       # fips_vec # ??? this line was here but should have no effect?
@@ -1127,7 +1127,6 @@ app_server <- function(input, output, session) {
     if (sum(fips_is_valid) > 0) {
       numna <- sum(!fips_is_valid)
       num_notna <- length(fips_vec) - sum(!fips_is_valid)
-      #num_valid_pts_uploaded[['FIPS']] <- num_notna
       invalid_alert[[placetype]] <- numna # this updates the value of the reactive invalid_alert()
       cat("Number of FIPS codes:  "); cat(length(fips_vec), 'total,', num_notna, 'valid,', numna, ' invalid \n')
       # (fips_vec)
@@ -1296,8 +1295,8 @@ app_server <- function(input, output, session) {
     ## if >1 upload method used, use the one currently indicated by radio button ss_choose_method
 
     if        (current_upload_method() == 'latlon'         ) {data_up_latlon()
-   #} else if (current_upload_method() == 'latlontypedin'  ) {data_typedin_latlon() # enable if implemented/ready ***
-   #} else if (current_upload_method() == 'ECHO'           ) {data_up_echo()        # enable if implemented/ready ***
+      #} else if (current_upload_method() == 'latlontypedin'  ) {data_typedin_latlon() # enable if implemented/ready ***
+      #} else if (current_upload_method() == 'ECHO'           ) {data_up_echo()        # enable if implemented/ready ***
     } else if (current_upload_method() == 'FRS'            ) {data_up_frs()
 
     } else if (current_upload_method() == 'EPA_PROGRAM_sel') {data_up_epa_program_sel()
@@ -1357,7 +1356,7 @@ app_server <- function(input, output, session) {
       } else {
         removeNotification(id = 'radius_warning', session = session)
       }
-    } else {#else if (disable_buttons[[current_upload_method()]] == FALSE) {
+    } else {
       removeNotification(id = 'radius_warning', session = session)
     }
     if (NROW(data_uploaded()) > input$max_pts_run) {
@@ -1366,7 +1365,9 @@ app_server <- function(input, output, session) {
                        duration = NULL, type = 'error', closeButton = F,
                        paste0('Too many sites provided. This web app currently caps analyses at ', input$max_pts_run,' sites.'))
     } else {
-      shinyjs::enable(id = 'bt_get_results')
+      if (disable_buttons[[current_upload_method()]] == FALSE) {
+        shinyjs::enable(id = 'bt_get_results')
+      }
       removeNotification(id = 'max_pts_warning', session = session)
     }
     if (input$testing) {
@@ -1718,7 +1719,7 @@ app_server <- function(input, output, session) {
           if (inherits(xyz, "try-error")) {
             canmap <- FALSE
             validate("problem with map_shapes_leaflet() function")
-            } else {xyz}
+          } else {xyz}
         }
       }
 
@@ -2375,22 +2376,22 @@ app_server <- function(input, output, session) {
 
     full_page <- build_community_report(in_shiny = TRUE,
 
-      output_df = data_processed()$results_overall,
-      analysis_title =  sanitized_analysis_title(),
-      totalpop = popstr,
-      locationstr = residents_within_xyz,
-      include_ejindexes = (input$include_ejindexes == 'TRUE'),
-      show_ratios_in_report = (input$show_ratios_in_report == 'TRUE'),
-      extratable_show_ratios_in_report = (input$extratable_show_ratios_in_report == 'TRUE'),
-      extratable_title = input$extratable_title, # above the table, not in the upper left cell
-      extratable_title_top_row = input$extratable_title_top_row,
-      extratable_list_of_sections = EJAM:::global_or_param("default_extratable_list_of_sections"),
-      extratable_hide_missing_rows_for = input$extratable_hide_missing_rows_for, # c(names_d_language, names_health),
+                                        output_df = data_processed()$results_overall,
+                                        analysis_title =  sanitized_analysis_title(),
+                                        totalpop = popstr,
+                                        locationstr = residents_within_xyz,
+                                        include_ejindexes = (input$include_ejindexes == 'TRUE'),
+                                        show_ratios_in_report = (input$show_ratios_in_report == 'TRUE'),
+                                        extratable_show_ratios_in_report = (input$extratable_show_ratios_in_report == 'TRUE'),
+                                        extratable_title = input$extratable_title, # above the table, not in the upper left cell
+                                        extratable_title_top_row = input$extratable_title_top_row,
+                                        extratable_list_of_sections = EJAM:::global_or_param("default_extratable_list_of_sections"),
+                                        extratable_hide_missing_rows_for = input$extratable_hide_missing_rows_for, # c(names_d_language, names_health),
 
-      filename = NULL,
-      report_title = NULL, #
-      logo_path = NULL,
-      logo_html = NULL
+                                        filename = NULL,
+                                        report_title = NULL, #
+                                        logo_path = NULL,
+                                        logo_html = NULL
     )
     ## return generated HTML
     full_page
