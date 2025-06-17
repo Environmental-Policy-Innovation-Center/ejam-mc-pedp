@@ -1,3 +1,13 @@
+# EJAM v2.32.5 ? (July 2025 ? - TBD PLACEHOLDER )
+
+- interactive barplots of indicators can show median not just mean via `ejam2barplot_indicators()`
+- disabled Start Analysis until Done is clicked, when using FIPS dropdown menu of counties/cities/etc.
+- installation vignette/article may be edited
+- TBD PLACEHOLDER
+- TBD PLACEHOLDER
+- TBD PLACEHOLDER
+- TBD PLACEHOLDER
+
 # EJAM v2.32.4 (June 2025)
 
 Note the URLs, emails, and notes about repository locations/owners were edited to reflect this forked non-EPA version of the EJAM package being located at ejanalysis/EJAM, so the package called the v2.32.4 release on ejanalysis/EJAM is slightly different than the version called the v2.32.4 release that was released on USEPA/EJAM-open.
