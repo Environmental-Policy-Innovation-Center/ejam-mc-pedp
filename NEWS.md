@@ -1,5 +1,7 @@
 # EJAM v2.32.4 (June 2025)
 
+Note the URLs, emails, and notes about repository locations/owners were edited to reflect this forked non-EPA version of the EJAM package being located at ejanalysis/EJAM, so the package called the v2.32.4 release on ejanalysis/EJAM is slightly different than the version called the v2.32.4 release that was released on USEPA/EJAM-open.
+
 ## Web app
 
 - Fixed logo in "About" tab, app header, and report header, in app_ui, generate_html_header(), global_defaults_xyz, etc., and updated testoutput files related to `ejam2report()` and `ejam2excel()`
