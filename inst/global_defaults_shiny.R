@@ -61,12 +61,12 @@ global_defaults_shiny <- list(
 
   ## .app_title ####
   .app_title = app_title,
-  
+
   ## logos ####
   aboutpage_logo = aboutpage_logo,
   ## .community_report_logo_path is not needed here since since it is defined elsewhere, in global_defaults_package.R
   ## app_header_logo_html is not needed here since it is simply used below in the html directly, not queried by app_ui.R
-  
+
   default_testing        = FALSE,
   default_shiny.testmode = FALSE,  # If TRUE, then various features for testing Shiny applications are enabled.
   default_print_uploaded_points_to_log = TRUE,
@@ -350,7 +350,9 @@ global_defaults_shiny <- list(
   # ~ ####
   # RESULTS VIEWS ####
 
+  ## ------------------------ Interactive plots options ####
 
+  default_allow_median_in_barplot_indicators = FALSE,
 
   ## ------------------------ Map formatting options ####
 

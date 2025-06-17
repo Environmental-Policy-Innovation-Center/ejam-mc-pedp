@@ -2744,11 +2744,22 @@ app_server <- function(input, output, session) {
     req(data_processed())
     req(input$summ_bar_ind)
     req(input$summ_bar_data)
-
-    ejam2barplot_indicators(ejamitout = data_processed(), indicator_type = input$summ_bar_ind, data_type = input$summ_bar_data)
-
+    ##  if allowing option of median ('med'), use thiS
+    if (global_or_param("default_allow_median_in_barplot_indicators")) {
+      mybarvars.stat <- input$summ_bar_stat
+    } else {
+      mybarvars.stat <- "avg"
+    }
+    mybarvars.sumstat <- switch(mybarvars.stat,
+                                'med' =  c('Median site', 'Median person'),
+                                'avg' = c('Average site', 'Average person')
+    )
+    ejam2barplot_indicators(ejamitout = data_processed(),
+                            indicator_type = input$summ_bar_ind, # D,E,EJ,EJS
+                            data_type = input$summ_bar_data,     # ratio or raw
+                            mybarvars.stat = mybarvars.stat, mybarvars.sumstat = mybarvars.sumstat # average or median
+    )
   }) # end of summ_display_bar  for barplot
-
   #############################################################################  #
   ## *HISTOGRAM interactive    ####
   #. ####
