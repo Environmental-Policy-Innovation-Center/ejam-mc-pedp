@@ -100,7 +100,7 @@ out <- testoutput_ejamit_100pts_1miles
 ejam2barplot(out,
   varnames = names_these_ratio_to_avg,
   main = "Envt & Demog Indicators at Selected Sites Compared to State Averages")
-  
+
 ejam2barplot(out,
   varnames = names_these_ratio_to_state_avg,
   main = "Envt & Demog Indicators at Selected Sites Compared to State Averages")
@@ -111,7 +111,7 @@ ejam2barplot(out,
 ejam2barplot(out)
 
 # vs statewide avg
-ejam2barplot(out, 
+ejam2barplot(out,
   varnames = c(names_d_ratio_to_state_avg, names_d_subgroups_ratio_to_state_avg),
   main = "Residential Populations at Selected Sites Compared to State Averages")
 
@@ -120,7 +120,7 @@ ejam2barplot(out,
 ejam2barplot(out,
   varnames = c(names_e_ratio_to_avg, names_e_ratio_to_state_avg),
   main = "Environmental Indicators at Selected Sites Compared to Averages")
-  
+
  ## select your own ratio-type indicators that are available
  ## -- and you could see the range of available ratio indicators like this:
  \dontrun{
@@ -131,20 +131,20 @@ ejam2barplot(out,
    info = c("varlist", "shortname")
  )
    }
- 
+
  # helper functions related to ejam2barplot()
- 
+
   plot_barplot_ratios_ez(
-    out, 
+    out,
     varnames = c(names_d_ratio_to_avg , names_d_subgroups_ratio_to_avg)
   )
-  
+
   # same plot but with function that would need more work to format inputs:
   plot_barplot_ratios(
       unlist(out$results_overall[ ,
       c(..names_d_ratio_to_avg , ..names_d_subgroups_ratio_to_avg) ])
       )
-      
+
 }
 \seealso{
 \code{\link[=ejam2ratios]{ejam2ratios()}} \code{\link[=ejam2barplot]{ejam2barplot()}} \code{\link[=plot_barplot_ratios_ez]{plot_barplot_ratios_ez()}} \code{\link[=table_xls_format]{table_xls_format()}}
