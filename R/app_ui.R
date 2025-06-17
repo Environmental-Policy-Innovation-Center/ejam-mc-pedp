@@ -405,8 +405,8 @@ app_ui  <- function(request) {
                                    label = div(icon('play', style = 'transform: rotate(180deg);'), HTML('&nbsp;'),
                                                'Return to Previous Results'), class = 'usa-button')
                     )
-                  ))
-              )
+                  )) # end fluid row
+              ) # end well panel
               # _________ wellPanel end ___------------------------------------------------------
             ), # end of upload-methods column
             ################################################################# #
@@ -472,10 +472,8 @@ app_ui  <- function(request) {
                             )
                      ),
                    ) # end fluidRow with radius slide and analysis title and start button
-
             ) # end of column with map
           ), # end of fluidRow container for upload method (left column) and map (right column)
-
         ), # end Site Selection tab panel
 
         #############################################################################  #
@@ -625,6 +623,7 @@ app_ui  <- function(request) {
                                                        ),
                                                        br(), br()
                                                        ######################################################################################################### #
+                                                     ) # end of wellPanel
                                                      ),  # end of tabPanel(title = 'Plot Average Scores',
 
                                                      ### _HISTOPLOT (RANGE OF SCORES) - tabPanel(title = 'Plot Full Range of Scores' ####
@@ -676,9 +675,7 @@ app_ui  <- function(request) {
                                             ) # end tab panel for histograms
                                           ) # end navbarPage
                                       ) # end div(class = 'navbar1'
-
                              ), # end 'Details' results tab
-
                              ######################################################################################################### #
                              #. ####
                              # ______ FULL REPORT (Word doc) - tabPanel(title = 'Written Report' _________ ####
