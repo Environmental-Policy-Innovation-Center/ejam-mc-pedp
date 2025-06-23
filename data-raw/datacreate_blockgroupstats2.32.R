@@ -5,6 +5,7 @@ if (!exists("askquestions")) {askquestions <- TRUE}
 if (!exists("rawdir")) {rawdir <- './data-raw'}
 if (!exists("localfolder")) {
   # localfolder = "~/Downloads/ejscreen new ftp downloads"
+  # localfolder = ""
   # dir.create(localfolder, showWarnings = FALSE, recursive = TRUE)
 }
 rm(td) # start fresh with new tempdir
@@ -522,8 +523,6 @@ nacounts(blockgroupstats_new)
 ## merge US summary indexes with the state.EJ.DISPARITY columns ####
 # from the  blockgroupstats_new_state  table
 
-# download_dynamic("bgej")
-# > names( bgej)
 
 blockgroupstats_new_state <- blockgroupstats_new_state[, c("bgid", "bgfips", names_ej, names_ej_supp)]
 data.table::setDT(blockgroupstats_new_state)
@@ -537,7 +536,6 @@ data.table::setnames(blockgroupstats_new_state,
 data.table::setDF(blockgroupstats_new)
 data.table::setDF(blockgroupstats_new_state)
 
-all.equal(bgej$bgfips, bgej_new$bgfips)
 
 bgej_new <- data.table::data.table(
   blockgroupstats_new[ , c("bgid", "bgfips",
@@ -548,6 +546,8 @@ bgej_new <- data.table::data.table(
                                 names_ej_supp_state)]
 )
 ########################################### # ############################################ # ############################################ #
+
+##   QUALITY CONTROL CHECK - make sure calculation (replication) based on formulas and raw envt pctiles and demog indexes matches what is in bgej_new
 
 ############################################################### #
 # compare new to existing one if possible as a check
@@ -561,9 +561,6 @@ if (exists("bgej")) {
 
 ############################################################### #
 
-########################################### # ############################################ # ############################################ #
-
-##   QUALITY CONTROL CHECK - make sure calculation (replication) based on formulas and raw envt pctiles and demog indexes matches what is in bgej_new
 
 # random sample of 20 blockgroups to check
 myfips = sample(blockgroupstats$bgfips, 20) # or  testinput_fips_blockgroups
@@ -683,7 +680,7 @@ setcolorder(blockgroupstats_new, c("bgid", "bgfips", "statename", "ST", "countyn
                                    "pop",
                                    names_d, names_e), before = 1)
 
-s
+
 
 ########################################################## #
 SAVELOCAL <- TRUE
@@ -694,7 +691,10 @@ if (interactive() && askquestions) {
 if (SAVELOCAL) {
 
   ## save bgej local copy for convenience ####
-  datawrite_to_local("bgej", localfolder = localfolder)
+  # datawrite_to_local("bgej", localfolder = localfolder)
+  write_feather(bgej, sink = file.path(localfolder, "bgej.arrow"))
+
+
 
   # ASARROW = TRUE
   # if (ASARROW) {

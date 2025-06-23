@@ -213,7 +213,7 @@ if (0 == 1) {  # collapsable list
   documentOpen('./data-raw/datacreate_ejampackages.R')
   documentOpen('./data-raw/datacreate_meters_per_mile.R')
 
-  ### and then datawrite_to_pins() if those datasets were updated.
+  ### and then SAVE TO ejamdata REPO or wherever, if those datasets were updated.
 
 } # outline/list of datacreate_ files
 ######################################### ########################################## #
@@ -226,23 +226,7 @@ if (0 == 1) {  # collapsable list
 ## use full metadata if related to ejscreen or census/acs
 # x <- metadata_add(x)
 ######################################### #
-## obsolete - used to Verify pins board access ####
-# x <- datawrite_to_pins(justchecking = T) # load_all() first or use EJAM:::
-# if (!is.null(x)) {
-#   cat(" Must use VPN to have access to pins board \n\n" )
-#   cat("\n As of", as.character(Sys.Date()), "\n\n")
-#   x = x[order(x$created), ]
-#   rownames(x) <- NULL
-#   print(x)
-#
-#   pin_seen <- x$name
-#   pin_expected = .arrow_ds_names
-#   if (length(setdiff2(pin_seen, pin_expected)) > 0 ) {
-#     message("Expected to see on pin board but not there: ", paste0(setdiff(pin_expected, pin_seen), collapse = ", "))
-#     message("See on on pin board but not expected: ", paste0(setdiff(pin_seen, pin_expected), collapse = ", "))
-#   }
-#   rm(pin_seen, pin_expected, x)
-# }
+
 
   # As of 2024-08-29
 
@@ -313,7 +297,6 @@ source_maybe("datacreate_runtime_models.R")
 
 ######################################### #
 ### Must use load_all() or build/install, to make available those new variable name lists
-#  and possibly modified  metadata4pins.rda
 #  (the source package as just updated, not the version installed)
 #  and so all functions will use the new source version
 
@@ -342,9 +325,9 @@ source_maybe('datacreate_blockwts.R', DOIT = FALSE) # script that can include me
 # Creates mylistoftables, a list that includes tables blockwts, blockpoints, bgid2fips, etc.,
 #   gets updated when FIPS codes or boundaries change for blocks or blockgroups
 #  such as in Connecticut for v2.2 change to v2.32 !
-#  and then datawrite_to_pins() if those datasets were updated.
+#  and then write to ejamdata repository if those datasets were updated.
 # bgej  is not ready yet here... it is made when blockgroupstats is made.
-# note that 'bg_cenpop2020' and 'bgpts' are in EJAM/data/ not pins
+# note that 'bg_cenpop2020' and 'bgpts' are in EJAM/data/
 
 # take a look/ check
 length(unique(substr(blockid2fips$blockfips,1,2)))
@@ -378,14 +361,13 @@ stopifnot(
 # blockwts :     blockid, bgid, blockwt, block_radius_miles
 # quaddata :      blockid   and      BLOCK_X, BLOCK_Z, BLOCK_Y
 
-### SAVE LOCALLY AND TO PINS BOARD - obsolete ####
+### SAVE LOCALLY ? ####
 
 these <- c("bgid2fips",   "blockid2fips", "blockpoints", "blockwts", 'quaddata')
 datawrite_to_local(these) # maybe obsolete
-# datawrite_to_pins(varnames = these) # it asks interactively to confirm which ones to save to pins
 
-# ONE COULD LOAD FROM LOCAL OR PINS THE EXISTING VERSIONS OF THESE DATASETS IF available INSTEAD OF UPDATING THEM
-
+# ONE COULD LOAD FROM LOCAL or ejamdata repo THE EXISTING VERSIONS OF THESE DATASETS IF available INSTEAD OF UPDATING THEM
+# via   dataload_dynamic()
 ######################################### #
 ## blockgroups ####
 # documentOpen('./data-raw/datacreate_bgpts.R')              # USED BY datacreate_blockgroupstats2.32.R !! otherwise redundant w bg_cenpop2020
@@ -444,7 +426,7 @@ source_maybe("datacreate_censusplaces.R", DOIT = FALSE, folder = rawdir)
 ######################################### ########################################## #
 
 
-## updated block-related datasets should be on local disk now but not yet in pins,
+## updated block-related datasets should be on local disk now but not yet in ejamdata repo,
 ## and updated names_xyz and map_headernames should be in globalenv and in /data/ but not in installed pkg yet.
 ## so maybe best to rm(list = ls()) and load_all() again to get all new versions of everything
 rmost2()
@@ -459,12 +441,9 @@ loadall()
 ## + pctile & avg lookup tables (usastats, statestats) ####
 
 ######################################### #
-### datacreate_metadata4pins.R ####
+### OBSOLETE datacreate_metadata4pins.R ####
 # rstudioapi::documentOpen("./data-raw/datacreate_metadata4pins.R")
-### probably obsolete if not using pins boards now
-source_maybe("datacreate_metadata4pins.R") # does use_data()
-# this just stores title, description of each dataset that gets put in pins board - no dates info
-# dates info for pins is generated right when being written to pins board.
+###   obsolete if not using pins boards now
 
 ######################################### #
 ### datacreate_blockgroupstats2.32.R (also starts making usastats,statestats!!) ####
@@ -479,19 +458,23 @@ if (askquestions && interactive()) {
 }
 
 source_maybe("datacreate_blockgroupstats2.32.R") # (also starts making usastats,statestats!!)
-# created bgej (with metadata and documentation, and saved it locally but not to pins yet)
-### bgej to pins ####
+# created bgej (with metadata and documentation, and saved it locally but not to ejamdata repo yet)
+### bgej to ejamdatarepo ####
 ######################################### #
 if (askquestions && interactive()) {
-  cat("\n\n### probably obsolete if not using pins boards now\n\n")
-  pinej = askYesNo("write to bgej pins? ")
-  if (!is.na(pinej) && pinej) {
+  writebgej = askYesNo("write to bgej file in ejamdata repo? ")
+  if (!is.na(writebgej) && writebgej) {
     ## do not save via  usethis::use_data(bgej, overwrite = TRUE) - it is a large file
-    ## Save bgej to pins board as .arrow file
-    datawrite_to_pins("bgej", type = "arrow")
-    # defaults should work but anyone doing this needs authentication, access to pins board !
+    ## Save bgej to ejamdata repo as .arrow file
+   ### WRITE  bgej  TO THE ejamdata REPOSITORY NOW   ####
+cat("WRITE  bgej  TO THE ejamdata REPOSITORY NOW
+  THIS is done by copying the bgej.arrow file into the data folder of the ejamdata repository and pushing the changes.
+   See notes in https://ejanalysis.github.io/EJAM/articles/dev_update-datasets.html
+
+   and note any testoutput files and objects have to be recreated if numbers in bgej etc. changed...
+\n")
   }}
-# created blockgroupstats_new as interim object
+# created blockgroupstats_new as interim object   and bgej
 # created usastats, statestats but not final versions yet
 
 ################################################################################ #
