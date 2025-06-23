@@ -1,24 +1,67 @@
 
 # SCRIPT TO DOWNLOAD/UPDATE EJSCREEN BLOCKGROUP DATA AND PERCENTILE LOOKUP TABLES FOR EJAM YEARLY
 
-if (!exists("askquestions")) {askquestions <- FALSE}
+if (!exists("askquestions")) {askquestions <- TRUE}
 if (!exists("rawdir")) {rawdir <- './data-raw'}
-if (!exists("localfolder")) { localfolder = "~/../Downloads/ejscreen new ftp downloads"}
+if (!exists("localfolder")) {
+  # localfolder = "~/Downloads/ejscreen new ftp downloads"
+  # dir.create(localfolder, showWarnings = FALSE, recursive = TRUE)
+}
 rm(td) # start fresh with new tempdir
 if (!exists("td")) {td <- tempdir() }
 if (!dir.exists(td)) {stop("tempdir() called td does not exist")}
 ############################################################################################ #
 # EJScreen initial v 2.3 ftp site files as of 7/5/2024 had problems with ozone (and possibly ties-handling in percentile lookups)
 # and team posted version 2.32 on 8/12/24 here:
-baseurl = "https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe"
+baseurl = "https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe" # went offline after approx Feb 2025
+# archived version:
+baseurl = "https://web.archive.org/web/20250201182652/https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe" # archived version, since official site went down
 # browseURL(baseurl)
+
+if (!dir.exists(localfolder)) {
+  if (interactive() && askquestions) {
+    localfolder <- rstudioapi::selectDirectory("Save local copies where?")
+    if (is.na(localfolder) || !dir.exists(localfolder)) {stop(localfolder, " folder does not exist")}
+  } else {
+    localfolder <- getwd()
+  }
+}
+cat("Using this FTP folder as source of data: ", baseurl, "\n")
+cat("Using this folder as local folder to save copies in: ", localfolder, "\n")
+
+#   # if this were a function not a script  ...
+# x = function(localfolder = "~/../Downloads/ejscreen new ftp downloads",
+#              baseurl = "https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe"
+# ) {
+#   if (!dir.exists(localfolder)) {dir.create(localfolder)}
+# }
+############################################################################################ #
+
 needgdb = FALSE
 # require(arrow)
 
-#         as of 8/21/24 2.32 August version filenames on ftp site:
+# # ARCHIVES EXIST here from as of approx 2/1/25 (and still there at least as of 6/18/25) :
+#
+# date created by epa 8/2024           date archived seems to be 2/3/25
+# 2024-08-12 14:57	127M	https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip
+# 2024-08-08 14:53	123M	https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_StatePct_with_AS_CNMI_GU_VI.csv.zip
+
+# 2024-08-12 14:59	450M  https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJScreen_2024_BG_with_AS_CNMI_GU_VI.gdb.zip
+# 2024-08-08 15:00	448M  https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJScreen_2024_BG_StatePct_with_AS_CNMI_GU_VI.gdb.zip
+
+# 2024-08-12 14:56	96K   https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJScreen_2024_BG_National_Lookup.csv
+# 2024-08-12 14:56	4.8M	https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJScreen_2024_BG_State_Lookup.csv
+
+# 2024-08-12 14:56	21K	  https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJScreen_2024_BG_Percentiles_Columns.xlsx
+# 2024-08-12 14:56	21K	  https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJScreen_2024_BG_State_Percentiles_Columns.xlsx
+#
+## and tract-scale files such as https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJScreen_2024_Tract_StatePct_with_AS_CNMI_GU_VI.csv.zip
+
+
+# # as of 8/21/24 2.32 August version filenames on ftp site:  (but offline as of Feb 2025)
 
 # https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip   # CAPS
-# https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_StatePct_with_AS_CNMI_GU_VI.csv.zip # CAPS
+# https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_StatePct_with_AS_CNMI_GU_VI.csv.zip # CAPS  - see archived copy
 
 # https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJScreen_2024_BG_with_AS_CNMI_GU_VI.gdb.zip
 # https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJScreen_2024_BG_StatePct_with_AS_CNMI_GU_VI.gdb.zip
@@ -29,7 +72,8 @@ needgdb = FALSE
 # https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJScreen_2024_BG_Percentiles_Columns.xlsx
 # https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJScreen_2024_BG_State_Percentiles_Columns.xlsx
 
-#   data for   blockgroupstats   
+
+#   data for   blockgroupstats
 
 blockgroupstats_source_usa.zip   <- "EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip"  # capitalization changed from prior  version
 blockgroupstats_source_usa.csv   <- "EJScreen_2024_BG_with_AS_CNMI_GU_VI.csv"   # inside .zip not for download - it will be available after unzip
@@ -54,32 +98,15 @@ statestats_new_explained.xlsx    <- "EJScreen_2024_BG_State_Percentiles_Columns.
 
 ############################################################################################ #
 
-if (!dir.exists(localfolder)) {
-  if (interactive() && askquestions) {
-    localfolder <- rstudioapi::selectDirectory("Save local copies where?")
-    if (is.na(localfolder) || !dir.exists(localfolder)) {stop(localfolder, " folder does not exist")}
-  } else {
-    localfolder <- getwd() 
-  }
-}
-cat("Using this FTP folder as source of data: ", baseurl, "\n")
-cat("Using this folder as local folder to save copies in: ", localfolder, "\n")
-
-#   # if this were a function not a script  ... 
-# x = function(localfolder = "~/../Downloads/ejscreen new ftp downloads", 
-#              baseurl = "https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe"
-# ) {
-#   if (!dir.exists(localfolder)) {dir.create(localfolder)}
-# }
 ############################################################################################ #
 ## older scripts:
 # /dev/notes_datasets
-# [1] "0_SCRIPT_overview_get_ejscreendata.R"             "1_SCRIPT_EJAMejscreen_download.R"                
-# [3] "2_SCRIPT_FOR_FIPS_ST_TRACT_CNTY.R"                "3_SCRIPT_create_bgDemog_ejscreen2.1_andtracts.R" 
-# [5] "4_SCRIPT_ADD_PUERTORICO_DEMOG_SUBGROUPS.R"        "5_SCRIPT_merge_demogsubgroups_v2.1.R"            
+# [1] "0_SCRIPT_overview_get_ejscreendata.R"             "1_SCRIPT_EJAMejscreen_download.R"
+# [3] "2_SCRIPT_FOR_FIPS_ST_TRACT_CNTY.R"                "3_SCRIPT_create_bgDemog_ejscreen2.1_andtracts.R"
+# [5] "4_SCRIPT_ADD_PUERTORICO_DEMOG_SUBGROUPS.R"        "5_SCRIPT_merge_demogsubgroups_v2.1.R"
 # [7] "6_SCRIPT_create_blockgroupstats.R"                "8_SCRIPT_make_MeansByGroup_and_Ratios_RRS.US22.R"
-# [9] "9_SCRIPT_PCTILELOOKUPS_READ-CSVS-MID-2022.R"      "NOTES_which_states_are_in_which_datasets.R"      
-# [11] "PINSURLTRY.R"     
+# [9] "9_SCRIPT_PCTILELOOKUPS_READ-CSVS-MID-2022.R"      "NOTES_which_states_are_in_which_datasets.R"
+# [11] "PINSURLTRY.R"
 ############################################################################################ #
 
 # DOWNLOAD ZIP and CSV ####
@@ -93,14 +120,14 @@ fnames <- c(
   statestats_new_explained.xlsx
   # and the other  .csv files are found inside zip files after download
 )
-options(timeout = max(300, getOption("timeout"))) # default is 60 seconds 
+options(timeout = max(300, getOption("timeout"))) # default is 60 seconds
 zurls = (  file.path(baseurl, fnames) )
 print(cbind(zurls))
 
-# are they all there as expected??? 
+# are they all there as expected???
 # browseURL(baseurl)
 
-curl::multi_download(urls = zurls, 
+curl::multi_download(urls = zurls,
                      destfiles = file.path(td, fnames))
 ########################################################### #
 
@@ -124,7 +151,7 @@ if (needgdb) {
 ######################################################### #
 
 # ARCHIVE  .xlsx files in case needed ####
-savex = FALSE
+savex = TRUE
 if (interactive() && askquestions) {
   savex = askYesNo("Save usastats_new_explained.xlsx in localfolder?")
   if (!is.na(savex) && savex) {
@@ -153,7 +180,7 @@ for (i in 1:length(znames)) {
 getfile <- function(fname, folder = td) {as.data.frame(readr::read_csv(file.path(folder, fname)))}
 
 blockgroupstats_new       <- getfile(blockgroupstats_source_usa.csv, td)
-blockgroupstats_new_state <- getfile(blockgroupstats_source_state.csv, td) 
+blockgroupstats_new_state <- getfile(blockgroupstats_source_state.csv, td)
 
 usastats_new   <- getfile(usastats_source.csv, td)
 statestats_new <- getfile(statestats_source.csv, td)
@@ -172,12 +199,12 @@ print(ls())
 # > usastats_new, statestats_new ####
 
 # archive unaltered versions (just for convenience, in case needed, to avoid downloading again)
-# Later they will get saved for the package as data, or maybe put in pins board
+# Later they will get saved for the package as data somewhere
 
 # save.image(file = file.path(localfolder, "save.image just after ftp downloads original colnames.rda"))
-# load(file = file.path(localfolder, "save.image just after ftp downloads original colnames.rda"))
+# load(      file = file.path(localfolder, "save.image just after ftp downloads original colnames.rda"))
 
-varnames <- c("blockgroupstats_new", 
+varnames <- c("blockgroupstats_new",
               "blockgroupstats_new_state",
               "usastats_new",
               "statestats_new")
@@ -188,7 +215,7 @@ if (interactive() && askquestions) {
   if (is.na(SAVELOCAL)) {SAVELOCAL <- FALSE}
 }
 if (SAVELOCAL) {
-  
+
   if (interactive() && askquestions) {
     ASARROW = askYesNo("Save copies as .arrow ? (not .rda)", default = TRUE)
     if (is.na(ASARROW)) {ASARROW <- FALSE}
@@ -197,8 +224,11 @@ if (SAVELOCAL) {
   }
   if (ASARROW) {
     fnames = paste0(paste0(varnames,  "_as_on_ftp"), ".arrow")
-    datawrite_to_local(varnames = varnames, fnames = fnames, localfolder = localfolder, overwrite = TRUE)
+    library(arrow)
+    towhere = file.path(localfolder, fnames)
+    # datawrite_to_local(varnames = varnames, fnames = fnames, localfolder = localfolder, overwrite = TRUE)
     for (i in seq_along(fnames)) {
+      write_feather(get(varnames[i]), sink = towhere[i])
       cat(file.path(localfolder, fnames[i]), " saved: "); cat(file.exists(file.path(localfolder, fnames[i]))); cat("\n")
     }
     # file.exists(file.path(localfolder,"blockgroupstats_new_as_on_ftp.arrow"))
@@ -219,6 +249,7 @@ if (SAVELOCAL) {
     # file.exists(file.path(localfolder,"usastats_new.arrow"))
     # file.exists(file.path(localfolder,"statestats_new.arrow"))
   }
+
   rm(varnames,   ASARROW, i)
   browseURL(localfolder)
   # if (!silent) {
@@ -232,43 +263,47 @@ if (SAVELOCAL) {
 # load(file.path(localfolder, "blockgroupstats_new_as_on_ftp.rda"))
 # load(file.path(localfolder, "blockgroupstats_new_state_as_on_ftp.rda"))
 if (!exists('blockgroupstats_new_as_on_ftp') && file.exists(file.path(localfolder, "blockgroupstats_new_as_on_ftp.arrow"))) {
-  blockgroupstats_new_as_on_ftp <- arrow::read_ipc_file(file.path(localfolder, "blockgroupstats_new_as_on_ftp.arrow"))
+  readtest <- arrow::read_ipc_file(file.path(localfolder, "blockgroupstats_new_as_on_ftp.arrow"))
 }
-
+all.equal(readtest, blockgroupstats_new)
+# class includes "tbl_df" and "tbl" when read back in.
+readtest = data.frame(readtest)
+all.equal(readtest, blockgroupstats_new)
+rm(readtest)
 ########################################################### #
 
 ## rename colnames ####
 
 ############################ #
-# 1st, check  map_headernames info  
+# 1st, check  map_headernames info
 EJAM:::nacounts(blockgroupstats_new)
-cbind(sort(names(blockgroupstats_new)[fixcolnames(names(blockgroupstats_new),'csv','r') == names(blockgroupstats_new)]))
+# cbind(sort(names(blockgroupstats_new)[EJAM::fixcolnames(names(blockgroupstats_new),'csv','r') == names(blockgroupstats_new)]))
 #         bins (colors on map)
-# [1,] "B_D2_DWATER"    
-# [2,] "B_D2_NO2"       
-# [3,] "B_D5_DWATER"    
-# [4,] "B_D5_NO2"       
+# [1,] "B_D2_DWATER"
+# [2,] "B_D2_NO2"
+# [3,] "B_D5_DWATER"
+# [4,] "B_D5_NO2"
 # [5,] "B_DISABILITYPCT"
-# [6,] "B_DWATER"       
-# [7,] "B_NO2" 
+# [6,] "B_DWATER"
+# [7,] "B_NO2"
 # etc etc
-# [8,] "REGION"         
-# [9,] "Shape_Length"   
+# [8,] "REGION"
+# [9,] "Shape_Length"
 #           text for popups in ejscreen app
-# [10,] "T_D2_DWATER"    
-# [11,] "T_D2_NO2"       
-# [12,] "T_D5_DWATER"    
-# [13,] "T_D5_NO2"       
+# [10,] "T_D2_DWATER"
+# [11,] "T_D2_NO2"
+# [12,] "T_D5_DWATER"
+# [13,] "T_D5_NO2"
 # [14,] "T_DISABILITYPCT"
-# [15,] "T_DWATER"       
-# [16,] "T_NO2"      
+# [15,] "T_DWATER"
+# [16,] "T_NO2"
 #   etc etc
 ############################ #
 
 # now rename columns
 
-names(blockgroupstats_new)       <-  fixcolnames(names(blockgroupstats_new),       oldtype = 'csv', newtype = 'r') # 
-names(blockgroupstats_new_state) <-  fixcolnames(names(blockgroupstats_new_state), oldtype = 'csv', newtype = 'r') # 
+names(blockgroupstats_new)       <-  fixcolnames(names(blockgroupstats_new),       oldtype = 'csv', newtype = 'r') #
+names(blockgroupstats_new_state) <-  fixcolnames(names(blockgroupstats_new_state), oldtype = 'csv', newtype = 'r') #
 
 names(usastats_new)    <- fixcolnames(names(usastats_new),   oldtype = "csv", newtype = "r")
 names(statestats_new)  <- fixcolnames(names(statestats_new), oldtype = "csv", newtype = "r")
@@ -282,8 +317,8 @@ cols2drop <- grep("^pctile|state.pctile|^bin", names(blockgroupstats_new), value
 # extra ones not renamed by fixcolnames() since did not bother to put all Text and Bin columns names in map_headernames
 cols2drop <- c(cols2drop,
                grep("^T_|^B_", names(blockgroupstats_new), value = TRUE)
-               
-               # c("B_D2_DWATER", "B_D2_NO2", "B_D5_DWATER", "B_D5_NO2",  "B_DISABILITYPCT", "B_DWATER", "B_NO2", 
+
+               # c("B_D2_DWATER", "B_D2_NO2", "B_D5_DWATER", "B_D5_NO2",  "B_DISABILITYPCT", "B_DWATER", "B_NO2",
                #              "T_D2_DWATER", "T_D2_NO2",  "T_D5_DWATER", "T_D5_NO2", "T_DISABILITYPCT", "T_DWATER", "T_NO2")
 )
 cat("\n Dropping these columns: \n\n")
@@ -299,14 +334,14 @@ rm(cols2drop)
 # dim(statestats_new); dim(EJAM::statestats)
 
 dim(blockgroupstats_new); dim(EJAM::blockgroupstats)
-# [1] 243022     81 as of 8/13/24 and 8/21/24
-# [1] 243021    112  v2.2
+# [1] 243022     81 as of 8/13/24 and 8/21/24 and in archived versionchecked 6/25
+# [1] 242336    150   v2.32
 dim(usastats_new);   dim(EJAM::usastats)
 # [1] 103  52  as of 8/13/24
-# [1] 102 rows in v2.2
+# [1] 102  67  in v2.32
 dim(statestats_new); dim(EJAM::statestats)
 # [1] 5356   52  # for now
-# [1] 5304 rows in v2.2
+# [1] 5304 rows in v2.32   67 cols
 
 setdiff(          names(blockgroupstats_new), names(EJAM::blockgroupstats))
 # EJAM:::setdiff_yx(names(blockgroupstats_new), names(EJAM::blockgroupstats))
@@ -336,7 +371,7 @@ arrow::write_ipc_file(bg_islandareas, sink = file.path(localfolder, "bg_islandar
 #  No EJScreen reports or maps are available in the Island Areas.
 # (we have data and reports in all States and PR and DC, but not GU AS VI MP).
 ## Therefore we should just drop the Island Areas from blockgroupstats_new etc. tables in EJAM for now.
-## 
+##
 # nacounts = EJAM:::nacounts
 # > length(unique(blockgroupstats_new$OBJECTID))
 # [1] 243022
@@ -345,14 +380,14 @@ arrow::write_ipc_file(bg_islandareas, sink = file.path(localfolder, "bg_islandar
 # nacounts(blockgroupstats_new$OBJECTID)
 # nacounts(blockgroupstats_new[,1:20]) # so far OBJECTID and ST are not NA here at all
 ## but current fips_valid() fails to recognize as valid 686 of the fips currently
-## because it relied on bgpts which was based on the weights table 
+## because it relied on bgpts which was based on the weights table
 # table(EJAM:::fips_valid(blockgroupstats_new$OBJECTID))
-# FALSE   TRUE 
+# FALSE   TRUE
 #   686 242336
 #
 ### THAT IS BECAUSE ISLAND AREAS HAVE FIPS OF NONSTANDARD NUMBER OF DIGITS:
 # > table(nchar(blockgroupstats_new$OBJECTID))
-#   7     10     12 
+#   7     10     12
 # 270    416 242336   The 686 cases are FIPS of 7 or 10 digits.
 # > unique(blockgroupstats_new$ST[nchar(blockgroupstats_new$OBJECTID) == 10])
 # [1] "VI"
@@ -372,11 +407,11 @@ arrow::write_ipc_file(bg_islandareas, sink = file.path(localfolder, "bg_islandar
 # head(nacounts(blockgroupstats_new[blockgroupstats_new$ST %in% 'MP', ], showall = T))
 # head(nacounts(blockgroupstats_new[blockgroupstats_new$ST %in%   'DE', ], showall = T))
 
-################################################### # 
+################################################### #
 
 ## drop island areas  ####
-##   AS, GU, MP, VI are in the new blockgroupstats table but bgid will be set to NA for those if they 
-## are not found in bgpts. 
+##   AS, GU, MP, VI are in the new blockgroupstats table but bgid will be set to NA for those if they
+## are not found in bgpts.
 
 # table(blockgroupstats_new$ST)
 blockgroupstats_new       <- blockgroupstats_new[!(blockgroupstats_new$ST %in% c('AS', 'GU', 'MP', 'VI')), ]
@@ -386,12 +421,11 @@ blockgroupstats_new_state <- blockgroupstats_new_state[!is.na(blockgroupstats_ne
 # AS OF 8/14/24 THERE ARE STILL 19 Connecticut blockgroups FIPS in bgfips (derived from the block weights file provided directly by the EJScreen team)
 #  that are NOT in blockgroupstats (derived from the geodatabase on the FTP site)
 # ***
-
+NROW(bgpts) - NROW(blockgroupstats_new) # 19
 dim(blockgroupstats_new)         # 242,336  (missing 19 blockgroups compared to bgpts)   ***
 dim(blockgroupstats_new_state)   # 242,336  (missing 19 blockgroups compared to bgpts)
-dim(bgpts)                       # 242,355 rows at this point it had  
-
-################################################# # 
+dim(bgpts)                       # 242,355 rows at this point it had
+################################################# #
 
 ## create bgfips and bgid columns ####
 
@@ -406,13 +440,13 @@ blockgroupstats_new_state$OBJECTID <- NULL
 
 # table(fips2state_abbrev(  bgpts[bgfips %in% (setdiff(bgpts$bgfips, blockgroupstats_new$bgfips)), substr(bgfips,1,2)]))
 # *** 19 bg in CT are somehow missing in the new blockgroupstats_new table but were in the supposedly correct bgpts$bgfips...
-# that was made from the july 2024 weights table  ? 
+# that was made from the july 2024 weights table  ?
 
 # mapfast(bgpts[bgfips %in% (setdiff(bgpts$bgfips, blockgroupstats_new$bgfips)),])
 
-################################################# # 
+################################################# #
 
-#### THIS REQUIRES USING THE UPDATING THE bgpts data table first!                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          PDATED/LATEST VERSION OF bgpts and bgid2fips ! 
+#### THIS REQUIRES USING THE UPDATING THE bgpts data table first!                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          PDATED/LATEST VERSION OF bgpts and bgid2fips !
 #### e.g., from v2.2 to v2.32, FIPS changed in Connecticut!
 # e.g., the v2.32 blockgroupstats$bgfips had about 2,717 new bgfips that failed to match any old v2.2 bgpts$bgfips.
 
@@ -421,24 +455,22 @@ blockgroupstats_new_state$OBJECTID <- NULL
 # [1] "2.1"
 # > attributes(bgpts)$ejscreen_version
 # NULL
-download_dynamic('bgid2fips')
+
+dataload_dynamic('bgid2fips')
 if (!all(blockgroupstats_new$bgfips %in% bgpts$bgfips))     {stop("not all new bgfips can be found in the version of bgpts available/attached")}
 if (!all(blockgroupstats_new$bgfips %in% bgid2fips$bgfips)) {stop("not all new bgfips can be found in the version of bgid2fips available/attached")}
 
 # table( blockgroupstats_new[blockgroupstats_new$bgfips %in% (EJAM:::setdiff_yx(bgpts$bgfips, blockgroupstats_new$bgfips)), "ST"])
-#  These used to be there but are gone now: 
-# AS  GU  MP  VI 
+#  These used to be there but are gone now:
+# AS  GU  MP  VI
 # 77  58 135 416   # 686 total Island Area  bgfips were in _new but NOT in the   bgpts$bgfips...
-
-
-
 
 blockgroupstats_new$bgid       <- bgpts$bgid[match(blockgroupstats_new$bgfips,       bgpts$bgfips)]
 blockgroupstats_new_state$bgid <- bgpts$bgid[match(blockgroupstats_new_state$bgfips, bgpts$bgfips)]
-# table(is.na(blockgroupstats_new$bgfips))
+# table(is.na(blockgroupstats_new$bgfips)) # none
 
 nacounts(blockgroupstats_new)
-#  
+#
 #                                     nas  other  # 8/21/24
 # pctunemployed                       424 241912
 # lowlifex                          17406 224930
@@ -485,19 +517,19 @@ nacounts(blockgroupstats_new)
 # > bgej - Create bgej here.####
 
 ###### MOVE summary INDEXES FROM blockgroupstats_new and blockgroupstats_new_state
-## to  a consolidated bgej  table 
+## to  a consolidated bgej  table
 
 ## merge US summary indexes with the state.EJ.DISPARITY columns ####
 # from the  blockgroupstats_new_state  table
 
 # download_dynamic("bgej")
-# > names( bgej) 
+# > names( bgej)
 
 blockgroupstats_new_state <- blockgroupstats_new_state[, c("bgid", "bgfips", names_ej, names_ej_supp)]
 data.table::setDT(blockgroupstats_new_state)
 data.table::setDT(blockgroupstats_new)
 data.table::setnames(blockgroupstats_new_state,
-                     old =  c("bgid", "bgfips", names_ej, names_ej_supp), 
+                     old =  c("bgid", "bgfips", names_ej, names_ej_supp),
                      new =  c("bgid", "bgfips", c(names_ej_state, names_ej_supp_state))
 )
 # > all.equal(blockgroupstats_new$bgid, blockgroupstats_new_state$bgid)
@@ -505,38 +537,138 @@ data.table::setnames(blockgroupstats_new_state,
 data.table::setDF(blockgroupstats_new)
 data.table::setDF(blockgroupstats_new_state)
 
-bgej <- data.table(
-  blockgroupstats_new[ , c("bgid", "bgfips", 
-                           "ST", "pop", 
-                           names_ej, 
+all.equal(bgej$bgfips, bgej_new$bgfips)
+
+bgej_new <- data.table::data.table(
+  blockgroupstats_new[ , c("bgid", "bgfips",
+                           "ST", "pop",
+                           names_ej,
                            names_ej_supp)],
-  blockgroupstats_new_state[, c(names_ej_state, 
+  blockgroupstats_new_state[, c(names_ej_state,
                                 names_ej_supp_state)]
 )
+########################################### # ############################################ # ############################################ #
+
+############################################################### #
+# compare new to existing one if possible as a check
+dataload_dynamic("bgej")
+if (exists("bgej")) {
+  all.equal(bgej, bgej_new, check.attributes = FALSE)
+  # difference would be just the metadata
+}
+# This confirms that the early June 2025 version of bgej, in EJAM v2.32.4, had errors in ozone mostly but also other indicators,
+# so bgej in pkg should be replaced by redone bgej_new
+
+############################################################### #
+
+########################################### # ############################################ # ############################################ #
+
+##   QUALITY CONTROL CHECK - make sure calculation (replication) based on formulas and raw envt pctiles and demog indexes matches what is in bgej_new
+
+# random sample of 20 blockgroups to check
+myfips = sample(blockgroupstats$bgfips, 20) # or  testinput_fips_blockgroups
+
+checkit <- function(bgej_to_check, state_or_us = c("US", "State", "both")[1]) {
+
+  if (state_or_us == "US")    {ns = 1:2} #  to check only the US type indexes, not State-based.
+  if (state_or_us == "State") {ns = 3:4} #  to check only State-based, assuming correct formulas are used below.
+  if (state_or_us == "both")  {ns = 1:4} #  to check both types, assuming correct formulas are used below.
+
+  for (kind in ns) {
+    if (kind == 1) {
+      ejnamegroup = names_ej
+      dname      = "Demog.Index"
+    }
+    if (kind == 2) {
+      ejnamegroup =  names_ej_supp
+      dname      =  "Demog.Index.Supp"
+    }
+    if (kind == 3) {
+      ejnamegroup =  names_ej_state
+      dname      =   "Demog.Index.State"
+    }
+    if (kind == 4) {
+      ejnamegroup =  names_ej_supp_state
+      dname      =   "Demog.Index.Supp.State"
+    }
+    cat("\n", dname , "\n\n")
+
+    for (i in 1:13) {
+
+      ename = names_e[i]
+      ejname = ejnamegroup[i]
+      if (grepl("state", dname, ignore.case = T)) {
+        ## check/fix this formula:
+        pctile.E_from_xstats = pctile_from_raw_lookup(as.vector(  unlist(blockgroupstats[bgfips %in% myfips, ..ename]) ), ename, lookup = statestats, zone = fips2state_abbrev(myfips))
+      } else {
+        pctile.E_from_xstats = pctile_from_raw_lookup(as.vector(  unlist(blockgroupstats[bgfips %in% myfips, ..ename]) ), ename)
+      }
+      Demogindexused = as.vector(unlist(blockgroupstats[bgfips %in% myfips, ..dname]))
+      inbg = data.frame(bgej_to_check)[bgej_to_check$bgfips %in% myfips,  ejname]
+
+      mytable = data.frame(blockgroupstats[
+        bgfips %in% myfips, .(bgfips, pop)]
+      )
+      mytable$pctile.E_from_xstats = pctile.E_from_xstats
+      mytable$Demogindexused = Demogindexused
+      mytable$EJ.DISPARITY_calc_from_blockgroupstats =  Demogindexused * pctile.E_from_xstats
+
+      mytable$EJ.DISPARITY_inbgej = inbg
+      mytable$PROBLEM = round(mytable$EJ.DISPARITY_calc_from_blockgroupstats, 1) != round(mytable$EJ.DISPARITY_inbgej, 1)
+      mytable$PFLAG = ifelse(is.na(mytable$EJ.DISPARITY_inbgej) | !mytable$PROBLEM, "", "**********")
+
+      cat(ename, ' ', dname, ' ', ejname   )
+      if (any(  mytable[!is.na(mytable$PROBLEM), 'PROBLEM'] )) {
+        cat(" -- PROBLEMS: \n")
+        cat("--------------------- \n")
+        print(mytable[mytable$PROBLEM, ] )
+        cat("--------------------- \n")
+      } else {
+        cat(" -- all ok \n")
+      }
+    }
+    cat("########################################### # ############################################ # ############################################ # # \n")
+  }
+}
+
+
+checkit(bgej_to_check = bgej)
+
+checkit(bgej_to_check = bgej_new)
+
+########################################### # ############################################ # ############################################ #
+
+
+# if ok,
+
+bgej <- bgej_new
+rm(bgej_new)
 # all.equal(data.frame(bgej)[, names_ej], blockgroupstats_new[,names_ej])
 
 ## metadata_add ####
 bgej = metadata_add(bgej)
+
+attr(bgej, "date_saved_in_package") <- as.character(Sys.Date())
 
 ## do not save via  usethis::use_data(bgej, overwrite = TRUE) - it is a large file
 cat("bgej created in globalenv but not saved yet - will try to save in later script... \n")
 
 ## documentation for bgej ####
 
-dataset_documenter("bgej", 
+dataset_documenter("bgej",
                    title = "bgej (DATA) Summary Indexes for Census block groups",
                    description = "bgej is a table of all blockgroups, with the raw scores of the Summary Indexes
 #'   and Supplemental Summary Indexes for all the environmental indicators.",
                    details = "This file is not stored in the package.
-#'   
+#'
 #'   For documentation on the residential population and environmental data and indicators,
 #'   see [EJScreen documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/understanding-ejscreen-results).
-#'   
+#'
 #'   The column names are these:
-#'   
-#'     c('bgfips', 'bgid', 'ST', 'pop', 
-#'     names_ej, 
-#'     names_ej_supp, 
+#'
+#'     c('bgfips', 'bgid', 'ST', 'pop',
+#'     names_ej,
+#'     names_ej_supp,
 #'     names_ej_state,
 #'     names_ej_supp_state
 #'     )",
@@ -551,19 +683,19 @@ setcolorder(blockgroupstats_new, c("bgid", "bgfips", "statename", "ST", "countyn
                                    "pop",
                                    names_d, names_e), before = 1)
 
+s
 
-
-########################################################## # 
+########################################################## #
 SAVELOCAL <- TRUE
 if (interactive() && askquestions) {
   SAVELOCAL = askYesNo("Save bgej locally now?")
   if (is.na(SAVELOCAL)) {SAVELOCAL <- FALSE}
 }
 if (SAVELOCAL) {
-  
+
   ## save bgej local copy for convenience ####
   datawrite_to_local("bgej", localfolder = localfolder)
-  
+
   # ASARROW = TRUE
   # if (ASARROW) {
   #   fnames = paste0(paste0(varnames,  "_as_on_ftp"), ".arrow")
@@ -574,7 +706,7 @@ if (SAVELOCAL) {
   #   # file.exists(file.path(localfolder,"blockgroupstats_new_as_on_ftp.arrow"))
   #   # file.exists(file.path(localfolder,"usastats_new_as_on_ftp.arrow"))
   #   # file.exists(file.path(localfolder,"statestats_new_as_on_ftp.arrow"))
-  # }  
+  # }
   rm(   ASARROW)
   rm(i)
 }
@@ -585,7 +717,7 @@ rm(fnames)
 
 ## bgej is left in globalenv by this script -
 # later can Save bgej  as .arrow file
-#   
+#
 cat("FINISHED A SCRIPT\n")
 cat("\n In globalenv() so far: \n\n")
 print(ls())

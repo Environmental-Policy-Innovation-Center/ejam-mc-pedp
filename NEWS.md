@@ -1,11 +1,13 @@
 # EJAM v2.32.5 (July 2025)
 
-- `test_ejam()` is what used to be called `test_interactively()` -- it was renamed and moved to the R folder as an unexported internal function loaded as part of the package
+- Summary Indexes (aka EJ Indexes) were found to have some incorrect numbers, so this release has replaced `?bgej` dataset with correct numbers, drawn from the internet archive version at https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip that was a copy of the datasets EPA had posted August 2024 at https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip
+- testoutput_xyz .xlsx and .html files and dataset R objects updated to reflect the new `?bgej` dataset
+- [installation instructions in vignette/article](../articles/1_installing.html) were edited
 - interactive barplots of indicators can show median not just mean via `ejam2barplot_indicators()`
 - disabled Start Analysis until Done is clicked, when using FIPS dropdown menu of counties/cities/etc.
-- installation vignette/article may be edited
-- `linesofcode2()` utility was improved, just as a way for package maintainers/contributors to look at which files have most of the lines of code, are mostly comments, etc.
+- `test_ejam()` is what used to be called `test_interactively()` -- it was renamed and moved to the R folder as an unexported internal function loaded as part of the package
 - `test_coverage_check()` utility was improved, just as a way to for package maintainers/contributors to look at which functions might need unit tests written
+- `linesofcode2()` utility was improved, just as a way for package maintainers/contributors to look at which files have most of the lines of code, are mostly comments, etc.
 - `table_xls_format_api()` is what used to be called table_xls_formatting_api() (but is not used unless the ejscreenapi module or server is working)
 
 
@@ -33,7 +35,7 @@ Note the URLs, emails, and notes about repository locations/owners were edited t
 - added warning in `url_countyhealthrankings()` if default year seems outdated
 - unexported read_and_clean_points()
 - unexported ejam2quantiles()
-- removed reference to obsolete testids_registry_id, replaced by testinput_regid
+- removed reference to obsolete testids_registry_id, replaced by `?testinput_regid`
 
 ## Technical / internal changes:
 
@@ -45,7 +47,7 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 - reorganized server code by moving v1_demog_table() and v1_envt_table to long report section of server file
 - cleaned up server code (eg, remove obsolete input$disconnect, remove obsolete community_download() and report_community_download(), and remove repetitive `ejam2repor()`, remove old EJScreen Batch Tool tab, used session = session as param in server calls to updateXYZINPUT, etc.)
 - allow shiny.testmode to be TRUE even if not set in options
-- used silent=TRUE in more cases of try()
+- used silent=TRUE in more cases of `try()`
 - added validate("problem with map_shapes_leaflet() function")
 - added validate(need(data_processed(), 'Please run an analysis to see results.'))
 
@@ -120,6 +122,7 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 - Updated FRS datasets, pulled on 2/12/25
 - Remove screenshots from user guide document
 
+
 # EJAM v2.32.1-EJAM (February 2025)
 
 ## Bug Fixes
@@ -148,6 +151,7 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 
 - Refactored community report functions, `app_server.R` script
 
+
 # EJAM v2.32-EJAM (January 2025)
 
 ## New Features + Improvements
@@ -160,6 +164,7 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 ## Bug Fixes and Enhancements
 
 - Added `leaflet.extras2` dependency to Imports, instead of Suggests, which is necessary for new installations
+
 
 # EJAM v2.32.0
 
