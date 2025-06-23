@@ -1,12 +1,13 @@
-# EJAM v2.32.5 ? (July 2025 ? - TBD PLACEHOLDER )
+# EJAM v2.32.5 (July 2025)
 
+- `test_ejam()` is what used to be called `test_interactively()` -- it was renamed and moved to the R folder as an unexported internal function loaded as part of the package
 - interactive barplots of indicators can show median not just mean via `ejam2barplot_indicators()`
 - disabled Start Analysis until Done is clicked, when using FIPS dropdown menu of counties/cities/etc.
 - installation vignette/article may be edited
-- TBD PLACEHOLDER
-- TBD PLACEHOLDER
-- TBD PLACEHOLDER
-- TBD PLACEHOLDER
+- `linesofcode2()` utility was improved, just as a way for package maintainers/contributors to look at which files have most of the lines of code, are mostly comments, etc.
+- `test_coverage_check()` utility was improved, just as a way to for package maintainers/contributors to look at which functions might need unit tests written
+- `table_xls_format_api()` is what used to be called table_xls_formatting_api() (but is not used unless the ejscreenapi module or server is working)
+
 
 # EJAM v2.32.4 (June 2025)
 
@@ -36,7 +37,7 @@ Note the URLs, emails, and notes about repository locations/owners were edited t
 
 ## Technical / internal changes:
 
-- enabled testing of web app functionality from the test_interactively() utility or via test_local(), etc., not just from a github action. (See /tests/setup.R which now has a copy of what is also in app-functionality.R)
+- enabled testing of web app functionality from the test_interactively() utility (which has more recently been renamed test_ejam() and put in R folder as an unexported internal function loaded as part of the package) or via test_local(), etc., not just from a github action. (See /tests/setup.R which now has a copy of what is also in app-functionality.R)
 - drafted revisions to ui and server to try to allow for more `run_app()` params or advanced tab or global_defaults_xyz to alter default method of upload vs dropdown, e.g., output ss_choose_method_ui, default_ss_choose_method, default_upload_dropdown. This included revising server and ui to use just EJAM:::global_or_param("xyz") not golem::get_golem_options("xyz"), so that non-shiny global defaults can work (e.g., logo path as `global_defaults_package$.community_report_logo_path`) even outside shiny when global_defaults_package has happened via onattach but global_defaults_shiny etc. has not happened.
 - changed .onAttach() to do source(global_defaults_package) with  local = FALSE not TRUE, but this might need to be revisited -- note both local = F and local = T are used in .onAttach() versus get_global_defaults_or_user_options()
 - in server, `ejam2excel()` now figures out value of radius_or_buffer_description, ejam2excel() gets new parameters
@@ -97,8 +98,8 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 - Continued towards refactoring/consolidating code in server vs in functions, related to creating summary report as HTML vs for download from shiny app vs from `ejam2report()`,
   in functions such as `report_residents_within_xyz()`, renamed generate_demog_header to generate_env_demog_header, etc.
 - server uses `ejamit()` for SHP and latlon, and cleanup
-- server uses `ejam2excel()` now not table_xls_format()
-- server uses `ejam2report()` now not obsolete report_community_download() etc. 
+- server uses `ejam2excel()` now (which then relies on `table_xls_format()`)
+- server uses `ejam2report()` now, not obsolete report_community_download() etc. 
 - server uses `shapefile_from_any()` now
 - server: removed use of data_summarized reactive everywhere, use data_processed$...
 - 2 new params `doaggregate()` has, to `ejamit()`, for calctype_maxbg and minbg
