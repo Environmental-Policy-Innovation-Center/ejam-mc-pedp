@@ -1,5 +1,5 @@
 
-# used to check test_interactively() etc.
+# used to check EJAM:::test_ejam() etc.
 test_that("test2a works", {
   expect_true(
     TRUE

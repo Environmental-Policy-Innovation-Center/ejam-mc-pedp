@@ -9,7 +9,7 @@
 app_ui  <- function(request) {
 
   tagList(
-    golem_add_external_resources(), # defined at end of this file. 
+    golem_add_external_resources(), # defined at end of this file.
     # SETUP: ####
 
     fluidPage(
@@ -574,7 +574,7 @@ app_ui  <- function(request) {
                                                               #h3(id = 'site_by_site', 'Site-by-Site Table'),
                                                        ),
                                                        column(6,
-                                                              ## button to download excel Table of Sites/Results - uses table_xls_format
+                                                              ## button to download excel Table of Sites/Results - uses ejam2excel()
                                                               downloadButton('download_results_table', 'Download Results Table', class = 'usa-button')
                                                        )
                                                      ),

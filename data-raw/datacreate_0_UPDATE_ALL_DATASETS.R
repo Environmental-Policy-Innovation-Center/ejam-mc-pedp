@@ -721,18 +721,15 @@ system.time({
 
 # devtools::test()
 
-# rstudioapi::navigateToFile("./tests/test_interactively.R")
+# rstudioapi::navigateToFile("./R/test_ejam.R")
 # system.time({
 #   #    ABOUT 10-20 MINUTES TO RUN all TESTS (if large datasets had not yet been loaded)
-   source("./tests/test_interactively.R") # answering Yes to running ALL tests
- biglist <- test_interactively(ask = askquestions)
+   # source("./R/test_ejam.R") # answering Yes to running ALL tests
+ biglist <- EJAM:::test_ejam(ask = askquestions)
 ## but should do AFTER updating test data
-
 # })
-
 ############################## #
 ############################## #
-
 
 
 # ~------------------------------------------- ####

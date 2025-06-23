@@ -94,7 +94,7 @@ shinytest2::test_app(".", filter = "-functionality")
 # "-functionality" filter to only shiny tests because they're all named with '-functionality'
 # filter="FIPS-functionality" would filter to just the FIPS shinytest
 # or
-# could use the test_interactively() function from EJAM/tests/test_interactively.R
+# could use the EJAM:::test_ejam() function
 
 ################################# #
 #

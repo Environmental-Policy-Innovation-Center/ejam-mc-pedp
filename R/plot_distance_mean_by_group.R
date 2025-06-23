@@ -28,7 +28,7 @@
 #' @param returnwhat If returnwhat is "table", invisibly returns a
 #'    data.frame with group, ratio, avg_distance_for_group, avg_distance_for_nongroup.
 #'   If returnwhat is "plotfilename" then it returns the full path including filename of a .png in a tempdir
-#'   If returnwhat is "plot" then it returns the plot object as needed for table_xls_format() ?
+#'   If returnwhat is "plot" then it returns the plot object as needed for [ejam2excel()] or related functions
 #' @param graph logical optional, set to FALSE to not show the barplot and only save the file of it
 #' @seealso [distance_by_group()] [distance_by_group_plot()]
 #' @return see parameter returnwhat
@@ -40,8 +40,8 @@ plot_distance_mean_by_group <- function(results_bybg_people,
                                         demogvarname=NULL, # namez$d, namez$d_subgroups),
                                         demoglabel=fixcolnames(demogvarname,"r","shortlabel"),
                                         graph=TRUE, returnwhat="table") {
-  
-  if (all(is.na(results_bybg_people$radius.miles))) { #Fips code ejam outputs do not have radius.miles, so check this to see if fips input. 
+
+  if (all(is.na(results_bybg_people$radius.miles))) { #Fips code ejam outputs do not have radius.miles, so check this to see if fips input.
     warning("plot_distance_mean_by_group does not work with NA distances This includes outputs from ejamit with fips inputs")
     return(NA)
   }
@@ -62,7 +62,7 @@ plot_distance_mean_by_group <- function(results_bybg_people,
       NA
     )
   }
-  
+
   if (all(is.nan(results_bybg_people$distance_min_avgperson))) {
     warning('distance_min_avgperson contains only NaN values')
     return(NA)
@@ -106,18 +106,18 @@ plot_distance_mean_by_group <- function(results_bybg_people,
 
     fname <- "distance_cdf.png"
     mytempdir <- tempdir()
-    
+
     data <- data.frame(
       Group = substr(rownames(x), 1, 13),
       Ratio = x$ratio,
       Color = ifelse(x$ratio < 1, "yellow", "gray")
     )
-    data$Color[i.min] <- "orange" 
-    
+    data$Color[i.min] <- "orange"
+
     plot <- ggplot2::ggplot(data, ggplot2::aes(x = Group, y = Ratio, fill = Color)) +
-      ggplot2::geom_bar(stat = "identity", show.legend = FALSE) + 
-      ggplot2::geom_hline(yintercept = 1, color = "gray") + 
-      ggplot2::scale_fill_identity() + 
+      ggplot2::geom_bar(stat = "identity", show.legend = FALSE) +
+      ggplot2::geom_hline(yintercept = 1, color = "gray") +
+      ggplot2::scale_fill_identity() +
       ggplot2::labs(
         title = "Ratio of avg distance from site \n among group residents vs non-group",
         x = paste0("Groups closer to sites are highlighted, with closest in orange (", mingrouptext, ")"),
@@ -125,17 +125,17 @@ plot_distance_mean_by_group <- function(results_bybg_people,
       ) +
       ggplot2::theme_minimal(base_size = 15) +
       ggplot2::theme(
-        axis.text.x = ggplot2::element_text(angle = -30, hjust = 0.5, vjust = 0.5, size = 14),  
-        axis.text.y = ggplot2::element_text(size = 14),  
-        axis.title.y = ggplot2::element_text(size = 16, margin = ggplot2::margin(r = 20)), 
-        axis.title.x = ggplot2::element_text(size = 16, margin = ggplot2::margin(t = 20)),  
-        plot.title = ggplot2::element_text(size = 18, hjust = 0.5, face = "bold"),  
-        plot.margin = ggplot2::margin(t = 20, r = 20, b = 100, l = 100)    
+        axis.text.x = ggplot2::element_text(angle = -30, hjust = 0.5, vjust = 0.5, size = 14),
+        axis.text.y = ggplot2::element_text(size = 14),
+        axis.title.y = ggplot2::element_text(size = 16, margin = ggplot2::margin(r = 20)),
+        axis.title.x = ggplot2::element_text(size = 16, margin = ggplot2::margin(t = 20)),
+        plot.title = ggplot2::element_text(size = 18, hjust = 0.5, face = "bold"),
+        plot.margin = ggplot2::margin(t = 20, r = 20, b = 100, l = 100)
       )
-    
+
     ggplot2::ggsave(filename = file.path(mytempdir, fname), plot = plot, width = 20, height = 12, dpi = 100)
-    
-    
+
+
     return(file.path(mytempdir, fname))
   }
 

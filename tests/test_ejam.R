@@ -1,32 +1,46 @@
 
-#  test_interactively()
+#  test_ejam() had been called test_interactively() in prior versions of EJAM
 
-#' run group(s) of unit tests, interactively or not, get compact summary
-#' asks user in RStudio what tests to run and how
+#' run group(s) of unit tests for EJAM package
+#' run tests of local source pkg EJAM, by group of functions, quietly, interactively or not, with compact summary of test results
+#'
+#' @details
+#'  Note these require installing the package [testthat](https://testthat.r-lib.org) first:
+#'
+#'     [EJAM:::test_ejam()]         to test this local source pkg, by group of functions, quietly, summarized.
+#'
+#'     [devtools::test()]           is just a shortcut for [testthat::test_dir()], to run all tests in package.
+#'
+#'     [testthat::test_local()]     to test any local source pkg
+#'
+#'     [testthat::test_package()]   to test the installed version of a package
+#'
+#'     [testthat::test_check()]     to test the installed version of a package, in the way used by R CMD check or [utils::check()]
+#'
 #' @param ask logical, whether it should ask in RStudio what parameter values to use
 #' @param noquestions logical, whether to avoid questions later on about where to save shapefiles
-#' @param useloadall logical, TRUE means use load_all(), FALSE means use library()
-#' @param y_basic logical, whether to only run some basic ejamit() functions, not do unit tests
-#' @param y_latlon logical, if y_basic=T, whether to run the basic ejamit() using points
-#' @param y_shp logical, if y_basic=T, whether to run the basic ejamit() using shapefile
-#' @param y_fips logical, if y_basic=T, whether to run the basic ejamit() using FIPS
+#' @param useloadall logical, TRUE means use [load_all()], FALSE means use [library()]
+#' @param y_basic logical, whether to only run some basic [ejamit()] functions, not do unit tests
+#' @param y_latlon logical, if y_basic=T, whether to run the basic [ejamit()] using points
+#' @param y_shp logical, if y_basic=T, whether to run the basic [ejamit()] using shapefile
+#' @param y_fips logical, if y_basic=T, whether to run the basic [ejamit()] using FIPS
 #' @param y_coverage_check logical, whether to show simple lists of
-#'   which functions might not have unit tests, just based on matching source file and test file names
+#'   which functions might not have unit tests, just based on matching source file and test file names.
+#' @param y_runall logical, whether to run all tests instead of only some groups
+#'   (so y_runsome is FALSE)
 #' @param y_runsome logical, whether to run only some groups of tests (so y_runall is FALSE)
 #' @param tname if y_runsome = T, a vector of group names like 'fips', 'naics', etc.
 #'   see source code for list
-#' @param y_runall logical, whether to run all tests instead of only some groups
-#'   (so y_runsome is FALSE)
 #' @param y_seeresults logical, whether to show results in console
 #' @param y_save logical, whether to save files of results
 #' @param y_tempdir logical, whether to save in tempdir
 #' @param mydir optional folder
 #' @examples
 #' \dontrun{
-#' biglist1 <- test_interactively()
-#' biglist2 <- test_interactively(ask = F,
+#' biglist1 <- EJAM:::test_ejam()
+#' biglist2 <- EJAM:::test_ejam(ask = F,
 #'       y_runsome = T, tname = c('test', 'maps'),
-#'       mydir = "~/../Downloads/unit testing")
+#'       mydir = "~/../Downloads/unit testing") # for example
 #'       }
 #'
 #' @return a named list of objects like data.tables, e.g., named
@@ -34,33 +48,28 @@
 #'
 #' @keywords internal
 #'
-test_interactively = function(ask = TRUE,
-                              noquestions = TRUE, # just for shapefile folder selections
-                              useloadall = TRUE, # might be essential actually
+test_ejam <- function(ask = TRUE,
+                      noquestions = TRUE, # just for shapefile folder selections
+                      useloadall = TRUE, # might be essential actually
 
-                              y_basic = FALSE, y_latlon=TRUE, y_shp=TRUE, y_fips = TRUE,
+                      y_basic = FALSE, y_latlon=TRUE, y_shp=TRUE, y_fips = TRUE,
 
-                              y_coverage_check = FALSE,
+                      y_coverage_check = FALSE,
 
-                              y_runsome = FALSE, # if T, need to also create partial_testlist
-                              tname = NULL,  ## or...
-                              # c("test_fips", "test_naics", "test_frs", "test_latlon",
-                              #  "test_maps", "test_shape", "test_getblocks", "test_fixcolnames", "test_doag",
-                              #  "test_ejamit", "test_misc",
-                              #  "test_mod", "test_app",
-                              #  "test_ejscreenapi", "test_test", "test_golem"
-                              # )
+                      y_runall  = TRUE,
+                      y_runsome = FALSE, # if T, need to also create partial_testlist
+                      tname = NULL,  ## or...
+                      # tname = c("test_fips", "test_naics", "test_frs", "test_latlon", "test_maps",
+                      #   "test_shape", "test_getblocks", "test_fixcolnames", "test_doag",
+                      #   "test_ejamit", "test_misc", "test_ejscreenapi", "test_mod", "test_app",
+                      #   "test_test", "test_golem"),
 
-                              y_runall = TRUE,
-                              y_stopif = FALSE,
-                              y_seeresults = TRUE,
-                              y_save = TRUE,
-                              y_tempdir = TRUE,
-                              mydir = NULL
+                      y_stopif = FALSE,
+                      y_seeresults = TRUE,
+                      y_save = TRUE,
+                      y_tempdir = TRUE,
+                      mydir = NULL
 ) {
-
-  # to make a sound when an error is hit and when it finishes
-  if (interactive()) {require(beepr)} # using beepr::beep(10) since utils::alarm() may not work
 
   ########################################## # ########################################## #
   if (missing(y_basic) & ask) {
@@ -85,22 +94,29 @@ test_interactively = function(ask = TRUE,
   logfilename_only = paste0("testresults-",
                             gsub(" ", "_", gsub("\\.[0-9]{6}$", "", gsub(":", ".", as.character(Sys.time())))),
                             ".txt")
-
   if (!y_basic) {
 
-    # !diagnostics off ## to disable diagnostics in this document
-    #        thisfile = "./tests/test_interactively.R"
-    # source(thisfile) to test the local source pkg, by group of functions, quietly, summarized
-    # test_local()     to test the local source pkg
-    # test_package()   to test installed version of package
-    # test_check()     to test installed version of package, the way used by R CMD check or check()
-    library(testthat)
-    library(data.table) # used in functions here
-    library(magrittr)
-    library(dplyr)
     # consoleclear <- function() {if (interactive() & rstudioapi::isAvailable()) {rstudioapi::executeCommand("consoleClear")}}
     # consoleclear() is an undocumented internal function in the pkg now
+    # !diagnostics off ## to disable diagnostics in this document
+    #        thisfile = "./R/test_ejam.R"
 
+    # require(data.table) # used in functions here
+
+    # Note testthat package is in Suggests not Imports, in DESCRIPTION file
+    try({suppressWarnings(suppressMessages({testthat_available <- require(testthat)}))}, silent = TRUE)
+    if (!testthat_available) {stop("this requires installing the package testthat first, e.g., \n  install.packages('testthat')")}
+
+    # Note beepr is in suggests not imports, in DESCRIPTION file
+    # to make a sound when an error is hit and when it finishes - using beepr::beep(10) since utils::alarm() may not work.
+    if (interactive()) {
+      try({suppressWarnings(suppressMessages({beepr_available <- require(beepr)}))}, silent = TRUE)
+      if (!beepr_available) {
+        cat("install the beepr package if you want to have this function make a noise when it hits an error and when it is finished with all testing\n")
+      }
+    } else {
+      beepr_available <- FALSE # it does not get used below when !intera
+    }
     ########################################## #
 
     ## FIND tests ####
@@ -222,7 +238,7 @@ test_interactively = function(ask = TRUE,
           "test-shp-zip-functionality.R"
         ),
         test_test = c(
-          # "test-test.R", #   fast way to check this script via  biglist <- test_interactively(ask = FALSE, y_runsome = T, tname = 'test')
+          # "test-test.R", #   fast way to check this script via  biglist <- EJAM:::test_ejam(ask = FALSE, y_runsome = T, tname = 'test')
           "test-test2.R",  #   fast way to check this script
           "test-test1.R"
         ),
@@ -303,7 +319,7 @@ test_interactively = function(ask = TRUE,
                           ),
                           seconds_byfile = c(119.793, 157.021, 156.421, 160.492, 163.264,
                                              133.808, 114.904)
-                                       ))
+                          ))
 
       # timebygroup
       #            testgroup seconds_bygroup
@@ -412,7 +428,7 @@ test_interactively = function(ask = TRUE,
       {
 
         if (!all(TRUE == all.equal(sort(test_all), sort(test_files_found)))) {
-          beepr::beep(10)
+          if (interactive() && beepr_available) {beepr::beep(10)}
           cat("\n\n   test files found in folder does not match test_files_found list  \n")
           print(all.equal(sort(test_all), sort(test_files_found)))
           cat("\n\n")
@@ -423,12 +439,12 @@ test_interactively = function(ask = TRUE,
           print(setdiff(test_files_found, test_all))
           cat("\n")
           if (interactive() && ask) {
-          stopfix <- askYesNo("Stop now to fix list of files in test_interactively() source code?", default = TRUE)
+            stopfix <- askYesNo("Stop now to fix list of files in test_ejam() source code?", default = TRUE)
           } else {
             stopfix <- TRUE
           }
           if (is.na(stopfix) || stopfix == TRUE) { # if ESC or asked and yes
-            stop("fix list of files in test_interactively() source code")
+            stop("fix list of files in test_ejam() source code")
           } else {
             cat("Continuing anyway \n")
           }
@@ -685,10 +701,10 @@ test_interactively = function(ask = TRUE,
           if (sum(xtable[[i]]$flagged) > 0) {
             # using beepr::beep() since utils::alarm() may not work
             # using :: might create a dependency but prefer that pkg be only in Suggests in DESCRIPTION
-            if (interactive()) {beepr::beep(10)}
+            if (interactive() && beepr_available) {beepr::beep(10)}
             cat(paste0("     ***      SOME UNTESTED OR WARNED OR FAILED IN ", tgroupname, ": ",
-                paste0(unique(xtable[[i]]$file[xtable[[i]]$flagged]), collapse = ","),
-                "\n"))
+                       paste0(unique(xtable[[i]]$file[xtable[[i]]$flagged]), collapse = ","),
+                       "\n"))
           }
 
         } # looped over groups of test files
@@ -814,11 +830,15 @@ test_interactively = function(ask = TRUE,
   logfilename = (  file.path(mydir, logfilename_only) )
 
   cat("Saving in ", logfilename, ' etc. \n')
-# ~ ####
+  # ~ ####
   ########################### #  ########################################## #
   # load_all() or library(EJAM) ####
   cat('\n')
   if (useloadall) {
+
+    # Note devtools package is in Suggests not Imports, in DESCRIPTION file
+    try({suppressWarnings(suppressMessages({devtools_available <- require(devtools)}))}, silent = TRUE)
+    if (!devtools_available) {stop("this requires installing the package devtools first, e.g., \n  install.packages('devtools') \n")}
     devtools::load_all()
     cat("\n\nNOTE the testthat.R file might do library(EJAM) and make this test only installed not loaded version??\n\n")
   } else {
@@ -826,7 +846,7 @@ test_interactively = function(ask = TRUE,
   }
   cat("Downloading all large datasets that might be needed...\n")
   dataload_dynamic("all")
-  ## should happen later in the function test1group() via testbygrou
+  ## should happen later in the function test1group() via testbygroup
   # if (file.exists("./tests/testthat/setup.R")) {
   #   # rstudioapi::navigateToFile("./tests/testthat/setup.R")
   #   source("./tests/testthat/setup.R") #   asks if need load_all or library
@@ -970,10 +990,10 @@ test_interactively = function(ask = TRUE,
     ## summary of input parameters ####
     # get current values
     paramslist <- list()
-    for (i in 1:length(formalArgs(test_interactively))) {
-      paramslist[[i]] <- get(formalArgs(test_interactively)[i])
+    for (i in 1:length(formalArgs(test_ejam))) {
+      paramslist[[i]] <- get(formalArgs(test_ejam)[i])
     }
-    names(paramslist) <- formalArgs(test_interactively)
+    names(paramslist) <- formalArgs(test_ejam)
     paramslist$tname <- paste0(paramslist$tname, collapse = ",") # easier to view
     params <- paramslist
     ## same as spelling them out:
@@ -992,7 +1012,7 @@ test_interactively = function(ask = TRUE,
     #               y_tempdir    =  y_tempdir,
     #               mydir        =  mydir
     # )
-    paramsdefaults <- formals(test_interactively)
+    paramsdefaults <- formals(test_ejam)
     params_summary = data.frame(
       default = cbind(paramsdefaults),
       current = cbind(params)
@@ -1099,8 +1119,8 @@ test_interactively = function(ask = TRUE,
 
       shownlist = testlist
 
-     # cat("skipping ejscreenapi tests while API down \n")
-     #  testlist = testlist[names(testlist) %in% "ejscreenapi"]
+      # cat("skipping ejscreenapi tests while API down \n")
+      #  testlist = testlist[names(testlist) %in% "ejscreenapi"]
 
       shownlist = cbind(testgroup = rep(names(shownlist), sapply(shownlist, length)), file = unlist(shownlist))
       rownames(shownlist) = NULL
@@ -1314,7 +1334,7 @@ test_interactively = function(ask = TRUE,
       rstudioapi::navigateToFile(logfilename)
     }
   }
-  if (interactive()) {beepr::beep()} # utils::alarm() may not work
+  if (interactive() && beepr_available) {beepr::beep()} # utils::alarm() may not work
 
   invisible(
     biglist
@@ -1399,16 +1419,16 @@ cat('\n
 
 # Examples of using it ####
 
-?test_interactively
+?EJAM:::test_ejam
 
-x <- test_interactively()   # it will ask about each parameter, by default
+x <- EJAM:::test_ejam()   # it will ask about each parameter, by default
 
-x <- test_interactively(F, mydir = rstudioapi::selectDirectory())
+x <- EJAM:::test_ejam(F, mydir = rstudioapi::selectDirectory())
 # uses defaults, except it asks you what folder to save in
 
-x <- test_interactively(F)  # no questions, just defaults, i.e. these:
+x <- EJAM:::test_ejam(F)  # no questions, just defaults, i.e. these:
 
-x <- test_interactively(
+x <- EJAM:::test_ejam(
   ask = TRUE,
   noquestions = TRUE, # just for shapefile folder selections
 
@@ -1418,15 +1438,13 @@ x <- test_interactively(
 
   y_coverage_check = FALSE,
 
-  y_runsome        = FALSE, # if T, need to also create partial_testlist
-  tname = NULL,  # or some of these:
-# c("test_fips", "test_naics", "test_frs", "test_latlon",
-#  "test_maps", "test_shape", "test_getblocks", "test_fixcolnames", "test_doag",
-#  "test_ejamit", "test_misc",
-#  "test_mod", "test_app",
-#  "test_ejscreenapi", "test_test", "test_golem"
-# )
   y_runall     = TRUE,
+  y_runsome    = FALSE, # if T, need to also create partial_testlist
+  tname = NULL,  # or some of these:
+  # tname = c("test_fips", "test_naics", "test_frs", "test_latlon", "test_maps",
+  #   "test_shape", "test_getblocks", "test_fixcolnames", "test_doag",
+  #   "test_ejamit", "test_misc", "test_ejscreenapi", "test_mod", "test_app",
+  #   "test_test", "test_golem"),
 
   y_stopif     = FALSE, # stop as soon as problem is hit?
   y_seeresults = TRUE,

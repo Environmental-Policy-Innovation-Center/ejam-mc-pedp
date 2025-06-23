@@ -117,11 +117,8 @@ update_pkgdown = function(
   if (dotests) {
     cat('doing unit tests \n')
     print(Sys.time())
-    source("./tests/test_interactively.R")
-    # rstudioapi::documentOpen("./tests/test_interactively.R")
-    test_interactively(ask = doask & interactive() & testinteractively )
+    EJAM:::test_ejam(ask = doask & interactive() & testinteractively )
     print(Sys.time())
-    # also see  devtools::test()
   }
   #################### #
 
