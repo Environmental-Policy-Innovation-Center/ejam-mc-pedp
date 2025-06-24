@@ -19,7 +19,8 @@
 #'
 #' @param ask logical, whether it should ask in RStudio what parameter values to use
 #' @param noquestions logical, whether to avoid questions later on about where to save shapefiles
-#' @param useloadall logical, TRUE means use [load_all()], FALSE means use [library()]
+#' @param useloadall logical, TRUE means use [load_all()], FALSE means use [library()].
+#'   But useloadall=T is essential actually, for unexported functions to be found when they are tested!
 #' @param y_basic logical, whether to only run some basic [ejamit()] functions, not do unit tests
 #' @param y_latlon logical, if y_basic=T, whether to run the basic [ejamit()] using points
 #' @param y_shp logical, if y_basic=T, whether to run the basic [ejamit()] using shapefile
@@ -50,7 +51,7 @@
 #'
 test_ejam <- function(ask = TRUE,
                       noquestions = TRUE, # just for shapefile folder selections
-                      useloadall = TRUE, # might be essential actually
+                      useloadall = TRUE, # essential actually, for unexported functions to be found when they are tested!
 
                       y_basic = FALSE, y_latlon=TRUE, y_shp=TRUE, y_fips = TRUE,
 
@@ -744,7 +745,7 @@ test_ejam <- function(ask = TRUE,
 
       if (missing(useloadall)) {
         useloadall <- askYesNo(msg = "Do you want to load and test the current source code files version of EJAM (via devtools::load_all() etc.,
-                      rather than testing the installed version)?", default = TRUE)
+                      rather than testing the installed version)? MUST BE YES/TRUE OR UNEXPORTED FUNCTIONS CANT BE FOUND", default = TRUE)
       }
       if (missing(y_runsome)) {
         if (!missing(tname)) {y_runsome <- TRUE}
@@ -842,6 +843,7 @@ test_ejam <- function(ask = TRUE,
     devtools::load_all()
     cat("\n\nNOTE the testthat.R file might do library(EJAM) and make this test only installed not loaded version??\n\n")
   } else {
+    cat("useloadall=F WILL FAIL TO FIND THE UNEXPORTED FUNCTIONS WHEN IT TRIES TO TEST THEM !! \n")
     suppressPackageStartupMessages({   library(EJAM)   })
   }
   cat("Downloading all large datasets that might be needed...\n")
