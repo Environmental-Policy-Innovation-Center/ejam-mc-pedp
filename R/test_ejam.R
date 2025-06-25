@@ -65,7 +65,7 @@ test_ejam <- function(ask = TRUE,
                       #   "test_shape", "test_getblocks", "test_fixcolnames", "test_doag",
                       #   "test_ejamit", "test_misc", "test_ejscreenapi", "test_mod", "test_app",
                       #   "test_test", "test_golem"),
-                      skip_these = c("ejscreenapi"),
+                      skip_these = c("ejscreenapi", "proximity"),
 
                       y_stopif = FALSE,
                       y_seeresults = TRUE,

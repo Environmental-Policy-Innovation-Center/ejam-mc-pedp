@@ -23,7 +23,7 @@ test_that('doaggregate() returns a correctly named list, with no error if key pa
   expect_no_error({
     suppressWarnings({
       val <- doaggregate(sites2blocks = testoutput_getblocksnearby_10pts_1miles,
-                         sites2states_or_latlon = testpoints_10, 
+                         sites2states_or_latlon = testpoints_10,
                          radius = max(testoutput_getblocksnearby_10pts_1miles$distance), include_ejindexes = TRUE)
     })
   })
@@ -40,14 +40,14 @@ test_that('doaggregate() returns a correctly named list, with no error if key pa
 # DOES IT STILL RETURN WHAT IT USED TO, OR HAS FUNCTION CHANGED SO THAT OUTPUTS NO LONGER MATCH ARCHIVED OUTPUTS? ####
 ################# #
 test_that("still same exact results_overall as previously saved", {
-  
+
   # # data created/saved was this:
   # out_data_doagg <- doaggregate(out_data_getblocks, sites2states_or_latlon = testpoints_data, radius = myrad, include_ejindexes = TRUE) # not the default but want to test this way
-  
+
   suppressWarnings({
     # WHAT IT RETURNS NOW:
-    x <- doaggregate(testoutput_getblocksnearby_10pts_1miles, 
-                     sites2states_or_latlon = testpoints_10, 
+    x <- doaggregate(testoutput_getblocksnearby_10pts_1miles,
+                     sites2states_or_latlon = testpoints_10,
                      radius = 1, include_ejindexes = TRUE)
     overall_has_changed <- !isTRUE(all.equal(
       testoutput_doaggregate_10pts_1miles$results_overall,
@@ -59,7 +59,7 @@ test_that("still same exact results_overall as previously saved", {
   )
   skip_if(overall_has_changed, "not testing all outputs of doaggregate against archived since results_overall test failed")
   # overall_has_changed
-  
+
   expect_equal(
     testoutput_doaggregate_10pts_1miles$results_bysite,
     x$results_bysite # use defaults
@@ -122,11 +122,11 @@ test_that('error if input has column not named distance', {
 # TESTS TO ADD, FOR HANDLING OF MISSING or various values for  param  sites2states_or_latlon
 #
 # This case never arises if using shiny app  or ejamit
-# 
+#
 # testthat::test_that("doaggregate() handles missing sites2states_or_latlon", {
 #   expect_error({
 #     x = doaggregate(sites2blocks = testoutput_getblocksnearby_10pts_1miles,
-#                     radius = 1) 
+#                     radius = 1)
 #     })
 # })
 # doaggregate(testpoints_10[1:2,], radius = 1)
@@ -171,7 +171,7 @@ test_that('warning if ask for radius < 0', {
       })
     })
     expect_true("results_overall" %in% names(x))
-  })  
+  })
 })
 
 test_that('warning if ask for radius > 32, and just uses 32 instead', {
@@ -269,7 +269,7 @@ test_that('confusingly, warning (but not error) if radius = character string tha
 })
 
 test_that("radius param to doagg that is string/text like '0.25' is not interpreted as the number 0.25 but use radius inferred from output of getblocks", {
-  suppressWarnings(   
+  suppressWarnings(
     expect_equal(
     doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = "0.25")$results_bysite$radius.miles[1],
     1) # inferred based on sites2blocks
@@ -294,35 +294,35 @@ test_that(paste0("doaggregate radius with the input below should not warn or err
 })
 
 test_that(paste0("doaggregate radius like with the input below should warn!"), {
-  
+
   cause_warn <- bad_numbers[c('TRUE1', 'text1', 'list1', "NA1", "NULL1")]
-  
+
   cat('\n  Trying radius that is', names(cause_warn)[1], '- Testing to ensure it warns... ')
   try({
     expect_warning(
-      x <- doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = cause_warn[[1]]), 
+      x <- doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = cause_warn[[1]]),
       info = paste0("doaggregate radius like ", names(cause_warn)[1], " should warn!")
     )
     expect_true(is.list(x))
   })
-  
+
   cat('\n  Trying radius that is', names(cause_warn)[2], '- Testing to ensure it warns... ')
   try({
     expect_warning(
-      x <- doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = cause_warn[[2]]), 
+      x <- doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = cause_warn[[2]]),
       info = paste0("doaggregate radius like ", names(cause_warn)[2], " should warn!")
     )
   })
-  
+
   cat('\n  Trying radius that is', names(cause_warn)[3], '- Testing to ensure it warns... ')
   try({
     expect_warning(
-      x <- doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = cause_warn[[3]]), 
+      x <- doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = cause_warn[[3]]),
       info = paste0("doaggregate radius like ", names(cause_warn)[3], " should warn!")
     )
     expect_true(is.list(x))
   })
-  
+
   cat('\n  Trying radius that is', names(cause_warn)[4], '- Testing to ensure it warns... ')
   try({
     expect_warning(
@@ -330,11 +330,11 @@ test_that(paste0("doaggregate radius like with the input below should warn!"), {
       info = paste0("doaggregate radius like ", names(cause_warn)[4], " should warn!")
     )
   })
-  
+
   cat('\n  Trying radius that is', names(cause_warn)[5], '- Testing to ensure it warns... ')
   try({
     expect_warning(
-      x <- doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = cause_warn[[5]]), 
+      x <- doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = cause_warn[[5]]),
       info = paste0("doaggregate radius like ", names(cause_warn)[5], " should warn!")
     )
   })
@@ -342,15 +342,15 @@ test_that(paste0("doaggregate radius like with the input below should warn!"), {
 
 test_that(paste0("doaggregate radius like with the input below should report error!"), {
   cause_err <- bad_numbers[c("vector2", "array2","matrix_1row_4col", "matrix_4row_1col", "matrix_2x2" )]
-  
+
   cat('\n  Trying radius that is', names(cause_err)[1], '- Testing to ensure it reports error... ')
   try({
     expect_error(
-      x <- doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = cause_err[[1]]), 
+      x <- doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = cause_err[[1]]),
       info = paste0("doaggregate radius like ", names(cause_err)[1], " should report error!")
     )
   })
-  
+
   cat('\n  Trying radius that is', names(cause_err)[2], '- Testing to ensure it reports error... ')
   try({
     expect_error(
@@ -358,15 +358,15 @@ test_that(paste0("doaggregate radius like with the input below should report err
       info = paste0("doaggregate radius like ", names(cause_err)[2], " should report error!")
     )
   })
-  
+
   cat('\n  Trying radius that is', names(cause_err)[3], '- Testing to ensure it reports error... ')
   try({
     expect_error(
-      x <- doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = cause_err[[3]]), 
+      x <- doaggregate(sites2blocks =  testoutput_getblocksnearby_10pts_1miles, radius = cause_err[[3]]),
       info = paste0("doaggregate radius like ", names(cause_err)[3], " should report error!")
     )
   })
-  
+
   cat('\n  Trying radius that is', names(cause_err)[4], '- Testing to ensure it reports error... ')
   try({
     expect_error(
@@ -374,7 +374,7 @@ test_that(paste0("doaggregate radius like with the input below should report err
       info = paste0("doaggregate radius like ", names(cause_err)[4], " should report error!")
     )
   })
-  
+
   cat('\n  Trying radius that is', names(cause_err)[5], '- Testing to ensure it reports error... ')
   try({
     expect_error(
@@ -382,7 +382,7 @@ test_that(paste0("doaggregate radius like with the input below should report err
       info = paste0("doaggregate radius like ", names(cause_err)[5], " should report error!")
     )
   })
-  
+
   expect_true(TRUE) # just to avoid report of empty test
 })
 

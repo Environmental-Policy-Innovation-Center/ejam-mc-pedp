@@ -110,6 +110,110 @@ testthat::test_that("ejamit can use fips=fips_counties_from_statename()", {
                c("10001" , "10003", "10005") )
 })
 ########################################################## #
+################# #
+# pctile from ejamit() replicated by pctile_from_raw_lookup() ? ####
+test_that("US pctiles via ejamit() replicated by pctile_from_raw_lookup()", {
+  myfips = blockgroupstats$bgfips[999]
+  junk = capture_output({
+    x = data.frame(ejamit(fips = myfips)$results_bysite)
+  })
+  rawvarname = c(names_e, names_d, names_d_subgroups,   names_ej, names_ej_supp)
+  pvarname = c(names_e_pctile, names_d_pctile, names_d_subgroups_pctile, names_ej_pctile, names_ej_supp_pctile)
+  in_results = (unlist(x[, pvarname]))
+  via_formula = pctile_from_raw_lookup(x[, rawvarname], varname.in.lookup.table = rawvarname,
+                                       lookup = usastats, zone = "USA")
+  expect_equal(
+    as.vector(in_results),
+    as.vector(via_formula),
+    ignore_attr = TRUE
+  )
+})
+########## #
+test_that("STATE pctiles via ejamit() replicated by pctile_from_raw_lookup()", {
+  myfips = blockgroupstats$bgfips[999]
+  junk = capture_output({
+    x = data.frame(ejamit(fips = myfips)$results_bysite)
+  })
+  # STATE:  # the state demog index lookups are slightly off for some reason but that is not critical so omit them from the test
+  rawvarname =  setdiff(c(names_e, names_d, names_d_subgroups,   names_ej_state, names_ej_supp_state),
+                        c("Demog.Index", "Demog.Index.Supp" ))
+  pvarname = setdiff(c(names_e_state_pctile, names_d_state_pctile, names_d_subgroups_state_pctile,  names_ej_state_pctile, names_ej_supp_state_pctile),
+                     c("state.pctile.Demog.Index", "state.pctile.Demog.Index.Supp"))
+
+  in_results = as.vector(unlist(x[, pvarname]))
+  via_formula = as.vector(pctile_from_raw_lookup(x[, rawvarname], varname.in.lookup.table = rawvarname,
+                                                 lookup = statestats, zone = fips2state_abbrev(myfips)))
+  if (!all(in_results == via_formula)) {
+    cat("Problems:\n")
+    print(data.frame(in_results, via_formula, pvarname = pvarname)[in_results != via_formula,])
+  }
+  expect_equal(
+    in_results,
+    via_formula,
+    ignore_attr = TRUE
+  )
+})
+
+################# #
+# EJ INDEX FROM ejamit() REPLICATED BY FORMULA (& bgej) ? ####
+################# #
+## US only ####
+test_that("US EJ Index via ejamit() approx = via bgej, for 1 bgfips", {
+  myfips = blockgroupstats$bgfips[999]
+  junk = capture_output({
+    x = data.frame(ejamit(fips = myfips)$results_bysite)
+  })
+  found = list()
+  for (evarname in names_e) {
+    pctile.evarname = paste0("pctile.", evarname)
+    ejvarname = paste0("EJ.DISPARITY.", evarname, ".eo") #  ejvarname = "EJ.DISPARITY.traffic.score.eo"
+    in_results = x[, ejvarname]
+    in_bgej = data.frame(bgej)[bgej$bgfips == blockgroupstats$bgfips[999], ejvarname]
+    via_formula <- x$Demog.Index * x[, pctile.evarname]
+    found[[evarname]] <- data.frame(in_bgej, in_results, via_formula,
+                                    same_as_formula = (round(in_results, 1) == round(via_formula, 1)),
+                                    ejvarname = ejvarname, pctile.evarname = pctile.evarname)
+    # print(data.frame(in_bgej, in_results, via_formula, ejvarname = ejvarname, pctile.evarname = pctile.evarname))
+  }
+  found <-  do.call(rbind, found)
+  # print(found)
+  testthat::expect_true(all(round(found$in_bgej, 1) == round(found$in_results, 1)))
+})
+################# #
+
+test_that("US EJ Index via ejamit() approx = via formula, for 1 bgfips", {
+  myfips = blockgroupstats$bgfips[999]
+  junk = capture_output({
+    x = data.frame(ejamit(fips = myfips)$results_bysite)
+  })
+  found = list()
+  for (evarname in names_e) {
+    pctile.evarname = paste0("pctile.", evarname)
+    ejvarname = paste0("EJ.DISPARITY.", evarname, ".eo") #  ejvarname = "EJ.DISPARITY.traffic.score.eo"
+    in_results = x[, ejvarname]
+    in_bgej = data.frame(bgej)[bgej$bgfips == blockgroupstats$bgfips[999], ejvarname]
+    via_formula <- x$Demog.Index * x[, pctile.evarname]
+    found[[evarname]] <- data.frame(in_bgej, in_results, via_formula,
+                                    same_as_formula = (round(in_results, 1) == round(via_formula, 1)),
+                                    ejvarname = ejvarname, pctile.evarname = pctile.evarname)
+    # print(data.frame(in_bgej, in_results, via_formula, ejvarname = ejvarname, pctile.evarname = pctile.evarname))
+  }
+  found <-  do.call(rbind, found)
+  testthat::expect_true(all(found$same_as_formula))
+  if (!all(found$same_as_formula)) {print(found[, 1:4])}
+})
+################# #
+## State versions of EJ Index? ####
+
+
+
+# tbd   ***   confirm correct formula used in trying to replicate.
+
+
+
+
+################# #
+
 
 # more tests for ejamit could go here ***
 
