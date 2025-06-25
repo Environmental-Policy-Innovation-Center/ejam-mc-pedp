@@ -216,7 +216,7 @@ test_that("mapfastej_counties() works", {
   suppressMessages({
     suppressWarnings({
       junk = capture.output(
-        myshapes <- shapes_counties_from_countyfips(fips_counties_from_state_abbrev("RI")[1])
+        myshapes <- shapes_from_fips(fips_counties_from_state_abbrev("RI")[1])
       )    })
     expect_no_error({
       junk = capture.output({
