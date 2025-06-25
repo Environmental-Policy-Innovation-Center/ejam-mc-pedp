@@ -294,32 +294,40 @@ map_counties_in_state <- function(ST = "DE", colorcolumn = c('pop', "NAME", "POP
 #'   (or alternatively, colorvarname = "green" means a single specific color for all, like "green")
 #' @param static_not_leaflet set TRUE to use [map_shapes_plot()] instead of [map_shapes_leaflet()]
 #' @param main title for map
-#' @param colorfills = c('yellow', 'orange', 'red')
-#' @param colorlabels = c(80, 90, 95)
-#' @param colorbins =  c(80, 90, 95)
-#' @param colorpalette = c("yellow", "yellow", "orange", "red")
-#' @param ... passed to map_shapes_plot() if relevant
+#' @param colorfills  vector of colors shown in legend
+#' @param colorlabels vector of cutoffs shown in legend
+#' @param colorbins vector of cutoffs for which values of colorvarname indicator
+#'    get assigned which colors from colorpalette
+#' @param colorpalette vector of colors available for filling polygons
+#' @param fillOpacity passed to [map_shapes_leaflet()] which passes it to [leaflet::addPolygons()]
+#' @param ... depending on value of static_not_leaflet T/F, passed to [map_shapes_plot()]
+#' or to [map_shapes_leaflet()] which passes it to [leaflet::addPolygons()], such as opacity=1
 #'
-#' @details THIS ASSUMES THAT mydf$ejam_unique_id is the county FIPS codes
+#' @details THIS ASSUMES THAT mydf$ejam_unique_id is the county FIPS codes.
+#'
+#' IMPORTANT: The percentiles shown are percentiles among blockgroups, not counties.
+#'   A county here shown as being at 90th percentile actually is one where
+#'   the average resident in the county is in a blockgroup that is at the 90th
+#'   percentile of blockgroups in the US (or the State, depending on colorvarname).
 #'
 #' @seealso [mapfastej()] [map_shapes_leaflet()]
 #' @return leaflet html widget (but if static_not_leaflet=T,
 #'   returns just shapes_counties_from_countyfips(mydf$ejam_uniq_id))
 #' @examples \donttest{
-#'  fips_ky <- fips_counties_from_statename("Kentucky")
-#'  x <- ejamit(fips = fips_ky, radius = 0)
-#'  mapfastej_counties(x$results_bysite)
+#' myfips = fips_counties_from_state_abbrev(c("AL", "GA", "MS"))
+#' mydf = ejamit(fips = myfips )$results_bysite
+#' mapfastej_counties(mydf, colorvarname = "pctile.pctnhba" )
 #'  }
-#'  # map_shapes_leaflet(shapes = shapes_counties_from_countyfips(fips_ky))
 #'
 #' @export
 #'
 mapfastej_counties <- function(mydf, colorvarname = "pctile.Demog.Index.Supp",
-                               colorfills = c('yellow', 'orange', 'red'),
-                               colorlabels = c(80, 90, 95),
-                               colorbins =  c(80, 90, 95),
-                               colorpalette = c("yellow","yellow", "orange", "red"),
+                               colorfills = c('darkgray', 'yellow', 'orange', 'darkred'),
+                               colorlabels = c("<80", "80-89", "90-94", "95+"),
+                               colorbins = c(0,80,90,95,100),
+                               colorpalette = c('gray',   'yellow', 'orange',   'red'),
                                static_not_leaflet = FALSE, main = "Selected Counties",
+                               fillOpacity = 0.5,
                                ...) {
 
   # *** CANNOT HANDLE colorvarname = ANYTHING ELSE BESIDES THOSE SCALED 0 TO 100, SO FAR
@@ -360,9 +368,9 @@ mapfastej_counties <- function(mydf, colorvarname = "pctile.Demog.Index.Supp",
   setDT(mydf)
   ## see color-coding of one percentile variable:
   pal <- leaflet::colorBin(
-    palette = colorpalette, # c("yellow","yellow", "orange", "red"),
+    palette = colorpalette,
     domain = NULL,
-    bins = colorbins # 80:100
+    bins = colorbins
   )
   shading <- pal(as.vector(unlist(mydf[ , ..colorvarname])))
 
@@ -375,8 +383,8 @@ mapfastej_counties <- function(mydf, colorvarname = "pctile.Demog.Index.Supp",
     # plot(mymapdata[flagged, ], col = "purple", add = TRUE)
     mymap <- mymapdata # if ggplot, youd return the plot object but with plot() you cannot I think do that
     legend("topright",
-           fill = colorfills, # c("yellow", "orange", "red"),
-           legend = colorlabels, # c(80, 90, 100),
+           fill = colorfills,
+           legend = colorlabels,
            title = fixcolnames(colorvarname, 'rname', 'shortlabel'))
 
   } else {
@@ -390,10 +398,11 @@ mapfastej_counties <- function(mydf, colorvarname = "pctile.Demog.Index.Supp",
     poplabels <- fixcolnames(names(popindicators), 'r', 'shortlabel') # friendly labels for indicators
     popup2 <- popup_from_any(popindicators, labels = poplabels)
 
-    mymap <- map_shapes_leaflet(mymapdata, popup = popup2, color = shading)
+    mymap <- map_shapes_leaflet(mymapdata, popup = popup2,
+                                color = shading, fillOpacity = fillOpacity, ...)
     mymap <- mymap %>% leaflet::addLegend(
-      colors = colorfills, # c("yellow", "orange", "red"),
-      labels = colorlabels, # c(80, 90, 100),
+      colors = colorfills,
+      labels = colorlabels,
       title = fixcolnames(colorvarname, 'rname', 'shortlabel'))
   }
   return(mymap)
@@ -476,9 +485,10 @@ map_shapes_plot <- function(shapes, main = "Selected Census Units", ...) {
 #'
 #' @param shapes like from shapes_counties_from_countyfips(fips_counties_from_state_abbrev("DE")),
 #'   or at least a data.frame that can be interpreted as indicating points via [shapefile_from_sitepoints()]
-#' @param color passed to leaflet::addPolygons()
-#' @param popup  passed to leaflet::addPolygons()
-#'
+#' @param color passed to [leaflet::addPolygons()]
+#' @param popup  passed to [leaflet::addPolygons()]
+#' @param fillOpacity passed to [leaflet::addPolygons()]
+#' @param ... passed to [leaflet::addPolygons()], such as opacity=1
 #' @return html widget from leaflet::leaflet()
 #' @examples
 #' out = testoutput_ejamit_10pts_1miles
@@ -490,7 +500,7 @@ map_shapes_plot <- function(shapes, main = "Selected Census Units", ...) {
 #'
 #' @export
 #'
-map_shapes_leaflet <- function(shapes, color = "green", popup = NULL) {
+map_shapes_leaflet <- function(shapes, color = "green", popup = NULL, fillOpacity = 0.5, ...) {
 
   # check if spatial class
   if (!inherits(shapes, "sf")) {
@@ -523,7 +533,9 @@ map_shapes_leaflet <- function(shapes, color = "green", popup = NULL) {
   }
 
   mymap <- leaflet::leaflet(shapes) %>%
-    leaflet::addPolygons(color = color, popup = popup, popupOptions = leaflet::popupOptions(maxHeight = 200)) %>%
+    leaflet::addPolygons(color = color, fillOpacity = fillOpacity,
+                         popup = popup, popupOptions = leaflet::popupOptions(maxHeight = 200),
+                         ...) %>%
     leaflet::addTiles()
   return(mymap)
 }
