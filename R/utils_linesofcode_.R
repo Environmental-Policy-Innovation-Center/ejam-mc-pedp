@@ -13,7 +13,7 @@
 #' @return vector of paths
 #' @examples
 #'  #  dir2()
-#' dontrun{
+#'  \dontrun{
 #' dir2()
 #' dir2("*.zip", recursive = T)
 #' dir2("*.y*",  recursive = T)

@@ -2749,7 +2749,8 @@ app_server <- function(input, output, session) {
     req(input$summ_bar_ind)
     req(input$summ_bar_data)
     ##  if allowing option of median ('med'), use thiS
-    if (global_or_param("default_allow_median_in_barplot_indicators")) {
+    if (input$allow_median_in_barplot_indicators) {
+      # if (global_or_param("default_allow_median_in_barplot_indicators")) {
       mybarvars.stat <- input$summ_bar_stat
     } else {
       mybarvars.stat <- "avg"
