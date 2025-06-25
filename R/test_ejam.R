@@ -30,8 +30,9 @@
 #' @param y_runall logical, whether to run all tests instead of only some groups
 #'   (so y_runsome is FALSE)
 #' @param y_runsome logical, whether to run only some groups of tests (so y_runall is FALSE)
-#' @param tname if y_runsome = T, a vector of group names like 'fips', 'naics', etc.
+#' @param run_these if y_runsome = T, a vector of group names to test, like 'fips', 'naics', etc.
 #'   see source code for list
+#' @param skip_these if y_runall = T, a vector of group names to skip, like 'fips', 'naics', etc.
 #' @param y_seeresults logical, whether to show results in console
 #' @param y_save logical, whether to save files of results
 #' @param y_tempdir logical, whether to save in tempdir
@@ -40,7 +41,7 @@
 #' \dontrun{
 #' biglist1 <- EJAM:::test_ejam()
 #' biglist2 <- EJAM:::test_ejam(ask = F,
-#'       y_runsome = T, tname = c('test', 'maps'),
+#'       y_runsome = T, run_these = c('test', 'maps'),
 #'       mydir = "~/../Downloads/unit testing") # for example
 #'       }
 #'
@@ -59,11 +60,12 @@ test_ejam <- function(ask = TRUE,
 
                       y_runall  = TRUE,
                       y_runsome = FALSE, # if T, need to also create partial_testlist
-                      tname = NULL,  ## or...
-                      # tname = c("test_fips", "test_naics", "test_frs", "test_latlon", "test_maps",
+                      run_these = NULL,  ## or...
+                      # run_these = c("test_fips", "test_naics", "test_frs", "test_latlon", "test_maps",
                       #   "test_shape", "test_getblocks", "test_fixcolnames", "test_doag",
                       #   "test_ejamit", "test_misc", "test_ejscreenapi", "test_mod", "test_app",
                       #   "test_test", "test_golem"),
+                      skip_these = c("ejscreenapi"),
 
                       y_stopif = FALSE,
                       y_seeresults = TRUE,
@@ -215,6 +217,7 @@ test_ejam <- function(ask = TRUE,
           "test-acs_bybg.R"
         ),
 
+        ### X ejscreenapi tests do not work / get skipped WHILE EJSCREEN API IS DOWN MID 2025  ####
         test_ejscreenapi = c(
           "test-ejscreenapi.R",
           "test-ejscreenapi_plus.R",
@@ -222,6 +225,7 @@ test_ejam <- function(ask = TRUE,
           "test-ejscreenit.R",
           "test-ejscreenRESTbroker-functions.R"
         ),
+
         test_mod = c(
           "test-mod_save_report.R",
           "test-mod_specify_sites.R",
@@ -239,7 +243,7 @@ test_ejam <- function(ask = TRUE,
           "test-shp-zip-functionality.R"
         ),
         test_test = c(
-          # "test-test.R", #   fast way to check this script via  biglist <- EJAM:::test_ejam(ask = FALSE, y_runsome = T, tname = 'test')
+          # "test-test.R", #   fast way to check this script via  biglist <- EJAM:::test_ejam(ask = FALSE, y_runsome = T, run_these = 'test')
           "test-test2.R",  #   fast way to check this script
           "test-test1.R"
         ),
@@ -440,12 +444,14 @@ test_ejam <- function(ask = TRUE,
           print(setdiff(test_files_found, test_all))
           cat("\n")
           if (interactive() && ask) {
+            # setdiff(test_files_found, test_all)
             stopfix <- askYesNo("Stop now to fix list of files in test_ejam() source code?", default = TRUE)
           } else {
             stopfix <- TRUE
           }
           if (is.na(stopfix) || stopfix == TRUE) { # if ESC or asked and yes
-            stop("fix list of files in test_ejam() source code")
+            cat("You need to fix `testlist`, the list of files in the test_ejam() source code, to ensure
+all existing `./test/test-xyz.R` files are listed in `testlist` and all filenames listed there actually exist as in that folder called `test`.\n\n")
           } else {
             cat("Continuing anyway \n")
           }
@@ -729,7 +735,7 @@ test_ejam <- function(ask = TRUE,
 
     # >>Ask what to do<< ####
 
-    # *** THIS SECTION ASKS ABOUT tname SO IT USES THE LATEST LIST OF TESTS FOUND to ask which ones to use, to know what the options are,
+    # *** THIS SECTION ASKS ABOUT run_these SO IT USES THE LATEST LIST OF TESTS FOUND to ask which ones to use, to know what the options are,
     # WHICH IS WHY THESE QUESTIONS ARE ASKED ONLY AFTER FINDING AND GROUPING TESTS
 
     if (y_runsome) {y_runall =  FALSE} # in case you want to say y_runsome = T and not have to also remember to specify y_runall = F
@@ -743,20 +749,21 @@ test_ejam <- function(ask = TRUE,
       }
       if (is.na(y_coverage_check)) {stop("canceled")}
 
-      if (missing(useloadall)) {
-        useloadall <- askYesNo(msg = "Do you want to load and test the current source code files version of EJAM (via devtools::load_all() etc.,
-                      rather than testing the installed version)? MUST BE YES/TRUE OR UNEXPORTED FUNCTIONS CANT BE FOUND", default = TRUE)
-      }
+      ## seems to not work if useloadall = FALSE
+      # if (missing(useloadall)) {
+      #   useloadall <- askYesNo(msg = "Do you want to load and test the current source code files version of EJAM (via devtools::load_all() etc.,
+      #                 rather than testing the installed version)? MUST BE YES/TRUE OR UNEXPORTED FUNCTIONS CANT BE FOUND", default = TRUE)
+      # }
       if (missing(y_runsome)) {
-        if (!missing(tname)) {y_runsome <- TRUE}
-        if ( missing(tname)) {y_runsome = askYesNo("Run ONLY SOME OF THE tests ?", default = FALSE)}
+        if (!missing(run_these)) {y_runsome <- TRUE}
+        if ( missing(run_these)) {y_runsome = askYesNo("Specify a subset of test groups to run?", default = FALSE)}
       }
       if (is.na(y_runsome))  {stop("canceled")}
       if (y_runsome) {y_runall =  FALSE}
       if (y_runsome) {
-        if (missing(tname)) {
-          tname = rstudioapi::showPrompt(
-            "WHICH TEST OR GROUPS COMMA-SEP LIST",
+        if (missing(run_these)) {
+          run_these = rstudioapi::showPrompt(
+            "WHICH TEST GROUPS TO RUN? Enter a comma-separated list like  maps,frs  (or Esc to specify none)",
             paste0(shortgroupnames, collapse = ","),
             #e.g., "fips,naics,frs,latlon,maps,shape,getblocks,fixcolnames,doag,ejamit,ejscreenapi,mod,app"
           )
@@ -764,10 +771,25 @@ test_ejam <- function(ask = TRUE,
 
         y_runall <- FALSE
       } else {
-        if (missing(y_runall)) {
-          y_runall = askYesNo("RUN ALL TESTS NOW?")}
-        if (is.na(y_runall)) {stop("canceled")}
+        y_runall <- TRUE
+        # if (missing(y_runall)) {
+        #   y_runall = askYesNo("RUN ALL TESTS NOW?")}
+        # if (is.na(y_runall)) {stop("canceled")}
       }
+
+      if (y_runall) {
+        if (missing(skip_these)) {
+          askskip = askYesNo("Specify some groups to skip?", default = FALSE)
+          if (is.na(askskip)) {stop("canceled")}
+          if (askskip) {
+            skip_these = rstudioapi::showPrompt(
+              "WHICH TEST GROUPS TO SKIP? Enter a comma-separated list like  maps,frs  (or Esc to specify none)",
+              paste0(shortgroupnames, collapse = ","),
+              # e.g., "fips,naics,frs,latlon,maps,shape,getblocks,fixcolnames,doag,ejamit,ejscreenapi,mod,app"
+            )
+          }}
+      }
+
       if (missing(y_stopif)) {
         y_stopif = askYesNo("Halt when a test fails?")}
       if (is.na(y_stopif)) {stop("canceled")}
@@ -791,14 +813,23 @@ test_ejam <- function(ask = TRUE,
       }
     }
 
-    if (!missing(tname)) {y_runsome <- TRUE} # you specified some tests to run, so assume you meant to ignore the default y_runsome xxx
+    if (!missing(run_these)) {y_runsome <- TRUE} # you specified some tests to run, so assume you meant to ignore the default y_runsome
+    if (any(skip_these %in% run_these)) {cat("Note you are skipping some tests that you also asked to run:\n ", paste0(intersect(skip_these, run_these), collapse = ", "), "\n")}
     if (y_runsome) {y_runall =  FALSE}
     if (y_runsome) {
-      tname <- unlist(strsplit(gsub(" ", "", tname), ","))
-      tname = paste0("test_", tname)
+      run_these <- unlist(strsplit(gsub(" ", "", run_these), ","))
+      run_these = paste0("test_", run_these)
       #    test_file("./tests/testthat/test-MAP_FUNCTIONS.R" )
-      partial_testlist <-  testlist[names(testlist) %in% tname]
+      partial_testlist <-  testlist[names(testlist) %in% run_these]
     }
+
+    if (y_runall) {
+      skip_these <- unlist(strsplit(gsub(" ", "", skip_these), ","))
+      skip_these = paste0("test_", skip_these)
+      partial_testlist <-  testlist
+      if (length(skip_these) > 0 && !is.null(skip_these)) {
+      partial_testlist <-  testlist[!(names(testlist) %in% skip_these)]
+    }}
     ################################### #  ################################### #
     if (y_runall == FALSE && y_runsome == FALSE) {
       stop('no tests run')
@@ -841,7 +872,6 @@ test_ejam <- function(ask = TRUE,
     try({suppressWarnings(suppressMessages({devtools_available <- require(devtools)}))}, silent = TRUE)
     if (!devtools_available) {stop("this requires installing the package devtools first, e.g., \n  install.packages('devtools') \n")}
     devtools::load_all()
-    cat("\n\nNOTE the testthat.R file might do library(EJAM) and make this test only installed not loaded version??\n\n")
   } else {
     cat("useloadall=F WILL FAIL TO FIND THE UNEXPORTED FUNCTIONS WHEN IT TRIES TO TEST THEM !! \n")
     suppressPackageStartupMessages({   library(EJAM)   })
@@ -964,7 +994,7 @@ test_ejam <- function(ask = TRUE,
     cat("Using the copy of out_api that already is in globalenv() so if that is outdated you should halt and do rm(out_api) now\n")
   } else {
     if (!ejscreenapi_online()) {
-      cat("API URL does not seem to be accessible \n")
+      cat("ejscreen API URL does not seem to be accessible according to EJAM:::ejscreenapi_online() \n\n")
     } else {
       cat("Creating out_api in the globalenv(), using ejscreenapi()\n\n")
       test2lat <- c(33.943883,    39.297209)
@@ -985,8 +1015,8 @@ test_ejam <- function(ask = TRUE,
     cat(logfilename_only, '\n ---------------------------------------------------------------- \n\n')
     cat("Started at", as.character(Sys.time()), '\n')
 
-    if (is.null(tname)) {tnameprint = NA} else {
-      tnameprint = paste0(tname, collapse = ',')
+    if (is.null(run_these)) {run_theseprint = NA} else {
+      run_theseprint = paste0(run_these, collapse = ',')
     }
 
     ## summary of input parameters ####
@@ -996,7 +1026,7 @@ test_ejam <- function(ask = TRUE,
       paramslist[[i]] <- get(formalArgs(test_ejam)[i])
     }
     names(paramslist) <- formalArgs(test_ejam)
-    paramslist$tname <- paste0(paramslist$tname, collapse = ",") # easier to view
+    paramslist$run_these <- paste0(paramslist$run_these, collapse = ",") # easier to view
     params <- paramslist
     ## same as spelling them out:
     # params = list(ask =  ask,
@@ -1007,7 +1037,8 @@ test_ejam <- function(ask = TRUE,
     #               y_shp        =  y_shp,
     #               y_fips       =  y_fips,
     #               y_runsome    =  y_runsome,
-    #               tname        =  paste0(tname, collapse = ","),
+    #               run_these        =  paste0(run_these, collapse = ","),
+    #   skip_these = .....
     #               y_runall     =  y_runall,
     #               y_seeresults =  y_seeresults,
     #               y_save       =  y_save,
@@ -1036,8 +1067,8 @@ test_ejam <- function(ask = TRUE,
     #       y_fips       = ", y_fips, "
     #
     #     y_runsome    = ", y_runsome, "
-    #       tname        = ", tnameprint, "
-    #
+    #       run_these        = ", run_theseprint, "
+    ##   skip_these = .....
     #     y_runall     = ", y_runall, "
     #
     #     y_seeresults = ", y_seeresults, "
@@ -1052,6 +1083,7 @@ test_ejam <- function(ask = TRUE,
   # RUN JUST 1 FILE OR GROUP ####
 
   if (y_runsome) {
+
     if (y_runsome) {y_runall =  FALSE}
     shownlist = partial_testlist
     shownlist = cbind(testgroup = rep(names(shownlist), sapply(shownlist, length)), file = unlist(shownlist))
@@ -1119,10 +1151,7 @@ test_ejam <- function(ask = TRUE,
 
     z <- system.time({
 
-      shownlist = testlist
-
-      # cat("skipping ejscreenapi tests while API down \n")
-      #  testlist = testlist[names(testlist) %in% "ejscreenapi"]
+      shownlist = partial_testlist # testlist is universe but what is tested now may be limited by skip_these param
 
       shownlist = cbind(testgroup = rep(names(shownlist), sapply(shownlist, length)), file = unlist(shownlist))
       rownames(shownlist) = NULL
@@ -1144,7 +1173,7 @@ test_ejam <- function(ask = TRUE,
 
       rm(shownlist)
 
-      x <- testbygroup(testlist = testlist, stop_on_failure = y_stopif)
+      x <- testbygroup(testlist = partial_testlist, stop_on_failure = y_stopif)
       bytest <- x
 
     })
@@ -1442,8 +1471,8 @@ x <- EJAM:::test_ejam(
 
   y_runall     = TRUE,
   y_runsome    = FALSE, # if T, need to also create partial_testlist
-  tname = NULL,  # or some of these:
-  # tname = c("test_fips", "test_naics", "test_frs", "test_latlon", "test_maps",
+  run_these = NULL,  # or some of these:
+  # run_these = c("test_fips", "test_naics", "test_frs", "test_latlon", "test_maps",
   #   "test_shape", "test_getblocks", "test_fixcolnames", "test_doag",
   #   "test_ejamit", "test_misc", "test_ejscreenapi", "test_mod", "test_app",
   #   "test_test", "test_golem"),

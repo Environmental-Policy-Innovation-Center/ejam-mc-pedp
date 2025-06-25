@@ -1,6 +1,5 @@
 
 
-
 #' export EJAM results as geojson/zipped shapefile/kml for use in ArcPro, EJScreen, etc.
 #'
 #' @param ejamitout output of EJAM such as from [ejamit()]
@@ -19,6 +18,9 @@
 #'   Can be "all" or NULL to include all columns.
 #' @param shp data.frame that is also "sf" class, with "geometry" column for mapping,
 #'   rows exactly corresponding to those in ejamitout$results_bysite
+#' @param quiet Passed to [sf::st_write()]
+#' @param ... Passed to [sf::st_write()]
+#'
 #' @return path to saved file
 #' @examples \donttest{
 #'   # folder = getwd()
@@ -43,9 +45,10 @@ ejam2shapefile <- function(ejamitout,
                            save = TRUE,
                            crs = 4269,
                            shortcolnames = TRUE, varnames = "basic250",
-                           shp = NULL
+                           shp = NULL,
+                           quiet = TRUE,
+                           ...
 ) {
-  # ,   ...) {
 
   #  ejamitout <- testoutput_ejamit_10pts_1miles; crs = 4269; file = "bysite.shp" ;  folder =  "~/../Downloads"  # getwd()
   if ('results_bysite' %in% names(ejamitout)) {
@@ -79,7 +82,7 @@ To include specific columns provides those as a character vector of varnames.")
 
       if ((is.null(shp)) & !('radius.miles' %in% varnames)) {
         varnames = c(varnames, 'radius.miles')
-        } # radius will be needed to draw circles, unless shp provided
+      } # radius will be needed to draw circles, unless shp provided
       ok <- varnames %in% names(df)
       if (any(!ok)) {warning("Some specified varnames not found in ejamitout$results_bysite")}
       if (all(!ok)) {stop("No specified varnames found in ejamitout$results_bysite") }
@@ -102,8 +105,7 @@ To include specific columns provides those as a character vector of varnames.")
     bysite_shp <- cbind(shp, df) # or could merge using ejam_uniq_id? but output of ejamit()$results_bysite should already have 1 row for every row of original shapefile input, even invalid ones, so merge typically won't be needed here.
     ## note class(cbind(df,shp)) is just data.frame but class(cbind(shp,df)) is  "sf" and data.frame !
   } else {
-
- ######################################################################################### #
+    ######################################################################################### #
 
     # LATLON + Radius (no shp provided) ####
     ## Try to create circles at lat,lon pts ####
@@ -111,7 +113,6 @@ To include specific columns provides those as a character vector of varnames.")
     bysite_shp <- shape_buffered_from_shapefile_points(df, radius.miles = NULL, crs = crs)
 
     ######################################################################################### #
-
   }
 
   # SAVE  ####
@@ -141,11 +142,11 @@ To include specific columns provides those as a character vector of varnames.")
       stop(paste0('file extension must be one of \"', paste0(ok.ext, collapse = "\", \""), '\"'))
     }
     ##################################### #
-    
+
     # is bysite_shp data OK?
-    
+
     if (NROW(bysite_shp) == 0) {stop("no data in shapefile")}
-    
+
     ##################################### #
 
     ## .geojson, .json, .kml    ####
@@ -154,28 +155,35 @@ To include specific columns provides those as a character vector of varnames.")
 
       finalpath = paste0(normalizePath(folder), "\\", file)
       if (file.exists(finalpath)) {
-        warning("File by that name already exists, but will overwrite it.")
+        message("File by that name already exists, but will overwrite it.")
         file.remove(finalpath)
       }
 
       if (ftype %in% c("geojson", "json")) {
+        # junk = capture.output({
         sf::st_write(
           obj = bysite_shp,
           dsn = finalpath,
           driver = "GeoJSON", # "json" is not recognized but this way it works
           delete_layer = TRUE, # delete_layer not supported?
-          append = FALSE
+          append = FALSE,
+          quiet = quiet,
+          ...
         )
+        # })
       } else {
+        # junk = capture.output({
         sf::st_write(
           obj = bysite_shp,
           dsn = finalpath,
           # driver = "KML", # infers it from extension
           delete_layer = TRUE, # delete_layer not supported?
-          append = FALSE
+          append = FALSE,
+          quiet = quiet,
+          ...
         )
+        # })
       }
-
     }
     ##################################### #
 
@@ -205,15 +213,19 @@ To include specific columns provides those as a character vector of varnames.")
       if (!dir.exists(tds)) {dir.create(tds)}
       if (!dir.exists(tds)) {stop('could not create temp directory')}
       if (file.exists(file.path(tds, file))) {
-        warning("File by that name already exists, but will overwrite it.")
+        message("File by that name already exists, but will overwrite it.")
         file.remove(file.path(tds, file))
       }
+      # junk = capture.output({
       sf::st_write(
         obj = bysite_shp,
         dsn = file.path(tds, file),
         delete_layer = TRUE, # delete_layer not supported?
-        append = FALSE
+        append = FALSE,
+        quiet = quiet,
+        ...
       )
+      # })
       if (!file.exists(file.path(tds, file))) {stop('could not write to file at ', file.path(tds, file))}
 
       # now make it a zip file

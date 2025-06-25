@@ -345,7 +345,8 @@ test_that("map_shapes_mapview() if mapview pkg available works", {
   # requires mapview pkg be attached by setup.R in tests folders
   expect_no_error({
     suppressWarnings({
-      # warns now but no error if package mapview not installed or not attached
+      require(mapview)
+      # warns if package mapview not yet attached
       x = map_shapes_mapview(myshapes)
     })
   })
