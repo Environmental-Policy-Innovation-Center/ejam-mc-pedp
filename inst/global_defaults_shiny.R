@@ -612,7 +612,7 @@ testdata_repo <-  gsub(".*/", "", testdata_owner_repo)
 help_texts <- list(
   intro_text = tagList(
     # tags$p("For more information about EJAM:"),
-    h2( a(href = paste0(docs_url, "/", "articles/0_whatis.html"),
+    h2( a(href = paste0(docs_url, "/", "articles/whatis.html"),
           "What is EJAM?",
           target = "_blank", rel = "noreferrer noopener") ),
     p("The Environmental and Residential Population Analysis Multisite tool (EJAM) is a tool developed by the United States Environmental Protection Agency (US EPA) that makes it easy to see residential population and environmental information summarized in and across any list of places in the nation. Using this tool is like getting reports for hundreds or thousands of places, all at the same time."),

@@ -1,11 +1,15 @@
 # EJAM v2.32.5 (July 2025)
 
 - Summary Indexes (aka EJ Indexes) were found to have some incorrect numbers, so this release has replaced `?bgej` dataset with correct numbers, drawn from the internet archive version at https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip that was a copy of the datasets EPA had posted August 2024 at https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip
+  But there might still be some problem with the ozone and drinking EJ Indexes -- unlike the other EJ Indexes, they appear to be hard to replicate via formula, 
+  and the same may be true for the State EJ Indexes (for all Envt indicators).
+  This is an issue noted on the github repo and is being looked into.
 - testoutput_xyz .xlsx and .html files and dataset R objects updated to reflect the new `?bgej` dataset
-- [installation instructions in vignette/article](../articles/1_installing.html) were edited
-- interactive barplots of indicators can show median not just mean via `ejam2barplot_indicators()`
+- color-coded maps of counties are improved in `mapfastej_counties()`
+- [installation instructions in vignette/article](../articles/installing.html) were edited
+- interactive barplots of indicators will be able to show median not just mean via `ejam2barplot_indicators()`
 - disabled Start Analysis until Done is clicked, when using FIPS dropdown menu of counties/cities/etc.
-- `test_ejam()` is what used to be called `test_interactively()` -- it was renamed and moved to the R folder as an unexported internal function loaded as part of the package
+- `test_ejam()` is what used to be called `test_interactively()` -- it was improved and renamed and moved to the R folder as an unexported internal function loaded as part of the package
 - `test_coverage_check()` utility was improved, just as a way to for package maintainers/contributors to look at which functions might need unit tests written
 - `linesofcode2()` utility was improved, just as a way for package maintainers/contributors to look at which files have most of the lines of code, are mostly comments, etc.
 - `table_xls_format_api()` is what used to be called table_xls_formatting_api() (but is not used unless the ejscreenapi module or server is working)
@@ -42,7 +46,7 @@ Note the URLs, emails, and notes about repository locations/owners were edited t
 - enabled testing of web app functionality from the test_interactively() utility (which has more recently been renamed test_ejam() and put in R folder as an unexported internal function loaded as part of the package) or via test_local(), etc., not just from a github action. (See /tests/setup.R which now has a copy of what is also in app-functionality.R)
 - drafted revisions to ui and server to try to allow for more `run_app()` params or advanced tab or global_defaults_xyz to alter default method of upload vs dropdown, e.g., output ss_choose_method_ui, default_ss_choose_method, default_upload_dropdown. This included revising server and ui to use just EJAM:::global_or_param("xyz") not golem::get_golem_options("xyz"), so that non-shiny global defaults can work (e.g., logo path as `global_defaults_package$.community_report_logo_path`) even outside shiny when global_defaults_package has happened via onattach but global_defaults_shiny etc. has not happened.
 - changed .onAttach() to do source(global_defaults_package) with  local = FALSE not TRUE, but this might need to be revisited -- note both local = F and local = T are used in .onAttach() versus get_global_defaults_or_user_options()
-- in server, `ejam2excel()` now figures out value of radius_or_buffer_description, ejam2excel() gets new parameters
+- in server, `ejam2excel()` now figures out value of radius_or_buffer_description, `ejam2excel()` gets new parameters
 table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ejam2report()` to add a report in one tab.
 - reorganized server code by moving v1_demog_table() and v1_envt_table to long report section of server file
 - cleaned up server code (eg, remove obsolete input$disconnect, remove obsolete community_download() and report_community_download(), and remove repetitive `ejam2repor()`, remove old EJScreen Batch Tool tab, used session = session as param in server calls to updateXYZINPUT, etc.)
@@ -81,7 +85,7 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 
 ## RStudio user-related or internal improvements
 - Clarified/explained 2025 status of API and urls in CONTRIBUTING and README, etc.
-- Extensive additions of and improvements in articles/vignettes, including documentation of how to maintain repo, package, and datasets. Articles/vignettes avoid hardcoded repo urls, and use relative links within pkgdown site... unexported helper function `EJAM:::repo_from_desc()` added, avoids hardcoded repo url; download_latest_arrow_data avoids hardcoded repo url; links to testdata files on webapp UI avoid hardcoded repo url; simpler [What is EJAM](../articles/0_whatis.html) doc.
+- Extensive additions of and improvements in articles/vignettes, including documentation of how to maintain repo, package, and datasets. Articles/vignettes avoid hardcoded repo urls, and use relative links within pkgdown site... unexported helper function `EJAM:::repo_from_desc()` added, avoids hardcoded repo url; download_latest_arrow_data avoids hardcoded repo url; links to testdata files on webapp UI avoid hardcoded repo url; simpler [What is EJAM](../articles/whatis.html) doc.
 - `ejamit()` in interactive mode (RStudio) now lets you select any type of file to upload if no sites specified by parameters
 - Many options or starting values or settings for the shiny app (and in general) can now be set as 
   parameters passed to the `run_app()` function, which overrides the defaults.
@@ -170,4 +174,4 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 
 - The EJAM R package is available as an open source resource you can
     - clone from the [EJAM-open github repository](https://github.com/USEPA/EJAM-open) or
-    - install using the [installation instructions](../articles/1_installing.html)
+    - install using the [installation instructions](../articles/installing.html)

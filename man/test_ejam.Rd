@@ -16,7 +16,8 @@ test_ejam(
   y_coverage_check = FALSE,
   y_runall = TRUE,
   y_runsome = FALSE,
-  tname = NULL,
+  run_these = NULL,
+  skip_these = c("ejscreenapi"),
   y_stopif = FALSE,
   y_seeresults = TRUE,
   y_save = TRUE,
@@ -29,7 +30,8 @@ test_ejam(
 
 \item{noquestions}{logical, whether to avoid questions later on about where to save shapefiles}
 
-\item{useloadall}{logical, TRUE means use \code{\link[=load_all]{load_all()}}, FALSE means use \code{\link[=library]{library()}}}
+\item{useloadall}{logical, TRUE means use \code{\link[=load_all]{load_all()}}, FALSE means use \code{\link[=library]{library()}}.
+But useloadall=T is essential actually, for unexported functions to be found when they are tested!}
 
 \item{y_basic}{logical, whether to only run some basic \code{\link[=ejamit]{ejamit()}} functions, not do unit tests}
 
@@ -47,8 +49,10 @@ which functions might not have unit tests, just based on matching source file an
 
 \item{y_runsome}{logical, whether to run only some groups of tests (so y_runall is FALSE)}
 
-\item{tname}{if y_runsome = T, a vector of group names like 'fips', 'naics', etc.
+\item{run_these}{if y_runsome = T, a vector of group names to test, like 'fips', 'naics', etc.
 see source code for list}
+
+\item{skip_these}{if y_runall = T, a vector of group names to skip, like 'fips', 'naics', etc.}
 
 \item{y_seeresults}{logical, whether to show results in console}
 
@@ -84,7 +88,7 @@ Note these require installing the package \href{https://testthat.r-lib.org}{test
 \dontrun{
 biglist1 <- EJAM:::test_ejam()
 biglist2 <- EJAM:::test_ejam(ask = F,
-      y_runsome = T, tname = c('test', 'maps'),
+      y_runsome = T, run_these = c('test', 'maps'),
       mydir = "~/../Downloads/unit testing") # for example
       }
 

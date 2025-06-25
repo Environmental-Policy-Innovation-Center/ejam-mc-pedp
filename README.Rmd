@@ -55,8 +55,8 @@ data_reponame <- gsub(".*/", "", data_reponame_with_owner)    #       "REPONAME"
 data_reponame_url <- paste0("https://github.com/", data_reponame_with_owner) 
 # "https://github.com/OWNER/REPONAME"
 
-whatislink <- paste0(docs_reponame_url, "/articles/0_whatis.html")
-deploylink <- paste0(docs_reponame_url, "/articles/dev_deploy-app.html")
+whatislink <- paste0(docs_reponame_url, "/articles/whatis.html")
+deploylink <- paste0(docs_reponame_url, "/articles/dev-deploy-app.html")
 ```
 
 <!-- badges: start -->

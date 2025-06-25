@@ -82,7 +82,7 @@ which currently returns ejanalysis/ejamdata, so the full URL would be
 ### web app hosting
 
 For information about how to host the web app, see [Deploying the Web
-App](https://ejanalysis.github.io/EJAM/articles/dev_deploy-app.html)
+App](https://ejanalysis.github.io/EJAM/articles/dev-deploy-app.html)
 
 EJScreen and the EJAM/multisite tool web app were *no longer hosted by
 EPA starting in early 2025*. Changes have been taking place in terms of
