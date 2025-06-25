@@ -7,7 +7,9 @@
 ejam2barplot_indicators(
   ejamitout,
   indicator_type = "Demographic",
-  data_type = "raw"
+  data_type = "raw",
+  mybarvars.stat = "avg",
+  mybarvars.sumstat = c("Average site", "Average person at these sites")
 )
 }
 \arguments{
@@ -16,6 +18,19 @@ ejam2barplot_indicators(
 \item{indicator_type}{group of indicators to display, such as 'Environmental', etc.}
 
 \item{data_type}{form to display data in: 'raw' or 'ratio'}
+
+\item{mybarvars.stat}{"avg" is tested and works
+(or possibly could be "med" for median),
+can be defined by the value of shiny input$summ_bar_stat selection}
+
+\item{mybarvars.sumstat}{description of summary stat type -
+by default depends on mybarvars.stat being "avg" or "med"
+which should correspond to also specifying values of
+mybarvars.sumstat equal to
+c('Average site', 'Average person at these sites') or
+c('Median site', 'Median person') respectively.
+If mybarvars.stat is specified then mybarvars.sumstat should be also
+to ensure they correspond! Done in shiny, not checked here.}
 }
 \value{
 ggplot object with facets for each indicator and 3 bars

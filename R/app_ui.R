@@ -405,8 +405,8 @@ app_ui  <- function(request) {
                                    label = div(icon('play', style = 'transform: rotate(180deg);'), HTML('&nbsp;'),
                                                'Return to Previous Results'), class = 'usa-button')
                     )
-                  ))
-              )
+                  )) # end fluid row
+              ) # end well panel
               # _________ wellPanel end ___------------------------------------------------------
             ), # end of upload-methods column
             ################################################################# #
@@ -472,10 +472,8 @@ app_ui  <- function(request) {
                             )
                      ),
                    ) # end fluidRow with radius slide and analysis title and start button
-
             ) # end of column with map
           ), # end of fluidRow container for upload method (left column) and map (right column)
-
         ), # end Site Selection tab panel
 
         #############################################################################  #
@@ -537,7 +535,6 @@ app_ui  <- function(request) {
                                    label = 'Download Community Report', class = 'usa-button'), style = 'text-align: center;'
                                ),
                              ),  # end report tab
-
 
                              ######################################################################################################### #
                              #. ####
@@ -602,12 +599,7 @@ app_ui  <- function(request) {
 
                                                      wellPanel(
                                                        style = 'width: 100%;',
-                                                       ### _BARPLOT
                                                        br(),
-                                                       #h3(id = 'barplot','Compare Across Indicators'),
-                                                       #fluidRow(
-                                                       ## input: Barplot setting - indicator type
-                                                       # column(2,
                                                        shinycssloaders::withSpinner(
                                                          ## output: display barplot
                                                          plotOutput(outputId = 'summ_display_bar', height = '600px')
@@ -615,29 +607,26 @@ app_ui  <- function(request) {
 
                                                        fluidRow(
                                                          column(4,
-                                                                uiOutput('summ_bar_ind_out'),
+                                                                uiOutput('summ_bar_ind_out')
                                                          ),
                                                          column(4,
-                                                                uiOutput('summ_bar_data'),
+                                                                uiOutput('summ_bar_data')
                                                          )
                                                        ),
 
-                                                       ## hiding this option for now - defaulting to Average
+                                                       ## was hiding this option while debugging median - defaulted to Average
                                                        ## input: Barplot setting - statistic type
-                                                       # radioButtons(inputId = 'summ_bar_stat', 'Statistic',
-                                                       #              choiceValues = c('avg', 'med'),
-                                                       #              choiceNames = c('Average', 'Median'))
-                                                       #  ),
 
                                                        h4('Definitions'),
                                                        HTML("<strong>Average site</strong> = the average site's average resident (the average resident's score is calculated at each site as the site-specific population-weighted mean, and then the arithmetic mean of those site-specific scores is calculated)
-          <br><strong>Average person at these sites</strong> = the average person among all the residents who are at any one or more of the sites, counting each person only once even if they live near more than one site.")
-                                                     ),
-                                                     br(), br(),
-                                                     ######################################################################################################### #
-                                            ),  # end of tabPanel(title = 'Plot Average Scores',
+          <br><strong>Average person at these sites</strong> = the average person among all the residents who are at any one or more of the sites, counting each person only once even if they live near more than one site."
+                                                       ),
+                                                       br(), br()
+                                                       ######################################################################################################### #
+                                                     ) # end of wellPanel
+                                                     ),  # end of tabPanel(title = 'Plot Average Scores',
 
-                                            ### _HISTOPLOT (RANGE OF SCORES) - tabPanel(title = 'Plot Full Range of Scores' ####
+                                                     ### _HISTOPLOT (RANGE OF SCORES) - tabPanel(title = 'Plot Full Range of Scores' ####
 
                                             tabPanel(id = "plot_range",
                                                      title = 'Plot Full Range of Scores',
@@ -686,9 +675,7 @@ app_ui  <- function(request) {
                                             ) # end tab panel for histograms
                                           ) # end navbarPage
                                       ) # end div(class = 'navbar1'
-
                              ), # end 'Details' results tab
-
                              ######################################################################################################### #
                              #. ####
                              # ______ FULL REPORT (Word doc) - tabPanel(title = 'Written Report' _________ ####
@@ -1231,6 +1218,14 @@ app_ui  <- function(request) {
                               label = 'Threshold value(s) for 2nd set of comparisons (e.g. %ile 1-100):',
                               value = EJAM:::global_or_param("default.an_thresh_comp2")
                  ),
+                 ######################################################## #
+                 ## Plots on webpages ####
+                 h2("Plots"),
+
+                 shiny::radioButtons(inputId = "allow_median_in_barplot_indicators",
+                                     label = "Allow median not just average as metric for array of barplots",
+                                     choices = list(Yes = TRUE, No = FALSE),
+                                     selected = EJAM:::global_or_param("default_allow_median_in_barplot_indicators")),
 
                  ######################################################## #
                  ## Short report options ####

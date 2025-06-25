@@ -350,7 +350,9 @@ global_defaults_shiny <- list(
   # ~ ####
   # RESULTS VIEWS ####
 
+  ## ------------------------ Interactive plots options ####
 
+  default_allow_median_in_barplot_indicators = FALSE,
 
   ## ------------------------ Map formatting options ####
 
