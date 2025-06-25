@@ -1,8 +1,7 @@
 
 # test_file("./tests/testthat/test-ejamit.R")
 
-########################################################## #
-# see test-ejamit_compare_distances.R  for test of "donuts ok in ejamit(radius_donut_lower_edge=3)"
+# Also see test-ejamit_compare_distances.R, for test of "donuts ok in ejamit(radius_donut_lower_edge=3)"
 
 ########################################################## #
 
@@ -18,7 +17,7 @@ test_that('ejamit() returns a list with no error, for very simple example', {
   })
   expect_true('list' %in% class(v10))
 })
-
+########################################################## #
 
 test_that("ejamit() returns no distances greater than radius - even if maxradius parameter not specified", {
   max_specified <- 3
@@ -32,18 +31,10 @@ test_that("ejamit() returns no distances greater than radius - even if maxradius
     max_found,
     max_specified
   )
-
+  # expect_identical(NROW(v10), NROW(EJAM::testpoints_10))
+  ### only if ejamit returns blank rows where latlon invalid or no blocks so no results for that point
 })
-
-
-# expect_identical(NROW(val), NROW(EJAM::testpoints_10))
-### only if update ejamit to return blank rows where latlon invalid or no blocks so no results for that point
-
-
-
 ########################################################## #
-
-################# #
 
 test_that('ejamit() output has names the same as it used to return, i.e. names(testoutput_ejamit_10pts_1miles)', {
   suppressWarnings(suppressMessages({
@@ -58,7 +49,7 @@ test_that('ejamit() output has names the same as it used to return, i.e. names(t
       "count_of_blocks_near_multiple_sites", "results_summarized", "formatted", "sitetype"),
     names(v10))
 })
-################# #
+########################################################## #
 
 test_that("ejamit() still returns results_overall identical to what it used to return
           (saved as testoutput_ejamit_10pts_1miles$results_overall)", {
@@ -75,7 +66,7 @@ test_that("ejamit() still returns results_overall identical to what it used to r
             # all.equal(ejamitoutnow$results_overall,
             #           testoutput_ejamit_10pts_1miles$results_overall)
           })
-################# #
+########################################################## #
 
 test_that("ejamit() still returns results_bysite identical to expected numbers it used to return
           (saved as testoutput_ejamit_10pts_1miles$results_bysite)", {
@@ -92,7 +83,7 @@ test_that("ejamit() still returns results_bysite identical to expected numbers i
               } )
             })
           })
-################# #
+########################################################## #
 
 test_that("ejamit() returns same exact colnames() in both results_bysite and results_overall", {
   ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE) # see setup.R - takes roughly 5-10 seconds
@@ -102,8 +93,6 @@ test_that("ejamit() returns same exact colnames() in both results_bysite and res
   )
 })
 ########################################################## #
-
-# more tests for ejamit go here
 
 testthat::test_that("ejamit can use fips=fips_counties_from_statename()", {
   testthat::expect_no_error({
@@ -120,28 +109,11 @@ testthat::test_that("ejamit can use fips=fips_counties_from_statename()", {
   expect_equal(y$results_bysite$ejam_uniq_id,
                c("10001" , "10003", "10005") )
 })
+########################################################## #
 
-# ***
+# more tests for ejamit could go here ***
+
+
+
 
 ############################### # ############################### # ############################### # ############################### #
-############################### # ############################### # ############################### # ############################### #
-
-
-# more tests for ejscreenit go here ?
-
-
-# # ***
-# mid 2025 version no longer had testoutput_ejscreenit_10pts_1miles since it had been outdated and API went down
-# maybe
-# create a test data set that is
-# testoutput_ejscreenit_10pts_1miles  so
-# testoutput_ejscreenit_10pts_1miles$table  can be compared to
-# testoutput_ejamit_10pts_1miles$results_bysite[, 4:ncol(testoutput_ejamit_10pts_1miles$results_bysite)]
-#
-
-
-################################ #
-
-
-
-
