@@ -95,6 +95,7 @@ test_that("ejamit() returns same exact colnames() in both results_bysite and res
 ########################################################## #
 
 testthat::test_that("ejamit can use fips=fips_counties_from_statename()", {
+  oldwidth = options("width")
   testthat::expect_no_error({
     suppressWarnings(
       suppressWarnings({
@@ -108,6 +109,7 @@ testthat::test_that("ejamit can use fips=fips_counties_from_statename()", {
                  "formatted", "sitetype"))
   expect_equal(y$results_bysite$ejam_uniq_id,
                c("10001" , "10003", "10005") )
+  options(width = as.vector(unlist(oldwidth)))
 })
 ########################################################## #
 ################# #

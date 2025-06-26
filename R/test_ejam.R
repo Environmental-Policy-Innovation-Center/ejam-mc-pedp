@@ -39,11 +39,16 @@
 #' @param mydir optional folder
 #' @examples
 #' \dontrun{
-#' biglist1 <- EJAM:::test_ejam()
-#' biglist2 <- EJAM:::test_ejam(ask = F,
+#' biglist <- EJAM:::test_ejam()
+#'
+#' biglist <- EJAM:::test_ejam(ask=F, mydir = rstudioapi::selectDirectory())
+# uses defaults, except it asks you what folder to save in
+
+#' biglist <- EJAM:::test_ejam(ask = F,
 #'       y_runsome = T, run_these = c('test', 'maps'),
 #'       mydir = "~/../Downloads/unit testing") # for example
-#'       }
+#'
+#'   }
 #'
 #' @return a named list of objects like data.tables, e.g., named
 #'   'bytest', 'byfile', 'bygroup', 'params', 'passcount' and other summary stats, etc.
@@ -65,7 +70,7 @@ test_ejam <- function(ask = TRUE,
                       #   "test_shape", "test_getblocks", "test_fixcolnames", "test_doag",
                       #   "test_ejamit", "test_misc", "test_ejscreenapi", "test_mod", "test_app",
                       #   "test_test", "test_golem"),
-                      skip_these = c("ejscreenapi", "proximity"),
+                      skip_these = c("ejscreenapi", "app"),
 
                       y_stopif = FALSE,
                       y_seeresults = TRUE,
@@ -74,6 +79,51 @@ test_ejam <- function(ask = TRUE,
                       mydir = NULL
 ) {
 
+  if (ask) {
+  # example of using this function ####
+  cat('\n
+################################### #  ################################### #
+\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n
+\n  # examples of using this function: ####
+
+# Examples of using it ####
+
+?EJAM:::test_ejam
+
+x <- EJAM:::test_ejam()   # it will ask about each parameter, by default
+
+x <- EJAM:::test_ejam(ask=F, mydir = rstudioapi::selectDirectory())
+# uses defaults, except it asks you what folder to save in
+
+x <- EJAM:::test_ejam(F)  # no questions, just defaults, i.e. these:
+
+x <- EJAM:::test_ejam(
+  ask = TRUE,
+  noquestions = TRUE, # just for shapefile folder selections
+
+  useloadall  = TRUE, # might be essential actually
+
+  y_basic = FALSE,   y_latlon=TRUE, y_shp=TRUE, y_fips=TRUE,
+
+  y_coverage_check = FALSE,
+
+  y_runall     = TRUE,
+  y_runsome    = FALSE, # if T, need to also create partial_testlist
+  run_these = NULL,  # or some of these:
+  # run_these = c("test_fips", "test_naics", "test_frs", "test_latlon", "test_maps",
+  #   "test_shape", "test_getblocks", "test_fixcolnames", "test_doag",
+  #   "test_ejamit", "test_misc", "test_ejscreenapi", "test_mod", "test_app",
+  #   "test_test", "test_golem"),
+
+  y_stopif     = FALSE, # stop as soon as problem is hit?
+  y_seeresults = TRUE,
+  y_save       = TRUE,
+  y_tempdir    = TRUE,
+  mydir = NULL
+)
+
+')
+}
   ########################################## # ########################################## #
   if (missing(y_basic) & ask) {
     if (missing(y_basic)) {
@@ -785,6 +835,9 @@ all existing `./test/test-xyz.R` files are listed in `testlist` and all filename
             skip_these = rstudioapi::showPrompt(
               "WHICH TEST GROUPS TO SKIP? Enter a comma-separated list like  maps,frs  (or Esc to specify none)",
               paste0(shortgroupnames, collapse = ","),
+              default = ifelse(length(skip_these) > 0,
+                              paste0(skip_these, collapse = ","),
+                              "")
               # e.g., "fips,naics,frs,latlon,maps,shape,getblocks,fixcolnames,doag,ejamit,ejscreenapi,mod,app"
             )
           }}
@@ -1441,48 +1494,4 @@ loggable <- function(x, file = 'will be created using timestamp if not provided 
 
 }
 ################################### #
-
-# example of using this function ####
-cat('\n
-################################### #  ################################### #
-\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n
-\n  # examples of using this function: ####
-
-# Examples of using it ####
-
-?EJAM:::test_ejam
-
-x <- EJAM:::test_ejam()   # it will ask about each parameter, by default
-
-x <- EJAM:::test_ejam(F, mydir = rstudioapi::selectDirectory())
-# uses defaults, except it asks you what folder to save in
-
-x <- EJAM:::test_ejam(F)  # no questions, just defaults, i.e. these:
-
-x <- EJAM:::test_ejam(
-  ask = TRUE,
-  noquestions = TRUE, # just for shapefile folder selections
-
-  useloadall  = TRUE, # might be essential actually
-
-  y_basic = FALSE,   y_latlon=TRUE, y_shp=TRUE, y_fips=TRUE,
-
-  y_coverage_check = FALSE,
-
-  y_runall     = TRUE,
-  y_runsome    = FALSE, # if T, need to also create partial_testlist
-  run_these = NULL,  # or some of these:
-  # run_these = c("test_fips", "test_naics", "test_frs", "test_latlon", "test_maps",
-  #   "test_shape", "test_getblocks", "test_fixcolnames", "test_doag",
-  #   "test_ejamit", "test_misc", "test_ejscreenapi", "test_mod", "test_app",
-  #   "test_test", "test_golem"),
-
-  y_stopif     = FALSE, # stop as soon as problem is hit?
-  y_seeresults = TRUE,
-  y_save       = TRUE,
-  y_tempdir    = TRUE,
-  mydir = NULL
-)
-
-')
 
