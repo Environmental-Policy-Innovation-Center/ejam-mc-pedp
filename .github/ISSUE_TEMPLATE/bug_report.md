@@ -6,8 +6,8 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**What is the bug?**
+A clear and concise description of what is **wrong or not working correctly**. (If this is a request for a new feature, please use the "Feature Request" form instead of this "Bug report" form).
 
 **When does it happen?**
 Steps to reproduce the behavior or see the problem:
