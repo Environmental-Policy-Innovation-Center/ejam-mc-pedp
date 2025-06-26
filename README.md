@@ -20,10 +20,11 @@ places, all at the same time.
 
 ## What Can You Do with EJAM?
 
-[What is
-EJAM?](https://ejanalysis.github.io/EJAM/articles/0_whatis.html)
+[What is EJAM?](https://ejanalysis.github.io/EJAM/articles/whatis.html)
 
 ## Status of EJAM package after mid-June 2025
+
+See <https://www.ejanalysis.com/status> for more information.
 
 *As of mid-June 2025, content related to what had been the USEPA-hosted
 open source R package EJAM will be archived (and/or unpublished)*
