@@ -53,6 +53,24 @@ The EJAM package can be installed on your computer as an R package. This is usef
 
 ### Try this first (if you just want to use the package, not clone & edit source code)
 
+It may be easiest to clone the repo and build/install from source (see below).
+
+Otherwise, trying to install using remotes or devtools packages may require setting up a PAT for authentication to work:
+```{r echo=TRUE, eval=FALSE}
+#  To check on PATs:
+usethis::gh_token_help() # or
+usethis::git_sitrep() # git situation report
+
+#  To make a PAT:
+usethis::create_github_token()
+  
+#  To register a PAT, see
+credentials::set_github_pat()
+# see # https://usethis.r-lib.org/articles/git-credentials.html#git-credential-helpers-and-the-credential-store
+# Windows more or less takes care of this for you now, in conjunction with github.
+```
+
+
 If you just install the package without cloning the repository, you can use the EJAM package, but cannot edit the source code, for example. To just install it, try this:
 
 ```{r install_github_main, eval=FALSE, include=TRUE}

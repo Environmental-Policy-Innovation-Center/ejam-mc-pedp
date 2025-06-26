@@ -7,12 +7,14 @@
 - testoutput_xyz .xlsx and .html files and dataset R objects updated to reflect the new `?bgej` dataset
 - color-coded maps of counties are improved in `mapfastej_counties()`
 - [installation instructions in vignette/article](../articles/installing.html) were edited
-- interactive barplots of indicators will be able to show median not just mean via `ejam2barplot_indicators()`
+- README mentions https://www.ejanalysis.com now
+- vignettes/articles were renamed
 - disabled Start Analysis until Done is clicked, when using FIPS dropdown menu of counties/cities/etc.
 - `test_ejam()` is what used to be called `test_interactively()` -- it was improved and renamed and moved to the R folder as an unexported internal function loaded as part of the package
 - `test_coverage_check()` utility was improved, just as a way to for package maintainers/contributors to look at which functions might need unit tests written
 - `linesofcode2()` utility was improved, just as a way for package maintainers/contributors to look at which files have most of the lines of code, are mostly comments, etc.
 - `table_xls_format_api()` is what used to be called table_xls_formatting_api() (but is not used unless the ejscreenapi module or server is working)
+- interactive barplots of indicators will be able to show median not just mean via `ejam2barplot_indicators()` but that is work in progress.
 
 
 # EJAM v2.32.4 (June 2025)
