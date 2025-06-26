@@ -17,7 +17,7 @@
 
 ## You might be able to do that now simply via something like this:
 
-# install_url()  # as explained at paste0(repo_from_desc('github.io', get_full_url=T), "/articles/1_installing.html")
+# install_url()  # as explained at paste0(repo_from_desc('github.io', get_full_url=T), "/articles/installing.html")
 
 # or
 

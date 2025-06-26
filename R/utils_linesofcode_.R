@@ -13,7 +13,7 @@
 #' @return vector of paths
 #' @examples
 #'  #  dir2()
-#' dontrun{
+#'  \dontrun{
 #' dir2()
 #' dir2("*.zip", recursive = T)
 #' dir2("*.y*",  recursive = T)
@@ -63,6 +63,7 @@ dir2 <- function(query_glob = '*.*', ignore.case = TRUE, recursive = FALSE, sile
 #' @param cropfilename number of character to truncate filename to for display in console
 #' @param croppath limit path for display
 #' @param showrows optional
+#' @param showplot optional logical whether to plot cumulative distribution (for R folder only)
 #'
 #' @return data.frame of info about files
 #'
@@ -70,7 +71,7 @@ dir2 <- function(query_glob = '*.*', ignore.case = TRUE, recursive = FALSE, sile
 #'
 #' @noRd
 #'
-linesofcode2 <- function(folder='.', packages, recursive=TRUE, sums=FALSE, rfolderonly=FALSE, cropfilename=40, croppath=20, showrows=NULL) {
+linesofcode2 <- function(folder='.', packages, recursive=TRUE, sums=FALSE, rfolderonly=FALSE, cropfilename=40, croppath=20, showrows=NULL, showplot = TRUE) {
 
   # if packages is specified:   if (!missing(packages))
   #   if both specified: if (!missing(folder)) {warn("packages and folder both specified, so ignoring folder param")}
@@ -108,7 +109,7 @@ linesofcode2 <- function(folder='.', packages, recursive=TRUE, sums=FALSE, rfold
 
   if (!missing(packages)) {
     packages = basename(packages)
-    if (!missing(folder)) {warn("packages and folder both specified, so ignoring folder param")}
+    if (!missing(folder)) {warning("packages and folder both specified, so ignoring folder param")}
     # find each of packages wherever, using find.package()
     # find each package - finds installed version unless load_all() has been done
     pkg_dir = vector()
@@ -179,7 +180,8 @@ linesofcode2 <- function(folder='.', packages, recursive=TRUE, sums=FALSE, rfold
     out <- out[order(out$lines, decreasing = T), ]
     rownames(out) <- NULL
 
-    if (rfolderonly) {out <- out[out$where == "/R/", ]}
+    if (rfolderonly) {out <- out[out$where == "R/", ]}
+    rownames(out) <- NULL # resets to 1:nrow since some are dropped if rfolderonly = TRUE
 
     mysums <- cbind(
       #   summarize(out$lines,    by = out$package, FUN = sum), # was from the Hmisc pkg
@@ -187,10 +189,24 @@ linesofcode2 <- function(folder='.', packages, recursive=TRUE, sums=FALSE, rfold
       aggregate(out$lines,    by = list(out$package), FUN = sum),
       aggregate(out$filename, by = list(out$package), FUN = length)
     )
-    names(mysums)    <- c(    "package",     "filename",  "p2",   "lines")
+    names(mysums)    <- c("package", "lines", "p2", "filename")
     mysums <- mysums[ , c("package", "filename", "lines")]
     mysums <- mysums[order(mysums$lines, decreasing = T), ]
     rownames(mysums) <- NULL
+
+    if (showplot) {
+      x = out
+      n50 = min(which( cumsum(x$lines) >= 0.50 * sum(x$lines) ))
+      n80 = min(which( cumsum(x$lines) >= 0.80 * sum(x$lines) ))
+      plot(   1:NROW(x), cumsum(x$lines) / sum(x$lines) ,
+              ylab = paste0("cum fraction of all lines of code (including comments, which are ", round(100 * sum(x$comments) / sum(x$lines), 0), "% of all lines)"),
+              main = paste0("Share of all lines of code that are in the largest files", ifelse(rfolderonly, " (counting only the /R/ folder)", " (including all folders, not just the /R/ folder)")),
+              xlab = paste0("Source files (from largest to smallest) -- The largest 10 files have ",
+                            round(100 * sum(x$lines[1:10]) / sum(x$lines) , 0),"% of all code & most of the code is in just the largest ",
+                            n50, " files" )) # , and ~80% is in the largest ", n80))
+      abline(h=0.50)
+      abline(h=sum(x$lines[1:10]) / sum(x$lines) )
+    }
 
     if (sums) {
       return(mysums)

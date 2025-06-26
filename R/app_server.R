@@ -50,6 +50,7 @@ app_server <- function(input, output, session) {
   ################################################################### #
   # testing/dev mode settings ####
   observe({
+    req(input$testing)
     if (input$testing) {cat("testing == TRUE \n ")} else {cat("testing == FALSE \n----------------------\n")}
   })
   observe({
@@ -66,6 +67,7 @@ app_server <- function(input, output, session) {
     }
   }, priority = 1)
   observe({
+    req(input$shiny.testmode)
     if (input$shiny.testmode) {
       options(shiny.testmode = TRUE)
       cat('shiny.testmode == TRUE\n')
@@ -282,6 +284,7 @@ app_server <- function(input, output, session) {
 
   # keep track of currently used method of site selection
   current_upload_method <- reactive({
+    req(input$testing)
     if (input$testing) {
       cat('\nThe input$ss_choose_method is ', input$ss_choose_method, '\n')
       if (input$ss_choose_method == "dropdown") {cat(' and input$ss_choose_method_drop is ', input$ss_choose_method_drop, '\n')}
@@ -571,7 +574,7 @@ app_server <- function(input, output, session) {
   ## NOT YET IMPLEMENTED
 
   data_up_tablepassed_latlon <- reactive({
-
+    req(input$max_pts_upload)
     ################################# #
     prepare_table_from_run_app <- function(sitepoints, input_max_pts_upload, input_testing) {
 
@@ -2745,11 +2748,23 @@ app_server <- function(input, output, session) {
     req(data_processed())
     req(input$summ_bar_ind)
     req(input$summ_bar_data)
-
-    ejam2barplot_indicators(ejamitout = data_processed(), indicator_type = input$summ_bar_ind, data_type = input$summ_bar_data)
-
+    ##  if allowing option of median ('med'), use thiS
+    if (input$allow_median_in_barplot_indicators) {
+      # if (global_or_param("default_allow_median_in_barplot_indicators")) {
+      mybarvars.stat <- input$summ_bar_stat
+    } else {
+      mybarvars.stat <- "avg"
+    }
+    mybarvars.sumstat <- switch(mybarvars.stat,
+                                'med' =  c('Median site', 'Median person'),
+                                'avg' = c('Average site', 'Average person')
+    )
+    ejam2barplot_indicators(ejamitout = data_processed(),
+                            indicator_type = input$summ_bar_ind, # D,E,EJ,EJS
+                            data_type = input$summ_bar_data,     # ratio or raw
+                            mybarvars.stat = mybarvars.stat, mybarvars.sumstat = mybarvars.sumstat # average or median
+    )
   }) # end of summ_display_bar  for barplot
-
   #############################################################################  #
   ## *HISTOGRAM interactive    ####
   #. ####

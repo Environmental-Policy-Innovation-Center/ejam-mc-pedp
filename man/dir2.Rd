@@ -34,7 +34,7 @@ useful if you forget \code{\link[=glob2rx]{glob2rx()}} is available
 }
 \examples{
  #  dir2()
-dontrun{
+ \dontrun{
 dir2()
 dir2("*.zip", recursive = T)
 dir2("*.y*",  recursive = T)

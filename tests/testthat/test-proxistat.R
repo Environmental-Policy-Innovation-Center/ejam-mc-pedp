@@ -29,24 +29,25 @@ de1county_blocks = delaware_blocks[bgids_statewide %in% delaware_1county_bgids, 
 ### GET SCORES FOR JUST 1 COUNTY'S BLOCKS AS TEST
 # proxistat(topoints = delaware_testpoints,
 #           bpoints = de1county_blocks)
+################################################################### #
 
 testthat::test_that("proxistat works at all", {
 
+  skip("proxistat() NOT YET WORKING AND CAN CRASH R SO WILL NOT TEST YET")
 
-  skip(" proxistat() NOT YET WORKING AND CAN CRASH R SO WILL NOT TEST YET")
   expect_no_error({
-    proxistat(topoints = delaware_testpoints,
+    x = proxistat(topoints = delaware_testpoints,
               bpoints = de1county_blocks)
-
-
   })
-
 })
+################################################################### #
 
 testthat::test_that("proxistat_via_getblocks() works at all", {
-  skip("skipping proxistat_via_getblocks testing until ready")
-  expect_no_error({
-    proxistat_via_getblocks(pts = testpoints_10[1:2, ])
-  })
 
+  skip("skipping proxistat_via_getblocks testing until ready")
+
+  expect_no_error({
+    y = proxistat_via_getblocks(pts = testpoints_10[1:2, ])
+  })
 })
+################################################################### #

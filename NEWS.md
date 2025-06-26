@@ -1,3 +1,22 @@
+# EJAM v2.32.5 (July 2025)
+
+- Summary Indexes (aka EJ Indexes) were found to have some incorrect numbers, so this release has replaced `?bgej` dataset with correct numbers, drawn from the internet archive version at https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip that was a copy of the datasets EPA had posted August 2024 at https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip
+  But there are still be some problem with the ozone and drinking EJ Indexes -- unlike the other EJ Indexes, they appear to be hard to replicate via formula, 
+  and there is now a unit test that shows the issue and also it is an issue noted on the github repo and is being looked into.
+  The same problem may exist for the State EJ Indexes (for all Envt indicators) -- need to clarify what formula is for state-based EJ percentiles.
+- testoutput_xyz .xlsx and .html files and dataset R objects updated to reflect the new `?bgej` dataset
+- color-coded maps of counties are improved in `mapfastej_counties()`
+- [installation instructions in vignette/article](../articles/installing.html) were edited
+- README mentions https://www.ejanalysis.com now
+- vignettes/articles were renamed
+- disabled Start Analysis until Done is clicked, when using FIPS dropdown menu of counties/cities/etc.
+- `test_ejam()` is what used to be called `test_interactively()` -- it was improved and renamed and moved to the R folder as an unexported internal function loaded as part of the package
+- `test_coverage_check()` utility was improved, just as a way to for package maintainers/contributors to look at which functions might need unit tests written
+- `linesofcode2()` utility was improved, just as a way for package maintainers/contributors to look at which files have most of the lines of code, are mostly comments, etc.
+- `table_xls_format_api()` is what used to be called table_xls_formatting_api() (but is not used unless the ejscreenapi module or server is working)
+- interactive barplots of indicators will be able to show median not just mean via `ejam2barplot_indicators()` but that is work in progress.
+
+
 # EJAM v2.32.4 (June 2025)
 
 Note the URLs, emails, and notes about repository locations/owners were edited to reflect this forked non-EPA version of the EJAM package being located at ejanalysis/EJAM, so the package called the v2.32.4 release on ejanalysis/EJAM is slightly different than the version called the v2.32.4 release that was released on USEPA/EJAM-open.
@@ -22,19 +41,19 @@ Note the URLs, emails, and notes about repository locations/owners were edited t
 - added warning in `url_countyhealthrankings()` if default year seems outdated
 - unexported read_and_clean_points()
 - unexported ejam2quantiles()
-- removed reference to obsolete testids_registry_id, replaced by testinput_regid
+- removed reference to obsolete testids_registry_id, replaced by `?testinput_regid`
 
 ## Technical / internal changes:
 
-- enabled testing of web app functionality from the test_interactively() utility or via test_local(), etc., not just from a github action. (See /tests/setup.R which now has a copy of what is also in app-functionality.R)
+- enabled testing of web app functionality from the test_interactively() utility (which has more recently been renamed test_ejam() and put in R folder as an unexported internal function loaded as part of the package) or via test_local(), etc., not just from a github action. (See /tests/setup.R which now has a copy of what is also in app-functionality.R)
 - drafted revisions to ui and server to try to allow for more `run_app()` params or advanced tab or global_defaults_xyz to alter default method of upload vs dropdown, e.g., output ss_choose_method_ui, default_ss_choose_method, default_upload_dropdown. This included revising server and ui to use just EJAM:::global_or_param("xyz") not golem::get_golem_options("xyz"), so that non-shiny global defaults can work (e.g., logo path as `global_defaults_package$.community_report_logo_path`) even outside shiny when global_defaults_package has happened via onattach but global_defaults_shiny etc. has not happened.
 - changed .onAttach() to do source(global_defaults_package) with  local = FALSE not TRUE, but this might need to be revisited -- note both local = F and local = T are used in .onAttach() versus get_global_defaults_or_user_options()
-- in server, `ejam2excel()` now figures out value of radius_or_buffer_description, ejam2excel() gets new parameters
+- in server, `ejam2excel()` now figures out value of radius_or_buffer_description, `ejam2excel()` gets new parameters
 table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ejam2report()` to add a report in one tab.
 - reorganized server code by moving v1_demog_table() and v1_envt_table to long report section of server file
 - cleaned up server code (eg, remove obsolete input$disconnect, remove obsolete community_download() and report_community_download(), and remove repetitive `ejam2repor()`, remove old EJScreen Batch Tool tab, used session = session as param in server calls to updateXYZINPUT, etc.)
 - allow shiny.testmode to be TRUE even if not set in options
-- used silent=TRUE in more cases of try()
+- used silent=TRUE in more cases of `try()`
 - added validate("problem with map_shapes_leaflet() function")
 - added validate(need(data_processed(), 'Please run an analysis to see results.'))
 
@@ -68,7 +87,7 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 
 ## RStudio user-related or internal improvements
 - Clarified/explained 2025 status of API and urls in CONTRIBUTING and README, etc.
-- Extensive additions of and improvements in articles/vignettes, including documentation of how to maintain repo, package, and datasets. Articles/vignettes avoid hardcoded repo urls, and use relative links within pkgdown site... unexported helper function `EJAM:::repo_from_desc()` added, avoids hardcoded repo url; download_latest_arrow_data avoids hardcoded repo url; links to testdata files on webapp UI avoid hardcoded repo url; simpler [What is EJAM](../articles/0_whatis.html) doc.
+- Extensive additions of and improvements in articles/vignettes, including documentation of how to maintain repo, package, and datasets. Articles/vignettes avoid hardcoded repo urls, and use relative links within pkgdown site... unexported helper function `EJAM:::repo_from_desc()` added, avoids hardcoded repo url; download_latest_arrow_data avoids hardcoded repo url; links to testdata files on webapp UI avoid hardcoded repo url; simpler [What is EJAM](../articles/whatis.html) doc.
 - `ejamit()` in interactive mode (RStudio) now lets you select any type of file to upload if no sites specified by parameters
 - Many options or starting values or settings for the shiny app (and in general) can now be set as 
   parameters passed to the `run_app()` function, which overrides the defaults.
@@ -87,8 +106,8 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 - Continued towards refactoring/consolidating code in server vs in functions, related to creating summary report as HTML vs for download from shiny app vs from `ejam2report()`,
   in functions such as `report_residents_within_xyz()`, renamed generate_demog_header to generate_env_demog_header, etc.
 - server uses `ejamit()` for SHP and latlon, and cleanup
-- server uses `ejam2excel()` now not table_xls_format()
-- server uses `ejam2report()` now not obsolete report_community_download() etc. 
+- server uses `ejam2excel()` now (which then relies on `table_xls_format()`)
+- server uses `ejam2report()` now, not obsolete report_community_download() etc. 
 - server uses `shapefile_from_any()` now
 - server: removed use of data_summarized reactive everywhere, use data_processed$...
 - 2 new params `doaggregate()` has, to `ejamit()`, for calctype_maxbg and minbg
@@ -108,6 +127,7 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 - Some edits made considering github repositories and gh pages may change location or go offline
 - Updated FRS datasets, pulled on 2/12/25
 - Remove screenshots from user guide document
+
 
 # EJAM v2.32.1-EJAM (February 2025)
 
@@ -137,6 +157,7 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 
 - Refactored community report functions, `app_server.R` script
 
+
 # EJAM v2.32-EJAM (January 2025)
 
 ## New Features + Improvements
@@ -150,8 +171,9 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 
 - Added `leaflet.extras2` dependency to Imports, instead of Suggests, which is necessary for new installations
 
+
 # EJAM v2.32.0
 
 - The EJAM R package is available as an open source resource you can
     - clone from the [EJAM-open github repository](https://github.com/USEPA/EJAM-open) or
-    - install using the [installation instructions](../articles/1_installing.html)
+    - install using the [installation instructions](../articles/installing.html)

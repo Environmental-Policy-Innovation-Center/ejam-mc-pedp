@@ -23,37 +23,37 @@
 #'   full table of sorted distances of blockgroups,
 #'   cumulative count of demog groups at that block group's distance.
 #'   If returnwhat is "plotfilename" then it returns the full path including filename of a .png in a tempdir
-#'   If returnwhat is "plot" then it returns the plot object as needed for table_xls_format()
+#'   If returnwhat is "plot" then it returns the plot object as needed for [ejam2excel()] or related functions
 #' @param ... other parameters passed through to [points()]
 #' @seealso [distance_by_group()] [ejamit()] for examples
 #' @aliases plot_distance_cdf_by_group
 #' @return see returnwhat parameter
 #' @examples
 #'  y <- ejamit(testpoints_100, radius = 3)
-#'  
+#'
 #'  # see barplot and table comparing groups to see which are closer to sites analyzed
 #'  plot_distance_mean_by_group(y$results_bybg_people) # or distance_mean_by_group() synonym
-#'  
+#'
 #'  # table - proximity of sites for just one demog group vs rest of population
 #'  print(distance_by_group(y$results_bybg_people,
 #'    demogvarname = 'pctlowinc'))
-#'    
+#'
 #'  # plot cumulative share of group by distance vs overall population
 #'   distance_by_group_plot(y$results_bybg_people,
 #'      demogvarname = 'pctlowinc' )
-#'      
-#'  # plot cum. shares for two groups  
-#'  # about 14% of black and 12% of asian residents have a site within 1 mile. 
+#'
+#'  # plot cum. shares for two groups
+#'  # about 14% of black and 12% of asian residents have a site within 1 mile.
 #'  # 29% vs 21% have a site within 1.5 miles.
-#'  round(xyz[findInterval(c(1, 1.5),  xyz$dist), ], 3) 
-#'  
+#'  round(xyz[findInterval(c(1, 1.5),  xyz$dist), ], 3)
+#'
 #'  # plot is too busy for all groups at once so this is a way to tap through them 1 by 1
 #'  these = c(names_d, names_d_subgroups)
 #'  for (i in 1:length(these)) {
 #'    readline("press any key to see the next plot")
 #'    print(distance_by_group_plot(y$results_bybg_people, demogvarname = these[i]) )
 #'  }
-#'  
+#'
 #'
 #' @export
 #'
@@ -78,7 +78,7 @@ distance_by_group_plot <- function(
   if (is.null(radius_miles)) {
     radius_miles <- round(max(
       results_bybg_people$distance_min_avgperson[!is.infinite(
-        results_bybg_people$distance_min_avgperson)], na.rm = T), 
+        results_bybg_people$distance_min_avgperson)], na.rm = T),
       table_rounding_info("distance_min_avgperson")
     )
   }
@@ -275,7 +275,7 @@ distance_cdf_by_group_plot <- function(
   }
   if(is.null(radius_miles)){
     radius_miles <- round(max(
-      results_bybg_people$distance_min_avgperson, na.rm = T), 
+      results_bybg_people$distance_min_avgperson, na.rm = T),
       table_rounding_info("distance_min_avgperson")
     )
   }

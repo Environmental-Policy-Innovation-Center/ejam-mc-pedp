@@ -11,7 +11,7 @@ For Summary Indexes, see \link{bgej}
 }
 \details{
 \itemize{
-\item Version 2.32.4 of EJAM
+\item Version 2.32.5 of EJAM
 uses EPA environmental indicators and population indicators derived from
 ACS data from \verb{r a2018-2022 Each year this should be re-created as for the latest version.   See }attributes(blockgroupstats)`
 }

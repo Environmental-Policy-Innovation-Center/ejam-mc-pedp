@@ -687,7 +687,7 @@ test_that("fips_from_table() works", {
     )
     expect_no_error({
       expect_warning({
-        x = fips_from_table(fips_table = mydat)
+        x = EJAM:::fips_from_table(fips_table = mydat)
       })
     })
     expect_true(
@@ -699,7 +699,7 @@ test_that("fips_from_table() works", {
       other = c("ok", "ok", "ok", "not ok, na", "not fips, text")
     )
     expect_warning({
-      y = fips_from_table(mydat_y)
+      y = EJAM:::fips_from_table(mydat_y)
     })
     expect_identical(x, y)
 
@@ -710,11 +710,11 @@ test_that("fips_from_table() works", {
       statefips = "10"
     )
     expect_true(
-      fips_from_table(mydat_z) == "10"
+      EJAM:::fips_from_table(mydat_z) == "10"
     )
     expect_warning(
       # no suitable colname found
-      fips_from_table(data.frame(x = 1:3, y = 1:3))
+      EJAM:::fips_from_table(data.frame(x = 1:3, y = 1:3))
     )
 
   })

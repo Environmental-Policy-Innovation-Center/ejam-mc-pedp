@@ -61,12 +61,12 @@ global_defaults_shiny <- list(
 
   ## .app_title ####
   .app_title = app_title,
-  
+
   ## logos ####
   aboutpage_logo = aboutpage_logo,
   ## .community_report_logo_path is not needed here since since it is defined elsewhere, in global_defaults_package.R
   ## app_header_logo_html is not needed here since it is simply used below in the html directly, not queried by app_ui.R
-  
+
   default_testing        = FALSE,
   default_shiny.testmode = FALSE,  # If TRUE, then various features for testing Shiny applications are enabled.
   default_print_uploaded_points_to_log = TRUE,
@@ -350,7 +350,9 @@ global_defaults_shiny <- list(
   # ~ ####
   # RESULTS VIEWS ####
 
+  ## ------------------------ Interactive plots options ####
 
+  default_allow_median_in_barplot_indicators = FALSE,
 
   ## ------------------------ Map formatting options ####
 
@@ -381,7 +383,7 @@ global_defaults_shiny <- list(
   ## ------------------------ Excel formatting options ####
 
 
-  # > (cbind(formals(table_xls_format)))
+  # > (cbind(formals(table_xls_format))) and see ejam2excel()
   #
   # overall                      ?          na
   # eachsite                     ?          na
@@ -612,7 +614,7 @@ testdata_repo <-  gsub(".*/", "", testdata_owner_repo)
 help_texts <- list(
   intro_text = tagList(
     # tags$p("For more information about EJAM:"),
-    h2( a(href = paste0(docs_url, "/", "articles/0_whatis.html"),
+    h2( a(href = paste0(docs_url, "/", "articles/whatis.html"),
           "What is EJAM?",
           target = "_blank", rel = "noreferrer noopener") ),
     p("The Environmental and Residential Population Analysis Multisite tool (EJAM) is a tool developed by the United States Environmental Protection Agency (US EPA) that makes it easy to see residential population and environmental information summarized in and across any list of places in the nation. Using this tool is like getting reports for hundreds or thousands of places, all at the same time."),

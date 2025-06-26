@@ -65,7 +65,7 @@ Setting this to TRUE can produce unexpected results, which will not match EJScre
 Note that if creating a proximity score, by contrast, you
 instead want to find nearest 1 SITE if none within radius of this BLOCK.}
 
-\item{quadtree}{(a pointer to the large quadtree object) created using \code{\link[=indexblocks]{indexblocks()}} which uses the SearchTree package.
+\item{quadtree}{(a pointer to the large quadtree object) created using \code{\link[=indexblocks]{indexblocks()}} which uses the \href{https://github.com/gmbecker/SearchTrees}{SearchTree} package.
 Takes about 2-5 seconds to create this each time it is needed.
 It can be automatically created when the package is attached via the .onAttach() function}
 
@@ -128,16 +128,16 @@ at each site. (see default)}
 
 \item{in_shiny}{if fips parameter is used, passed to \code{\link[=getblocksnearby_from_fips]{getblocksnearby_from_fips()}}}
 
-\item{quiet}{Optional. passed to getblocksnearby() and batch.summarize(). set to TRUE to avoid message about using \code{\link[=getblocks_diagnostics]{getblocks_diagnostics()}},
+\item{quiet}{Optional. passed to \code{\link[=getblocksnearby]{getblocksnearby()}} and \code{\link[=batch.summarize]{batch.summarize()}}. set to TRUE to avoid message about using \code{\link[=getblocks_diagnostics]{getblocks_diagnostics()}},
 which is relevant only if a user saved the output of this function.}
 
 \item{silentinteractive}{to prevent long output showing in console in RStudio when in interactive mode,
-passed to \code{\link[=doaggregate]{doaggregate()}} also. app server sets this to TRUE when calling doaggregate() but
+passed to \code{\link[=doaggregate]{doaggregate()}} also. app server sets this to TRUE when calling \code{\link[=doaggregate]{doaggregate()}} but
 \code{\link[=ejamit]{ejamit()}} default is to set this to FALSE when calling \code{\link[=doaggregate]{doaggregate()}}.}
 
 \item{called_by_ejamit}{Set to TRUE by \code{\link[=ejamit]{ejamit()}} to suppress some outputs even if ejamit(silentinteractive=F)}
 
-\item{testing}{used while testing this function, passed to doaggregate()}
+\item{testing}{used while testing this function, passed to \code{\link[=doaggregate]{doaggregate()}}}
 
 \item{showdrinkingwater}{T/F whether to include drinking water indicator values or display as NA. Defaults to TRUE.}
 
@@ -175,7 +175,7 @@ blockgroup, not just the portion that was counted as at/in the analyzed sites.
 The column bgwt records what fraction of the blockgroup was counted as
 being at/in the analyzed sites as a whole, which may reflect more than
 one blockgroup since it may be near two analyzed sites, for example.
-\item \strong{results_summarized} See \code{batch.summarize()} documenting what is here!
+\item \strong{results_summarized} See \code{\link[=batch.summarize]{batch.summarize()}} documenting what is here!
 \item \strong{longnames}  descriptive long names for the indicators in the above outputs
 \item \strong{count_of_blocks_near_multiple_sites}  additional detail
 \item \strong{sitetype} indicates if analysis used latlon, fips, or shp
@@ -226,11 +226,11 @@ See examples in vignettes/ articles at https://ejanalysis.github.io/EJAM
   # Shapefile examples
   out2 = ejamit(shapefile = testshapes_2, radius = 0)
   out3 = ejamit(shapefile = testdata("portland.json", quiet = T), radius = 0)
-  
+
   # FIPS examples
   out4 = ejamit(fips = testinput_fips_cities)
   out5 = ejamit(fips = fips_counties_from_state_abbrev("DE"), radius = 0)
-  
+
   # View results overall
   round(t(out$results_overall), 3.1)
 

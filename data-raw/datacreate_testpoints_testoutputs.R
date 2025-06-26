@@ -1,3 +1,4 @@
+#
 
 ## Script to (re)create and document testpoints and related datasets, including:
 #
@@ -5,6 +6,8 @@
 # - points dataset objects (like testpoints_10 saved as and installed from source file "EJAM/data/testpoints_10.rda")
 # - other dataset objects (like testoutput_ejamit_1000pts_1miles)
 # - documentation files for all those (like source file saved as "EJAM/R/data_testpoints_10.R", readable via ?testpoints_10 in RStudio)
+
+warning("CHECK THE HTML AND .XLSX")
 
 devtools::load_all()  # ensures the latest source version of each function gets used
 
