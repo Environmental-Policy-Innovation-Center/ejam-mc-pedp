@@ -1,9 +1,9 @@
 # EJAM v2.32.5 (July 2025)
 
 - Summary Indexes (aka EJ Indexes) were found to have some incorrect numbers, so this release has replaced `?bgej` dataset with correct numbers, drawn from the internet archive version at https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip that was a copy of the datasets EPA had posted August 2024 at https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip
-  But there might still be some problem with the ozone and drinking EJ Indexes -- unlike the other EJ Indexes, they appear to be hard to replicate via formula, 
-  and the same may be true for the State EJ Indexes (for all Envt indicators).
-  This is an issue noted on the github repo and is being looked into.
+  But there are still be some problem with the ozone and drinking EJ Indexes -- unlike the other EJ Indexes, they appear to be hard to replicate via formula, 
+  and there is now a unit test that shows the issue and also it is an issue noted on the github repo and is being looked into.
+  The same problem may exist for the State EJ Indexes (for all Envt indicators) -- need to clarify what formula is for state-based EJ percentiles.
 - testoutput_xyz .xlsx and .html files and dataset R objects updated to reflect the new `?bgej` dataset
 - color-coded maps of counties are improved in `mapfastej_counties()`
 - [installation instructions in vignette/article](../articles/installing.html) were edited

@@ -359,6 +359,9 @@ cat(
   "
 To use this function:
 
+Maybe create a background job that runs this:
+  './data-raw/update_pkgdown_background_job.R'
+
 update_pkgdown(doask = TRUE)
 
 or change from any of these defaults:

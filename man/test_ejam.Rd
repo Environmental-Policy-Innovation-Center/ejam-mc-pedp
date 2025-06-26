@@ -17,7 +17,7 @@ test_ejam(
   y_runall = TRUE,
   y_runsome = FALSE,
   run_these = NULL,
-  skip_these = c("ejscreenapi", "proximity"),
+  skip_these = c("ejscreenapi", "app"),
   y_stopif = FALSE,
   y_seeresults = TRUE,
   y_save = TRUE,
@@ -86,11 +86,14 @@ Note these require installing the package \href{https://testthat.r-lib.org}{test
 }
 \examples{
 \dontrun{
-biglist1 <- EJAM:::test_ejam()
-biglist2 <- EJAM:::test_ejam(ask = F,
+biglist <- EJAM:::test_ejam()
+
+biglist <- EJAM:::test_ejam(ask=F, mydir = rstudioapi::selectDirectory())
+biglist <- EJAM:::test_ejam(ask = F,
       y_runsome = T, run_these = c('test', 'maps'),
       mydir = "~/../Downloads/unit testing") # for example
-      }
+
+  }
 
 }
 \keyword{internal}
