@@ -5,6 +5,7 @@
     "acs_version": "",
     "add_naics_subcategories": "TRUE",
     "all_tabs": "See Results",
+    "allow_median_in_barplot_indicators": "FALSE",
     "an_leaf_map_bounds": {
       "north": 45.66300666222867,
       "east": -122.2455596923828,
@@ -2180,7 +2181,7 @@
       ]
     },
     "summ_display_bar": {
-      "src": "[image data hash: 97e45c08e0e80bdf47d21bb3c6b06c3f]",
+      "src": "[image data hash: d8b0d7ea4087efe1051064dd28de2e1f]",
       "width": 1771,
       "height": 600,
       "alt": "Plot object",

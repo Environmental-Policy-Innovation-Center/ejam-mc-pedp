@@ -5,6 +5,7 @@
     "acs_version": "",
     "add_naics_subcategories": "TRUE",
     "all_tabs": "See Results",
+    "allow_median_in_barplot_indicators": "FALSE",
     "an_leaf_map_bounds": {
       "north": 69.41124235697256,
       "east": -6.679687500000001,
@@ -2707,7 +2708,7 @@
       ]
     },
     "summ_display_bar": {
-      "src": "[image data hash: 8392282c3e72089f849420040c825508]",
+      "src": "[image data hash: 0bbbc88bc8c44c7e3623ce738eb85d5b]",
       "width": 1771,
       "height": 600,
       "alt": "Plot object",
@@ -2728,7 +2729,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%< High School"
               }
@@ -2761,7 +2762,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%< age 5"
               }
@@ -2794,7 +2795,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%> age 64"
               }
@@ -2827,7 +2828,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%AmerIndian/AK NHA"
               }
@@ -2860,7 +2861,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%Asian NHA"
               }
@@ -2893,7 +2894,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%Black NHA"
               }
@@ -2926,7 +2927,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%Hawaiian/PI NHA"
               }
@@ -2959,7 +2960,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%Hispanic"
               }
@@ -2992,7 +2993,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%Limited English"
               }
@@ -3025,7 +3026,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%Low-inc."
               }
@@ -3058,7 +3059,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%Other race NHA"
               }
@@ -3091,7 +3092,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%POC"
               }
@@ -3124,7 +3125,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%Unemployed"
               }
@@ -3157,7 +3158,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%White NHA"
               }
@@ -3190,7 +3191,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "%multirace NH"
               }
@@ -3223,7 +3224,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "Demog.Ind."
               }
@@ -3256,7 +3257,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.373282683330248,
+              "top": 1.96988141737431,
               "discrete_limits": {
                 "x": "Suppl Demog.Ind."
               }

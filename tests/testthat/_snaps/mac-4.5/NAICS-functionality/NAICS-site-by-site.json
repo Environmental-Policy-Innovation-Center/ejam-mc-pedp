@@ -5,6 +5,7 @@
     "acs_version": "",
     "add_naics_subcategories": "TRUE",
     "all_tabs": "See Results",
+    "allow_median_in_barplot_indicators": "FALSE",
     "an_leaf_map_bounds": {
       "north": 68.07330474079025,
       "east": -15.64453125,

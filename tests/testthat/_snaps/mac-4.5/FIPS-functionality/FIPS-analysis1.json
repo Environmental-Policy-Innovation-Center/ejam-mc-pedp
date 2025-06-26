@@ -5,6 +5,7 @@
     "acs_version": "",
     "add_naics_subcategories": "TRUE",
     "all_tabs": "See Results",
+    "allow_median_in_barplot_indicators": "FALSE",
     "an_leaf_map_bounds": {
       "north": 40.20405042511329,
       "east": -72.04833984375001,
@@ -2432,7 +2433,7 @@
                 "opacity": 0.5,
                 "fill": true,
                 "fillColor": "green",
-                "fillOpacity": 0.2,
+                "fillOpacity": 0.5,
                 "smoothFactor": 1,
                 "noClip": false
               },

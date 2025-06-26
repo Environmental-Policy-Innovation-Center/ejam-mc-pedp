@@ -5,6 +5,7 @@
     "acs_version": "",
     "add_naics_subcategories": "TRUE",
     "all_tabs": "See Results",
+    "allow_median_in_barplot_indicators": "FALSE",
     "an_leaf_map_bounds": {
       "north": 69.41124235697256,
       "east": -6.679687500000001,
@@ -2707,7 +2708,7 @@
       ]
     },
     "summ_display_bar": {
-      "src": "[image data hash: 6c8bc1224f494b43100ad9b8ff06f482]",
+      "src": "[image data hash: 1f649a788b01c688438d4396da0731fd]",
       "width": 1771,
       "height": 600,
       "alt": "Plot object",
@@ -2728,7 +2729,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "%pre-1960"
               }
@@ -2761,7 +2762,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "Diesel PM"
               }
@@ -2794,7 +2795,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "Drinking"
               }
@@ -2827,7 +2828,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "NO2"
               }
@@ -2860,7 +2861,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "NPDES"
               }
@@ -2893,7 +2894,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "NPL"
               }
@@ -2926,7 +2927,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "Ozone"
               }
@@ -2959,7 +2960,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "PM2.5"
               }
@@ -2992,7 +2993,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "RMP"
               }
@@ -3025,7 +3026,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "TSDF"
               }
@@ -3058,7 +3059,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "Toxic Releases to Air"
               }
@@ -3091,7 +3092,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "Traffic"
               }
@@ -3124,7 +3125,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 3.208525752791653,
+              "top": 3.192089151373202,
               "discrete_limits": {
                 "x": "UST"
               }

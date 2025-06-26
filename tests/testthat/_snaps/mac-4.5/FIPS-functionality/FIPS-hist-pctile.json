@@ -5,6 +5,7 @@
     "acs_version": "",
     "add_naics_subcategories": "TRUE",
     "all_tabs": "See Results",
+    "allow_median_in_barplot_indicators": "FALSE",
     "an_leaf_map_bounds": {
       "north": 40.20405042511329,
       "east": -72.04833984375001,
@@ -4006,7 +4007,7 @@
                 "opacity": 0.5,
                 "fill": true,
                 "fillColor": "green",
-                "fillOpacity": 0.2,
+                "fillOpacity": 0.5,
                 "smoothFactor": 1,
                 "noClip": false
               },
@@ -4246,7 +4247,7 @@
       ]
     },
     "summ_display_bar": {
-      "src": "[image data hash: fad0447b86096d9c65add127977d7463]",
+      "src": "[image data hash: 7eafe5a290e0d04f3580a1247ab88481]",
       "width": 1771,
       "height": 600,
       "alt": "Plot object",
@@ -4267,7 +4268,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "%pre-1960"
               }
@@ -4300,7 +4301,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "Diesel PM"
               }
@@ -4333,7 +4334,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "Drinking"
               }
@@ -4366,7 +4367,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "NO2"
               }
@@ -4399,7 +4400,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "NPDES"
               }
@@ -4432,7 +4433,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "NPL"
               }
@@ -4465,7 +4466,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "Ozone"
               }
@@ -4498,7 +4499,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "PM2.5"
               }
@@ -4531,7 +4532,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "RMP"
               }
@@ -4564,7 +4565,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "TSDF"
               }
@@ -4597,7 +4598,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "Toxic Releases to Air"
               }
@@ -4630,7 +4631,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "Traffic"
               }
@@ -4663,7 +4664,7 @@
               "left": 0.4,
               "right": 1.6,
               "bottom": 0,
-              "top": 2.154476254211304,
+              "top": 1.755399161870956,
               "discrete_limits": {
                 "x": "UST"
               }
