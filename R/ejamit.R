@@ -643,7 +643,7 @@ ejamit <- function(sitepoints = NULL,
   } else {
     if (sitetype %in% "fips") {
         areas <- area_sqmi(fips = out$results_bysite$ejam_uniq_id,
-                           download_city_fips_bounds = download_city_fips_bounds, download_city_fips_bounds = download_noncity_fips_bounds)
+                           download_city_fips_bounds = download_city_fips_bounds, download_noncity_fips_bounds = download_noncity_fips_bounds)
     }
     if (sitetype %in% "shp") {
       areas <- area_sqmi(shp = shp_valid) # includes any BUFFER ADDED
