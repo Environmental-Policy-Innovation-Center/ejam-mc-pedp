@@ -74,8 +74,10 @@
 #' @param testing used while testing this function, passed to [doaggregate()]
 #' @param showdrinkingwater T/F whether to include drinking water indicator values or display as NA. Defaults to TRUE.
 #' @param showpctowned T/f whether to include percent owner-occupied units indicator values or display as NA. Defaults to TRUE.
+#' @param default_download_city_fips_bounds passed to [area_sqmi()]
+#' @param default_download_noncity_fips_bounds passed to [area_sqmi()]
 #' @param ... passed to [getblocksnearby()] etc. such as  report_progress_every_n = 0
-#' @param download_fips_bounds_to_calc_areas if set to TRUE, it is slower because it downloads bounds of each unit to calculate area in square miles
+#'
 #' @return This returns a named list of results.
 #' ```
 #' # To see the structure of the outputs of ejamit()
@@ -231,7 +233,8 @@ ejamit <- function(sitepoints = NULL,
                    testing = FALSE,
                    showdrinkingwater = TRUE,
                    showpctowned = TRUE,
-                   download_fips_bounds_to_calc_areas = FALSE, # SLOWS IT DOWN IF TRUE... testing
+                   default_download_city_fips_bounds = TRUE,
+                   default_download_noncity_fips_bounds = FALSE,
                    ...
 ) {
 
@@ -374,8 +377,6 @@ ejamit <- function(sitepoints = NULL,
 
   if (sitetype == "fips") {
 
-
-
     # * FIPS  ####
 
     ## . check fips ####
@@ -389,9 +390,9 @@ ejamit <- function(sitepoints = NULL,
     data_uploaded$invalid_msg = ifelse(data_uploaded$valid, "",  "invalid FIPS")
     data_uploaded$ejam_uniq_id = as.character(data_uploaded$ejam_uniq_id) # for merge or join below to work, must match class (integer vs character) of output of doaggregate() and before that output of getblocksnearby_from_fips(fips_counties_from_state_abbrev('DE'))  #  1:length(fips))
 
-    # Here we only keep valid ones (vector not data.frame)
-    fips <- fips#[data_uploaded$valid]
-    #### *** should confirm this is needed ####
+    # Here we only kept valid ones? (vector not data.frame)
+    #fips <- fips#[data_uploaded$valid]
+    #### *** should confirm this is NOT needed ####
 
     ## . radius is ignored for fips ####
     radius <- 999 # use this value when analyzing by fips not by circular buffers, as input to doaggregate(),
@@ -404,9 +405,8 @@ ejamit <- function(sitepoints = NULL,
 
     mysites2blocks <- getblocksnearby_from_fips(
 
-      fips = fips,  # these get retained as ejam_uniq_id for the fips case.
+      fips = fips,  # these get retained as ejam_uniq_id for the fips case. fips is ALL submitted even invalid ones. data_uploaded$valid notes which are valid fips.
       inshiny = inshiny,
-
       need_blockwt = need_blockwt
     )
     if (nrow(mysites2blocks) == 0) {
@@ -419,10 +419,8 @@ ejamit <- function(sitepoints = NULL,
     # . doaggregate  fips ####
 
     if (!silentinteractive) {cat('Aggregating at each FIPS Census unit and overall.\n')}
-    # sites2states_or_latlon
-    # fipshere <- fips # ?? in case any got dropped during getblocks..., but cant create state pctiles for those anyway.
-    fipshere <- unique(mysites2blocks$ejam_uniq_id)
-    sites2states_or_latlon <- data.table(ejam_uniq_id = fipshere, ST = fips2state_abbrev(fipshere))
+    ## Retain the sort order of the input fips now!
+    sites2states_or_latlon <- data.table(ejam_uniq_id = fips, ST = fips2state_abbrev(fips)) # includes invalid fips here
     setkey(sites2states_or_latlon, ejam_uniq_id)
 
     #Initialize progress bar and function to track doaggregate
@@ -430,7 +428,6 @@ ejamit <- function(sitepoints = NULL,
       progress_all$inc(1/3,
                        message = 'Step 2 of 3',
                        detail  = 'Aggregating')
-
       progress_doagg <- shiny::Progress$new(min = 0, max = 1)
       on.exit(progress_doagg$close(), add = TRUE)
       progress_doagg$set(value   = 0,
@@ -438,6 +435,7 @@ ejamit <- function(sitepoints = NULL,
       nrows_blocks_value            <- nrow(mysites2blocks)
       predicted_doaggregate_runtime <- predict_doaggregate_runtime(nrows_blocks_value)
       upper_bound_value             <- predicted_doaggregate_runtime[, "fit"]
+
       updateProgress_doagg <- function(value = NULL,
                                        message_detail = NULL,
                                        message_main   = NULL) {
@@ -452,14 +450,9 @@ ejamit <- function(sitepoints = NULL,
                            message = message_main,
                            detail  = message_detail)
       }
-
-    }else{
+    } else {
       updateProgress_doagg <- NULL
     }
-
-
-
-
 
     out <- suppressWarnings(
 
@@ -498,8 +491,6 @@ ejamit <- function(sitepoints = NULL,
   # * LAT/LON POINTS ####
 
   if (sitetype == "latlon") {
-
-
 
     ## . getblocksnearby() ####
 
@@ -651,13 +642,8 @@ ejamit <- function(sitepoints = NULL,
     # done
   } else {
     if (sitetype %in% "fips") {
-      ## Getting bounds here would be slow!
-      if (download_fips_bounds_to_calc_areas) {
-        areas <- area_sqmi(fips = fipshere) # uses  shapes_from_fips(fipshere)
-      } else {
-        # *** ASSUMES NO BUFFER ADDED TO FIPS UNITS !
-        areas <- rep(NA, length(fipshere))
-      }
+        areas <- area_sqmi(fips = out$results_bysite$ejam_uniq_id,
+                           download_city_fips_bounds = download_city_fips_bounds, download_city_fips_bounds = download_noncity_fips_bounds)
     }
     if (sitetype %in% "shp") {
       areas <- area_sqmi(shp = shp_valid) # includes any BUFFER ADDED
@@ -706,7 +692,6 @@ ejamit <- function(sitepoints = NULL,
     dup <- sf::st_drop_geometry(shp)#[, intersect(names(shp), c('ejam_uniq_id', 'valid', colnames(shp)[1:2], 'NAME'))]
     # dup <- data.frame(dup, ejam_uniq_id = 1:NROW(dup)) # shp already had ejam_uniq_id
   }
-
 
   data_uploaded$valid[site_in_results_pop0 | !site_in_results] <- FALSE  # NOTE this also says invalid if zero population
 

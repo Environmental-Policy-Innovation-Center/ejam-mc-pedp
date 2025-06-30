@@ -4,7 +4,7 @@
 ############################################################################# #
 
 
-#' Download shapefiles based on FIPS codes of States, Counties, Cities/CDPs, Tracts, or Blockgroups
+#' Download shapefiles based on FIPS codes of States, Counties, Cities/CDPs, Tracts, or Blockgroups (not blocks)
 #'
 #' @param fips vector of one or more Census FIPS codes such as from [name2fips()]
 #'
@@ -16,10 +16,23 @@
 #' @param myservice_county URL of feature service to get shapes from,
 #'   or "cartographic" or "tiger" to use approx or slow/accurate bounds from tidycensus and tigris packages.
 #'   Note State bounds are built into this package as data so do not need to be downloaded from a service.
-#' @details when using tigris package ("tiger" as service-related parameter here),
+#' @details
+#'  The functions this relies on should return results in the same order as the input fips,
+#'  but will exclude rows for invalid fips, and will also exclude output rows that would
+#'  correspond to fips for which boundaries could not be obtained for some reason.
+#'  So the output table might not have the same number of rows as the input fips vector.
+#'
+#' When using tigris package ("tiger" as service-related parameter here),
 #' it uses the year that is the default in the version of the tigris package that is installed.
 #' You can use options(tigris_year = 2022) for example to specify it explicitly.
 #' This function also sets options(tigris_use_cache = TRUE), but each individual shapes_xyz_from_ function may not specify.
+#'
+#'  Blocks are not implemented yet here. For info on blocks bounds, see  [tigris::block_groups()]
+#'  Also note the [blockwts] dataset had a placeholder column block_radius_miles that as of
+#'  v2.32.5 was just zero values, but see notes in EJAM/data-raw/datacreate_blockwts.R on how it could be obtained.
+#'  If it were used, it could be a way to quickly get the area of each block,
+#'  using the formula  area = pi * (block_radius_miles^2)
+#'
 #' @return spatial data.frame with one row per fips (assuming any fips are valid)
 #' @examples
 #'  # shp2 = shapes_from_fips("10001", "10005")
@@ -62,6 +75,15 @@ shapes_from_fips <- function(fips,
 
   options(tigris_use_cache = TRUE) # But it seems to use cache anyway?
   # options(tigris_year = 2022) # uses default of the tigris package version installed
+
+  if (all(ftype %in% 'block')) {
+    if (shiny::isRunning()) {
+      validate("Obtaining boundaries of Census blocks is not supported here currently.")
+      shp <- NULL
+    } else {
+      stop("Obtaining boundaries of Census blocks is not supported here currently. see  ?tigris::block_groups()")
+    }
+  }
 
   if (all(ftype %in% 'blockgroup')) {
     shp <- try(shapes_blockgroups_from_bgfips(fips, myservice = myservice_blockgroup), silent = TRUE)
@@ -408,6 +430,10 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
       f = "geojson")
     request <- httr2::url_build(myurl)
     mymapdata <- sf::st_read(request) # st_read returns data.frame, read_sf returns tibble
+
+    # ensure original sort order, but excluding invalid FIPS and also excluding any rows with unavailable boundaries despite valid FIPS
+    mymapdata <- mymapdata[match(fips, mymapdata$FIPS), ]
+
     return(mymapdata)
   }
 }
@@ -487,6 +513,10 @@ shapes_tract_from_tractfips <- function(fips, outFields = c("FIPS", "STATE_ABBR"
     f = "geojson")
   request <- httr2::url_build(myurl)
   mymapdata <- sf::st_read(request) # data.frame not tibble
+
+  # ensure original sort order, but excluding invalid FIPS and also excluding any rows with unavailable boundaries despite valid FIPS
+  mymapdata <- mymapdata[match(fips, mymapdata$FIPS), ]
+
   return(mymapdata)
 }
 ########################### # ########################### # ########################### # ########################### #
@@ -498,7 +528,7 @@ shapes_tract_from_tractfips <- function(fips, outFields = c("FIPS", "STATE_ABBR"
 #'
 #' @details This is useful mostly for small numbers of blockgroups.
 #'   The EJScreen map services provide other ways to map blockgroups and see EJScreen data.
-#' @param bgfips one or more block group FIPS codes as 12-character strings in a vector
+#' @param bgfips one or more blockgroup FIPS codes as 12-character strings in a vector
 #' @param outFields can be "*" for all, or can be
 #'   just a vector of variables that particular service provides, like FIPS, SQMI, POPULATION_2020, etc.
 #' @param myservice URL of feature service to get shapes from.
@@ -575,6 +605,12 @@ shapes_blockgroups_from_bgfips <- function(bgfips = '010890029222', outFields = 
     f = "geojson")
   request <- httr2::url_build(myurl)
   mymapdata <- sf::st_read(request) # data.frame not tibble
+  # ensure original sort order, but excluding invalid FIPS and also excluding any rows with unavailable boundaries despite valid FIPS
+  mymapdata <- mymapdata[match(myfips, mymapdata$FIPS), ]
+
+  # ensure original sort order, but excluding invalid FIPS and also excluding any rows with unavailable boundaries despite valid FIPS
+  mymapdata <- mymapdata[match(fips, mymapdata$FIPS), ]
+
   return(mymapdata)
 }
 ########################### # ########################### # ########################### # ########################### #
@@ -655,6 +691,10 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
   }
   shp <- shp[match(fips, shp$GEOID), ] # filter using FIPS is more robust than trying to get exact name right
   shp$FIPS <- shp$GEOID # so all via shapes_from_fips() have a FIPS colname
+
+  # ensure original sort order, but excluding invalid FIPS and also excluding any rows with unavailable boundaries despite valid FIPS
+  mymapdata <- mymapdata[match(fips, mymapdata$FIPS), ]
+
   return(shp)
 }
 ####################################################### #
@@ -674,7 +714,15 @@ shapes_places_from_placenames <- function(place_st) {
   # place_st = c('denver city, co',  "new york city, ny" )
 
   fips = fips_place_from_placename(place_st)  # get FIPS of each place
+
+  ftype = fipstype(fips)
+  if (all(is.na(ftype))) {
+    warning('no valid fips')
+    return(NULL)
+  }
   fips = fips_lead_zero(fips)
+  fips = fips[fips_valid(fips)]
+  if (length(fips) == 0) {stop('no valid fips')}
 
   st = censusplaces$ST[match(as.integer(fips), censusplaces$fips)]
   # as.numeric since not stored with leading zeroes there !
@@ -690,48 +738,48 @@ shapes_places_from_placenames <- function(place_st) {
 ####################################################### ######################################################## #
 
 ## obsolete
-
-shapes_places_from_placefips_oldway <- function(fips) {
-
-  fips <- fips_lead_zero(fips)
-  if (!all(as.integer(fips) %in% censusplaces$fips)) {stop("check fips - some are not found in censusplaces$fips")}
-
-  st <- fips2state_abbrev(fips)
-  place_nost <- fips_place2placename(fips, append_st = FALSE)
-
-  shp <- tigris::places(st) %>%
-    tigris::filter_place(place_nost) # gets shapefile of those places boundaries from census via download
-  return(shp)
-}
+#
+# shapes_places_from_placefips_oldway <- function(fips) {
+#
+#   fips <- fips_lead_zero(fips)
+#   if (!all(as.integer(fips) %in% censusplaces$fips)) {stop("check fips - some are not found in censusplaces$fips")}
+#
+#   st <- fips2state_abbrev(fips)
+#   place_nost <- fips_place2placename(fips, append_st = FALSE)
+#
+#   shp <- tigris::places(st) %>%
+#     tigris::filter_place(place_nost) # gets shapefile of those places boundaries from census via download
+#   return(shp)
+# }
 ####################################################### #
 
 ## obsolete
-
-shapes_places_from_placenames_oldway <- function(place_st) {
-
-  #   This earlier way just relies on the tigris pkg for search/filtering
-
-  if (length(st) > 1) {cat("not tested/written to handle more than one state at a time\n")}
-
-  # getst = function(x) {gsub(".*(..)", "\\1", x)}  # only works if exact format right like x = c("Port Chester, NY", "White Plains, NY", "New Rochelle, NY")
-  # st = unique(getst(place_st))
-  st = unique(post_comma(place_st))
-
-  # getnost = function(x) gsub("(.*),.*", "\\1", x) # keep non-state parts, only works if exact format right
-  # place_nost = getnost(place_st)
-  place_nost = pre_comma(place_st)
-
-  tigrisplaces <-  tigris::places(st) # places(st) is what limits tigrisplaces to just the State st
-  shp <- tigrisplaces %>% tigris::filter_place(place_nost) # gets shapefile of those places boundaries from census via download
-
-  # tigrisplaces$NAME is like Rockland
-  # tigrisplaces$NAMELSAD  is like Rockland city
-  # tigrisplaces also has STATEFP, PLACEFP, geometry, ALAND, INTPTLAT, INTPTLON, etc.
-  #   and in GA,e.g., has more fips than censusplaces does, somehow, and a few fips in censusplaces are not in tigrisplaces
-  ## censusplaces has these: eparegion ST stfips      countyname countyfips         placename    fips
-
-  return(shp)
-}
+#
+# shapes_places_from_placenames_oldway <- function(place_st) {
+#
+#   #   This earlier way just relies on the tigris pkg for search/filtering
+#
+#   if (length(st) > 1) {cat("not tested/written to handle more than one state at a time\n")}
+#
+#   # getst = function(x) {gsub(".*(..)", "\\1", x)}  # only works if exact format right like x = c("Port Chester, NY", "White Plains, NY", "New Rochelle, NY")
+#   # st = unique(getst(place_st))
+#   st = unique(post_comma(place_st))
+#
+#   # getnost = function(x) gsub("(.*),.*", "\\1", x) # keep non-state parts, only works if exact format right
+#   # place_nost = getnost(place_st)
+#   place_nost = pre_comma(place_st)
+#
+#   tigrisplaces <-  tigris::places(st) # places(st) is what limits tigrisplaces to just the State st
+#   shp <- tigrisplaces %>% tigris::filter_place(place_nost) # gets shapefile of those places boundaries from census via download
+#
+#   # tigrisplaces$NAME is like Rockland
+#   # tigrisplaces$NAMELSAD  is like Rockland city
+#   # tigrisplaces also has STATEFP, PLACEFP, geometry, ALAND, INTPTLAT, INTPTLON, etc.
+#   #   and in GA,e.g., has more fips than censusplaces does, somehow, and a few fips in censusplaces are not in tigrisplaces
+#   ## censusplaces has these: eparegion ST stfips      countyname countyfips         placename    fips
+#
+#   return(shp)
+# }
 ####################################################### #
 
 

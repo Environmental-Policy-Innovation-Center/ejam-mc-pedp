@@ -22,13 +22,18 @@
 #' @param fips optional vector of character Census FIPS codes, with leading zeroes,
 #'  2 digits for State, 5 for county, etc. If you already have the boundaries
 #'  then provide that as shp instead of this parameter (much faster that way).
-#'
+#' @param download_city_fips_bounds if TRUE, fips that are "city" are handled by trying to download shapefile boundaries to calculate area. otherwise they are returned as NA.
+#' @param download_noncity_fips_bounds if set to TRUE, fips that are state, county, tract, or blockgroup types have their area estimate come from
+#'  the column blockgroupstats$arealand. If FALSE, it more slowly downloads boundary shapefiles and then uses sf::sf_area to calculate areas. These two methods give roughly the same answer.
+#' @param includewater whether to add blockgroupstats$areawater not just $arealand. includewater only matters when download_noncity_fips_bounds = FALSE,
+#'   and only for state, county, tract, blockgroup FIPS, not "city" types of fips as identified by [fipstype()]
 #' @returns vector of numbers same length as length(radius.miles) or length(fips) or NROW(shp)
 #'
 #' @export
 #' @keywords internal
 #'
-area_sqmi <- function(df = NULL, radius.miles = NULL, shp = NULL, fips = NULL) {
+area_sqmi <- function(df = NULL, radius.miles = NULL, shp = NULL, fips = NULL,
+                      download_city_fips_bounds = TRUE, download_noncity_fips_bounds = FALSE, includewater = FALSE) {
 
   # can use to add area to output of doaggregate   and thus ejamit etc.
 
@@ -43,11 +48,11 @@ area_sqmi <- function(df = NULL, radius.miles = NULL, shp = NULL, fips = NULL) {
     return(area_sqmi_from_shp(shp))
   }
   if (!is.null(fips)) {
-    return(area_sqmi_from_fips(fips))
+    return(area_sqmi_from_fips(fips, download_city_fips_bounds = download_city_fips_bounds, download_noncity_fips_bounds = download_noncity_fips_bounds, includewater = includewater))
   }
   if (!is.null(df)) {
     if (is.data.frame(df)) {
-      return(area_sqmi_from_table(df))
+      return(area_sqmi_from_table(df, download_city_fips_bounds = download_city_fips_bounds, download_noncity_fips_bounds = download_noncity_fips_bounds))
     } else {
       if (is.vector(df)) {
         warning("df seems to be a vector, so treating it like a vector of radius.miles")
@@ -61,7 +66,7 @@ area_sqmi <- function(df = NULL, radius.miles = NULL, shp = NULL, fips = NULL) {
 }
 ############################################################################### #
 
-area_sqmi_from_table <- function(df) {
+area_sqmi_from_table <- function(df, download_city_fips_bounds = TRUE, download_noncity_fips_bounds = FALSE) {
 
   if ("sf" %in% class(df)) {
     return(area_sqmi_from_shp(df))
@@ -71,7 +76,7 @@ area_sqmi_from_table <- function(df) {
   })
   if (!is.null(fips)) {
     message("ignoring any buffer/radius information for FIPS units")
-    return(area_sqmi_from_fips(fips))
+    return(area_sqmi_from_fips(fips, download_city_fips_bounds = download_city_fips_bounds, download_noncity_fips_bounds = download_noncity_fips_bounds))
   }
   # find aliases of radius, radius.miles
   names(df) <- fixcolnames_infer(
@@ -98,8 +103,49 @@ area_sqmi_from_shp <- function(shp, units_needed = "miles^2") {
   return(area)
 }
 ############################################################################### #
-area_sqmi_from_fips <- function(fips) {
-  shp <- shapes_from_fips(fips)
-  return(area_sqmi_from_shp(shp))
+area_sqmi_from_fips_made_of_bgs <- function(fips, includewater = FALSE) {
+
+  # ASSUMES you already checked/confirmed each fips here is made up of some number of 1+ WHOLE blockgroups,
+  # fipstype(fips) %in% c("state", "county", "tract", "blockgroup") # not block, not city - for blocks, see  ?tigris::block_groups()
+
+  # This can handle case where each fips is a different type, like mix of state, county, tract, blockgroup fips (unlike other functions here)
+
+  myfunction = function(f1) {
+    if (includewater) {
+      sum( blockgroupstats[blockgroupstats$bgfips %in% fips_bgs_in_fips1(f1), arealand + areawater], na.rm = TRUE)
+    } else {
+      sum( blockgroupstats[blockgroupstats$bgfips %in% fips_bgs_in_fips1(f1), arealand            ], na.rm = TRUE)
+    }
+  }
+  areas_sqmeters <- sapply(fips, FUN = myfunction)
+
+  ## UNITS IN blockgroupstats were square meters
+  areas_sqmi <- convert_units(areas_sqmeters, from = "sqmeter", towhat = "sqmi")
+  return(areas_sqmi)
+}
+############################################################################### #
+area_sqmi_from_fips <- function(fips, download_city_fips_bounds = TRUE, download_noncity_fips_bounds = FALSE, includewater = FALSE) {
+
+  # download_noncity_fips_bounds = F default since it is faster and roughly accurate to rely on the arealand
+  # column that is already in blockgroupstats instead of trying to download via API the boundaries of state, county, tract, blockgroup
+
+  # includewater only matters when download_noncity_fips_bounds = FALSE, and only for state, county, tract, blockgroup types, not city
+
+  areas <- rep(NA, length(fips))
+  made_of_bgs <- fipstype(fips) %in% c("state", "county", "tract", "blockgroup") # not block, not city - for blocks, see  ?tigris::block_groups()
+
+  if (any(made_of_bgs) && download_noncity_fips_bounds) {
+    shp <- shapes_from_fips(fips[made_of_bgs])
+    areas[made_of_bgs] <- area_sqmi_from_shp(shp)
+  } else {
+    areas[made_of_bgs] <- area_sqmi_from_fips_made_of_bgs(fips[made_of_bgs], includewater = includewater)
+  }
+
+  if (any(!made_of_bgs) && download_city_fips_bounds) {
+    shp <- shapes_from_fips(fips[!made_of_bgs])
+    areas[!made_of_bgs] <- area_sqmi_from_shp(shp)
+  }
+
+  return(areas)
 }
 ############################################################################### #
