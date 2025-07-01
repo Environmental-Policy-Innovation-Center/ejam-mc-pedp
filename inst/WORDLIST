@@ -503,9 +503,9 @@ fs
 ftpname
 fulloutput
 func
-func_has_keywords_internal_tag
+pkg_functions_with_keywords_internal_tag
 funcs
-functions_in_pkg
+pkg_functions
 functions_that_use
 funs
 gdb

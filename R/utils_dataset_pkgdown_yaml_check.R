@@ -4,7 +4,7 @@
 dataset_pkgdown_yaml_check = function(fname = "_pkgdown.yml") {
   
   cat("Doing dataset_pkgdown_yaml_check()\n")
-  cat('also see draft func_has_keywords_internal_tag() \n')
+  cat('also see draft pkg_functions_with_keywords_internal_tag() \n')
   cat("Checking yml file for reference metadata as in pkgdown_sitrep() ...\n")
   #pkgdown:::error_to_sitrep("Reference metadata", pkgdown:::data_reference_index(as_pkgdown('.')))
   pkgdown::pkgdown_sitrep('.') 
@@ -39,7 +39,7 @@ dataset_pkgdown_yaml_check = function(fname = "_pkgdown.yml") {
   inpkg = datapack("EJAM")
   inpkg = inpkg$Item
   ## also includes things like .onAttach if you do it this way:
-  # inpkg2 = functions_in_pkg(pkg = 'EJAM', internal_included = T, data_included = T, exportedfuncs_included = F)
+  # inpkg2 = pkg_functions(pkg = 'EJAM', internal_included = T, data_included = T, exportedfuncs_included = F)
   # inpkg2 = inpkg2$object
 
   cat('\n')

@@ -149,7 +149,7 @@ Each is explained below:
     datanames = gsub('\\.R$', '', gsub('^data_', '', dir('./R', pattern = '^data_.*R')))
     datanames = datanames[!grepl('aaaaaaaaaaaaa|xxxxxxxxxx', datanames)]
     # 2. Add names of functions to the WORDLIST
-    funcnames = EJAM:::functions_in_pkg( 'EJAM' )$object
+    funcnames = EJAM:::pkg_functions( 'EJAM' )$object
     wordlist = readLines('inst/WORDLIST')
     wordlist = sort(unique(union(wordlist, c(datanames, funcnames))))
     # Write the revised list of words to the file

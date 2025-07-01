@@ -21,7 +21,7 @@ See \code{\link[=dupenames]{dupenames()}} for objects that are in R packages.
 
 See \code{\link[=datapack]{datapack()}} for objects that are in R packages.
 
-See \code{\link[=functions_in_pkg]{functions_in_pkg()}} for functions in R package.
+See \code{\link[=pkg_functions]{pkg_functions()}} for functions in R package.
 
 See \code{\link[=functions_that_use]{functions_that_use()}} - searches for text in each function exported by pkg (or each .R source file in pkg/R)
 }

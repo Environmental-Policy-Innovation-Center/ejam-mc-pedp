@@ -124,7 +124,7 @@ metadata_add <- function(x, update_date_saved_in_package = TRUE) {
 #' @param grepdatasets optional, if set to TRUE, datasets should be a query to use
 #'   via grep to identify which datasets to check. It always uses ignore.case=TRUE for this.
 #' @param loadifnotloaded Optional to control if func should temporarily attach packages not already loaded.
-#' @seealso [functions_in_pkg()]
+#' @seealso [pkg_functions()]
 #' @examples
 #'   # tail(metadata_check( ))
 #'   metadata_check(packages = NULL)
@@ -240,7 +240,7 @@ metadata_check <- function(packages = EJAM::ejampackages,
     # which datasets to check ####
 
     ## also see
-    # EJAM:::functions_in_pkg(pkg = pkg, internal_included = TRUE, exportedfuncs_included = TRUE, data_included = TRUE)
+    # EJAM:::pkg_functions(pkg = pkg, internal_included = TRUE, exportedfuncs_included = TRUE, data_included = TRUE)
     ## and
     # rdafiles <- datapack(pkg = pkg)$Item  # same thing as data(package = pkg)$results[ , "Item"]
 
@@ -324,7 +324,7 @@ metadata_check <- function(packages = EJAM::ejampackages,
     '\n
 Also see
 
-    x = EJAM:::functions_in_pkg(pkg = "EJAM",
+    x = EJAM:::pkg_functions(pkg = "EJAM",
       internal_included = FALSE, exportedfuncs_included = FALSE, data_included = TRUE)$object
     x[!grepl("^name", x)] \n
 Also see \n

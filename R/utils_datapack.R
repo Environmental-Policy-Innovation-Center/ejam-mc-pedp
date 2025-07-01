@@ -4,6 +4,9 @@
 #' Wrapper for data() and can get memory size of objects
 #' @details do not rely on this much - it was a quick utility.
 #'   It may create and leave objects in global envt - not careful about that.
+#'
+#'   Also see functions like pkg_functions() and pkg_functions_xyz
+#'
 #' @param pkg a character vector giving the package(s) to look in for data sets
 #' @param len Only affects what is printed to console - specifies the
 #'   number of characters to limit Title to, making it easier to see in the console.
@@ -34,17 +37,17 @@
 #'  x[order(x$Package, x$Item), 1:2]
 #'  # sorted alphabetically across all the pkgs
 #'  x[order(x$Item), 1:2]
-#'  
+#'
 #' # datasets as lazyloaded objects vs. files installed with package
-#' 
+#'
 #' topic = "fips"  # or "shape" or "latlon" or "naics" or "address" etc.
-#' 
+#'
 #' # datasets / R objects
 #' cbind(data.in.package  = sort(grep(topic, EJAM:::datapack()$Item, value = T)))
-#' 
+#'
 #' # files
 #' cbind(files.in.package = sort(basename(testdata(topic, quiet = T))))
-#' 
+#'
 #' @keywords internal
 #'
 datapack <- function(pkg = 'EJAM', len=30, sortbysize=TRUE, simple = TRUE) {
