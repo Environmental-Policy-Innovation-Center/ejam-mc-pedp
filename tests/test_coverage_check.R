@@ -80,4 +80,10 @@ test_coverage_check <- function() {
 
 ## also see
 
+# test_coverage() computes test coverage for your package. It's a shortcut for covr::package_coverage() plus covr::report().
+
 # y = EJAM:::pkg_functions('EJAM')
+
+## and
+
+# x = EJAM:::linesofcode2(packages = 'EJAM')
