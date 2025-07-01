@@ -78,10 +78,6 @@ test_coverage_check <- function() {
 #  tdat %>%   print(n = Inf) # to see everything
 
 
-
 ## also see
 
 # y = EJAM:::pkg_functions('EJAM')
-
-# x = analyze.stuff::linesofcode('./..', packages = 'EJAM')
-
