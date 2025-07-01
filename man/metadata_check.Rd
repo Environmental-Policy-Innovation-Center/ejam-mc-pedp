@@ -46,6 +46,6 @@ but it is not coded to be able to check attributes without doing that.
 
 }
 \seealso{
-\code{\link[=pkg_functions]{pkg_functions()}}
+\code{\link[=pkg_functions_and_data]{pkg_functions_and_data()}}
 }
 \keyword{internal}
