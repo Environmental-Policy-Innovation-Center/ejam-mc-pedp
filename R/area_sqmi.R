@@ -134,16 +134,23 @@ area_sqmi_from_fips <- function(fips, download_city_fips_bounds = TRUE, download
   areas <- rep(NA, length(fips))
   made_of_bgs <- fipstype(fips) %in% c("state", "county", "tract", "blockgroup") # not block, not city - for blocks, see  ?tigris::block_groups()
 
-  if (any(made_of_bgs) && download_noncity_fips_bounds) {
-    shp <- shapes_from_fips(fips[made_of_bgs])
-    areas[made_of_bgs] <- area_sqmi_from_shp(shp)
-  } else {
-    areas[made_of_bgs] <- area_sqmi_from_fips_made_of_bgs(fips[made_of_bgs], includewater = includewater)
+  if (any(made_of_bgs)) {
+    if (download_noncity_fips_bounds) {
+      shp <- shapes_from_fips(fips[made_of_bgs])
+      areas[made_of_bgs] <- area_sqmi_from_shp(shp)
+    } else {
+      areas[made_of_bgs] <- area_sqmi_from_fips_made_of_bgs(fips[made_of_bgs], includewater = includewater)
+    }
   }
 
-  if (any(!made_of_bgs) && download_city_fips_bounds) {
-    shp <- shapes_from_fips(fips[!made_of_bgs])
-    areas[!made_of_bgs] <- area_sqmi_from_shp(shp)
+  if (any(!made_of_bgs)) {
+    if (download_city_fips_bounds) {
+      shp <- shapes_from_fips(fips[!made_of_bgs])
+      areas[!made_of_bgs] <- area_sqmi_from_shp(shp)
+    } else {
+      # just leave them as NA, since we cannot calculate area without downloading the boundaries,
+      # unless we find a database that stores that information perhaps (not avail in head(acs::fips.place) for example)
+    }
   }
 
   return(areas)

@@ -7,11 +7,11 @@ junk <- capture.output({
     statefips = name2fips(mystates),
     countyfips = fips_counties_from_state_abbrev(c('DE')),
     cityfips = name2fips(c('Rehoboth Beach,DE', 'Camden,de')),
-    tractfips = substr(blockgroupstats$bgfips[300:301], 1, 12),
+    tractfips = substr(blockgroupstats$bgfips[300:301], 1, 11),
     bgfips = blockgroupstats$bgfips[300:301]
   )
   shp <- list()
-  
+
 })
 
 # for (i in seq_along(fipslist)) {
@@ -21,7 +21,7 @@ junk <- capture.output({
 # }
 
 testthat::test_that("shapes_from_fips for statefips", {
-  
+
   expect_no_error({
     shp <- shapes_from_fips(fipslist$statefips)
   })
@@ -33,7 +33,7 @@ testthat::test_that("shapes_from_fips for countyfips", {
   junk = capture.output({
     expect_no_error({
       suppressWarnings({
-        
+
         shp <- shapes_from_fips(fipslist$countyfips)
       })
     })
@@ -43,7 +43,7 @@ testthat::test_that("shapes_from_fips for countyfips", {
 })
 
 testthat::test_that("shapes_from_fips for cityfips", {
-  
+
   expect_no_error({
     shp <- shapes_from_fips(fipslist$cityfips)
   })
@@ -53,19 +53,19 @@ testthat::test_that("shapes_from_fips for cityfips", {
 
 testthat::test_that("shapes_from_fips for tractfips", {
   junk = capture.output({
-    
+
     expect_no_error({
       shp <- shapes_from_fips(fipslist$tractfips)
     })
   })
   expect_true({'sf' %in% class(shp)})
   expect_identical(shp$FIPS, fipslist$tractfips)
-  expect_identical(NROW(shp), length(fipslist$tractfips)) 
+  expect_identical(NROW(shp), length(fipslist$tractfips))
 })
 
 testthat::test_that("shapes_from_fips for bgfips", {
   junk = capture.output({
-    
+
     expect_no_error({
       shp <- shapes_from_fips(fipslist$bgfips)
     })
@@ -73,9 +73,9 @@ testthat::test_that("shapes_from_fips for bgfips", {
   expect_true({'sf' %in% class(shp)})
 })
 ################ #
-# 
+#
 # testthat::test_that("shapes_from_fips error cases", {
-#   
+#
 #   expect_null({
 #     shp <- shapes_from_fips("string not fips")
 #   })
@@ -91,5 +91,5 @@ testthat::test_that("shapes_from_fips for bgfips", {
 #   expect_null({
 #     shp <- shapes_from_fips(c('2513205','1239999')) # some ok some not - city
 #   })
-#   
+#
 # })

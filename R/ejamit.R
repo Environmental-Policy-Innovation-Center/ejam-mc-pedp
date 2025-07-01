@@ -74,8 +74,8 @@
 #' @param testing used while testing this function, passed to [doaggregate()]
 #' @param showdrinkingwater T/F whether to include drinking water indicator values or display as NA. Defaults to TRUE.
 #' @param showpctowned T/f whether to include percent owner-occupied units indicator values or display as NA. Defaults to TRUE.
-#' @param default_download_city_fips_bounds passed to [area_sqmi()]
-#' @param default_download_noncity_fips_bounds passed to [area_sqmi()]
+#' @param download_city_fips_bounds passed to [area_sqmi()]
+#' @param download_noncity_fips_bounds passed to [area_sqmi()]
 #' @param ... passed to [getblocksnearby()] etc. such as  report_progress_every_n = 0
 #'
 #' @return This returns a named list of results.
@@ -233,8 +233,8 @@ ejamit <- function(sitepoints = NULL,
                    testing = FALSE,
                    showdrinkingwater = TRUE,
                    showpctowned = TRUE,
-                   default_download_city_fips_bounds = TRUE,
-                   default_download_noncity_fips_bounds = FALSE,
+                   download_city_fips_bounds = TRUE,
+                   download_noncity_fips_bounds = FALSE,
                    ...
 ) {
 
@@ -377,8 +377,6 @@ ejamit <- function(sitepoints = NULL,
 
   if (sitetype == "fips") {
 
-    # * FIPS  ####
-
     ## . check fips ####
 
     # getblocksnearby_from_fips() should include doing something like fips_lead_zero() ?
@@ -406,7 +404,7 @@ ejamit <- function(sitepoints = NULL,
     mysites2blocks <- getblocksnearby_from_fips(
 
       fips = fips,  # these get retained as ejam_uniq_id for the fips case. fips is ALL submitted even invalid ones. data_uploaded$valid notes which are valid fips.
-      inshiny = inshiny,
+      inshiny = shiny::isRunning(),
       need_blockwt = need_blockwt
     )
     if (nrow(mysites2blocks) == 0) {
@@ -421,7 +419,7 @@ ejamit <- function(sitepoints = NULL,
     if (!silentinteractive) {cat('Aggregating at each FIPS Census unit and overall.\n')}
     ## Retain the sort order of the input fips now!
     sites2states_or_latlon <- data.table(ejam_uniq_id = fips, ST = fips2state_abbrev(fips)) # includes invalid fips here
-    setkey(sites2states_or_latlon, ejam_uniq_id)
+    ##setkey(sites2states_or_latlon, ejam_uniq_id) # this would sort on ejam_uniq_id, which we do not want to do
 
     #Initialize progress bar and function to track doaggregate
     if (!is.null(progress_all)) {
@@ -481,6 +479,8 @@ ejamit <- function(sitepoints = NULL,
       )
 
     )
+    # return results in the order fips were provided: # setorder() can only sort by named columns
+    out$results_bysite <- out$results_bysite[match(fips, out$results_bysite$ejam_uniq_id), ]
     #close doagg progress bar
     if (exists("progress_doagg")) {
       progress_doagg$close()

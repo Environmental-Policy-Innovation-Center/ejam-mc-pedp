@@ -1855,8 +1855,8 @@ app_server <- function(input, output, session) {
                     silentinteractive = TRUE,
                     # called_by_ejamit = TRUE, # not sure this is needed or works here
                     testing = input$testing,
-                    default_download_city_fips_bounds = EJAM:::global_or_param("default_download_city_fips_bounds"),
-                    default_download_noncity_fips_bounds = EJAM:::global_or_param("default_download_noncity_fips_bounds"),
+                    download_city_fips_bounds = EJAM:::global_or_param("default_download_city_fips_bounds"),
+                    download_noncity_fips_bounds = EJAM:::global_or_param("default_download_noncity_fips_bounds"),
                     thresholds   = list(input$an_thresh_comp1, input$an_thresh_comp2), # thresholds = list(90, 90), # or 80,80
                     threshnames  = list(input$an_threshnames1, input$an_threshnames2), # list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
                     threshgroups = list(sanitized_an_threshgroup1(), sanitized_an_threshgroup2()) # list("EJ-US-or-ST", "Supp-US-or-ST")
@@ -1928,8 +1928,8 @@ app_server <- function(input, output, session) {
                       # called_by_ejamit = TRUE, # not sure this is needed or works here
                       progress_all = progress_all,
                       testing = input$testing,
-                      # default_download_city_fips_bounds = EJAM:::global_or_param("default_download_city_fips_bounds"), # not relevant in shapefile case
-                      # default_download_noncity_fips_bounds = EJAM:::global_or_param("default_download_noncity_fips_bounds"), # not relevant in shapefile case
+                      # download_city_fips_bounds = EJAM:::global_or_param("default_download_city_fips_bounds"), # not relevant in shapefile case
+                      # download_noncity_fips_bounds = EJAM:::global_or_param("default_download_noncity_fips_bounds"), # not relevant in shapefile case
                       thresholds   = list(input$an_thresh_comp1, input$an_thresh_comp2), # thresholds = list(90, 90), # or 80,80
                       threshnames  = list(input$an_threshnames1, input$an_threshnames2), # list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
                       threshgroups = list(sanitized_an_threshgroup1(), sanitized_an_threshgroup2()), # list("EJ-US-or-ST", "Supp-US-or-ST")

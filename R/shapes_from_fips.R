@@ -693,7 +693,7 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
   shp$FIPS <- shp$GEOID # so all via shapes_from_fips() have a FIPS colname
 
   # ensure original sort order, but excluding invalid FIPS and also excluding any rows with unavailable boundaries despite valid FIPS
-  mymapdata <- mymapdata[match(fips, mymapdata$FIPS), ]
+  shp <- shp[match(fips, shp$FIPS), ]
 
   return(shp)
 }
