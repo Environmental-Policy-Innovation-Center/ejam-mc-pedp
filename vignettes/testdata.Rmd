@@ -50,13 +50,13 @@ Examples of .xlsx files and shapefiles are installed locally with EJAM, as input
 **Files and Datasets Installed with EJAM**
 
 For just one topic you can see all files and data objects like this:
-```{r datapack_and_testdata, eval=TRUE, echo=TRUE}
+```{r pkg_data_and_testdata, eval=TRUE, echo=TRUE}
 
 topic = "fips"  # or "shape" or "latlon" or "naics" or "address" etc.
 
 
 # datasets / R objects
-cbind(data.in.package  = sort(grep(topic, EJAM:::datapack()$Item, value = T)))
+cbind(data.in.package  = sort(grep(topic, EJAM:::pkg_data()$Item, value = T)))
 
 # files
 cbind(files.in.package = sort(basename(testdata(topic, quiet = T))))
@@ -121,18 +121,18 @@ objects in EJAM and related packages:
 See all files and all dataset examples related to one topic:
 ```{r}
 topic = "fips"
-cbind(data.in.package  = sort(grep(topic, EJAM:::datapack()$Item, value = T)))
+cbind(data.in.package  = sort(grep(topic, EJAM:::pkg_data()$Item, value = T)))
 cbind(files.in.package = sort(basename(testdata(topic, quiet = T))))
 
 ```
 
-```{r datapack, eval=T, echo=FALSE, message=FALSE, include=FALSE}
-x <- EJAM:::datapack(simple = FALSE)
+```{r pkg_data, eval=T, echo=FALSE, message=FALSE, include=FALSE}
+x <- EJAM:::pkg_data(simple = FALSE)
 x <- x[order(x$Package, x$Item), !grepl("size", names(x))]
 ```
 
-```{r datapackshow, eval=FALSE, echo=TRUE}
-x <- EJAM:::datapack(simple = FALSE)
+```{r pkg_datashow, eval=FALSE, echo=TRUE}
+x <- EJAM:::pkg_data(simple = FALSE)
 x <- x[order(x$Package, x$Item), !grepl("size", names(x))]
 ```
 

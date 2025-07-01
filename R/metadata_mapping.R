@@ -42,7 +42,7 @@ default_metadata <- list(
 
 # metadata_mapping ####
 
-# x = datapack("EJAM")
+# x = pkg_data("EJAM")
 # # Not included here yet:
 # cbind(sort(setdiff(x$Item, cbind(names(metadata_mapping)))))
 
@@ -103,7 +103,7 @@ metadata_mapping <- list(
   
   # datacreate_testpoints_testoutputs.R
   
-  ## see   cbind(data.in.package  = sort(grep("test", datapack()$Item, value = T)))
+  ## see   cbind(data.in.package  = sort(grep("test", pkg_data()$Item, value = T)))
   
   ## etc. inputs ####
   

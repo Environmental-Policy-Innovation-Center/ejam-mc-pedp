@@ -25,7 +25,7 @@
 #' topic = "fips"  # or "shape" or "latlon" or "naics" or "address" etc.
 #' 
 #' # datasets / R objects
-#' cbind(data.in.package  = sort(grep(topic, EJAM:::datapack()$Item, value = T)))
+#' cbind(data.in.package  = sort(grep(topic, EJAM:::pkg_data()$Item, value = T)))
 #' 
 #' # files
 #' cbind(files.in.package = sort(basename(testdata(topic, quiet = T))))

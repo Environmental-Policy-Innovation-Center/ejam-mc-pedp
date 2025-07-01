@@ -35,11 +35,11 @@ dataset_pkgdown_yaml_check = function(fname = "_pkgdown.yml") {
   inrfiles <- inrfiles[!grepl("xxxxx", inrfiles)]
   
   # 4  DATASETS IN INSTALLED PACKAGE
-  cat("Checking data() via datapack() \n")
-  inpkg = datapack("EJAM")
+  cat("Checking data() via pkg_data() \n")
+  inpkg = pkg_data("EJAM")
   inpkg = inpkg$Item
   ## also includes things like .onAttach if you do it this way:
-  # inpkg2 = pkg_functions(pkg = 'EJAM', internal_included = T, data_included = T, exportedfuncs_included = F)
+  # inpkg2 = pkg_functions_and_data(pkg = 'EJAM', internal_included = T, data_included = T, exportedfuncs_included = F)
   # inpkg2 = inpkg2$object
 
   cat('\n')

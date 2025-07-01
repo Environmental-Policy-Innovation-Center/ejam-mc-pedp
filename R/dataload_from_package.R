@@ -14,9 +14,9 @@
 #'   "frs", "frs_by_programid ", "frs_by_naics", etc.
 #' @param envir the environment into which they should be loaded
 #' @return Nothing
-#' @seealso [datapack()] [dataload_dynamic()] [dataload_from_local()] [indexblocks()] [.onAttach()] 
+#' @seealso [pkg_data()] [dataload_dynamic()] [dataload_from_local()] [indexblocks()] [.onAttach()] 
 #' @examples 
-#'   x <- datapack("EJAM")
+#'   x <- pkg_data("EJAM")
 #'   subset(x, x$size >= 0.1) # at least 100 KB
 #'   grep("names_", x$Item, value = T, ignore.case = T, invert = T) # most were like names_d, etc.
 #'   ls()

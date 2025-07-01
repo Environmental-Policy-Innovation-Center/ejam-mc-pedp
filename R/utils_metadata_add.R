@@ -16,7 +16,7 @@ attributes2 = function(x) {
 # helper function to update 1 attribute such as ONLY the EJAM VERSION metadata for ALL datasets in EJAM/data/
 # AND NOT ARROW FILES AND NOT TXT FILES - ONLY THE .RDA FILES
 
-metadata_update_attr <- function(x = datapack('EJAM')$Item, attr_name = "ejam_package_version", newvalue = desc::desc_get("Version")) {
+metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_package_version", newvalue = desc::desc_get("Version")) {
 
   # x param is vector of names of data objects to update in the source package
   fnamesimplied = tolower(paste0(x, ".rda"))
@@ -124,7 +124,7 @@ metadata_add <- function(x, update_date_saved_in_package = TRUE) {
 #' @param grepdatasets optional, if set to TRUE, datasets should be a query to use
 #'   via grep to identify which datasets to check. It always uses ignore.case=TRUE for this.
 #' @param loadifnotloaded Optional to control if func should temporarily attach packages not already loaded.
-#' @seealso [pkg_functions()]
+#' @seealso [pkg_functions_and_data()]
 #' @examples
 #'   # tail(metadata_check( ))
 #'   metadata_check(packages = NULL)
@@ -240,11 +240,11 @@ metadata_check <- function(packages = EJAM::ejampackages,
     # which datasets to check ####
 
     ## also see
-    # EJAM:::pkg_functions(pkg = pkg, internal_included = TRUE, exportedfuncs_included = TRUE, data_included = TRUE)
+    # EJAM:::pkg_functions_and_data(pkg = pkg, internal_included = TRUE, exportedfuncs_included = TRUE, data_included = TRUE)
     ## and
-    # rdafiles <- datapack(pkg = pkg)$Item  # same thing as data(package = pkg)$results[ , "Item"]
+    # rdafiles <- pkg_data(pkg = pkg)$Item  # same thing as data(package = pkg)$results[ , "Item"]
 
-    ## see also EJAM ::: #  datapack()
+    ## see also EJAM ::: #  pkg_data()
     # were_attached <- .packages()
     # were_loaded <- loadedNamespaces()
 
@@ -324,11 +324,11 @@ metadata_check <- function(packages = EJAM::ejampackages,
     '\n
 Also see
 
-    x = EJAM:::pkg_functions(pkg = "EJAM",
+    x = EJAM:::pkg_functions_and_data(pkg = "EJAM",
       internal_included = FALSE, exportedfuncs_included = FALSE, data_included = TRUE)$object
     x[!grepl("^name", x)] \n
 Also see \n
-    y = datapack(pkg = "EJAM", simple = F)
+    y = pkg_data(pkg = "EJAM", simple = F)
     rdafiles =  y$Item   # same thing as data(package = pkg)$results[ , "Item"]
     \n'
   )

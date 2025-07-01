@@ -12,16 +12,16 @@
 
 test_coverage_check <- function() {
 
-  # MUST BE IN ROOT OF A PACKAGE WHOSE NAME MATCHES THE DIR so that pkg_functions(basename(getwd())) will work
+  # MUST BE IN ROOT OF A PACKAGE WHOSE NAME MATCHES THE DIR so that pkg_functions_and_data(basename(getwd())) will work
 
-  # removed dependency on fs pkg, and  dplyr, tibble, stringr pkgs are already in Imports of DESCRIPTION file.
+  # remove dependency on fs pkg, and  dplyr, tibble, stringr pkgs are already in Imports of DESCRIPTION file.
 
   cat("Looking in the source package EJAM/R/ folder for files like xyz.R, and in the EJAM/tests/testthat/ folder for test files like test-xyz.R \n")
   tdat = bind_rows(
     tibble(
       type = "R",
-      path = dir_ls("R/", regexp = "\\.[Rr]$"),
-      name = as.character( fs::path_ext_remove(path_file(path))),
+      path = fs::dir_ls("R/", regexp = "\\.[Rr]$"),
+      name = as.character( fs::path_ext_remove(fs::path_file(path))),
     ),
     tibble(
       type = "test",
@@ -36,7 +36,7 @@ test_coverage_check <- function() {
   names(tdat) <- gsub("R",    "codefile", names(tdat))
   names(tdat) <- gsub("test", "testfile", names(tdat))
 
-  y <- EJAM:::pkg_functions(basename(getwd()))
+  y <- EJAM:::pkg_functions_and_data(basename(getwd()))
   tdat$object_is_in_pkg <- tdat$object %in% y$object
   tdat <- tdat[order(tdat$object_is_in_pkg, tdat$object), ]
   ################################ #
@@ -57,6 +57,12 @@ test_coverage_check <- function() {
       All .R files that lack a test file with exactly matching name:\n\n")
 
   tdat[is.na(tdat$test) & !is.na(tdat$R) & "data_" != substr(tdat$name, 1,5), ] |> print(n = 500)
+
+  cat(" But those .R files contain functions that may have test files named after the functions not the whole .R file: \n")
+  # can use  EJAM:::pkg_functions_and_sourcefiles()  to see which functions are defined within a given .R source filename
+  x = tdat[is.na(tdat$test) & !is.na(tdat$R) & "data_" != substr(tdat$name, 1,5), ]
+  y = pkg_functions_and_sourcefiles()
+
   ################################ #
 
   cat(' -----------------------------------------------
@@ -82,7 +88,7 @@ test_coverage_check <- function() {
 
 # test_coverage() computes test coverage for your package. It's a shortcut for covr::package_coverage() plus covr::report().
 
-# y = EJAM:::pkg_functions('EJAM')
+# y = EJAM:::pkg_functions_and_data('EJAM')
 
 ## and
 

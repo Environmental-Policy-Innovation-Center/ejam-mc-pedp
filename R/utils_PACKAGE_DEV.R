@@ -1,23 +1,197 @@
 
 # Functions related to managing the EJAM package, names of its functions and datasets, etc.
 
-# also see
 
 
 # GET FUNCTIONS, DATA, SOURCEFILES, ETC. ####
+
+
+#' UTILITY - DRAFT - See names and size of data sets in installed package(s) - internal utility function
+#'
+#' Wrapper for data() and can get memory size of objects
+#' @details do not rely on this much - it was a quick utility.
+#'   It may create and leave objects in global envt - not careful about that.
+#'
+#'   Also see functions like pkg_functions_and_data() and pkg_functions_xyz
+#'
+#' @param pkg a character vector giving the package(s) to look in for data sets
+#' @param len Only affects what is printed to console - specifies the
+#'   number of characters to limit Title to, making it easier to see in the console.
+#' @param sortbysize if TRUE (and simple=F),
+#'   sort by increasing size of object, within each package, not alpha.
+#' @param simple FALSE to get object sizes, etc., or
+#'    TRUE to just get names in each package, like
+#'    `data(package = "EJAM")$results[, c("Package", 'Item')]`
+#' @return If simple = TRUE, data.frame with colnames Package and Item.
+#'   If simple = FALSE, data.frame with colnames Package, Item, size, Title.Short
+#' @examples
+#'  # see just a vector of the data object names
+#'  data(package = "EJAM")$results[, 'Item']
+#'
+#'  # not actually sorted within each pkg by default
+#'  pkg_data()
+#'  # not actually sorted by default
+#'  pkg_data("EJAM")$Item
+#'  ##pkg_data("MASS", simple=T)
+#'
+#'  # sorted by size if simple=F
+#'  ##pkg_data("datasets", simple=F)
+#'  x <- pkg_data(simple = F)
+#'  # sorted by size already, to see largest ones among all these pkgs:
+#'  tail(x[, 1:3], 20)
+#'
+#'  # sorted alphabetically within each pkg
+#'  x[order(x$Package, x$Item), 1:2]
+#'  # sorted alphabetically across all the pkgs
+#'  x[order(x$Item), 1:2]
+#'
+#' # datasets as lazyloaded objects vs. files installed with package
+#'
+#' topic = "fips"  # or "shape" or "latlon" or "naics" or "address" etc.
+#'
+#' # datasets / R objects
+#' cbind(data.in.package  = sort(grep(topic, EJAM:::pkg_data()$Item, value = T)))
+#'
+#' # files
+#' cbind(files.in.package = sort(basename(testdata(topic, quiet = T))))
+#'
+#' @keywords internal
+#'
+pkg_data <- function(pkg = 'EJAM', len=30, sortbysize=TRUE, simple = TRUE) {
+
+  if (simple) {
+    cat('Get more info with pkg_data(simple = FALSE)\n\n')
+    out <- data.frame(data(package = pkg)$results[, c('Package', 'Item')])
+    if (sortbysize) {cat('ignoring sortbysize because simple=TRUE \n\n')}
+    return(out)
+  }
+
+  n <- length(pkg)
+  ok <- rep(FALSE, n)
+  for (i in 1:n) {
+    ok[i] <- 0 != length(find.package(pkg[i], quiet = TRUE))
+  }
+  pkg <- pkg[ok] # available in a library but not necessarily attached ie on search path, in print(.packages()) or via search()
+  # pkg_on_search_path <- pkg %in%  .packages() # paste0('package:', pkg) %in% search()
+  were_attached <- .packages()
+  were_loaded <- loadedNamespaces()
+
+  ## commented out the on.exit section as it was causing namespace/search path issues with some of the EJAM dependencies
+  # on.exit({
+  #   #  get it back to those which had been attached and or loaded before we started this function
+  #   wasnotherebefore <- setdiff(.packages(), were_attached)
+  #   for (this in wasnotherebefore) {
+  #     # for (this in pkg[!(pkg %in% were_attached)]) {
+  #     detach(paste0("package:", this), unload  = FALSE, force = TRUE, character.only = TRUE)
+  #   }
+  #   wasnotloadedbefore <- setdiff(loadedNamespaces(), were_loaded)
+  #   for (this in wasnotloadedbefore) {
+  #     unloadNamespace(this)
+  #   }
+  # })
+
+  if (length(pkg) == 0) {
+    return(NULL)
+  } else {
+
+    zrows <- as.data.frame(data(package = pkg)$results) # this works for multiple packages all at once
+
+    # THIS PART ONLY WORKS ON ONE PACKAGE AT A TIME I THINK
+
+    cat('Loading all packages .... please wait... \n')
+    for (this in pkg) {
+      library(this, character.only = TRUE, quietly = TRUE)
+      # otherwise they are not attached/on search path and cannot use get() to check object size, etc.
+    }
+
+    zrows$size = sapply(
+      #objects(envir = as.environment( paste0("package:", pkg) )),
+      zrows$Item,
+      function(object_x) {
+
+        # for each item in any package:
+        thispkg <- zrows$Package[match(object_x, zrows$Item)]
+        if (!exists(object_x, envir = as.environment(paste0("package:", thispkg) ) )) {
+          cat('cannot find ', object_x, ' in ', thispkg, ' via exists() so trying to use data() \n')
+          #return(0)
+          data(object_x, envir = as.environment(paste0("package:", thispkg) ) )
+        } # in case supposedly data but not lazy loaded per DESCRIPTION
+        if (!exists(object_x, envir = as.environment(paste0("package:", thispkg) ) )) {
+          cat('tried loading  ', object_x,' via data() but failed \n')
+          subpart = gsub(' .*', '', object_x)
+          bigpart = gsub(".*\\((.*)\\)", '\\1', object_x)
+          cat('so trying to load the overall item ', bigpart, ' that contains object ', subpart, '\n')
+          data(bigpart,  envir = as.environment(paste0("package:", thispkg) ))
+          object_x = subpart
+          #return(0)
+        }
+
+        xattempt <- try(
+          get(object_x, envir = as.environment(paste0("package:", thispkg) ) ),
+          silent = TRUE
+        )
+        if (inherits(xattempt, "try-error")) {
+          cat("Error in trying to use get(", object_x, ", envir = as.environment(", paste0('package:', thispkg), ")) \n")
+          xattempt <- NULL
+        }
+
+        format(object.size(
+          xattempt
+        ),
+        # maybe since already attached do not need to do all this to specify where it is
+        units = "MB", digits = 3, standard = "SI")
+      } # end function(object_x)
+    ) # end of sapply loop over all zrows$Item
+    ############################## #
+    cat('\n\n')
+
+    zrows <- zrows[ , c("Package", "Item", "size", "Title")]
+    sizenumeric =   as.numeric(gsub("(.*) MB", "\\1", zrows$size))
+    zrows$sizen <- sizenumeric
+
+    if (sortbysize) {
+      zrows <- zrows[order(sizenumeric), ]
+      rownames(zrows) <- NULL
+    }
+
+    ############################## #
+    # show sorted rounded largest ones only, with shortened titles
+    zrows_narrow <- zrows
+    zrows_narrow$Title.Short  <- substr(zrows_narrow$Title, 1, len)
+    zrows_narrow$Title <- NULL
+    sizenumeric =   as.numeric(gsub("(.*) MB", "\\1", zrows_narrow$size))
+    if (sum(sizenumeric >= 1)  == 0) {
+      cat("None are > 1 MB in size: \n\n")
+      rounding = 3
+    } else {
+      cat('The ones at least 1 MB in size: \n\n')
+      zrows_narrow <- (zrows_narrow[sizenumeric >= 1, ])
+      rounding = 0
+    }
+    sizenumeric =   as.numeric(gsub("(.*) MB", "\\1", zrows_narrow$size))
+    zrows_narrow$size <-  paste0(round(sizenumeric, rounding), ' MB')
+    print(zrows_narrow)
+
+    ############################## #
+
+    invisible(zrows)
+  }
+}
+##################################################################################### #
+
 
 pkg_functions_with_keywords_internal_tag <- function(funcnames, pkg = "EJAM", full.names = TRUE) {
 
   # get R/*.R FILENAME that defines each function
 
   if (missing(funcnames)) {
-    fnames <- pkg_functions(pkg = pkg)$object
+    fnames <- pkg_functions_and_data(pkg = pkg)$object
   }
   fnames <- vector(length = length(funcnames))
   fnames <- paste0(pkg, ":::", fnames)
 
   for (i in seq_along(funcnames)) {
-    # funcname <- "datapack"
+    # funcname <- "pkg_data"
     funcname <- funcnames[i]
     cat(paste0(funcname, ", "))
     # findInFiles::fifR(pattern = paste0("^ *", funcname, ".*function[(]"), output = "tibble")$file
@@ -52,12 +226,14 @@ pkg_functions_with_keywords_internal_tag <- function(funcnames, pkg = "EJAM", fu
 # #   like askradius <- ask_number where ask_number = function() {}
 # #
 pkg_functions_and_sourcefiles <- function(pkg = "EJAM",
-                                             internal_included = TRUE, exportedfuncs_included = TRUE) {
+                                          internal_included = TRUE, exportedfuncs_included = TRUE) {
 
-  info <- pkg_functions(pkg = pkg, internal_included = internal_included, exportedfuncs_included = exportedfuncs_included,
-                           data_included = FALSE, alphasort_table = TRUE)
+  info <- pkg_functions_and_data(pkg = pkg, internal_included = internal_included, exportedfuncs_included = exportedfuncs_included,
+                                 data_included = FALSE, alphasort_table = TRUE)
   funcnames <- info$object
-  fnames <- pkg_functions_with_keywords_internal_tag(funcnames = funcnames)
+  if (basename(getwd()) != pkg) {stop("working directory must be the source package folder for pkg", pkg)}
+  fnames <- pkg_functions_with_keywords_internal_tag()
+  fnames <- fnames[match(funcnames, fnames)] # match to ensure same order as info$object, but check how extra or missing ones are handled
   return(data.frame(file = fnames, info))
 }
 ##################################################################################### #
@@ -96,7 +272,7 @@ pkg_functions_and_sourcefiles <- function(pkg = "EJAM",
 # golem::detach_all_attached()
 # load_all(export_all = FALSE)
 # x = EJAM:::pkg_functions_with_keywords_internal_tag()
-# y = EJAM:::pkg_functions("EJAM")
+# y = EJAM:::pkg_functions_and_data("EJAM")
 # z = data.frame(x, y[match(x$name1, y$object), ])
 # z[, c('name1', 'keywordval', 'exported')]
 
@@ -105,7 +281,7 @@ pkg_functions_and_sourcefiles <- function(pkg = "EJAM",
 
 pkg_functions_with_keywords_internal_tag <- function(package.dir = ".") {
 
-  # Does load_all() first, so even unexported functions will seem exported, fyi
+  # Does load_all() first?? so even unexported functions will seem exported, fyi
   #
   # Does not check undocumented functions (those lacking roxygen tags, like if func_alias <- definedfunc1)
   # but does check unexported functions with roxygen tags
@@ -196,17 +372,17 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".") {
 }
 ##################################################################################### #
 
-# get filenames, functions, exported & internal, & pkg data
+# get functions, datasets, filenames - exported & internal
 
-#' utility to see which objects in a loaded/attached package are exported functions, internal (unexported) objects, or datasets
+#' utility to see which objects in a loaded/attached package are functions or datasets, exported or not (internal)
 #' @details
-#'   See [dupeRfiles()] for files supporting a shiny app that is not a package, e.g.
+#'   See [pkg_dupeRfiles()] for files supporting a shiny app that is not a package, e.g.
 #'
-#'   See [dupenames()] for objects that are in R packages.
+#'   See [pkg_dupenames()] for objects that are in R packages.
 #'
-#'   See [pkg_functions()] etc.
+#'   See [pkg_functions_and_data()], pkg_functions_and_sourcefiles(),
 #'
-#'   See [datapack()]
+#'   See [pkg_data()]
 #'
 #' @param pkg name of package as character like "EJAM"
 #' @param alphasort_table default is FALSE, to show internal first as a group, then exported funcs, then datasets
@@ -218,15 +394,27 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".") {
 #'
 #' @return data.table with colnames object, exported, data  where exported and data are 1 or 0 for T/F,
 #'   unless vectoronly = TRUE in which case it returns a character vector
-#' @examples  # pkg_functions("datasets")
+#' @examples  # pkg_functions_and_data("datasets")
 #'
 #' @keywords internal
 #'
-pkg_functions <- function(pkg, alphasort_table=FALSE, internal_included=TRUE, exportedfuncs_included=TRUE, data_included=TRUE, vectoronly=FALSE) {
+pkg_functions_and_data <- function(pkg,
+                                   alphasort_table = FALSE,
+                                   internal_included = TRUE,
+                                   exportedfuncs_included = TRUE,
+                                   data_included = TRUE,
+                                   vectoronly = FALSE) {
 
   ## (helpers) ### #
-
-  dataonly <- function(pkg) {datapack(pkg = pkg, simple = TRUE)$Item}
+  if (!internal_included) {
+    if (exists("radius_inferred")) {
+      warning("Looks like you have done load_all() and if so, internal objects will get included in output here, even though you set internal_included = FALSE")
+    }
+    # x = sort(getNamespaceExports("EJAM"))
+    # y = sort(EJAM:::pkg_functions_and_data("EJAM", internal_included = FALSE, vectoronly = T, data_included = F))
+    # length(x); length(y); setdiff(y, x)
+  }
+  dataonly <- function(pkg) {pkg_data(pkg = pkg, simple = TRUE)$Item}
 
   exported_plus_internal_withdata <- function(pkg) {sort(union(dataonly(pkg), ls(getNamespace(pkg), all.names = TRUE)))} # all.names filters those starting with "."
   exported_only_withdata          <- function(pkg) {ls(paste0("package:", pkg))}
@@ -247,16 +435,16 @@ pkg_functions <- function(pkg, alphasort_table=FALSE, internal_included=TRUE, ex
     internal_only_withdata(pkg = pkg),
     dataonly(pkg = pkg)))}
 
-  # # double-checks, obsolete now since phased out use of EJAMejscreenapi pkg
+  # # double-checks
   #
-  # setequal(      exported_plus_internal_withdata("EJAMejscreenapi"),
-  #          union(exported_plus_internal_nodata(  "EJAMejscreenapi"), dataonly("EJAMejscreenapi")))
+  # setequal(      exported_plus_internal_withdata("EJAM"),
+  #          union(exported_plus_internal_nodata(  "EJAM"), dataonly("EJAM")))
   #
-  # setequal(      exported_only_withdata(         "EJAMejscreenapi"),
-  #          union(exported_only_nodata(           "EJAMejscreenapi"), dataonly("EJAMejscreenapi")))
+  # setequal(      exported_only_withdata(         "EJAM"),
+  #          union(exported_only_nodata(           "EJAM"), dataonly("EJAM")))
   #
-  # setequal(      internal_only_withdata(         "EJAMejscreenapi"),
-  #          union(internal_only_nodata(           "EJAMejscreenapi"), dataonly("EJAMejscreenapi")))
+  # setequal(      internal_only_withdata(         "EJAM"),
+  #          union(internal_only_nodata(           "EJAM"), dataonly("EJAM")))
 
   # table format output
 
@@ -322,22 +510,22 @@ pkg_functions <- function(pkg, alphasort_table=FALSE, internal_included=TRUE, ex
 #'
 #' @description See what same-named .R files are in 2 sourcecode folders
 #' @details
-#'   See [dupeRfiles()] for files supporting a shiny app that is not a package
+#'   See [pkg_dupeRfiles()] for files supporting a shiny app that is not a package
 #'
-#'   See [dupenames()] for objects that are in R packages.
+#'   See [pkg_dupenames()] for objects that are in R packages.
 #'
-#'   See [datapack()] for objects that are in R packages.
+#'   See [pkg_data()] for objects that are in R packages.
 #'
-#'   See [pkg_functions()] for functions in R package.
+#'   See [pkg_functions_and_data()] for functions in R package.
 #'
-#'   See [functions_that_use()] - searches for text in each function exported by pkg (or each .R source file in pkg/R)
+#'   See [pkg_functions_that_use()] - searches for text in each function exported by pkg (or each .R source file in pkg/R)
 #'
 #' @param folder1 path to other folder with R source files
 #' @param folder2 path to a folder with R source files, defaults to "./R"
 #'
 #' @keywords internal
 #'
-dupeRfiles <- function(folder1 = '../EJAM/R', folder2 = './R') {
+pkg_dupeRfiles <- function(folder1 = '../EJAM/R', folder2 = './R') {
   if (!dir.exists(folder1)) {
     #try to interpret as name of source package without path
     # assuming wd is one pkg and other is in parallel place
@@ -364,19 +552,19 @@ dupeRfiles <- function(folder1 = '../EJAM/R', folder2 = './R') {
 ##################################################################### #
 # conflicting exported functions or data ####
 
-#' UTILITY - check conflicting exported function or data names
+#' UTILITY - check conflicting getNamespaceExports (names of exported functions or datasets)
 #'
 #' @description See what same-named objects (functions or data) are exported by some (installed) packages
 #' @details utility to find same-named exported objects (functions or datasets) within source code
 #'   of 2+ packages, and see what is on search path, for dev renaming / moving functions/ packages
 #'
-#'   See [dupeRfiles()] for files supporting a shiny app that is not a package, e.g.
+#'   See [pkg_dupeRfiles()] for files supporting a shiny app that is not a package, e.g.
 #'
-#'   See [dupenames()] for objects that are in R packages.
+#'   See [pkg_dupenames()] for objects that are in R packages.
 #'
-#'   See [pkg_functions()], pkg_functions_and_sourcefiles(), etc.
+#'   See [pkg_functions_and_data()], pkg_functions_and_sourcefiles(), etc.
 #'
-#'   See [datapack()]
+#'   See [pkg_data()]
 #'
 #' @param pkg one or more package names as vector of strings.
 #'   If "all" it checks all installed pkgs, but takes very very long potentially.
@@ -388,7 +576,7 @@ dupeRfiles <- function(folder1 = '../EJAM/R', folder2 = './R') {
 #'
 #' @keywords internal
 #'
-dupenames <- function(pkg = EJAM::ejampackages, sortbypkg=FALSE, compare.functions=TRUE) {
+pkg_dupenames <- function(pkg = EJAM::ejampackages, sortbypkg=FALSE, compare.functions=TRUE) {
 
   # Get list of exported names in package1, then look in package1 to
   #   obs <- getNamespaceExports(pkg)
@@ -446,11 +634,11 @@ dupenames <- function(pkg = EJAM::ejampackages, sortbypkg=FALSE, compare.functio
 
   if (compare.functions) {
     ddd$problem = "ok"
-    #  use all_equal_functions() here to compare all pairs (but ignores more 2d copy of a function, so misses check of trios)
+    #  use pkg_functions_all_equal() here to compare all pairs (but ignores more 2d copy of a function, so misses check of trios)
     #  to see if identical names are actually identical functions
-    # ddd <- dupenames()
+    # ddd <- pkg_dupenames()
     for (var in unique(ddd$variable)) {
-      ok <- all_equal_functions(
+      ok <- pkg_functions_all_equal(
         fun = var,
         package1 = ddd$package[ddd$variable == var][1],
         package2 = ddd$package[ddd$variable == var][2]
@@ -466,20 +654,20 @@ dupenames <- function(pkg = EJAM::ejampackages, sortbypkg=FALSE, compare.functio
   return(ddd)
 }
 ##################################################################### #
-## (helper for dupenames) ### #
+## (helper for pkg_dupenames) ### #
 
 #' UTILITY - check different versions of function with same name in 2 packages
-#' obsolete since EJAMejscreenapi phased out? was used by dupenames() to check different versions of function with same name in 2 packages
+#' obsolete since EJAMejscreenapi phased out? was used by pkg_dupenames() to check different versions of function with same name in 2 packages
 #' @param fun quoted name of function, like "latlon_infer"
 #' @param package1 quoted name of package, like "EJAM"
 #' @param package2 quoted name of other package
 #'
 #' @return TRUE or FALSE
-#' @seealso [dupenames()] [all.equal.function()]
+#' @seealso [pkg_dupenames()] [all.equal.function()]
 #'
 #' @keywords internal
 #'
-all_equal_functions <- function(fun="latlon_infer", package1="EJAM", package2) {
+pkg_functions_all_equal <- function(fun="latlon_infer", package1="EJAM", package2) {
 
   # not the same as base R all.equal.function() see  ?all.equal.function
 
@@ -488,17 +676,17 @@ all_equal_functions <- function(fun="latlon_infer", package1="EJAM", package2) {
   # 1) Normally it checks the first two cases of dupe named functions from 2 packages,
   # and answers with FALSE or TRUE (1 value).
   # But it returns FALSE 3 times only in the case of run_app (but not latlon_is.valid)
-  # dupenames(ejampackages) # or just dupenames()
+  # pkg_dupenames(ejampackages) # or just pkg_dupenames()
 
   # 2) ### error when checking a package that is loaded but not attached.
   # eg doing this:
-  # all_equal_functions("get.distance.all", "proxistat", "EJAM") # something odd about proxistat pkg
+  # pkg_functions_all_equal("get.distance.all", "proxistat", "EJAM") # something odd about proxistat pkg
   #   and note there is now a function called proxistat()
   ### or
-  # dupenames(c("proxistat", "EJAMejscreenapi"), compare.functions = T)
-  # Error in all_equal_functions(fun = var, package1 = ddd$package[ddd$variable ==  :
+  # pkg_dupenames(c("proxistat", "EJAMejscreenapi"), compare.functions = T)
+  # Error in pkg_functions_all_equal(fun = var, package1 = ddd$package[ddd$variable ==  :
   #                                                                   distances.all not found in proxistat
-  #                                                                Called from: all_equal_functions(fun = var, package1 = ddd$package[ddd$variable ==
+  #                                                                Called from: pkg_functions_all_equal(fun = var, package1 = ddd$package[ddd$variable ==
 
   if (!(is.character(fun) & is.character(package1) & is.character(package2))) {
     warning("all params must be quoted ")
@@ -559,7 +747,7 @@ all_equal_functions <- function(fun="latlon_infer", package1="EJAM", package2) {
 #'
 #' @keywords internal
 #'
-functions_that_use <- function(text = "stop\\(", pkg = "EJAM", ignore_comments = TRUE) {
+pkg_functions_that_use <- function(text = "stop\\(", pkg = "EJAM", ignore_comments = TRUE) {
 
 
   if (grepl("\\(", text) & !grepl("\\\\\\(", text)) {warning('to look for uses of stop(), for example, use two slashes before the open parens, etc. as when using grepl()')}
@@ -632,7 +820,7 @@ functions_that_use <- function(text = "stop\\(", pkg = "EJAM", ignore_comments =
 #'
 #' @keywords internal
 #'
-dependencies_of_ejam <- function(localpkg = "EJAM", depth = 6, ignores_grep = "0912873410239478") {
+pkg_dependencies <- function(localpkg = "EJAM", depth = 6, ignores_grep = "0912873410239478") {
 
   #################### #
 

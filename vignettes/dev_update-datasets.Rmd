@@ -42,10 +42,10 @@ That file covers not only the large arrow datasets that are stored in a separate
 
 The various data objects need to be updated at various frequencies -- some only yearly (ACS data) and others when facility IDs and locations change (as often as possible, as when [EPA's FRS](https://www.epa.gov/frs) is updated). Some need to be updated only when the package features/code changes, such as the important data object called `map_headernames` (which in turn is used to update objects such as `names_e`).
 
-See the draft utility `EJAM:::datapack()` for a view of datasets if useful:
+See the draft utility `EJAM:::pkg_data()` for a view of datasets if useful:
 
 ```{r}
-x <- EJAM:::datapack()
+x <- EJAM:::pkg_data()
 x$Item[!grepl("names_|^test", x$Item)]
 ```
 
