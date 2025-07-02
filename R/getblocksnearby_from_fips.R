@@ -80,8 +80,8 @@ getblocksnearby_from_fips <- function(fips, inshiny = FALSE, need_blockwt = TRUE
 getblocksnearby_from_fips_cityshape <- function(fips, return_shp = FALSE) {
 
   polys <- shapes_places_from_placefips(fips)
-  polys <- polys[match(fips, polys$FIPS), ] # adds back in NA rows where fips was NA if missing
-  polys$FIPS <- fips
+  polys <- polys[match(fips, polys$FIPS), ] # adds back in NA rows where fips was NA if missing (but was already handled by shapes_places_from_placefips() )
+  polys$FIPS <- fips # was already handled by shapes_places_from_placefips()
   s2b_pts_polys <- get_blockpoints_in_shape(polys = polys)
   # s2b_pts_polys$polys is a spatial df with FIPS character like fips, and ejam_uniq_id is 1:nrow integer class
   # s2b_pts_polys$pts is a data.table with no fips field, and   ejam_uniq_id is integer class 1:nrow but check sort order of it.
@@ -100,7 +100,7 @@ getblocksnearby_from_fips_cityshape <- function(fips, return_shp = FALSE) {
   # fips = c(4975360, 4262056, 4958070) # 1 of those 3 has no bounds avail.
   # mapview::mapview( shapes_from_fips(fips))
   #
-  ## handles ejam_unique_id aka fips ####
+  ## handles ejam_unique_id aka fips ### #
   ##   polys$FIPS is in same sort order as fips input, but some are NA if cannot find boundaries shapefile for some cities/cdps !
   ##   get_blockpoints_in_shape() was ignoring FIPS and assigning ejam_uniq_id as 1:NROW(), if ejam_uniq_id column not found,
   ##   but may want to recode this to pass the FIPS codes as ejam_uniq_id ... except some FIPS are NA (if bounds not found)
@@ -228,7 +228,7 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, inshiny 
       ## if not matched, return this message
       shiny::validate('No blockgroups found for these FIP codes.') # A list of tests. Each test should equal NULL for success, FALSE for silent failure, or a string for failure with an error message.
     } else {
-      stop('No blockgroups found for these FIP codes.')
+      stop('No blockgroups found for these FIP codes.') # or just a warning? ***
     }
 
   }

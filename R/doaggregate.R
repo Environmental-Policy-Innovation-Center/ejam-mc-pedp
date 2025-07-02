@@ -208,7 +208,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     warning("distance should be a column in sites2blocks passed to doaggregate but was missing, so distances set to zero")
     sites2blocks$distance <- 0 # just to have a value but not sure results make sense in this unlikely case except if using polygons or fips and somehow getblocksnearby_from_fips() failed to add distance = 0 as a column
   }
-  if (all(sites2blocks$distance == 0)) {
+  if (all(na.omit( sites2blocks$distance) == 0)) {
     # seems like they must have used getblocksnearby_from_fips() to do query on block points within certain FIPS or polygons, not circular buffers using radius
     # so set radius here to 0 , and anyway it will not restrict analysis to distances <= any particular radius
     # Earlier step, in getblocksnearbyviaQuadTree, it would have adjusted small distances based on effective radius of block.

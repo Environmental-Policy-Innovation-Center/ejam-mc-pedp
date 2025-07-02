@@ -73,6 +73,26 @@ testthat::test_that("shapes_from_fips for bgfips", {
   expect_true({'sf' %in% class(shp)})
 })
 ################ #
+testthat::test_that("shapes_from_fips for bgfips keeps sort and handles NA fips or empty poly", {
+  junk = capture.output({
+
+    # ONE SORT OF VALID ROW- FIPS IS REAL BUT CANNOT GET POLYGONS:
+    ## cannot obtain shapefile for "4273072" so shape_from_fips() returns NA row for that one, empty polygon
+    x <- c("4273072", "1332412", "3920212", "2966134", "4272168")
+    # AND ONE INVALID ROW:
+    x[5] <- NA
+    inputfips <- x
+
+    expect_no_error({
+      shp <- shapes_from_fips(inputfips)
+    })
+  })
+  expect_true({'sf' %in% class(shp)})
+  expect_equal(NROW(shp), length(inputfips))
+  expect_equal(shp$FIPS, inputfips)
+})
+################ #
+
 #
 # testthat::test_that("shapes_from_fips error cases", {
 #

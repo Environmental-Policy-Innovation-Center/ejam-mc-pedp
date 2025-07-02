@@ -38,7 +38,7 @@ test_that('doaggregate() returns a correctly named list, with no error if key pa
 
 # see similar tests of getblocksnearby()
 
-test_that("doag outputs sorted like input, latlon case, NA rows as needed", {
+test_that("doag outputs sorted like input, LATLON case, NA rows as needed", {
 
   inputsitenumber <- c(3,1,2,5,4) # this is the sitenumber not the ejam_uniq_id assigned!
   input_ejam_uniq_id <- 1:5
@@ -62,7 +62,7 @@ test_that("doag outputs sorted like input, latlon case, NA rows as needed", {
 })
 ################# #
 
-test_that("doag outputs sorted like input, shp case", {
+test_that("doag outputs sorted like input, SHAPE case", { # no test of NAs? ***
 
   shp <- rbind(testinput_shapes_2, testinput_shapes_2[2,], testinput_shapes_2[1,])
   suppressWarnings({
@@ -70,11 +70,9 @@ test_that("doag outputs sorted like input, shp case", {
     x <- doaggregate(s2b)
   })
   expect_equal(unique(x$results_bysite$ejam_uniq_id), 1:NROW(shp))
-
-
 })
-################# #
-test_that("doag outputs sorted like input, fips case", {
+################# ################## ################## #
+test_that("doag outputs sorted like input, NONCITY FIPS case", {
 
   inputfips = c("061090011001" ,"530530723132" ,"340230083002" ,"240338052021", "390490095901")
   # ONE INVALID ROW:
@@ -82,19 +80,63 @@ test_that("doag outputs sorted like input, fips case", {
   suppressWarnings({
     s2b <- getblocksnearby_from_fips(inputfips)
   })
-
-  # ok
-  x <- doaggregate(s2b[!is.na(s2b$distance), ])
-
-  # fails due to NA values: -- fix  this in doaggregate() ***
-  # x <- doaggregate(s2b)
-
+  # See if it changes sort or fails due to NA values:
+  x <- doaggregate(s2b)
+  # x <- doaggregate(s2b[!is.na(s2b$distance), ])
   outputfips <- x$results_bysite$ejam_uniq_id
-
-  expect_equal(inputfips, outputfips)
-
+  expect_equal(outputfips, inputfips)
 })
 ################# #
+test_that("doag outputs sorted like input, CITY FIPS case", {
+
+  neednewexample <- FALSE #   neednewexample <- TRUE
+  if (neednewexample) {
+
+  rm(shp4, inputfips4, shp5a, noshpfips, noshpfips1, shp5, inputfips5, inputfips, shp)
+  ## get 4 valid fips that return boundaries shp data
+  shp4 <- data.frame(GEOID = NA)
+  while (any(is.na(shp4$GEOID))) {
+    inputfips4 <- dput(as.character(sample(censusplaces$fips, 4)))
+    shp4 <- shapes_from_fips(inputfips4)
+  }
+  cat(inputfips4, "are valid fips with available shape bounds for download\n")
+  ## find one valid fips that lacks available shape bounds for download
+  shp5a <- data.frame(GEOID = 999)
+  while (!any(is.na(shp5a$GEOID))) {
+    noshpfips <- dput(as.character(sample(censusplaces$fips, 5)))
+    shp5a <- shapes_from_fips(noshpfips)
+  }
+  noshpfips1 <- noshpfips[is.na(shp5a$GEOID)][1]
+  cat(noshpfips1, "is a valid fips but lacks spatial bounds data\n")
+  # add the one that lacks shape data
+  inputfips5 <- c(inputfips4[2:1], noshpfips1, inputfips4[3:4])
+  shp5 <- shapes_from_fips(inputfips5)
+  print(sf::st_drop_geometry(shp5[, c(1:4, NCOL(shp5))]))
+  cbind(inputfips5)
+  print(dput(inputfips5))
+  # ONE INVALID ROW in addition to the one lacking boundaries data:
+  inputfips <- inputfips5
+  inputfips[!is.na(shp5$GEOID)][2] <- NA
+
+  shp <- shapes_from_fips(inputfips)
+  print(sf::st_drop_geometry(shp[, c(1:4, NCOL(shp))]))
+  print(dput(inputfips))
+
+  rm(shp4, inputfips4, shp5a, noshpfips, noshpfips1, shp5, inputfips5 )
+  }
+
+  inputfips <- c("264240", "1941475", "2377625", "1937560", "3862060") # dput(as.character(sample(censusplaces$fips, 5)))
+
+  suppressWarnings({
+    s2b <- getblocksnearby_from_fips(inputfips)
+  })
+  # See if it changes sort or fails due to NA values:
+  x <- doaggregate(s2b)
+  # x <- doaggregate(s2b[!is.na(s2b$distance), ])
+  outputfips <- x$results_bysite$ejam_uniq_id
+  expect_equal(outputfips, inputfips)
+})
+################# ################## ################## #
 
 ################# #
 # DOES IT STILL RETURN WHAT IT USED TO, OR HAS FUNCTION CHANGED SO THAT OUTPUTS NO LONGER MATCH ARCHIVED OUTPUTS? ####
