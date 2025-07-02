@@ -152,8 +152,8 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
   res <- lapply(1:nRowsDf, FUN = function(a){
 
     vec <- SearchTrees::rectLookup(localtree,
-              xlims = FAC_X[a] + c(-1,1) * truedistance,
-              ylims = FAC_Z[a] + c(-1,1) * truedistance
+                                   xlims = FAC_X[a] + c(-1,1) * truedistance,
+                                   ylims = FAC_Z[a] + c(-1,1) * truedistance
     )
 
     tmp <- quaddata[vec,]
@@ -169,16 +169,16 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
 
     if (((a %% report_progress_every_n) == 0) & interactive()) {cat(paste("Finished finding blocks near ",a ," of ", nRowsDf),"\n" ) }   # i %% report_progress_every_n indicates i mod report_progress_every_n (“i modulo report_progress_every_n”)
 
-      pct_inc <- 5
-      ## add check that data has enough points to show increments with rounding
-      ## i.e. if 5% increments, need at least 20 points or %% will return NaN
-      if (is.function(updateProgress) & (nRowsDf >= (100/pct_inc)) & (a %% round(nRowsDf/(100/pct_inc)) < 1)) {
-        boldtext <- paste0((pct_inc)*round((100/pct_inc*a/nRowsDf)), '% done')
-        updateProgress(message_main = boldtext,
-                       value = round((pct_inc)*a/nRowsDf,2)/(pct_inc))
-      }
+    pct_inc <- 5
+    ## add check that data has enough points to show increments with rounding
+    ## i.e. if 5% increments, need at least 20 points or %% will return NaN
+    if (is.function(updateProgress) & (nRowsDf >= (100/pct_inc)) & (a %% round(nRowsDf/(100/pct_inc)) < 1)) {
+      boldtext <- paste0((pct_inc)*round((100/pct_inc*a/nRowsDf)), '% done')
+      updateProgress(message_main = boldtext,
+                     value = round((pct_inc)*a/nRowsDf,2)/(pct_inc))
+    }
 
-      return(tmp[, .(blockid, distance, ejam_uniq_id)])
+    return(tmp[, .(blockid, distance, ejam_uniq_id)])
   })
 
   if (sum(sapply(res, nrow)) > 2100000000) {
@@ -314,7 +314,7 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
   ###################################################################################################################### #
   ###################################################################################################################### #
 
-  #
+  ## >sort on blockid etc. ####
   data.table::setkey(sites2blocks, blockid, ejam_uniq_id, distance)
 
   ########################################################################### ##
@@ -325,7 +325,7 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
     #getblocks_diagnostics(sites2blocks) # returns NA if no blocks nearby
   }
 
-  # ADJUST THE VERY SHORT DISTANCES, if use_unadjusted_distance = FALSE  ####
+  # MAYBE ADJUST THE VERY SHORT DISTANCES, only if use_unadjusted_distance = FALSE  ####
 
   # distance can get adjusted to a minimum possible value,  0.9 * effective radius of block_radius_miles (see EJScreen Technical Documentation discussion of proximity analysis for rationale)
   # See notes in the file EJAM/data-raw/datacreate_blockwts.R
@@ -344,15 +344,15 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
   }
   if (!use_unadjusted_distance) {
     if (!quiet) {  cat("\n\nAdjusting upwards the very short distances now...\n ")}
-  # 2 ways considered here for how exactly to make the adjustment:
-  sites2blocks[distance < block_radius_miles, distance := 0.9 * block_radius_miles]  # assumes distance is in miles
-  # or a more continuous but slower (and nonEJScreen way?) adjustment for when dist is between 0.9 and 1.0 times block_radius_miles:
-  # sites2blocks_dt[ , distance  := pmax(block_radius_miles, distance, na.rm = TRUE)] # assumes distance is in miles
+    # 2 ways considered here for how exactly to make the adjustment:
+    sites2blocks[distance < block_radius_miles, distance := 0.9 * block_radius_miles]  # assumes distance is in miles
+    # or a more continuous but slower (and nonEJScreen way?) adjustment for when dist is between 0.9 and 1.0 times block_radius_miles:
+    # sites2blocks_dt[ , distance  := pmax(block_radius_miles, distance, na.rm = TRUE)] # assumes distance is in miles
   }
   # now drop that info about area or size of block to save memory. do not need it later in sites2blocks
   sites2blocks[ , block_radius_miles := NULL]
   if (radius_donut_lower_edge > 0) {
-  sites2blocks <- sites2blocks[distance <= truedistance & distance > radius_donut_lower_edge, ] # if analyzing a ring (donut)
+    sites2blocks <- sites2blocks[distance <= truedistance & distance > radius_donut_lower_edge, ] # if analyzing a ring (donut)
   } else {
     sites2blocks <- sites2blocks[distance <= truedistance, ] # had been inside the loop.
 
@@ -361,7 +361,7 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
     cat('Stats via getblocks_diagnostics(), AFTER ADJUSTING up FOR SHORT DISTANCES: \n')
     cat("min distance AFTER adjustment: ", min(sites2blocks$distance, na.rm = TRUE), "\n")
     cat("max distance AFTER adjustment: ", max(sites2blocks$distance, na.rm = TRUE), "\n\n")
-      getblocks_diagnostics(sites2blocks)
+    getblocks_diagnostics(sites2blocks)
     cat("\n")
   }
   ########################################################################### ##
@@ -378,5 +378,9 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
   #   sites2blocks[idtable, ejam_uniq_id_as_submitted_to_getblocks := ejam_uniq_id_as_submitted_to_getblocks, on = "ejam_uniq_id"]
   # }
 
-  return(sites2blocks)
+  ## >sort again to return sites in same sort order as inputs were in ####
+  # sitespoints$ejam_uniq_id is vector of ids in correct order, original order. do not assume they are sorted as 1:N
+  return(
+    sites2blocks[sitepoints, , on = "ejam_uniq_id"] # this join should return sites2blocks with ejam_unique_id in the order in which they are found in sitepoints
+  )
 }

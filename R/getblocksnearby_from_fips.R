@@ -29,17 +29,20 @@ getblocksnearby_from_fips <- function(fips, inshiny = FALSE, need_blockwt = TRUE
 
   # If some fips are city and others not, use approp method for each, then combine and re-sort
   original_order <- data.table(n = 1:length(fips), ejam_uniq_id = fips)
-  ftype <- fipstype(fips)
+  suppressWarnings({
+    ftype <- fipstype(fips)
+  })
   ftype_city <- ftype %in% "city"
+  ftype_city[is.na(ftype)] <- NA
 
-  if (any(ftype_city)) {
+  if (any(na.omit(ftype_city))) {
     # these need shapefile download
     output_city <- getblocksnearby_from_fips_cityshape(fips = fips[ftype_city],
                                                        return_shp = return_shp)
   } else {
     output_city <- NULL
   }
-  if (any(!ftype_city)) {
+  if (any(!na.omit(ftype_city))) {
     # these do not need shapefile download, just using FIPS code since blockgroups aggregate into tracts then counties then states
     output_noncity <- getblocksnearby_from_fips_noncity(fips[!ftype_city],
                                                         return_shp = return_shp,
@@ -63,11 +66,8 @@ getblocksnearby_from_fips <- function(fips, inshiny = FALSE, need_blockwt = TRUE
     output$pts[, n := NULL]
 
   } else {
-
     output <- rbind(output_city, output_noncity)
-    output[original_order, n := n, on = "ejam_uniq_id"]
-    setorder(output, n)
-    output[, n := NULL]
+    ## s2b table is already in correct sort order at this point
   }
   return(output)
 }
@@ -80,10 +80,17 @@ getblocksnearby_from_fips <- function(fips, inshiny = FALSE, need_blockwt = TRUE
 getblocksnearby_from_fips_cityshape <- function(fips, return_shp = FALSE) {
 
   polys <- shapes_places_from_placefips(fips)
-  polys$ejam_uniq_id <- fips
-  # polys[, c("FIPS", "ejam_uniq_id")][] # shows the order of fips was preserved, with NA row if no bounds avail.
+  polys <- polys[match(fips, polys$FIPS), ] # adds back in NA rows where fips was NA if missing
+  polys$FIPS <- fips
   s2b_pts_polys <- get_blockpoints_in_shape(polys = polys)
+  # s2b_pts_polys$polys is a spatial df with FIPS character like fips, and ejam_uniq_id is 1:nrow integer class
+  # s2b_pts_polys$pts is a data.table with no fips field, and   ejam_uniq_id is integer class 1:nrow but check sort order of it.
+  # do we need to sort again? sort outputs based on inputs, and include NA row for any NA in inputs, like now done by getblocks for latlon case
+  setorder(s2b_pts_polys$pts, ejam_uniq_id) # sort pts by ejam_uniq_id, which is 1:nrow
+
   if (return_shp) {
+    # sort outputs based on inputs
+    s2b_pts_polys$polys <- s2b_pts_polys$polys[match(fips, s2b_pts_polys$polys$FIPS), ]
     return(s2b_pts_polys) # named list with pts and polys tables
   } else {
     return(s2b_pts_polys$pts) # multiple rows per fips, but the order of fips was preserved, with no row for fips with no bounds avail.
@@ -128,9 +135,9 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, inshiny 
   }
 
   fips.char <- fips_lead_zero( fips)  # adds leading zeroes and returns as character, 5 characters if seems like countyfips, etc.
-  original_order <- data.table(n = seq_along(fips), ejam_uniq_id = fips.char)
-  fipslengths <- nchar(fips.char)
-  if (!(length(unique(fipslengths)) == 1)) {    # might recode to allow that but it is complicated
+  # original_order <- data.table(n = seq_along(fips), ejam_uniq_id = fips.char) # not used
+  fipslengths <- nchar(fips.char) # na.omit done while checking uniques since if not done, an invalid fips would create NA and cause error here
+  if (!(length(unique(na.omit(fipslengths))) == 1)) {    # might recode to allow that but it is complicated
     if (inshiny) {
       validate('fips must all be same number of characters, like all are 5-digit county fips with leading zeroes counted')
     } else {
@@ -156,6 +163,7 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, inshiny 
     # fips_bgs_in_fips() replaces fips_bgs_in_fips1()
     # all_bgs <- stack(sapply(fips_vec, fips_bgs_in_fips)) # newer - fast alone but slow in sapply?
     all_bgs <- stack(sapply(fips_vec, fips_bgs_in_fips1)) # Slow:  1.4 seconds for all counties in region 6, e.g.
+    # but that drops all NA fips, including any originally in the inputs passed to getblocks, and we now may want to retain those
   })
   names(all_bgs) <- c('bgfips', 'ejam_uniq_id')
 
@@ -192,8 +200,8 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, inshiny 
       fips_blockpoints <- merge(fips_blockpoints, blockwts[,.(blockid, blockwt)], by = "blockid")
     }
 
-    ## remove any invalid  values
-    fips_blockpoints <- na.omit(fips_blockpoints)
+    ## remove any invalid  values? but it is easier to ensure output matches input if NA invalid fips result in NA rows in output of getblocksnearby as is done by getblocksnearby() in the latlon case
+    # fips_blockpoints <- na.omit(fips_blockpoints)
 
     # Emulate the normal output of  getblocksnearby() which is a data.table with
     #  ejam_uniq_id, blockid, distance, blockwt, bgid
@@ -204,10 +212,14 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, inshiny 
     fips_blockpoints[ , lat := NULL]
     fips_blockpoints[ , lon := NULL]
 
-    # return results sorted in same order as the original input fips
-    fips_blockpoints[original_order, n := n, on = "ejam_uniq_id"]
-    setorder(fips_blockpoints, n)
-    fips_blockpoints[, n := NULL]
+    #  use a join to sort outputs based on inputs, and include NA row for any NA in inputs, like now done by getblocks for latlon case
+    fips.dt = data.table(ejam_uniq_id = fips)
+    fips_blockpoints <- fips_blockpoints[fips.dt, , on = "ejam_uniq_id"]
+
+    ## another way to return results sorted in same order as the original input fips
+    # fips_blockpoints[original_order, n := n, on = "ejam_uniq_id"]
+    # setorder(fips_blockpoints, n)
+    # fips_blockpoints[, n := NULL]
 
     return(fips_blockpoints[])
 
@@ -222,4 +234,3 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, inshiny 
   }
 }
 ######################################## #
-

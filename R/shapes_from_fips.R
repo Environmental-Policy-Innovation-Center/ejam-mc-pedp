@@ -665,7 +665,7 @@ shapes_blockgroups_from_bgfips <- function(bgfips = '010890029222', outFields = 
 #'
 shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
 
-  expectedtype = 'city'
+  expectedtype <- 'city'
 
   ftype = fipstype(fips)
   if (all(is.na(ftype))) {
@@ -675,25 +675,27 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
   if (!all(ftype[!is.na(ftype)] %in% expectedtype)) {
     stop("expected all valid fips to be for", expectedtype)
   }
-  fips = fips_lead_zero(fips)
-  fips = fips[fips_valid(fips)]
-  if (length(fips) == 0) {stop('no valid fips')}
-
+  suppressWarnings({
+    fips <- fips_lead_zero(fips)
+  })
+  # DO WE WANT TO DROP INVALID OR JUST RETURN NA ROWS FOR THOSE? ***
+  validfips <- fips[fips_valid(fips)]
+  if (length(validfips) == 0) {stop('no valid fips')}
   ST <- unique(fips2state_abbrev(fips))
 
   # check if census api key available if needed for tiger
 
   if (myservice[1] == 'tiger') {
-    shp <- tigris::places(ST)
+    shp <- tigris::places(na.omit(ST))
   } else {
     warning('other sources of boundaries not implemented, so using default')
-    shp <- tigris::places(ST)
+    shp <- tigris::places(na.omit(ST))
   }
-  shp <- shp[match(fips, shp$GEOID), ] # filter using FIPS is more robust than trying to get exact name right
-  shp$FIPS <- shp$GEOID # so all via shapes_from_fips() have a FIPS colname
-
+  # filter using FIPS is more robust than trying to get exact name right
   # ensure original sort order, but excluding invalid FIPS and also excluding any rows with unavailable boundaries despite valid FIPS
+  shp$FIPS <- shp$GEOID # so all via shapes_from_fips() have a FIPS colname
   shp <- shp[match(fips, shp$FIPS), ]
+  shp$FIPS <- fips # return original fips even for rows that came back NA / empty polygon because fips is NA or fips valid but couldnt download those polygons
 
   return(shp)
 }

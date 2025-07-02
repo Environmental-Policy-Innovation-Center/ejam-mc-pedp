@@ -227,7 +227,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
         radius <- radius_inferred(sites2blocks)
       }
     }
-    if (radius >= 1.5 * max(sites2blocks$distance)) {
+    if (radius >= 1.5 * max(sites2blocks$distance, na.rm = TRUE)) {
       warning('radius passed to doaggregate() is at least 1.5x any distance found in sites2blocks,
                 suggesting it is larger than the radius that was analyzed by getblocksnearby() --
                 changing the reported radius now to be the inferred radius')

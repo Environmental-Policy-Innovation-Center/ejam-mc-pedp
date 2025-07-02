@@ -78,12 +78,12 @@ get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby =
   if (!("ejam_uniq_id" %in% names(polys))) {
     polys$ejam_uniq_id <- 1:NROW(polys) # added by functions like shapefile_from_folder() but not here if user directly used read_sf or st_read
   }
+  input_ejam_uniq_id <- polys$ejam_uniq_id
 
   if (is.function(updateProgress)) {
     boldtext <- 'Computing overall bounding box'
     updateProgress(message_main = boldtext, value = 0.1)
   }
-
   ## overall bbox ########################### #
   #bbox <- sf::st_bbox(polys)
 
@@ -120,20 +120,20 @@ get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby =
   #   ylims = sitepoints[i, c(z_low, z_hi)]
   # )
   # res[[i]] <- quaddatatable[vec, ]  # all the pts (like blocks) near this 1 site.
-  
-  
+
+
   ## filter blockpoints using lat/lon, NOT polar coordinates/radians
-  
+
   # would run this line only once
   # blockpointstree <- SearchTrees::createTree(blockpoints[, .(lon, lat, blockid)])
   # blockpoints_filt <- lapply(bbox_polys, function(a){
   #   SearchTrees::rectLookup(blockpointstree,
   #                           xlims = c(a$xmin,a$xmax),
   #                           ylims = c(a$ymin,a$ymax)
-  #   
+  #
   # }) %>% unlist(use.names=FALSE) %>% unique
-  
-  
+
+
   earthRadius_miles <- 3959 # in case it is not already in global envt
   radians_per_degree <- pi / 180
 
@@ -228,12 +228,10 @@ get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby =
     # warning("using getblocksnearby() to filter US blocks to those near each site must be done before a dissolve  ")
     polys <- sf::st_union(polys)
   }
-
   if (is.function(updateProgress)) {
     boldtext <- 'Standardizing shapes'
     updateProgress(message_main = boldtext, value = 0.8)
   }
-
   blocksinsidef <- unique(blocksinside)
 
   #standardize input shapes for doaggregate
@@ -252,6 +250,12 @@ get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby =
 
   setnames(pts, c("lon","lat","ejam_uniq_id","blockid","distance")) # it is lon then lat due to format of output of st_coordinates() I think
   pts[blockwts,  `:=`(bgid = bgid, blockwt = blockwt), on = "blockid"]
+
+  # sort polys spatial data.frame like input was sorted
+  polys <- polys[match(input_ejam_uniq_id, polys$ejam_uniq_id), ]
+  # sort pts data.table like input was sorted
+  pts <- pts[data.table(ejam_uniq_id = input_ejam_uniq_id), , on = "ejam_uniq_id"]
+
   data.table::setcolorder(pts, c('ejam_uniq_id', 'blockid', 'distance', 'blockwt', 'bgid', 'lat', 'lon')) # to make it same order as output of getblocksnearby(), plus latlon
 
   if (is.function(updateProgress)) {
