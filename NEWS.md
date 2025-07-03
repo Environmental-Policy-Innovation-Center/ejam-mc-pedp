@@ -1,20 +1,38 @@
 # EJAM v2.32.5 (July 2025)
 
+## Web  app
+
 - Summary Indexes (aka EJ Indexes) were found to have some incorrect numbers, so this release has replaced `?bgej` dataset with correct numbers, drawn from the internet archive version at https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip that was a copy of the datasets EPA had posted August 2024 at https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip
   But there are still be some problem with the ozone and drinking EJ Indexes -- unlike the other EJ Indexes, they appear to be hard to replicate via formula, 
   and there is now a unit test that shows the issue and also it is an issue noted on the github repo and is being looked into.
   The same problem may exist for the State EJ Indexes (for all Envt indicators) -- need to clarify what formula is for state-based EJ percentiles.
-- testoutput_xyz .xlsx and .html files and dataset R objects updated to reflect the new `?bgej` dataset
-- color-coded maps of counties are improved in `mapfastej_counties()`
+- `ejamit()` now gets or calculates the **area in square miles** of each site more consistently and efficiently. It has new params related to how `area_sqmi()` now can get square mileage info from `blockgroupstats` table without needing to download boundaries. There are new parameters called download_fips_bounds_ok, download_noncity_fips_bounds, and includewater. The new params are also driven by two new defaults in global_defaults_shiny.R The old parameter default_download_fips_bounds_to_calc_areas is no longer a param in `ejamit()`.
+- disabled Start Analysis until Done is clicked, when using FIPS dropdown menu of counties/cities/etc.
+- interactive barplots of indicators will be able to show median not just mean via `ejam2barplot_indicators()` but that is work in progress.
+- DRAFT/TBD: Sort order of output fips and polygons should now always be the same as the order of the inputs (sorted like they were in an uploaded shapefile, uploaded FIPS, or FIPS selected from the dropdown list). 
+
+
+## RStudio users only
+  
 - [installation instructions in vignette/article](../articles/installing.html) were edited
 - README mentions https://www.ejanalysis.com now
 - vignettes/articles were renamed
-- disabled Start Analysis until Done is clicked, when using FIPS dropdown menu of counties/cities/etc.
+- `ejamit()` and `shapes_from_fips()` (and related helper functions):
+  - Sorting: The outputs now consistently preserve sort order of the input (points, fips, or polygons). This had not been the case for shapes_from_fips() functions, and ejamit()$results_bysite or doaggregate()$results_bysite were preserving sort order only for the latlon case but not necessarily the fips or shapes cases.
+  - Invalid sites: The outputs of `shapes_from_fips()` (and related helper functions) will no longer omit output rows for invalid fips and when boundaries could not be obtained for valid fips -- The number of rows in a shapefile output will be the same as then length of the input fips vector.
+  - Mix of fips types: DRAFT/TBD... See parameter allow_multiple_fips_types in `shapes_from_fips`. `shapes_from_fips()` now accepts a mix of city and noncity fips (state, county, tract, blockgroup), so you can get a shapefile where some polygons are cities and others are counties, etc. Previously that was not possible and caused an error.
+- `getblocksnearby()` and related functions (`getblocksnearby_from_fips()`, `get_blockpoints_in_shape()`, etc.):
+  - Sorting: The output sites are now sorted like the input sitse (points, fips, or polygons), while there are still usually many rows (blocks) per site. It had been sorted primarily by blockid, previously.
+  - Invalid sites: DRAFT/TBD... The output now will include a row of NA values for each site that has no blocks in/near it or where the input (coordinates, fips, or polygon) was invalid or NA. Those sites previously had been left out of the sites2blocks table outputs.
+  - Mix of fips types: `getblocksnearby_from_fips()` now accepts a mix of city and noncity fips (state, county, tract, blockgroup), so you can get a shapefile where some polygons are cities and others are counties, etc. Previously that was not possible and caused an error.
+- testoutput_xyz .xlsx and .html files and dataset R objects updated to reflect the new `?bgej` dataset
+- `mapfastej_counties()` has improved color-coded maps of counties
+- `convert_units()` now can recognize more abbreviations like "mi^2" via updated `fixnames_aliases()`, and got some bug fixes.
+- `blockgroupstats` documentation was improved.
 - `test_ejam()` is what used to be called `test_interactively()` -- it was improved and renamed and moved to the R folder as an unexported internal function loaded as part of the package
 - `test_coverage_check()` utility was improved, just as a way to for package maintainers/contributors to look at which functions might need unit tests written
 - `linesofcode2()` utility was improved, just as a way for package maintainers/contributors to look at which files have most of the lines of code, are mostly comments, etc.
 - `table_xls_format_api()` is what used to be called table_xls_formatting_api() (but is not used unless the ejscreenapi module or server is working)
-- interactive barplots of indicators will be able to show median not just mean via `ejam2barplot_indicators()` but that is work in progress.
 
 
 # EJAM v2.32.4 (June 2025)
@@ -27,7 +45,7 @@ Note the URLs, emails, and notes about repository locations/owners were edited t
 - corrected spelling in app and documentation
 - added better examples of params one can pass via `run_app()`
 
-## RStudio users
+## RStudio users only
 
 - New summary table and plot are available via `ejam2areafeatures()` and `ejam2barplot_areafeatures()`. 
   Changes in `ejamit()` provide information about what fraction of residents have 

@@ -404,7 +404,7 @@ ejamit <- function(sitepoints = NULL,
     mysites2blocks <- getblocksnearby_from_fips(
 
       fips = fips,  # these get retained as ejam_uniq_id for the fips case. fips is ALL submitted even invalid ones. data_uploaded$valid notes which are valid fips.
-      inshiny = shiny::isRunning(),
+      inshiny = inshiny,
       need_blockwt = need_blockwt
     )
     if (nrow(mysites2blocks) == 0) {
