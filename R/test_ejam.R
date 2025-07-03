@@ -21,10 +21,10 @@
 #' @param noquestions logical, whether to avoid questions later on about where to save shapefiles
 #' @param useloadall logical, TRUE means use [load_all()], FALSE means use [library()].
 #'   But useloadall=T is essential actually, for unexported functions to be found when they are tested!
-#' @param y_basic logical, whether to only run some basic [ejamit()] functions, not do unit tests
-#' @param y_latlon logical, if y_basic=T, whether to run the basic [ejamit()] using points
-#' @param y_shp logical, if y_basic=T, whether to run the basic [ejamit()] using shapefile
-#' @param y_fips logical, if y_basic=T, whether to run the basic [ejamit()] using FIPS
+#' @param y_skipbasic logical, if FALSE, runs some basic [ejamit()] functions, but NOT any unit tests.
+#' @param y_latlon logical, if y_skipbasic=F, whether to run the basic [ejamit()] using points
+#' @param y_shp logical, if y_skipbasic=F, whether to run the basic [ejamit()] using shapefile
+#' @param y_fips logical, if y_skipbasic=F, whether to run the basic [ejamit()] using FIPS
 #' @param y_coverage_check logical, whether to show simple lists of
 #'   which functions might not have unit tests, just based on matching source file and test file names.
 #' @param y_runall logical, whether to run all tests instead of only some groups
@@ -59,7 +59,7 @@ test_ejam <- function(ask = TRUE,
                       noquestions = TRUE, # just for shapefile folder selections
                       useloadall = TRUE, # essential actually, for unexported functions to be found when they are tested!
 
-                      y_basic = FALSE, y_latlon=TRUE, y_shp=TRUE, y_fips = TRUE,
+                      y_skipbasic = TRUE, y_latlon=TRUE, y_shp=TRUE, y_fips = TRUE,
 
                       y_coverage_check = FALSE,
 
@@ -80,8 +80,8 @@ test_ejam <- function(ask = TRUE,
 ) {
 
   if (ask) {
-  # example of using this function ####
-  cat('\n
+    # example of using this function ####
+    cat('\n
 ################################### #  ################################### #
 \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n
 \n  # examples of using this function: ####
@@ -103,7 +103,7 @@ x <- EJAM:::test_ejam(
 
   useloadall  = TRUE, # might be essential actually
 
-  y_basic = FALSE,   y_latlon=TRUE, y_shp=TRUE, y_fips=TRUE,
+  y_skipbasic = TRUE,   y_latlon=TRUE, y_shp=TRUE, y_fips=TRUE,
 
   y_coverage_check = FALSE,
 
@@ -123,14 +123,14 @@ x <- EJAM:::test_ejam(
 )
 
 ')
-}
+  }
   ########################################## # ########################################## #
-  if (missing(y_basic) & ask) {
-    if (missing(y_basic)) {
-      y_basic = askYesNo("Do ONLY basic quick checks (no unit tests, then STOP) ?", default = y_basic)
+  if (missing(y_skipbasic) & ask) {
+    if (missing(y_skipbasic)) {
+      y_skipbasic = askYesNo("Skip basic quick checks (which are not unit tests) ?", default = y_skipbasic)
     }}
-  if (is.na(y_basic)) {stop("canceled")}
-  if (y_basic) {
+  if (is.na(y_skipbasic)) {stop("canceled")}
+  if (!y_skipbasic) {
     if (missing(y_latlon) & ask) {y_latlon = askYesNo("quick tests for latlon?", default = y_latlon)}
     if (is.na(y_latlon)) {stop("canceled")}
     if (missing(y_shp)    & ask) {y_shp    = askYesNo("quick tests for shp?",    default = y_shp)}
@@ -147,7 +147,7 @@ x <- EJAM:::test_ejam(
   logfilename_only = paste0("testresults-",
                             gsub(" ", "_", gsub("\\.[0-9]{6}$", "", gsub(":", ".", as.character(Sys.time())))),
                             ".txt")
-  if (!y_basic) {
+  if (y_skipbasic) {
 
     # consoleclear <- function() {if (interactive() & rstudioapi::isAvailable()) {rstudioapi::executeCommand("consoleClear")}}
     # consoleclear() is an undocumented internal function in the pkg now
@@ -173,8 +173,7 @@ x <- EJAM:::test_ejam(
     ########################################## #
 
     ## FIND tests ####
-    update_list_of_tests <- TRUE
-    if (update_list_of_tests) {
+
       sdir <- getwd()
       test_files_found <-  basename(list.files(path = file.path(sdir, "tests/testthat"), full.names = TRUE, pattern = "test-"))
       ########################################## #
@@ -236,8 +235,8 @@ x <- EJAM:::test_ejam(
           "test-getblocksnearbyviaQuadTree.R",
           "test-report_residents_within_xyz.R",
           "test-proxistat.R",
-          "test-utils_indexpoints.R"
-          #    -------------- NEEDS MORE TESTS? ***
+          "test-utils_indexpoints.R",
+          "test-get_blockpoints_in_shape.R"
         ),
         test_fixcolnames = c(
           "test-fixcolnames.R",
@@ -375,6 +374,7 @@ x <- EJAM:::test_ejam(
                           seconds_byfile = c(119.793, 157.021, 156.421, 160.492, 163.264,
                                              133.808, 114.904)
                           ))
+      # *** add timing for "test-get_blockpoints_in_shape.R", and add in timebygroup the new group(s)
 
       # timebygroup
       #            testgroup seconds_bygroup
@@ -500,8 +500,11 @@ x <- EJAM:::test_ejam(
             stopfix <- TRUE
           }
           if (is.na(stopfix) || stopfix == TRUE) { # if ESC or asked and yes
-            cat("You need to fix `testlist`, the list of files in the test_ejam() source code, to ensure
-all existing `./test/test-xyz.R` files are listed in `testlist` and all filenames listed there actually exist as in that folder called `test`.\n\n")
+            cat("
+You need to fix `testlist`, the list of files in the test_ejam() source code, to
+ensure all existing `./test/test-xyz.R` files are listed in `testlist`
+and all filenames listed there actually exist as in that folder called `test`.\n\n")
+            stop("exiting to fix list of test files")
           } else {
             cat("Continuing anyway \n")
           }
@@ -522,11 +525,21 @@ all existing `./test/test-xyz.R` files are listed in `testlist` and all filename
         cat("\n\n")
         ########################################## #
       }
-    } # end if, update_list_of_tests
-
+      ## confirm time estimates available ####
+      if (y_runsome || y_runall) {
+        missingtime_tests <- setdiff(as.vector(unlist(testlist)), timebyfile$file)
+        if (length(missingtime_tests) > 0) {
+          cat("Missing time estimates for these test files:", paste0(missingtime_tests, collapse = ","))
+        }
+        missingtime_groups <- setdiff(names(testlist), timebygroup$testgroup)
+        if (length(missingtime_groups) > 0) {
+          cat("Missing time estimates for these:", paste0(missingtime_groups, collapse = ","))
+        }
+        cat('\n\n')
+      }
+      ########################### #  ########################################## #
 
     # cat("\n\nAVAILABLE UNIT TEST FILES, IN GROUPS:\n\n")
-
 
     ## count of test per group ####
     count_available_files_bygroup = data.frame(groupnames = names(testlist),
@@ -558,6 +571,7 @@ all existing `./test/test-xyz.R` files are listed in `testlist` and all filename
       # 15       test_golem           golem         2
       # fnames = unlist(testlist)
     }
+
     shortgroupnames = gsub("^test_(.*)","\\1", names((testlist)))
 
     ## define Functions that run tests ####
@@ -781,6 +795,8 @@ all existing `./test/test-xyz.R` files are listed in `testlist` and all filename
       }
     }   #   done defining functions
     #################################################### #
+
+
     ########################### #  ########################################## #
 
     # >>Ask what to do<< ####
@@ -836,10 +852,11 @@ all existing `./test/test-xyz.R` files are listed in `testlist` and all filename
               "WHICH TEST GROUPS TO SKIP? Enter a comma-separated list like  maps,frs  (or Esc to specify none)",
               paste0(shortgroupnames, collapse = ","),
               default = ifelse(length(skip_these) > 0,
-                              paste0(skip_these, collapse = ","),
-                              "")
+                               paste0(skip_these, collapse = ","),
+                               "")
               # e.g., "fips,naics,frs,latlon,maps,shape,getblocks,fixcolnames,doag,ejamit,ejscreenapi,mod,app"
             )
+            if (is.na(skip_these)) {stop("canceled")}
           }}
       }
 
@@ -881,8 +898,8 @@ all existing `./test/test-xyz.R` files are listed in `testlist` and all filename
       skip_these = paste0("test_", skip_these)
       partial_testlist <-  testlist
       if (length(skip_these) > 0 && !is.null(skip_these)) {
-      partial_testlist <-  testlist[!(names(testlist) %in% skip_these)]
-    }}
+        partial_testlist <-  testlist[!(names(testlist) %in% skip_these)]
+      }}
     ################################### #  ################################### #
     if (y_runall == FALSE && y_runsome == FALSE) {
       stop('no tests run')
@@ -915,8 +932,17 @@ all existing `./test/test-xyz.R` files are listed in `testlist` and all filename
   logfilename = (  file.path(mydir, logfilename_only) )
 
   cat("Saving in ", logfilename, ' etc. \n')
-  # ~ ####
   ########################### #  ########################################## #
+  # test_coverage_check() ####
+
+  if (y_coverage_check) {
+    cat("Also see the covr package at https://covr.r-lib.org/ \n")
+    source("tests/test_coverage_check.R")
+    test_coverage_info <- test_coverage_check()
+    # test_coverage_info table is not used. the function prints info.
+  }
+  ########################### #  ########################################## #
+  # ~ ####
   # load_all() or library(EJAM) ####
   cat('\n')
   if (useloadall) {
@@ -940,20 +966,10 @@ all existing `./test/test-xyz.R` files are listed in `testlist` and all filename
   # }
   ########################### #  ########################################## #
 
-  # test_coverage_check() ####
-
-  if (y_coverage_check) {
-    cat("Also see the covr package at https://covr.r-lib.org/ \n")
-    source("tests/test_coverage_check.R")
-    test_coverage_info <- test_coverage_check()
-    # test_coverage_info table is not used. the function prints info.
-  }
-  ########################### #  ########################################## #
-
   # RUN BASIC QUICK CHECKS NOT UNIT TESTS   ####
   # for easy/basic case, main functions, without actually running unit tests with testthat
 
-  if (y_basic) {
+  if (!y_skipbasic) {
 
     if (y_latlon) {
       # latlon
@@ -1034,7 +1050,7 @@ all existing `./test/test-xyz.R` files are listed in `testlist` and all filename
 
     cat("Done with basic checks. Not doing any other testing. \n\n")
     invisible(x1)
-  } # halts if this gets done - just y_basic done.
+  } # halts if this gets done - just basic checks get done if !y_skipbasic
   ########################### #  ########################################## #
   ########################### #  ########################################## #
 
@@ -1085,7 +1101,7 @@ all existing `./test/test-xyz.R` files are listed in `testlist` and all filename
     # params = list(ask =  ask,
     #               noquestions  =  noquestions,
     #               useloadall   =  useloadall,
-    #               y_basic      =  y_basic,
+    #               y_skipbasic      =  y_skipbasic,
     #               y_latlon     =  y_latlon,
     #               y_shp        =  y_shp,
     #               y_fips       =  y_fips,
@@ -1114,7 +1130,7 @@ all existing `./test/test-xyz.R` files are listed in `testlist` and all filename
     #     noquestions  = ", noquestions, "
     #     useloadall   = ", useloadall, "
     #
-    #     y_basic      = ", y_basic, "
+    #     y_skipbasic      = ", y_skipbasic, "
     #       y_latlon     = ", y_latlon, "
     #       y_shp        = ", y_shp, "
     #       y_fips       = ", y_fips, "
@@ -1148,7 +1164,6 @@ all existing `./test/test-xyz.R` files are listed in `testlist` and all filename
 
     secs1 = sum(timebygroup$seconds_bygroup[timebygroup$testgroup %in% shownlist[, 'testgroup']])
     mins1 = round(secs1 / 60, 1)
-
     cat("Predicted time to run tests is roughly", mins1, "minutes. Very rough estimate of ETA: ")
 
     print(Sys.time() + secs1)
