@@ -11,7 +11,8 @@ shapes_from_fips(
   myservice_tract =
     "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2022/FeatureServer/4/query",
   myservice_place = "tiger",
-  myservice_county = "cartographic"
+  myservice_county = "cartographic",
+  allow_multiple_fips_types = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,9 @@ or "cartographic" or "tiger" to use approx or slow/accurate bounds from tidycens
 \item{myservice_county}{URL of feature service to get shapes from,
 or "cartographic" or "tiger" to use approx or slow/accurate bounds from tidycensus and tigris packages.
 Note State bounds are built into this package as data so do not need to be downloaded from a service.}
+
+\item{allow_multiple_fips_types}{testing this option to allow multiple types
+like a county and a city in the same called to shapes_from_fips()}
 }
 \value{
 spatial data.frame with one row per fips (assuming any fips are valid)

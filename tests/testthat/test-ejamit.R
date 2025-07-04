@@ -122,10 +122,12 @@ testthat::test_that("ejamit output (tracts,bgs) sorted like input fips", {
   fips_bgs = rev(fips_bgs_in_fips1(fips_counties[1])) # all bgs in county
   junk = capture_output({
     suppressMessages({
-      expect_equal(fips_tracts ,   ejamit(fips = fips_tracts  )$results_bysite$ejam_uniq_id )
-      expect_equal(fips_bgs ,      ejamit(fips = fips_bgs     )$results_bysite$ejam_uniq_id )
+      out_tracts <- ejamit(fips = fips_tracts  )$results_bysite$ejam_uniq_id
+      out_bgs <- ejamit(fips = fips_bgs     )$results_bysite$ejam_uniq_id
     })
   })
+  expect_equal(fips_tracts , out_tracts)
+  expect_equal(fips_bgs ,    out_bgs)
 })
 ########################################################## #
 

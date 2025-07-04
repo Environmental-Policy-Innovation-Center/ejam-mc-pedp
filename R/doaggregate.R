@@ -190,7 +190,8 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     warning("sites2blocks must contain columns named ejam_uniq_id, blockid, and should have distance")
     return(NULL)
   }
-
+  # RETAIN ORIGINAL SORT ORDER OF SITES
+  original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)), ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
   # ensure it is a data.table
   if (!data.table::is.data.table(sites2blocks)) {
     message('sites2blocks should be a data.table - converting into one')
@@ -392,7 +393,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
   # sort rows
 
-  data.table::setorder(sites2blocks, ejam_uniq_id, bgid, blockid) # new
+  data.table::setorder(sites2blocks, ejam_uniq_id, bgid, blockid) # might not be needed... this was done at start, and also will resort in original order at end
 
   ################################################################ #
   # Just create some new columns in sites2blocks,
@@ -1711,6 +1712,12 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   ########################### #
 
   # Assemble list of results ####
+
+  # ENSURE outputs SITES ARE SORTED IN SAME ORDER AS THEY WERE IN INPUTS
+  results_bysite[original_order, n := n, on = "ejam_uniq_id"]
+  setorder(results_bysite, n)
+  results_bysite[, n := NULL]
+  # dont bother to sort results_bybg_people
 
   results <- list(
     results_overall = results_overall,  # each indicator

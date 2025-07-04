@@ -272,6 +272,10 @@ ejamit <- function(sitepoints = NULL,
     # something like this could replace similar code in server: ***
     shp <- shapefile_from_any(shapefile, cleanit = FALSE)
     # shp <- cbind(ejam_uniq_id = 1:nrow(shp), shp) # assign id to ALL even empty or invalid inputs
+
+    # RETAIN ORIGINAL SORT ORDER OF SITES
+    original_order <- data.table(n = 1:NROW(shp), ejam_uniq_id = 1:NROW(shp))
+
     shp  <- shapefile_clean(shp) # reassigns ejam_uniq_id to all, then drops invalid but not empty!! uses default crs = 4269;  drops invalid rows or return NULL if none valid  # shp <- sf::st_transform(shp, crs = 4269) # done by shapefile_clean()
     shp$valid <- !(!sf::st_is_valid(shp) | sf::st_is_empty(shp) ) # but clean dropped invalid ones already
     # ***  retain  empty but not invalid rows for analysis? ***
@@ -382,7 +386,9 @@ ejamit <- function(sitepoints = NULL,
     # getblocksnearby_from_fips() should include doing something like fips_lead_zero() ?
     # but also want to know what type each fips is (probably all should be same like all are tracts or all are county fips)
 
-    #### *** should confirm this is needed ####
+    # RETAIN ORIGINAL SORT ORDER OF SITES
+    original_order <- data.table(n = 1:length(fips), ejam_uniq_id = fips)
+
     # Here we retain all rows, columns include ejam_uniq_id, valid, invalid_msg
     data_uploaded = data.frame(fips = fips, ejam_uniq_id = fips, n = 1:length(fips), valid = fips_valid(fips))
     data_uploaded$invalid_msg = ifelse(data_uploaded$valid, "",  "invalid FIPS")
@@ -417,7 +423,7 @@ ejamit <- function(sitepoints = NULL,
     # . doaggregate  fips ####
 
     if (!silentinteractive) {cat('Aggregating at each FIPS Census unit and overall.\n')}
-    ## Retain the sort order of the input fips now!
+    ## so far it has retained the sort order of the input fips
     sites2states_or_latlon <- data.table(ejam_uniq_id = fips, ST = fips2state_abbrev(fips)) # includes invalid fips here
     ##setkey(sites2states_or_latlon, ejam_uniq_id) # this would sort on ejam_uniq_id, which we do not want to do
 
@@ -479,8 +485,9 @@ ejamit <- function(sitepoints = NULL,
       )
 
     )
-    # return results in the order fips were provided: # setorder() can only sort by named columns
-    out$results_bysite <- out$results_bysite[match(fips, out$results_bysite$ejam_uniq_id), ]
+    # doaggregate() should already return results in the order fips were provided. and note setorder() can only sort by named columns
+    # out$results_bysite <- out$results_bysite[match(fips, out$results_bysite$ejam_uniq_id), ]
+
     #close doagg progress bar
     if (exists("progress_doagg")) {
       progress_doagg$close()
@@ -507,7 +514,8 @@ ejamit <- function(sitepoints = NULL,
     stopifnot(is.data.frame(sitepoints), "lat" %in% colnames(sitepoints), "lon" %in% colnames(sitepoints), NROW(sitepoints) >= 1, is.numeric(sitepoints$lat))
 
     # Here are preserved ALL rows (pts) including invalid ones
-    # print(sitepoints)
+    # RETAIN ORIGINAL SORT ORDER OF SITES
+    original_order <- data.table(n = 1:NROW(sitepoints), ejam_uniq_id = sitepoints$ejam_uniq_id)
     data_uploaded <- sitepoints[, c("ejam_uniq_id", "lat", "lon", "valid", "invalid_msg" )] # invalids here were not passed to getblock.. but some valids here might not return from getblock.. so this distinguishes where it was dropped
     data_uploaded <- data.frame(data_uploaded) # not data.table
 
@@ -701,10 +709,10 @@ ejamit <- function(sitepoints = NULL,
 
   # Merge invalid and valid sites and msg, so results_bysite has ALL sites originally provided for analysis.
   setDT(data_uploaded)
+  # this changes the sort order of the data.table! but it gets fixed at the end of this overall function
   out$results_bysite <- merge(data_uploaded[, .(ejam_uniq_id, valid, invalid_msg)],
                               out$results_bysite,
                               by = 'ejam_uniq_id', all = T)
-  setorder(out$results_bysite, ejam_uniq_id)
 
   out$results_overall$valid <- TRUE # needs to be TRUE for some functions like ejam2report() ? or  sum(out$results_bysite$valid, na.rm = T)
   out$results_overall$invalid_msg <- ""
@@ -814,6 +822,13 @@ ejamit <- function(sitepoints = NULL,
   out$results_bybg_people[ , radius.miles := radius]
   ################################################################ #
 
+  # sort outputs like sites were sorted in the inputs to ejamit()
+
+  # ENSURE outputs SITES ARE SORTED IN SAME ORDER AS THEY WERE IN INPUTS
+  out$results_bysite[original_order, n := n, on = "ejam_uniq_id"]
+  setorder(out$results_bysite, n)
+  out$results_bysite[, n := NULL]
+
   # * batch.summarize()   ####
 
   # For each indicator, calc AVG and PCTILES, across all SITES and all PEOPLE
@@ -837,7 +852,7 @@ ejamit <- function(sitepoints = NULL,
 
   # * table_tall_from_overall() ####
 
-  out$formatted <- table_tall_from_overall(out$results_overall, fixcolnames(names(out$results_bysite), 'r', 'long')) # out$longnames)
+  out$formatted <- table_tall_from_overall(out$results_overall, fixcolnames(names(out$results_overall), 'r', 'long')) # out$longnames)
 
   ###################################### #
   ## report the sitetype ####

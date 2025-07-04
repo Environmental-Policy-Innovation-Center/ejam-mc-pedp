@@ -27,8 +27,10 @@
 #'
 getblocksnearby_from_fips <- function(fips, inshiny = FALSE, need_blockwt = TRUE, return_shp = FALSE) {
 
+  # fips.char <- fips_lead_zero( fips)  # adds leading zeroes and returns as character, 5 characters if seems like countyfips, etc.
+  # original_order <- data.table(n = seq_along(fips), ejam_uniq_id = fips.char)
+
   # If some fips are city and others not, use approp method for each, then combine and re-sort
-  original_order <- data.table(n = 1:length(fips), ejam_uniq_id = fips)
   suppressWarnings({
     ftype <- fipstype(fips)
   })
@@ -58,9 +60,9 @@ getblocksnearby_from_fips <- function(fips, inshiny = FALSE, need_blockwt = TRUE
 
     output$pts <- rbind(output_city$pts, output_noncity$pts)
     output$shp <- rbind(output_city$shp, output_noncity$shp)
-
+    # sort spatial data.frame using data.frame syntax:
     output$shp <- output$shp[match(fips, output$shp$ejam_uniq_id), ]
-
+    # sort pts data.table using data.table syntax:
     output$pts[original_order, n := n, on = "ejam_uniq_id"]
     setorder(output$pts, n)
     output$pts[, n := NULL]
@@ -79,14 +81,23 @@ getblocksnearby_from_fips <- function(fips, inshiny = FALSE, need_blockwt = TRUE
 
 getblocksnearby_from_fips_cityshape <- function(fips, return_shp = FALSE) {
 
+  ## NOTE!!!    getblocksnearby_from_fips()$ejam_uniq_id  is .... ??
+  ## RIGHT NOW, getblocksnearby_from_fips_noncity()   is using fips as the output ejam_uniq_id !!
+  ## BUT        getblocksnearby_from_fips_cityshape() is using 1:NROW() as the output ejam_uniq_id !!
+  ## unlike the use of fips as the ejam_uniq_id in the output of ejamit(fips= )$results_bysite$ejam_uniq_id, or for doaggregate()
+
+  original_order <- data.table(n = seq_along(fips), ejam_uniq_id = fips)
+
   polys <- shapes_places_from_placefips(fips)
   polys <- polys[match(fips, polys$FIPS), ] # adds back in NA rows where fips was NA if missing (but was already handled by shapes_places_from_placefips() )
   polys$FIPS <- fips # was already handled by shapes_places_from_placefips()
   s2b_pts_polys <- get_blockpoints_in_shape(polys = polys)
+
   # s2b_pts_polys$polys is a spatial df with FIPS character like fips, and ejam_uniq_id is 1:nrow integer class
   # s2b_pts_polys$pts is a data.table with no fips field, and   ejam_uniq_id is integer class 1:nrow but check sort order of it.
   # do we need to sort again? sort outputs based on inputs, and include NA row for any NA in inputs, like now done by getblocks for latlon case
-  setorder(s2b_pts_polys$pts, ejam_uniq_id) # sort pts by ejam_uniq_id, which is 1:nrow
+
+  setorder(s2b_pts_polys$pts, ejam_uniq_id) # sort pts by ejam_uniq_id, which is 1:nrow if cityshape
 
   if (return_shp) {
     # sort outputs based on inputs
@@ -100,7 +111,7 @@ getblocksnearby_from_fips_cityshape <- function(fips, return_shp = FALSE) {
   # fips = c(4975360, 4262056, 4958070) # 1 of those 3 has no bounds avail.
   # mapview::mapview( shapes_from_fips(fips))
   #
-  ## handles ejam_unique_id aka fips ### #
+  ## handles ejam_unique_id   ### #
   ##   polys$FIPS is in same sort order as fips input, but some are NA if cannot find boundaries shapefile for some cities/cdps !
   ##   get_blockpoints_in_shape() was ignoring FIPS and assigning ejam_uniq_id as 1:NROW(), if ejam_uniq_id column not found,
   ##   but may want to recode this to pass the FIPS codes as ejam_uniq_id ... except some FIPS are NA (if bounds not found)
@@ -127,6 +138,11 @@ getblocksnearby_from_fips_cityshape <- function(fips, return_shp = FALSE) {
 
 getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, inshiny = FALSE, need_blockwt = TRUE) {
 
+  ## NOTE!!!    getblocksnearby_from_fips()$ejam_uniq_id  is .... ??
+  ## RIGHT NOW, getblocksnearby_from_fips_noncity()   is using fips as the output ejam_uniq_id !!
+  ## BUT        getblocksnearby_from_fips_cityshape() is using 1:NROW() as the output ejam_uniq_id !!
+  ## unlike the use of fips as the ejam_uniq_id in the output of ejamit(fips= )$results_bysite$ejam_uniq_id, or for doaggregate()
+
   if (!exists('blockid2fips')) {
     dataload_dynamic(varnames = 'blockid2fips')
   }
@@ -134,8 +150,12 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, inshiny 
     dataload_dynamic(varnames = 'bgid2fips')
   }
 
+  ## RETAIN ORIGINAL SORT ORDER OF input fips to use in output as well
+
   fips.char <- fips_lead_zero( fips)  # adds leading zeroes and returns as character, 5 characters if seems like countyfips, etc.
-  # original_order <- data.table(n = seq_along(fips), ejam_uniq_id = fips.char) # not used
+  original_order <- data.table(n = seq_along(fips), ejam_uniq_id = fips.char)
+
+  # unlike getblocksnearby_from_fips(),  this function needs all fips to be the same type, like all "county", not a mix of county and city
   fipslengths <- nchar(fips.char) # na.omit done while checking uniques since if not done, an invalid fips would create NA and cause error here
   if (!(length(unique(na.omit(fipslengths))) == 1)) {    # might recode to allow that but it is complicated
     if (inshiny) {
@@ -212,14 +232,14 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, inshiny 
     fips_blockpoints[ , lat := NULL]
     fips_blockpoints[ , lon := NULL]
 
-    #  use a join to sort outputs based on inputs, and include NA row for any NA in inputs, like now done by getblocks for latlon case
-    fips.dt = data.table(ejam_uniq_id = fips)
-    fips_blockpoints <- fips_blockpoints[fips.dt, , on = "ejam_uniq_id"]
-
-    ## another way to return results sorted in same order as the original input fips
-    # fips_blockpoints[original_order, n := n, on = "ejam_uniq_id"]
-    # setorder(fips_blockpoints, n)
-    # fips_blockpoints[, n := NULL]
+    # could use a join to sort outputs based on inputs, and include NA row for any NA in inputs, like now done by getblocks for latlon case, but this makes a copy
+    # fips.dt = data.table(ejam_uniq_id = fips)
+    # fips_blockpoints <- fips_blockpoints[fips.dt, , on = "ejam_uniq_id"]
+#
+    ## better way to return results sorted in same order as the original input fips, using by reference not copies
+    fips_blockpoints[original_order, n := n, on = "ejam_uniq_id"]
+    setorder(fips_blockpoints, n)
+    fips_blockpoints[, n := NULL]
 
     return(fips_blockpoints[])
 
