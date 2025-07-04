@@ -174,371 +174,363 @@ x <- EJAM:::test_ejam(
 
     ## FIND tests ####
 
-      sdir <- getwd()
-      test_files_found <-  basename(list.files(path = file.path(sdir, "tests/testthat"), full.names = TRUE, pattern = "test-"))
-      ########################################## #
+    sdir <- getwd()
+    test_files_found <-  basename(list.files(path = file.path(sdir, "tests/testthat"), full.names = TRUE, pattern = "test-"))
+    ########################################## #
 
-      # GROUP the tests ####
+    # GROUP the tests ####
 
-      testlist = list(
+    testlist = list(
 
-        test_fips = c(
-          "test-FIPS_FUNCTIONS.R",
-          "test-state_from_fips_bybg.R",
-          "test-state_from_latlon.R",
-          "test-is.numeric.text.R"
-        ),
-        test_naics = c(
-          "test-naics_categories.R",
-          "test-naics_findwebscrape.R",
-          "test-naics_from_any.R",
-          "test-naics_from_code.R",
-          "test-naics_from_name.R",
-          "test-naics_subcodes_from_code.R",
-          "test-naics_validation.R",
-          "test-naics2children.R"
-        ),
-        test_frs = c(
-          "test-regid_from_naics.R",
-          "test-frs_from_naics.R",
-          "test-frs_from_programid.R",
-          "test-frs_from_regid.R",
-          "test-frs_from_sic.R",
-          "test-frs_is_valid.R"
-        ),
-        test_latlon = c(
-          "test-latlon_infer.R",
-          "test-latlon_as.numeric.R",
-          "test-latlon_df_clean.R",
-          "test-latlon_is.valid.R",
-          "test-latlon_from_anything.R",
-          "test-latlon_from_sic.R",
-          "test-address_xyz.R",
-          "test-latlon_from_address.R",
-          "test-latlon_from_vectorofcsvpairs.R",
-          "test-state_from_sitetable.R"
-        ),
-        test_maps = c(
-          "test-MAP_FUNCTIONS.R"
-        ),
-        test_shape = c(
-          "test-shapefile_xyz.R",
-          "test-shapes_from_fips.R",
-          "test-ejam2shapefile.R",
-          "test-shape2zip.R"
-        ),
-        test_getblocks = c(
-          "test-radius_inferred.R",              # this is SLOW THOUGH
-          "test-getblocks_summarize_blocks_per_site.R",
-          "test-getblocksnearby.R",
-          "test-getblocksnearby_from_fips.R",
-          "test-getblocksnearbyviaQuadTree.R",
-          "test-report_residents_within_xyz.R",
-          "test-proxistat.R",
-          "test-utils_indexpoints.R",
-          "test-get_blockpoints_in_shape.R"
-        ),
-        test_fixcolnames = c(
-          "test-fixcolnames.R",
-          "test-fixnames.R",
-          "test-fixnames_to_type.R",
-          "test-fixcolnames_infer.R",
-          "test-varinfo.R",
-          "test-utils_metadata_add.R"
-        ),
-        test_doag = c(
-          "test-pctile_from_raw_lookup.R",
-          "test-doaggregate.R",
-          "test-area_sqmi.R",
-          "test-batch.summarize.R",
-          "test-utils_flagged_FUNCTIONS.R"
-        ),
-        test_ejamit = c(
-          "test-ejamit.R",
-          "test-ejam2barplot_sites.R",
-          "test-ejamit_compare_distances.R",
-          "test-ejamit_compare_types_of_places.R",
-          "test-ejamit_sitetype_from_input.R",
-          "test-ejamit_sitetype_from_output.R"
-        ),
-
-        test_misc = c(
-          "test-acs_bybg.R"
-        ),
-
-        ### X ejscreenapi tests do not work / get skipped WHILE EJSCREEN API IS DOWN MID 2025  ####
-        test_ejscreenapi = c(
-          "test-ejscreenapi.R",
-          "test-ejscreenapi_plus.R",
-          "test-ejscreenapi1.R",
-          "test-ejscreenit.R",
-          "test-ejscreenRESTbroker-functions.R"
-        ),
-
-        test_mod = c(
-          "test-mod_save_report.R",
-          "test-mod_specify_sites.R",
-          "test-mod_view_results.R"
-        ),
-        test_app = c( # not to be confused with shinytest2::test_app() !
-          #"test-report_residents_within_xyz.R",  # maybe belongs in a separate group about reports/tables?
-          "test-ui_and_server.R",
-          "test-FIPS-functionality.R",
-          "test-latlon-functionality.R",
-          "test-NAICS-functionality.R",
-          "test-shp-gdb-zip-functionality.R",
-          "test-shp-json-functionality.R",
-          "test-shp-unzip-functionality.R",
-          "test-shp-zip-functionality.R"
-        ),
-        test_test = c(
-          # "test-test.R", #   fast way to check this script via  biglist <- EJAM:::test_ejam(ask = FALSE, y_runsome = T, run_these = 'test')
-          "test-test2.R",  #   fast way to check this script
-          "test-test1.R"
-        ),
-        test_golem = c(
-          "test-golem_utils_server.R", # not used
-          "test-golem_utils_ui.R"      # not used
-        )
-      )
-      # c("test_fips", "test_naics", "test_frs", "test_latlon", "test_maps",
-      #   "test_shape", "test_getblocks", "test_fixcolnames", "test_doag",
-      #   "test_ejamit", "test_misc", "test_ejscreenapi", "test_mod", "test_app",
-      #   "test_test", "test_golem")
-
-      # Seconds to run each testfile or group ####
-      # x$bytest_all[, c("file", "seconds_byfile")]
-
-      timebyfile <- structure(
-        list(
-          file = c(
-            "test-latlon_df_clean.R", "test-latlon_from_anything.R",
-            "test-latlon_from_vectorofcsvpairs.R", "test-address_xyz.R",
-            "test-latlon_as.numeric.R", "test-latlon_from_address.R", "test-latlon_from_sic.R",
-            "test-latlon_infer.R", "test-latlon_is.valid.R", "test-state_from_sitetable.R",
-            "test-utils_metadata_add.R", "test-fixcolnames.R", "test-fixnames_to_type.R",
-            "test-varinfo.R", "test-fixcolnames_infer.R", "test-fixnames.R",
-            "test-ejscreenRESTbroker-functions.R", "test-ejscreenapi.R",
-            "test-ejscreenapi1.R", "test-ejscreenapi_plus.R", "test-ejscreenit.R",
-            "test-naics2children.R", "test-naics_categories.R", "test-naics_findwebscrape.R",
-            "test-naics_from_code.R", "test-naics_from_name.R", "test-naics_subcodes_from_code.R",
-            "test-naics_validation.R", "test-naics_from_any.R", "test-FIPS_FUNCTIONS.R",
-            "test-is.numeric.text.R", "test-state_from_latlon.R", "test-state_from_fips_bybg.R",
-            "test-MAP_FUNCTIONS.R",
-
-            # obsolete names:
-            "test-FIPS-shiny-functionality.R", "test-NAICS-shiny-functionality.R",
-            "test-latlon-shiny-functionality.R", "test-shapefile-shiny-functionality.R",
-
-            "test-ui_and_server.R",
-
-            "test-doaggregate.R", "test-pctile_from_raw_lookup.R",
-            "test-ejamit_sitetype_from_output.R", "test-ejam2barplot_sites.R",
-            "test-ejamit.R", "test-ejamit_compare_distances.R", "test-ejamit_compare_types_of_places.R",
-            "test-ejamit_sitetype_from_input.R", "test-getblocks_summarize_blocks_per_site.R",
-            "test-report_residents_within_xyz.R", "test-getblocksnearby.R",
-            "test-getblocksnearby_from_fips.R", "test-getblocksnearbyviaQuadTree.R",
-            "test-radius_inferred.R", "test-shapefile_xyz.R", "test-ejam2shapefile.R",
-            "test-shape2zip.R", "test-shapes_from_fips.R", "test-frs_from_naics.R",
-            "test-frs_from_programid.R", "test-frs_from_regid.R", "test-frs_from_sic.R",
-            "test-frs_is_valid.R", "test-regid_from_naics.R", "test-golem_utils_server.R",
-            "test-mod_save_report.R", "test-mod_specify_sites.R", "test-mod_view_results.R",
-            "test-test1.R", "test-test2.R"),
-          seconds_byfile = c(
-            4.53999999999996,
-            2.58999999999924, 2.72999999999956, 6.10000000000036, 2.36000000000058,
-            4.5600000000004, 2.44000000000051, 2.53999999999996, 2.36999999999989,
-            7.13999999999942, 2.48000000000047, 2.39999999999964, 2.15999999999985,
-            2.21000000000004, 2.5, 2.38000000000011, 67.4399999999996, 6.57999999999993,
-            7.82999999999993, 14.2999999999993, 12.9099999999999, 2.5, 2.34999999999945,
-            7.80000000000018, 2.39999999999964, 2.50999999999931, 2.5, 2.43000000000029,
-            3.03999999999996, 31.54, 2.59000000000015, 17.5900000000001,
-            2.30000000000018, 20.1199999999999, 2.17000000000007, 2.25, 2.19999999999982,
-            2.31999999999971, 2.72000000000025, 42.25, 2.55000000000018,
-            10.9899999999998, 23.3200000000006, 31.4700000000003, 71.0799999999999,
-            13.0899999999992, 2.25, 4.40999999999985, 2.18000000000029, 8.83999999999924,
-            5.84000000000015, 7.72000000000025, 18.3400000000001, 6.96000000000004,
-            3.90999999999985, 3.36999999999989, 4.53000000000065, 30.0600000000004,
-            2.42000000000007, 2.5, 6.73999999999978, 2.64000000000033, 9.63000000000011,
-            2.35999999999876, 2.28999999999996, 2.22000000000025, 2.26000000000022,
-            2.19999999999891, 2.23999999999978)),
-        class = "data.frame",
-        row.names = c(NA, -69L))
-      # correct/new names:
-      timebyfile <- rbind(timebyfile,
-                          data.frame(file =  c("test-latlon-functionality.R", "test-shp-gdb-zip-functionality.R",
-                                               "test-shp-json-functionality.R", "test-shp-unzip-functionality.R",
-                                               "test-shp-zip-functionality.R", "test-FIPS-functionality.R",
-                                               "test-NAICS-functionality.R"
-                          ),
-                          seconds_byfile = c(119.793, 157.021, 156.421, 160.492, 163.264,
-                                             133.808, 114.904)
-                          ))
-      # *** add timing for "test-get_blockpoints_in_shape.R", and add in timebygroup the new group(s)
-
-      # timebygroup
-      #            testgroup seconds_bygroup
-      #               <char>           <num>
-      #  1:      test_latlon              70
-      #  2: test_fixcolnames              33
-      #  3: test_ejscreenapi  ***        123
-      #  4:       test_naics              52
-      #  5:        test_fips              68
-      #  6:        test_maps              22
-      #  7:         test_app                 1035
-      #  8:        test_doag              50
-      #  9:      test_ejamit  ***        169
-      # 10:   test_getblocks              64
-      # 11:       test_shape              30shap
-      # 12:         test_frs              72
-      # 13:       test_golem              11
-      # 14:         test_mod              16
-      # 15:        test_test              11
-
-      timebygroup = structure(list(
-        testgroup = c("test_latlon", "test_fixcolnames", "test_ejscreenapi", "test_naics", "test_fips", "test_maps", "test_app",
-                      "test_doag", "test_ejamit", "test_getblocks", "test_shape", "test_frs", "test_golem", "test_mod", "test_test",
-                      "test-misc"),
-        seconds_bygroup = c(70, 33, 123, 52, 68, 22, 1035, 50, 169, 64, 30, 72, 11, 16, 11, 10)
+      test_fips = c(
+        "test-FIPS_FUNCTIONS.R",
+        "test-state_from_fips_bybg.R",
+        "test-state_from_latlon.R",
+        "test-is.numeric.text.R"
       ),
-      row.names = c(NA, -15L), class = c("data.table", "data.frame")
+      test_naics = c(
+        "test-naics_categories.R",
+        "test-naics_findwebscrape.R",
+        "test-naics_from_any.R",
+        "test-naics_from_code.R",
+        "test-naics_from_name.R",
+        "test-naics_subcodes_from_code.R",
+        "test-naics_validation.R",
+        "test-naics2children.R"
+      ),
+      test_frs = c(
+        "test-regid_from_naics.R",
+        "test-frs_from_naics.R",
+        "test-frs_from_programid.R",
+        "test-frs_from_regid.R",
+        "test-frs_from_sic.R",
+        "test-frs_is_valid.R"
+      ),
+      test_latlon = c(
+        "test-latlon_infer.R",
+        "test-latlon_as.numeric.R",
+        "test-latlon_df_clean.R",
+        "test-latlon_is.valid.R",
+        "test-latlon_from_anything.R",
+        "test-latlon_from_sic.R",
+        "test-address_xyz.R",
+        "test-latlon_from_address.R",
+        "test-latlon_from_vectorofcsvpairs.R",
+        "test-state_from_sitetable.R"
+      ),
+      test_maps = c(
+        "test-MAP_FUNCTIONS.R"
+      ),
+      test_shape = c(
+        "test-shapefile_xyz.R",
+        "test-shapes_from_fips.R",
+        "test-ejam2shapefile.R",
+        "test-shape2zip.R"
+      ),
+      test_getblocks = c(
+        "test-radius_inferred.R",              # this is SLOW THOUGH
+        "test-getblocks_summarize_blocks_per_site.R",
+        "test-getblocksnearby.R",
+        "test-getblocksnearby_from_fips.R",
+        "test-getblocksnearbyviaQuadTree.R",
+        "test-report_residents_within_xyz.R",
+        "test-proxistat.R",
+        "test-utils_indexpoints.R",
+        "test-get_blockpoints_in_shape.R"
+      ),
+      test_fixcolnames = c(
+        "test-fixcolnames.R",
+        "test-fixnames.R",
+        "test-fixnames_to_type.R",
+        "test-fixcolnames_infer.R",
+        "test-varinfo.R",
+        "test-utils_metadata_add.R"
+      ),
+      test_doag = c(
+        "test-pctile_from_raw_lookup.R",
+        "test-doaggregate.R",
+        "test-area_sqmi.R",
+        "test-batch.summarize.R",
+        "test-utils_flagged_FUNCTIONS.R"
+      ),
+      test_ejamit = c(
+        "test-ejamit.R",
+        "test-ejam2barplot_sites.R",
+        "test-ejamit_compare_distances.R",
+        "test-ejamit_compare_types_of_places.R",
+        "test-ejamit_sitetype_from_input.R",
+        "test-ejamit_sitetype_from_output.R"
+      ),
+      test_misc = c(
+        "test-acs_bybg.R"
+      ),
+      ### X ejscreenapi tests do not work / get skipped WHILE EJSCREEN API IS DOWN MID 2025  ####
+      test_ejscreenapi = c(
+        "test-ejscreenapi.R",
+        "test-ejscreenapi_plus.R",
+        "test-ejscreenapi1.R",
+        "test-ejscreenit.R",
+        "test-ejscreenRESTbroker-functions.R"
+      ),
+      test_mod = c(
+        "test-mod_save_report.R",
+        "test-mod_specify_sites.R",
+        "test-mod_view_results.R"
+      ),
+      test_app = c( # not to be confused with shinytest2::test_app() !
+        #"test-report_residents_within_xyz.R",  # maybe belongs in a separate group about reports/tables?
+        "test-ui_and_server.R",
+        "test-FIPS-functionality.R",
+        "test-latlon-functionality.R",
+        "test-NAICS-functionality.R",
+        "test-shp-gdb-zip-functionality.R",
+        "test-shp-json-functionality.R",
+        "test-shp-unzip-functionality.R",
+        "test-shp-zip-functionality.R"
+      ),
+      test_test = c(
+        # "test-test.R", #   fast way to check this script via  biglist <- EJAM:::test_ejam(ask = FALSE, y_runsome = T, run_these = 'test')
+        "test-test2.R",  #   fast way to check this script
+        "test-test1.R"
+      ),
+      test_golem = c(
+        "test-golem_utils_server.R", # not used
+        "test-golem_utils_ui.R"      # not used
       )
+    )
+    # c("test_fips", "test_naics", "test_frs", "test_latlon", "test_maps",
+    #   "test_shape", "test_getblocks", "test_fixcolnames", "test_doag",
+    #   "test_ejamit", "test_misc", "test_ejscreenapi", "test_mod", "test_app",
+    #   "test_test", "test_golem")
 
-      # data.table(timebyfile)
-      #                                           file seconds_byfile
-      #                                         <char>          <num>
-      #  1:                     test-latlon_df_clean.R           4.54
-      #  2:                test-latlon_from_anything.R           2.59
-      #  3:        test-latlon_from_vectorofcsvpairs.R           2.73
-      #  4:                         test-address_xyz.R           6.10
-      #  5:                   test-latlon_as.numeric.R           2.36
-      #  6:                 test-latlon_from_address.R           4.56
-      #  7:                     test-latlon_from_sic.R           2.44
-      #  8:                        test-latlon_infer.R           2.54
-      #  9:                     test-latlon_is.valid.R           2.37
-      # 10:                test-state_from_sitetable.R           7.14
-      # 11:                  test-utils_metadata_add.R           2.48
-      # 12:                         test-fixcolnames.R           2.40
-      # 13:                    test-fixnames_to_type.R           2.16
-      # 14:                             test-varinfo.R           2.21
-      # 15:                   test-fixcolnames_infer.R           2.50
-      # 16:                            test-fixnames.R           2.38
-      # 17:        test-ejscreenRESTbroker-functions.R          67.44
-      # 18:                         test-ejscreenapi.R           6.58
-      # 19:                        test-ejscreenapi1.R           7.83
-      # 20:                    test-ejscreenapi_plus.R          14.30
-      # 21:                          test-ejscreenit.R          12.91
-      # 22:                      test-naics2children.R           2.50
-      # 23:                    test-naics_categories.R           2.35
-      # 24:                 test-naics_findwebscrape.R           7.80
-      # 25:                     test-naics_from_code.R           2.40
-      # 26:                     test-naics_from_name.R           2.51
-      # 27:            test-naics_subcodes_from_code.R           2.50
-      # 28:                    test-naics_validation.R           2.43
-      # 29:                      test-naics_from_any.R           3.04
-      # 30:                      test-FIPS_FUNCTIONS.R          31.54
-      # 31:                     test-is.numeric.text.R           2.59
-      # 32:                   test-state_from_latlon.R          17.59
-      # 33:                test-state_from_fips_bybg.R           2.30
-      # 34:                       test-MAP_FUNCTIONS.R          20.12
+    # Seconds to run each testfile or group ####
+    # to update this timing info, run all tests
+    # and then copy text output of dput():
+    # x = test_ejam(ask=F, mydir="~/Desktop/ejamtests",  skip_these = "") # instead of default  skip_these = c("ejscreenapi", "app"),
+    # dput(data.frame(unique(x$bytest_all[, .(file, seconds_byfile)])))
 
-      # 39:                       test-ui_and_server.R           2.72
-      # 40:                         test-doaggregate.R          42.25
-      # 41:              test-pctile_from_raw_lookup.R           2.55
-      # 42:         test-ejamit_sitetype_from_output.R          10.99
-      # 43:                  test-ejam2barplot_sites.R          23.32
-      # 44:                              test-ejamit.R          31.47
-      # 45:            test-ejamit_compare_distances.R          71.08
-      # 46:      test-ejamit_compare_types_of_places.R          13.09
-      # 47:          test-ejamit_sitetype_from_input.R           2.25
-      # 48: test-getblocks_summarize_blocks_per_site.R           4.41
-      # 49:         test-report_residents_within_xyz.R           2.18
-      # 50:                     test-getblocksnearby.R           8.84
-      # 51:           test-getblocksnearby_from_fips.R           5.84
-      # 52:          test-getblocksnearbyviaQuadTree.R           7.72
-      # 53:                     test-radius_inferred.R          18.34
-      # 54:                       test-shapefile_xyz.R           6.96
-      # 55:                      test-ejam2shapefile.R           3.91
-      # 56:                           test-shape2zip.R           3.37
-      # 57:                    test-shapes_from_fips.R           4.53
-      # 58:                      test-frs_from_naics.R          30.06
-      # 59:                  test-frs_from_programid.R           2.42
-      # 60:                      test-frs_from_regid.R           2.50
-      # 61:                        test-frs_from_sic.R           6.74
-      # 62:                        test-frs_is_valid.R           2.64
-      # 63:                    test-regid_from_naics.R           9.63
-      # 64:                  test-golem_utils_server.R           2.36
-      # 65:                     test-mod_save_report.R           2.29
-      # 66:                   test-mod_specify_sites.R           2.22
-      # 67:                    test-mod_view_results.R           2.26
-      # 68:                               test-test1.R           2.20
-      # 69:                               test-test2.R           2.24
-      #                                           file seconds_byfile
+    timebyfile <- structure(list(
+      file = c("test-ejamit.R", "test-ejamit_compare_distances.R",
+               "test-ejam2barplot_sites.R", "test-ejamit_compare_types_of_places.R",
+               "test-ejamit_sitetype_from_input.R", "test-ejamit_sitetype_from_output.R",
+               "test-getblocksnearbyviaQuadTree.R", "test-getblocksnearby.R",
+               "test-proxistat.R", "test-get_blockpoints_in_shape.R", "test-getblocks_summarize_blocks_per_site.R",
+               "test-getblocksnearby_from_fips.R", "test-radius_inferred.R",
+               "test-report_residents_within_xyz.R", "test-utils_indexpoints.R",
+               "test-MAP_FUNCTIONS.R", "test-doaggregate.R", "test-area_sqmi.R",
+               "test-batch.summarize.R", "test-utils_flagged_FUNCTIONS.R", "test-pctile_from_raw_lookup.R",
+               "test-shapes_from_fips.R", "test-ejam2shapefile.R", "test-shape2zip.R",
+               "test-shapefile_xyz.R", "test-latlon_from_anything.R", "test-address_xyz.R",
+               "test-latlon_as.numeric.R", "test-latlon_df_clean.R", "test-latlon_from_address.R",
+               "test-latlon_from_sic.R", "test-latlon_from_vectorofcsvpairs.R",
+               "test-latlon_infer.R", "test-latlon_is.valid.R", "test-state_from_sitetable.R",
+               "test-FIPS_FUNCTIONS.R", "test-is.numeric.text.R", "test-state_from_fips_bybg.R",
+               "test-state_from_latlon.R", "test-fixcolnames.R", "test-fixcolnames_infer.R",
+               "test-fixnames.R", "test-fixnames_to_type.R", "test-utils_metadata_add.R",
+               "test-varinfo.R", "test-frs_from_naics.R", "test-frs_from_programid.R",
+               "test-frs_from_regid.R", "test-frs_from_sic.R", "test-frs_is_valid.R",
+               "test-regid_from_naics.R", "test-golem_utils_server.R", "test-acs_bybg.R",
+               "test-mod_save_report.R", "test-mod_specify_sites.R", "test-mod_view_results.R",
+               "test-naics2children.R", "test-naics_categories.R", "test-naics_findwebscrape.R",
+               "test-naics_from_any.R", "test-naics_from_code.R", "test-naics_from_name.R",
+               "test-naics_subcodes_from_code.R", "test-naics_validation.R",
+               "test-test1.R", "test-test2.R"),
+      seconds_byfile = c(74.3, 58.3, 27.3, 11.7, 2, 10.3, 6.2, 10, 3, 4.8, 4.1, 7.2,
+                         15.1, 2, 1.9, 40.5, 31.1, 6.5, 6.7, 6.4, 2.1, 6, 3.2, 2, 6, 2.6,
+                         6.9, 1.9, 3.2, 5.5, 2.1, 2, 2.1, 2, 6.4, 30.6, 2, 3.8, 10.5,
+                         4.2, 2.9, 2, 2, 3.7, 2.1, 9, 2.2, 2.1, 2.2, 2.1, 5.8, 1.8, 4.6,
+                         1.8, 1.8, 1.8, 2.2, 1.9, 3.8, 2.5, 1.9, 1.9, 1.9, 1.9, 1.7, 1.8
+      )), class = "data.frame", row.names = c(NA, -66L
+                         ))
 
-      ########################################## #
-      # groupnames <- names(testlist)
-      test_all <- as.vector(unlist(testlist))
-      ########################################## #
-      ## confirm all grouped ####
-      {
+    #     # other names for tests that did not get run when dput used?
+    timebyfile <- rbind(timebyfile,
+                        data.frame(file =  c("test-latlon-functionality.R", "test-shp-gdb-zip-functionality.R",
+                                             "test-shp-json-functionality.R", "test-shp-unzip-functionality.R",
+                                             "test-shp-zip-functionality.R", "test-FIPS-functionality.R",
+                                             "test-NAICS-functionality.R",
+                                             "test-ui_and_server.R", "test-golem_utils_server.R",
+                                             c("test-ejscreenRESTbroker-functions.R",
+                                               "test-ejscreenapi.R", "test-ejscreenapi1.R", "test-ejscreenapi_plus.R",
+                                               "test-ejscreenit.R")
+                        ),
+                        seconds_byfile = c(120, 157, 156, 160, 163,
+                                           134, 115,
+                                           2.7, 2.4,
+                                           c(67, 7,
+                                             7.8, 14 , 13)
+                                           )
+                        ))
+    ## test_ejscreenapi timing not here.
 
-        if (!all(TRUE == all.equal(sort(test_all), sort(test_files_found)))) {
-          if (interactive() && beepr_available) {beepr::beep(10)}
-          cat("\n\n   test files found in folder does not match test_files_found list  \n")
-          print(all.equal(sort(test_all), sort(test_files_found)))
-          cat("\n\n")
+    #                                          file seconds_byfile
+    # 1                               test-ejamit.R         74.258
+    # 2             test-ejamit_compare_distances.R         58.289
+    # 3                   test-ejam2barplot_sites.R         27.297
+    # 4       test-ejamit_compare_types_of_places.R         11.744
+    # 5           test-ejamit_sitetype_from_input.R          1.986
+    # 6          test-ejamit_sitetype_from_output.R         10.279
+    # 7           test-getblocksnearbyviaQuadTree.R          6.232
+    # 8                      test-getblocksnearby.R          9.954
+    # 9                            test-proxistat.R          3.035
+    # 10            test-get_blockpoints_in_shape.R          4.806
+    # 11 test-getblocks_summarize_blocks_per_site.R          4.069
+    # 12           test-getblocksnearby_from_fips.R          7.155
+    # 13                     test-radius_inferred.R         15.127
+    # 14         test-report_residents_within_xyz.R          1.956
+    # 15                   test-utils_indexpoints.R          1.926
+    # 16                       test-MAP_FUNCTIONS.R         40.495
+    # 17                         test-doaggregate.R         31.119
+    # 18                           test-area_sqmi.R          6.532
+    # 19                     test-batch.summarize.R          6.711
+    # 20             test-utils_flagged_FUNCTIONS.R          6.416
+    # 21              test-pctile_from_raw_lookup.R          2.066
+    # 22                    test-shapes_from_fips.R          5.964
+    # 23                      test-ejam2shapefile.R          3.161
+    # 24                           test-shape2zip.R          1.957
+    # 25                       test-shapefile_xyz.R          6.001
+    # 26                test-latlon_from_anything.R          2.570
+    # 27                         test-address_xyz.R          6.859
+    # 28                   test-latlon_as.numeric.R          1.903
+    # 29                     test-latlon_df_clean.R          3.196
+    # 30                 test-latlon_from_address.R          5.490
+    # 31                     test-latlon_from_sic.R          2.076
+    # 32        test-latlon_from_vectorofcsvpairs.R          2.003
+    # 33                        test-latlon_infer.R          2.089
+    # 34                     test-latlon_is.valid.R          1.953
+    # 35                test-state_from_sitetable.R          6.378
+    # 36                      test-FIPS_FUNCTIONS.R         30.649
+    # 37                     test-is.numeric.text.R          2.017
+    # 38                test-state_from_fips_bybg.R          3.771
+    # 39                   test-state_from_latlon.R         10.485
+    # 40                         test-fixcolnames.R          4.212
+    # 41                   test-fixcolnames_infer.R          2.852
+    # 42                            test-fixnames.R          2.014
+    # 43                    test-fixnames_to_type.R          1.968
+    # 44                  test-utils_metadata_add.R          3.673
+    # 45                             test-varinfo.R          2.106
+    # 46                      test-frs_from_naics.R          8.987
+    # 47                  test-frs_from_programid.R          2.156
+    # 48                      test-frs_from_regid.R          2.072
+    # 49                        test-frs_from_sic.R          2.208
+    # 50                        test-frs_is_valid.R          2.143
+    # 51                    test-regid_from_naics.R          5.812
+    # 52                  test-golem_utils_server.R          1.818
+    # 53                            test-acs_bybg.R          4.570
+    # 54                     test-mod_save_report.R          1.837
+    # 55                   test-mod_specify_sites.R          1.802
+    # 56                    test-mod_view_results.R          1.802
+    # 57                      test-naics2children.R          2.239
+    # 58                    test-naics_categories.R          1.893
+    # 59                 test-naics_findwebscrape.R          3.778
+    # 60                      test-naics_from_any.R          2.520
+    # 61                     test-naics_from_code.R          1.894
+    # 62                     test-naics_from_name.R          1.946
+    # 63            test-naics_subcodes_from_code.R          1.910
+    # 64                    test-naics_validation.R          1.888
+    # 65                               test-test1.R          1.734
+    # 66                               test-test2.R          1.789
+
+    # 67                test-latlon-functionality.R        119.793
+    # 68           test-shp-gdb-zip-functionality.R        157.021
+    # 69              test-shp-json-functionality.R        156.421
+    # 70             test-shp-unzip-functionality.R        160.492
+    # 71               test-shp-zip-functionality.R        163.264
+    # 72                  test-FIPS-functionality.R        133.808
+    # 73                 test-NAICS-functionality.R        114.904
+    ################# #
+
+    # timebygroup
+
+    # dput(x$bygroup[, .(testgroup, seconds_bygroup)])
+
+    timebygroup <- structure(list(
+      testgroup = c("test_ejamit", "test_getblocks",
+                    "test_maps", "test_doag", "test_shape", "test_latlon", "test_fips",
+                    "test_fixcolnames", "test_frs", "test_golem", "test_misc", "test_mod",
+                    "test_naics", "test_test"),
+      seconds_bygroup = c(204, 81, 43, 67, 29, 66, 61, 34, 42, 9, 8, 14, 43, 9)),
+      class = "data.frame", row.names = c(NA, -14L))
+    # missing  "test_ejscreenapi" and "test_app"
+    #sum(timebyfile[timebyfile$file %in% testlist[['test_app']], ]$seconds_byfile)
+    # 1006
+    timebygroup = rbind(timebygroup, cbind(testgroup = 'test_app', seconds_bygroup = 1006))
+    timebygroup = rbind(timebygroup, cbind(testgroup = 'test_ejscreenapi', seconds_bygroup = 0))
+    timebygroup$seconds_bygroup = as.numeric(timebygroup$seconds_bygroup)
+    timebygroup$minutes_bygroup = round(as.numeric(timebygroup$seconds_bygroup) / 60, 1)
+    setDT(timebygroup)
+    # timebygroup
+    #
+    #           testgroup seconds_bygroup minutes_bygroup
+    #              <char>           <num>           <num>
+    # 1:      test_ejamit             204             3.4
+    # 2:   test_getblocks              81             1.4
+    # 3:        test_maps              43             0.7
+    # 4:        test_doag              67             1.1
+    # 5:       test_shape              29             0.5
+    # 6:      test_latlon              66             1.1
+    # 7:        test_fips              61             1.0
+    # 8: test_fixcolnames              34             0.6
+    # 9:         test_frs              42             0.7
+    #10:       test_golem               9             0.1
+    #11:        test_misc               8             0.1
+    #12:         test_mod              14             0.2
+    #13:       test_naics              43             0.7
+    #14:        test_test               9             0.1
+    #15:         test_app            1006            16.8
+    #16: test_ejscreenapi               0             0.0
+
+    ########################################## #
+    # groupnames <- names(testlist)
+    test_all <- as.vector(unlist(testlist))
+    ########################################## #
+    ## confirm all grouped ####
+    {
+
+      if (!all(TRUE == all.equal(sort(test_all), sort(test_files_found)))) {
+        if (interactive() && beepr_available) {beepr::beep(10)}
+        cat("\n\n   test files found in folder does not match test_files_found list  \n")
+        print(all.equal(sort(test_all), sort(test_files_found)))
+        cat("\n\n")
+      }
+
+      if (length(setdiff(test_files_found, test_all)) > 0) {
+        cat("These are in test folder as files but not in list of groups above: \n\n")
+        print(setdiff(test_files_found, test_all))
+        cat("\n")
+        if (interactive() && ask) {
+          # setdiff(test_files_found, test_all)
+          stopfix <- askYesNo("Stop now to fix list of files in test_ejam() source code?", default = TRUE)
+        } else {
+          stopfix <- TRUE
         }
-
-        if (length(setdiff(test_files_found, test_all)) > 0) {
-          cat("These are in test folder as files but not in list of groups above: \n\n")
-          print(setdiff(test_files_found, test_all))
-          cat("\n")
-          if (interactive() && ask) {
-            # setdiff(test_files_found, test_all)
-            stopfix <- askYesNo("Stop now to fix list of files in test_ejam() source code?", default = TRUE)
-          } else {
-            stopfix <- TRUE
-          }
-          if (is.na(stopfix) || stopfix == TRUE) { # if ESC or asked and yes
-            cat("
+        if (is.na(stopfix) || stopfix == TRUE) { # if ESC or asked and yes
+          cat("
 You need to fix `testlist`, the list of files in the test_ejam() source code, to
 ensure all existing `./test/test-xyz.R` files are listed in `testlist`
 and all filenames listed there actually exist as in that folder called `test`.\n\n")
-            stop("exiting to fix list of test files")
-          } else {
-            cat("Continuing anyway \n")
-          }
+          stop("exiting to fix list of test files")
+        } else {
+          cat("Continuing anyway \n")
         }
-
-        if (length(setdiff(test_all, test_files_found)) > 0) {
-          cat("These are in list of groups above but not in test folder as files: \n\n")
-          print(setdiff(test_all, test_files_found))
-          cat("\n")
-          stop("fix list of test files")
-        }
-
-        if (any(duplicated(test_all))) {
-          cat("some are listed >1 group\n")
-          stop("some are listed >1 group")
-        }
-
-        cat("\n\n")
-        ########################################## #
       }
-      ## confirm time estimates available ####
-      if (y_runsome || y_runall) {
-        missingtime_tests <- setdiff(as.vector(unlist(testlist)), timebyfile$file)
-        if (length(missingtime_tests) > 0) {
-          cat("Missing time estimates for these test files:", paste0(missingtime_tests, collapse = ","))
-        }
-        missingtime_groups <- setdiff(names(testlist), timebygroup$testgroup)
-        if (length(missingtime_groups) > 0) {
-          cat("Missing time estimates for these:", paste0(missingtime_groups, collapse = ","))
-        }
-        cat('\n\n')
-      }
-      ########################### #  ########################################## #
 
+      if (length(setdiff(test_all, test_files_found)) > 0) {
+        cat("These are in list of groups above but not in test folder as files: \n\n")
+        print(setdiff(test_all, test_files_found))
+        cat("\n")
+        stop("fix list of test files")
+      }
+
+      if (any(duplicated(test_all))) {
+        cat("some are listed >1 group\n")
+        stop("some are listed >1 group")
+      }
+
+      cat("\n\n")
+      ########################################## #
+    }
+    ########################### #  ########################################## #
     # cat("\n\nAVAILABLE UNIT TEST FILES, IN GROUPS:\n\n")
 
     ## count of test per group ####
@@ -573,6 +565,20 @@ and all filenames listed there actually exist as in that folder called `test`.\n
     }
 
     shortgroupnames = gsub("^test_(.*)","\\1", names((testlist)))
+    ########################### #  ########################################## #
+    ## confirm time estimates available ####
+    if (y_runsome || y_runall) {
+      missingtime_tests <- setdiff(as.vector(unlist(testlist)), timebyfile$file)
+      if (length(missingtime_tests) > 0) {
+        cat("Missing time estimates for these test FILES:", paste0(missingtime_tests, collapse = ","), '\n')
+      }
+      missingtime_groups <- setdiff(names(testlist), timebygroup$testgroup)
+      if (length(missingtime_groups) > 0) {
+        cat("Missing time estimates for these GROUPS:", paste0(missingtime_groups, collapse = ","), '\n')
+      }
+      cat('\n')
+    }
+    ########################### #  ########################################## #
 
     ## define Functions that run tests ####
     ########################### #      ########################### #
@@ -618,11 +624,6 @@ and all filenames listed there actually exist as in that folder called `test`.\n
               }
               , print = print4eachfile) # here it is a useless param of capture_output_lines()
             }))
-
-            ## old categorization
-            # total = err_cant_test + tests.  tests =  passed or flag. flag = warning OR err. err = (skipped OR failed).
-            # better categories:
-            # total = untested_cant + untested_skipped + tested. tested = passed + warned + failed. flagged = untested_cant + untested_skipped + warned + failed. err=0.
 
             x <- as.data.frame(x)
             x$tests <- x$nb
@@ -950,10 +951,14 @@ and all filenames listed there actually exist as in that folder called `test`.\n
     # Note devtools package is in Suggests not Imports, in DESCRIPTION file
     try({suppressWarnings(suppressMessages({devtools_available <- require(devtools)}))}, silent = TRUE)
     if (!devtools_available) {stop("this requires installing the package devtools first, e.g., \n  install.packages('devtools') \n")}
-    devtools::load_all()
+    junk <- capture.output({
+      suppressPackageStartupMessages(    devtools::load_all()   )
+    })
   } else {
     cat("useloadall=F WILL FAIL TO FIND THE UNEXPORTED FUNCTIONS WHEN IT TRIES TO TEST THEM !! \n")
-    suppressPackageStartupMessages({   library(EJAM)   })
+    junk <- capture.output({
+      suppressPackageStartupMessages({   library(EJAM)   })
+    })
   }
   cat("Downloading all large datasets that might be needed...\n")
   dataload_dynamic("all")

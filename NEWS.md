@@ -33,6 +33,7 @@
 - `test_coverage_check()` utility was improved, just as a way to for package maintainers/contributors to look at which functions might need unit tests written
 - `linesofcode2()` utility was improved, just as a way for package maintainers/contributors to look at which files have most of the lines of code, are mostly comments, etc.
 - `table_xls_format_api()` is what used to be called table_xls_formatting_api() (but is not used unless the ejscreenapi module or server is working)
+- tests/test_coverage_check() improved
 
 
 # EJAM v2.32.4 (June 2025)
