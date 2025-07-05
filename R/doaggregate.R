@@ -178,7 +178,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
   ## validate sites2blocks ####
 
-
   # ensure it has at least 1 row
   if (NROW(sites2blocks) == 0) {
     warning('No blocks found within that radius of your site(s). Try a larger radius')
@@ -190,14 +189,13 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     warning("sites2blocks must contain columns named ejam_uniq_id, blockid, and should have distance")
     return(NULL)
   }
-  # RETAIN ORIGINAL SORT ORDER OF SITES
+  # RETAIN ORIGINAL SORT ORDER OF SITES (and this also means it does not matter if ejam_uniq_id is 1:NROW() or is fips)
   original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)), ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
   # ensure it is a data.table
   if (!data.table::is.data.table(sites2blocks)) {
     message('sites2blocks should be a data.table - converting into one')
     data.table::setDT(sites2blocks, key = c("blockid", "ejam_uniq_id", "distance"))
   }
-
   ###################################################### #
 
   ## validate DISTANCES and RADIUS ####
@@ -382,14 +380,12 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
   # ____AGGREGATE by BLOCK across sites #############################################################################################
 
-
   ################################################################ #
   # FIRST, PREPARE TO AGGREGATE BY BLOCK
 
   ## Use pop weights of nearby blocks ####
   # to track what fraction of each parent block group is considered inside the buffer.
   #    getblocksnearby() already did join that added blockwt column
-  #
 
   # sort rows
 
@@ -478,17 +474,13 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     ),
     by = "blockid"]
   }
-
-  #  length(testoutput_getblocksnearby_10pts_1miles$blockid)
-  # [1] 11567
-  #  length(unique(testoutput_getblocksnearby_10pts_1miles$blockid))
-  # [1] 11334
+  #  length(testoutput_getblocksnearby_10pts_1miles$blockid) [1] 11567
+  #  length(unique(testoutput_getblocksnearby_10pts_1miles$blockid)) [1] 11334
 
   #***  ###################################### #
   ## ...update progress bar in shiny app ####
   if (is.function(updateProgress)) {
     boldtext <- paste0('Analyzing blockgroups')
-
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #Value was 0.4 in non timer approach
   }
   #***  ###################################### #
@@ -498,7 +490,9 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
   ##################################################### #
 
+
   # ___AGGREGATE by BG, the Distances and Sitecounts___ ######
+
 
   ##################################################### #
   ### >>NEED TO CHECK THIS overall calculation here ####
@@ -511,13 +505,12 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   # rm(blockwts) ; gc()  # drop 6m row block table to save RAM # does not seem to be loaded to do that??
   ## ########## #
   #
-  ## *?? ______WHICH OF THESE VERSIONS WAS BETTER? BY REFERENCE should be faster
+  ## *** ? ______WHICH OF THESE VERSIONS WAS BETTER? BY REFERENCE should be faster
   #
   # sites2blocks_overall[, bg_fraction_in_buffer_overall := sum(blockwt),     by="bgid"]  # variable not used !
   # sites2blocks[        , bg_fraction_in_buffer_bysite  := sum(blockwt, na.rm = TRUE), by=c("ejam_uniq_id", "bgid")]
   #
   # VERSUS this below...
-  #
   ##################################################### #
 
   # Distances, Proximity scores, and Site counts nearby ####
@@ -580,7 +573,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
         sitecount_unique = collapse::fnunique(ejam_uniq_id)
       )}, by = .(ejam_uniq_id, bgid)]
 
-
     #  >>>> SLOW, TO OPTIMIZE - starts with sites2bgs_overall  <- sites2blocks_overall[  ####
     # is this redundant since we have sites2bg_bysite and bgid already, and it will get rolled up by ejam_uniq_id only and by bg only, later
     sites2bgs_overall  <- sites2blocks_overall[ , {
@@ -601,7 +593,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
       )}, by =         "bgid" ]
   }
   # sites2bgs_overall$sitecount_unique <- sites2bgs_bysite[, --- TO BE FINISHED LATER --- , by="bgid"]
-
 
   ###################################### #
   ## _PROXIMITY/ DISTANCE/ SITECOUNT notes   ####
@@ -643,9 +634,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   # But really site counts and distance of closest are the best overall summary numbers.
   ################################### #
 
-
   #____________________________________________________ #  ######################################################
-
 
   ##################################################### #
   #  *** JOIN  EJScreen indicators ####
@@ -689,7 +678,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
                                                 all.x = TRUE, all.y = FALSE, by = 'bgid')
 
   # rm(sites2bgs_overall, sites2bgs_bysite); rm(blockgroupstats)
-
   ##################################################### #  ##################################################### #
 
   ######################### #
@@ -751,20 +739,19 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   # ( ENVT, and if include_ejindexes=TRUE, the Summary Indexes too )
   ##################################################### #
 
-  # started to draft new calc_wtdmeans() etc. here...
+  ## started to draft new calc_wtdmeans() etc. here...
   # cbind(table(EJAM::map_headernames$denominator))
   # cbind(table(calcweight(wtdmeancols)))
-  # [,1]
-  # age25up           1
-  # builtunits        2
-  # disab_universe    1
-  # hhlds             2
-  # lan_universe     15
-  # lingiso           4
-  # occupiedunits     1
-  # pop             103
-  # povknownratio     1
-  # unemployedbase    1
+  ## age25up           1
+  ## builtunits        2
+  ## disab_universe    1
+  ## hhlds             2
+  ## lan_universe     15
+  ## lingiso           4
+  ## occupiedunits     1
+  ## pop             103
+  ## povknownratio     1
+  ## unemployedbase    1
 
   ## mean person (or hhld etc.) at each SITE ###
   ## cant really update by reference, adding new columns, bc aggregating at the same time
@@ -859,8 +846,8 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     results_overall$pctownedunits <- as.numeric(NA)
     results_bysite$pctownedunits <- as.numeric(NA)
   }
-
   ############################################### #
+
   ##     later, for results_overall, will calc state pctiles once we have them for each site
 
   ##################################################### #
@@ -989,8 +976,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
   results_overall <- cbind(results_overall, blockcount_near_site = blockcount_overall) # 1 new col and then changed name to match it in results_bysite ---------------------------------------------- -
   results_overall <- cbind(results_overall, bgcount_near_site = bgcount_overall) # 1 new col and then changed name to match it in results_bysite ---------------------------------------------- -
-
-  #***  ###################################### ##  ###################################### #
+  ##################################################### #  ##################################################### #
 
   ##################################################### #
   ## ........update progress bar in shiny app ####
@@ -1014,7 +1000,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   #    by = .(ejam_uniq_id)]
   #
   #################### #
-
   #____________________________________________________  #  ##################################################### #  ######################################################
 
   ##################################################### #  ##################################################### #
@@ -1046,7 +1031,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
     # This case never arises if using shiny app  or ejamit( at least for latlon, not fips or shp cases ) !!
 
-    # This is only an edge case where RStudio user had run getblocksnearby() and has sites2blocks but
+    # This is only an edge case where RStudio user had run getblocksnearby(), get_blockpoints_in_shape(), or  getblocksnearby_from_fips() and has sites2blocks but
     # then tried to run doaggregate() without providing the original points (or fips or shp) that had been used to create sites2blocks.
     # In this edge case, we must figure out ST based on sites2blocks, which means inferring ST of each site from the blocks near it:
     # 1) for the sites2blocks$ejam_uniq_id values where ALL nearby blocks are from the same state, just use that ST.
@@ -1067,7 +1052,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     # single-state case
     sites2states <- state_from_s2b_bysite(sites2blocks) # works for single-state sites only, NA otherwise
     setDT(sites2states)
-
     # if ("confirmed this works" == "done?") {
     # multistate case
     multistate_ids <- sites2states$ejam_uniq_id[is.na(sites2states$ST)]
@@ -1077,7 +1061,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     ##  ???  xxx
     sites2states$ST[is.na(sites2states$ST)] <- others$ST[match(sites2states$ejam_uniq_id[is.na(sites2states$ST)], others$ejam_uniq_id)]
     # }
-
   }
 
   if (is.function(updateProgress)) {
@@ -1159,10 +1142,8 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   #Use vectorized operations instead of for loops
   #Processes entire columns at once for reduced overhead
 
-
   setDT(results_bysite)
   setDT(results_overall)
-
 
   results_bysite[, (varnames.us.pctile) := NA_real_]
   results_overall[, (varnames.us.pctile) := NA_real_]
@@ -1174,7 +1155,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   }
   columns_bysite <- results_bysite[, .SD, .SDcols = varsneedpctiles]
   columns_overall <- results_overall[, .SD, .SDcols = varsneedpctiles]
-
 
   valid_us_vars <- varsneedpctiles[varsneedpctiles %in% colnames(usastats)]
   valid_us_pctl_names <- varnames.us.pctile[varsneedpctiles %in% colnames(usastats)]
@@ -1194,7 +1174,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     })]
   }
 
-
   valid_us_vars_overall <- valid_us_vars[valid_us_vars %in% colnames(results_overall)]
   valid_us_pctl_names_overall <- valid_us_pctl_names[valid_us_vars %in% colnames(results_overall)]
 
@@ -1213,10 +1192,8 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     results_overall[, (vars_not_in_overall) := NA_real_]
   }
 
-
   myvars_to_use <- ifelse(varsneedpctiles %in% c("Demog.Index", "Demog.Index.Supp"),
                           paste0(varsneedpctiles, ".State"), varsneedpctiles)
-
 
   valid_state_vars <- varsneedpctiles[varsneedpctiles %in% colnames(statestats) & myvars_to_use %in% colnames(results_bysite)]
   valid_state_pctl_names <- varnames.state.pctile[varsneedpctiles %in% colnames(statestats) & myvars_to_use %in% colnames(results_bysite)]
@@ -1232,7 +1209,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
     columns_bysite_state <- as.list(results_bysite[, ..myvars_to_use])
 
-
     results_bysite[idx_not_na_st, (valid_state_pctl_names) := mapply(function(var, var_to_use) {
       pctile_from_raw_lookup(
         columns_bysite_state[[var_to_use]][idx_not_na_st],
@@ -1241,7 +1217,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
         zone = ST[idx_not_na_st]
       )
     }, valid_state_vars, valid_state_vars_to_use, SIMPLIFY = FALSE)]
-
 
     results_bysite[!idx_not_na_st, (valid_state_pctl_names) := NA_real_]
   }
@@ -1254,11 +1229,9 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
   if (include_ejindexes) {
 
-
     varnames.us.pctile_EJ <- c(names_ej_pctile, names_ej_supp_pctile)
     varnames.state.pctile_EJ <- c(names_ej_state_pctile, names_ej_supp_state_pctile)
     ejnames_pctile <- c(varnames.us.pctile_EJ, varnames.state.pctile_EJ)
-
 
     results_bysite[, (varnames.us.pctile_EJ) := NA_real_]
     results_bysite[, (varnames.state.pctile_EJ) := NA_real_]
@@ -1266,8 +1239,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
     valid_ej_vars_us <- ejnames_raw[ejnames_raw %in% names(usastats) & ejnames_raw %in% colnames(results_bysite)]
     valid_ej_vars_state <- ejnames_raw[ejnames_raw %in% names(statestats) & ejnames_raw %in% colnames(results_bysite)]
-
-
 
     columns_bysite_ej <- as.list(results_bysite[, ..ejnames_raw])
     columns_overall_ej <- as.list(results_overall[, ..ejnames_raw])
@@ -1285,6 +1256,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
       boldtext <- paste0('Computing results')
       updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #Value was 0.8 in non timer approach
     }
+
     if (length(valid_ej_vars_us) > 0) {
       results_overall[, (varnames.us.pctile_EJ) := lapply(valid_ej_vars_us, function(var) {
         pctile_from_raw_lookup(
@@ -1294,7 +1266,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
         )
       })]
     }
-
 
     if (length(valid_ej_vars_state) > 0) {
       st_vector <- results_bysite$ST
@@ -1308,15 +1279,10 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
           zone = ST[idx_not_na_st]
         )
       })]
-
-
       results_bysite[!idx_not_na_st, (varnames.state.pctile_EJ) := NA_real_]
     }
-
-
     varnames.state.pctile <- c(varnames.state.pctile, varnames.state.pctile_EJ)
   }
-
 
   ############################################################################## #
   #
@@ -1496,6 +1462,9 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   # COLUMNS ORDER  ####
 
   # Put results columns in a more useful/ convenient order
+  #
+  # *** This sorting information could be extracted to be in mapheadernames instead of residing inside doaggregate()
+  #
   ###  THEY COULD BE SORTED TO MATCH EJSCREEN COMMUNITY REPORT ORDER HERE OR ELSEWHERE
   ## TO DO SO HERE, COULD BE SORTED ONLY WITHIN EACH GROUP,
   ## *** e.g., names_e[table_order_variables(names_e)]
@@ -1639,8 +1608,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
       names_age_count,
       names_d_language_count, names_d_languageli_count,
 
-
-
       # ------------------------------------------------------------------------------------- #
 
       ## SUMMARY INDEXES (if include_ejindexes=TRUE) ----------------------------------------\
@@ -1713,7 +1680,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
   # Assemble list of results ####
 
-  # ENSURE outputs SITES ARE SORTED IN SAME ORDER AS THEY WERE IN INPUTS
+  # SORT output rows (sites) as they were in inputs ####
   results_bysite[original_order, n := n, on = "ejam_uniq_id"]
   setorder(results_bysite, n)
   results_bysite[, n := NULL]
@@ -1738,7 +1705,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     # blockcount_overall = blockcount_overall, # note already also in results_overall as a column now, so we dont need to duplicate it here
     # bgcount_overall = bgcount_overall        # note already also in results_overall as a column now, so we dont need to duplicate it here
   )
-
   ########################### #
 
   if (is.function(updateProgress)) {
