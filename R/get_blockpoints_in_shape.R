@@ -60,6 +60,7 @@ shapefile2blockpoints <- function(polys, addedbuffermiles = 0, blocksnearby = NU
 #'
 get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby = NULL,
                                      dissolved = FALSE, safety_margin_ratio = 1.10, crs = 4269,
+                                     # return_shp could be a param as in getblocksnearby_from_fips()
                                      updateProgress = NULL) {
 
   ############################################################################################################### #
@@ -75,82 +76,51 @@ get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby =
   #   areaid=
   #   f=pjson
   ############################################################################################################ #
+
   if (!("ejam_uniq_id" %in% names(polys))) {
     polys$ejam_uniq_id <- 1:NROW(polys) # added by functions like shapefile_from_folder() but not here if user directly used read_sf or st_read
   }
   input_ejam_uniq_id <- polys$ejam_uniq_id
 
+  ############################ ############################ ########################### #
+
+  ## define bounding box around each polygon ####
+
   if (is.function(updateProgress)) {
-    boldtext <- 'Computing overall bounding box'
+    boldtext <- 'Defining bounding box around each polygon'
     updateProgress(message_main = boldtext, value = 0.1)
   }
-  ## overall bbox ########################### #
-  #bbox <- sf::st_bbox(polys)
 
-  #### consider using rectLookup()
-  # would need to convert results of st_bbox(), ie bbox_polys, xy coordinates into format used by blockindex and quaddata
-  # polytable <- create_quaddata( the xy coordinates of the bounding box results)
-  # polytable etc as done in getblocksnearby
-  #
-  # blockpoints_filt <- blockpoints[rectLookup(tree = localtree, xlims = , ylims = ), ]
-  #
-
-
-  ## filter blockpoints to overall bbox
-
-  if (is.function(updateProgress)) {
-    boldtext <- 'Computing individual bounding boxes'
-    updateProgress(message_main = boldtext, value = 0.15)
-  }
-
-  ## individual bbox per polygon ########################### #
   bbox_polys <- lapply(polys$geometry, sf::st_bbox)
 
+  ############################ ############################ ########################### #
+
+  ## filter to just blockpoints in each polygon's bbox, via SearchTrees::rectLookup() using quadtree index ####
+
   if (is.function(updateProgress)) {
-    boldtext <- 'Clipping to bounding boxes'
+    boldtext <- 'Filtering to blocks in each bounding box'
     updateProgress(message_main = boldtext, value = 0.2)
   }
-  #### consider using rectLookup() here instead, for speed ***
-  # would need to convert results of st_bbox(), ie bbox_polys, xy coordinates into format used by blockindex and quaddata
-  # then something like what was done in getblocksnearbyvia...:
-  ### i = sitenumber for example
-  # vec <- rectLookup(  # rectLookup() is from SearchTrees pkg
-  #   tree = quadtree,
-  #   xlims = sitepoints[i, c(x_low, x_hi)],
-  #   ylims = sitepoints[i, c(z_low, z_hi)]
-  # )
-  # res[[i]] <- quaddatatable[vec, ]  # all the pts (like blocks) near this 1 site.
 
+  ## filter blockpoints using lat/lon, NOT polar coordinates/radians?
 
-  ## filter blockpoints using lat/lon, NOT polar coordinates/radians
-
-  # would run this line only once
-  # blockpointstree <- SearchTrees::createTree(blockpoints[, .(lon, lat, blockid)])
-  # blockpoints_filt <- lapply(bbox_polys, function(a){
-  #   SearchTrees::rectLookup(blockpointstree,
-  #                           xlims = c(a$xmin,a$xmax),
-  #                           ylims = c(a$ymin,a$ymax)
-  #
-  # }) %>% unlist(use.names=FALSE) %>% unique
-
-
-  earthRadius_miles <- 3959 # in case it is not already in global envt
+  earthRadius_miles <- 3959
   radians_per_degree <- pi / 180
 
-  ## filter blockpoints using individual bboxes and quadtree
-  blockpoints_filt <- lapply(bbox_polys, function(a){
+  blockpoints_filt <- lapply(bbox_polys, function(a) {
     SearchTrees::rectLookup(localtree,
                             xlims = c(earthRadius_miles * cos(a$ymin * radians_per_degree) * cos(a$xmin * radians_per_degree),
                                       earthRadius_miles * cos(a$ymax * radians_per_degree) * cos(a$xmax * radians_per_degree)),
                             ylims = c(earthRadius_miles * sin(a$ymin * radians_per_degree), earthRadius_miles * sin(a$ymax * radians_per_degree)))
 
   }) %>% unlist(use.names = FALSE) %>% unique
-  ########################### #
+  ############################ ############################ ########################### #
 
+  ## transform as a spatial data.frame ####
 
   if (is.function(updateProgress)) {
-    boldtext <- 'Transforming blockpoints'
-    updateProgress(message_main = boldtext, value = 0.25)
+    boldtext <- 'Transforming spatial data'
+    updateProgress(message_main = boldtext, value = 0.3)
   }
 
   blockpoints_sf <- sf::st_as_sf(blockpoints[blockpoints_filt,], coords = c('lon','lat'), crs = crs)
@@ -158,83 +128,78 @@ get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby =
     warning("requires the blockpoints   called blockpoints_sf  you can make like this: \n blockpoints_sf <-  blockpoints |> sf::st_as_sf(coords = c('lon', 'lat'), crs= 4269) \n # Geodetic CRS:  NAD83 ")
     return(NULL)
   }
-
   # CHECK FORMAT OF polys - ensure it is spatial object (with data.frame/ attribute table? )
   if (!("sf" %in% class(polys))) {
     polys <-  shapefile_from_sitepoints(polys, crs = crs)
   }
   ARE_POINTS <- "POINT" == names(which.max(table(sf::st_geometry_type(polys))))
+  ############################################### #
 
-  #   getblocksnearby() adds a unique id column
-
-
+  ## add buffer around each polygon if needed ####
 
   if (addedbuffermiles > 0) {
     if (is.function(updateProgress)) {
-      boldtext <- 'Adding buffered polygons'
-      updateProgress(message_main = boldtext, value = 0.3)
+      boldtext <- 'Adding buffers around polygons'
+      updateProgress(message_main = boldtext, value = 0.4)
     }
     addedbuffermiles_withunits <- units::set_units(addedbuffermiles, "miles")
     polys <- shape_buffered_from_shapefile_points(polys,  addedbuffermiles_withunits, crs = crs)
     # addedbuffermiles_withunits  name used since below getblocksnearby( , radius=addedbuffermiles etc ) warns units not expected
   }
+  ############################################### #
 
-
-
-  # use   sf::st_intersects() or st_join(, join=intersects)
-
-  if (is.function(updateProgress)) {
-    boldtext <- 'Finding blocks nearby'
-    updateProgress(message_main = boldtext, value = 0.4)
-  }
+  ## use getblocksnearby() only if shapefile was actually POINTS NOT POLYGONS ####
 
   if (is.null(blocksnearby) & ARE_POINTS) {
+
+    if (is.function(updateProgress)) {
+      boldtext <- 'Finding blocks nearby each point'
+      updateProgress(message_main = boldtext, value = 0.5)
+    }
+
     #  calculate it here since not provided
     # get lat,lon of sites
     pts <-  data.table(sf::st_coordinates(polys))  # this is wasteful if they provided a data.frame or data.table and we convert it to sf and then here go backwards
     setnames(pts, c("lon","lat")) # I think in this case it must be lon first then lat, due to how st_coordinates() output is provided?
-    # get blockid of each nearby census block
-    blocksnearby <- getblocksnearby(pts, addedbuffermiles * safety_margin_ratio)  # blockid, distance, ejam_uniq_id # don't care which site  was how this block got included in the filtered list
-    # get lat,lon of nearby blocks
-    blocksnearby <- (blockpoints[blocksnearby, .(lat,lon,blockid), on = "blockid"])  # blockid,      lat ,      lon
-  }
 
-  if (is.function(updateProgress)) {
-    boldtext <- 'Joining blocks to polygons'
-    updateProgress(message_main = boldtext, value = 0.6)
+    # get blockid of each nearby block
+    blocksnearby <- getblocksnearby(pts, addedbuffermiles * safety_margin_ratio)  # blockid, distance, ejam_uniq_id # don't care which site  was how this block got included in the filtered list
+    # get lat,lon of each nearby block
+    blocksnearby <- (blockpoints[blocksnearby, .(lat,lon,blockid), on = "blockid"])  # blockid,      lat ,      lon
+
+    # is this needed here??
+    if (dissolved) {
+      polys <- sf::st_union(polys)
+    }
   }
+  ############################################### #
+
+  # use sf::st_join() on POLYGONS, to find exactly which of the filtered blocks are inside each polygon ####
 
   if (is.null(blocksnearby) & !ARE_POINTS) {
-    # must use extremely slow method ?
-    #stop("non-circular buffers not working yet - too slow to find all US blocks in each via simple sf::st_join   ")
 
     if (dissolved) {
       # warning("using getblocksnearby() to filter US blocks to those near each site must be done before a dissolve  ")
       polys <- sf::st_union(polys)
     }
+
+    if (is.function(updateProgress)) {
+      boldtext <- 'Joining blocks to polygons'
+      updateProgress(message_main = boldtext, value = 0.6)
+    }
+
+    # can be extremely slow ?
     blocksinside <- sf::st_join(blockpoints_sf, sf::st_transform(polys, crs = crs), join = sf::st_intersects, left = 'FALSE' )
-
-
-    # OR...  find centroid of each polygon and
-    # figure out bounding box (or max radius) of each
-    # and then use getblocksnearby() to find all in bounding box (based on some radius like
-    # farthest point from centroid, which is worst-case, distance to the furthest corner of bounding box??)
-
-
-
   }
+  ############################################### #
 
-  if (dissolved) {
-    # warning("using getblocksnearby() to filter US blocks to those near each site must be done before a dissolve  ")
-    polys <- sf::st_union(polys)
-  }
+  # create table of blockpoints ####
+
   if (is.function(updateProgress)) {
-    boldtext <- 'Standardizing shapes'
+    boldtext <- 'Creating table of blockpoints'
     updateProgress(message_main = boldtext, value = 0.8)
   }
   blocksinsidef <- unique(blocksinside)
-
-  #standardize input shapes for doaggregate
 
   pts <-  data.table(
     sf::st_coordinates(blocksinsidef),
@@ -243,15 +208,12 @@ get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby =
     distance = 0
   )
 
-  if (is.function(updateProgress)) {
-    boldtext <- 'Standardizing output'
-    updateProgress(message_main = boldtext, value = 0.9)
-  }
-
   setnames(pts, c("lon","lat","ejam_uniq_id","blockid","distance")) # it is lon then lat due to format of output of st_coordinates() I think
   pts[blockwts,  `:=`(bgid = bgid, blockwt = blockwt), on = "blockid"]
 
-  # sort polys spatial data.frame like input was sorted
+  ## SORT outputs like inputs were ####
+
+  # sort output polys spatial data.frame like input was sorted
   polys <- polys[match(input_ejam_uniq_id, polys$ejam_uniq_id), ]
   # sort pts data.table like input was sorted
   pts <- pts[data.table(ejam_uniq_id = input_ejam_uniq_id), , on = "ejam_uniq_id"]
@@ -262,6 +224,5 @@ get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby =
     boldtext <- 'Completing'
     updateProgress(message_main = boldtext, value = 1)
   }
-
   return(list('pts' = pts, 'polys' = polys))
 }
