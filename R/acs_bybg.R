@@ -17,13 +17,12 @@
 
 #' download ACS 5year data from Census API, at block group resolution (slowly if for entire US)
 #' @details
-#' (Probably) requires [getting and specifying an API key for Census Bureau](https://api.census.gov/data/key_signup.html) ! (at least if query is large).
+#'
+#' Probably requires [getting and specifying an API key for Census Bureau](https://api.census.gov/data/key_signup.html) ! (at least if query is large).
 #'   see [tidycensus package help](https://walker-data.com/tidycensus/)
 #'
 #' NOTES ON KEY TABLES IN ACS THAT ARE RELEVANT TO EJSCREEN:
-#'
-#' \code{
-#'
+#' ```
 #' x <- tidycensus::load_variables(2022, "acs5")
 #'
 #' acstabs <- c("B01001", "B03002", "B15002", "C16002", "C17002", "B25034", "B23025",
@@ -32,18 +31,18 @@
 #' mytables <- data.table::rbindlist(lapply(acstabs2, function(z) {x[substr(x$name,1,7) %in% z, ][1,]}))
 #' print(mytables)
 #'
-#' #        name            label                                                            concept   geography
-#' #      <char>           <char>                                                             <char>      <char>
-#' # 1: B01001_001 Estimate!!Total:                                                         Sex by Age block group
-#' # 2: B03002_001 Estimate!!Total:                                  Hispanic or Latino Origin by Race block group
-#' # 3: B15002_001 Estimate!!Total: Sex by Educational Attainment for the Population 25 Years and Over block group
-#' # 4: C16002_001 Estimate!!Total:    Household Language by Household Limited English Speaking Status block group
-#' # 5: C17002_001 Estimate!!Total:             Ratio of Income to Poverty Level in the Past 12 Months block group
-#' # 6: B25034_001 Estimate!!Total:                                               Year Structure Built block group
-#' # 7: B23025_001 Estimate!!Total:             Employment Status for the Population 16 Years and Over block group
-#' # 8: B18101_001 Estimate!!Total:                                    Sex by Age by Disability Status       tract
+#'          name            label                                                            concept   geography
+#'        <char>           <char>                                                             <char>      <char>
+#'   1: B01001_001 Estimate!!Total:                                                         Sex by Age block group
+#'   2: B03002_001 Estimate!!Total:                                  Hispanic or Latino Origin by Race block group
+#'   3: B15002_001 Estimate!!Total: Sex by Educational Attainment for the Population 25 Years and Over block group
+#'   4: C16002_001 Estimate!!Total:    Household Language by Household Limited English Speaking Status block group
+#'   5: C17002_001 Estimate!!Total:             Ratio of Income to Poverty Level in the Past 12 Months block group
+#'   6: B25034_001 Estimate!!Total:                                               Year Structure Built block group
+#'   7: B23025_001 Estimate!!Total:             Employment Status for the Population 16 Years and Over block group
+#'   8: B18101_001 Estimate!!Total:                                    Sex by Age by Disability Status       tract
 #'
-#' # see details of the variables
+#'   # see details of the variables
 #'
 #' x[substr(x$name,1,7) %in% "B01001_", ] |> print(n=50)
 #' x[substr(x$name,1,7) %in% "B03002_", ] |> print(n=50)
@@ -54,13 +53,12 @@
 #' x[substr(x$name,1,7) %in% "B23025_", ] |> print(n=50)
 #' x[substr(x$name,1,7) %in% "B18101_", ] |> print(n=50)
 #'
-#' ## disability is by tract only:
-#' cbind(unique(grep("disab", x$concept, value = T, ignore.case = T) ))
-#' # x[substr(x$name,1,6) %in% "B18101" & x$geography == "block group", ] |> print(n=50) # none
-#' x[substr(x$name,1,7) %in% "B18101_"  , ] |> print(n=50)
+#'  # disability is by tract only:
 #'
-#' }
-#'
+#'  cbind(unique(grep("disab", x$concept, value = T, ignore.case = T) ))
+#'  # x[substr(x$name,1,6) %in% "B18101" & x$geography == "block group", ] |> print(n=50) # none
+#'  x[substr(x$name,1,7) %in% "B18101_"  , ] |> print(n=50)
+#'  ```
 #' @param variables Vector of variables - see get_acs from tidycensus package
 #' @param table  see get_acs from tidycensus package.
 #'
