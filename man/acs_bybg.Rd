@@ -28,7 +28,11 @@ acs_bybg(
 \arguments{
 \item{variables}{Vector of variables - see get_acs from tidycensus package}
 
-\item{table}{see get_acs from tidycensus package}
+\item{table}{see get_acs from tidycensus package.
+
+EJSCREEN-relevant key tables at block group resolution include these:
+acstabs <- c("B01001", "B03002", "B15002", "C16002", "C17002", "B25034", "B23025")
+and at tract resolution:   "B18101"}
 
 \item{cache_table}{see get_acs from tidycensus package}
 
@@ -69,10 +73,65 @@ data.table (not tibble, and not just a data.frame)
 \description{
 download ACS 5year data from Census API, at block group resolution (slowly if for entire US)
 }
-\details{
-(Probably) requires \href{https://api.census.gov/data/key_signup.html}{getting and specifying an API key for Census Bureau} ! (at least if query is large).
-see \href{https://walker-data.com/tidycensus/}{tidycensus package help}
+\section{name            label                                                            concept   geography}{
+
 }
+
+\section{\if{html}{\out{<char>}}           \if{html}{\out{<char>}}                                                             \if{html}{\out{<char>}}      \if{html}{\out{<char>}}}{
+
+}
+
+\section{1: B01001_001 Estimate!!Total:                                                         Sex by Age block group}{
+
+}
+
+\section{2: B03002_001 Estimate!!Total:                                  Hispanic or Latino Origin by Race block group}{
+
+}
+
+\section{3: B15002_001 Estimate!!Total: Sex by Educational Attainment for the Population 25 Years and Over block group}{
+
+}
+
+\section{4: C16002_001 Estimate!!Total:    Household Language by Household Limited English Speaking Status block group}{
+
+}
+
+\section{5: C17002_001 Estimate!!Total:             Ratio of Income to Poverty Level in the Past 12 Months block group}{
+
+}
+
+\section{6: B25034_001 Estimate!!Total:                                               Year Structure Built block group}{
+
+}
+
+\section{7: B23025_001 Estimate!!Total:             Employment Status for the Population 16 Years and Over block group}{
+
+}
+
+\section{8: B18101_001 Estimate!!Total:                                    Sex by Age by Disability Status       tract}{
+
+}
+
+\section{see details of the variables}{
+x\link{substr(x$name,1,7) \%in\% "B01001_", } |> print(n=50)
+x\link{substr(x$name,1,7) \%in\% "B03002_", } |> print(n=50)
+x\link{substr(x$name,1,7) \%in\% "B15002_", } |> print(n=50)
+x\link{substr(x$name,1,7) \%in\% "C16002_", } |> print(n=50)
+x\link{substr(x$name,1,7) \%in\% "C17002_", } |> print(n=50)
+x\link{substr(x$name,1,7) \%in\% "B25034_", } |> print(n=50)
+x\link{substr(x$name,1,7) \%in\% "B23025_", } |> print(n=50)
+x\link{substr(x$name,1,7) \%in\% "B18101_", } |> print(n=50)
+\subsection{disability is by tract only:}{
+
+cbind(unique(grep("disab", x$concept, value = T, ignore.case = T) ))
+}
+}
+
+\section{x\link{substr(x$name,1,6) \%in\% "B18101" & x$geography == "block group", } |> print(n=50) # none}{
+
+}
+
 \examples{
 \donttest{
 ## All states, full table
