@@ -336,7 +336,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     ## e.g., testing
     # shp <- get_acs(
     #   geography = "county",
-    #   variables = "B10001_001",
+    #   variables = "B01001_001", # B01001_001 is the correct total population estimate.
     #   state = c("44", "10"),
     #   geometry = TRUE,
     #   year = 2022,
@@ -345,7 +345,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
 
     shp <- tidycensus::get_acs(
       geography = "county",
-      variables = "B10001_001",
+      variables = "B01001_001",
       cb = usecb, ## TRUE MEANS FASTER DOWNLOAD BUT LESS ACCURATE
       state = mystates,
       # county =  substr(unique(fips), 3,5), # this function expects county fips to be only the county portion without the 2 state digits
@@ -368,8 +368,6 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     # Geodetic CRS:  NAD83
     # First 10 features:
     #    GEOID                           NAME   variable estimate  moe                       geometry
-    # 1  01069        Houston County, Alabama B10001_001     2458  326 MULTIPOLYGON (((-85.71209 3...
-    # 2  01023        Choctaw County, Alabama B10001_001      464  150 MULTIPOLYGON (((-88.47323 3...
 
     # old output format:
     # > shp = EJAM:::shapes_counties_from_countyfips(cfips)
@@ -381,8 +379,6 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     # Geodetic CRS:  WGS 84
     # First 10 features:
     #               NAME  FIPS STATE_ABBR STATE_NAME POP_SQMI                       geometry
-    # 1   Autauga County 01001         AL    Alabama     98.8 MULTIPOLYGON (((-86.41312 3...
-    # 2   Baldwin County 01003         AL    Alabama    148.7 MULTIPOLYGON (((-87.56491 3...
 
     drop_comma_statename = function(countyname_state) {
       gsub(", .*$", "", countyname_state)
@@ -406,7 +402,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     shp <- shp[ , c('NAME', 'FIPS', 'STATE_ABBR', 'STATE_NAME', 'POP_SQMI', 'geometry',
                     # now adding these 2 columns in this case:
                     'pop', 'pop_moe')]
-    cat("Population estimate is from B10001_001 in American Community Survey 5yr survey ending", acsendyear_carto_tiger, " \n")
+    cat("Population estimate is from B01001_001 in American Community Survey 5yr survey ending", acsendyear_carto_tiger, " \n")
 
     # fips was input, shp$FIPS is output column but need to make the sort order like input order
     if (any(sort(shp$FIPS) != sort(fips))) {warning("fips codes found in shapefile of boundaries are not all the same as fips requested")}
@@ -446,7 +442,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     #     state = mystates,
     #     #    county =  substr(fips_counties_from_state_abbrev(mystates), 3,5),
     #     geography = "county",
-    #     variables = "B10001_001",
+    #     variables = "B01001_001",
     #     geometry = TRUE,
     #     year = 2022
     #   )
@@ -461,7 +457,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     #     state = mystates,
     #     #    county =  substr(fips_counties_from_state_abbrev(mystates), 3,5),
     #     geography = "county",
-    #     variables = "B10001_001",
+    #     variables = "B01001_001",
     #     geometry = TRUE,
     #     year = 2022
     #   )
