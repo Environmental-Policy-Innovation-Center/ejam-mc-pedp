@@ -191,6 +191,7 @@ shapes_from_fips <- function(fips,
       shp_combined <- try(shapes_state_from_statefips(fips), silent = TRUE)
     }
   }
+
   ####################### #
   if (allow_multiple_fips_types == FALSE) {
     types <- c('blockgroup', 'tract', 'city', 'county', 'state')
@@ -218,8 +219,8 @@ shapes_from_fips <- function(fips,
       if (errshp) {shp_combined <- shapes_empty_table(fips)} else { } # else shp_combined is ok
     }
   }
-  ## a way to combine spatial data.frames that do not all have the same columns:
-  # shp_combined <- rbindlist(list(shp_combined, shp_this), fill = TRUE)
+  # convert it back into an sf object, since it has been made a non-sf data.table via rbindlist() above
+  shp_combined <- sf::st_as_sf(setDF(shp_combined))
   return(shp_combined)
 }
 # .------------------------------------ ####

@@ -816,8 +816,6 @@ ejamit <- function(sitepoints = NULL,
   ################################################################ #
 
   # sort outputs like sites were sorted in the inputs to ejamit()
-browser()
-  # ENSURE outputs SITES ARE SORTED IN SAME ORDER AS THEY WERE IN INPUTS
   out$results_bysite[original_order, n := n, on = "ejam_uniq_id"]
   setorder(out$results_bysite, n)
   out$results_bysite[, n := NULL]
