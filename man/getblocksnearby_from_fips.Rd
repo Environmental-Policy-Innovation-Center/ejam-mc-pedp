@@ -6,9 +6,10 @@
 \usage{
 getblocksnearby_from_fips(
   fips,
-  inshiny = FALSE,
+  in_shiny = FALSE,
   need_blockwt = TRUE,
-  return_shp = FALSE
+  return_shp = FALSE,
+  allow_multiple_fips_types = TRUE
 )
 }
 \arguments{
@@ -18,15 +19,26 @@ one will be getting stats on one or more tracts,
 or analyzing and comparing blockgroups in a county,
 or comparing whole counties to each other, within a State.}
 
-\item{inshiny}{used by shiny app server code to handle errors via validate() instead of stop()}
+\item{in_shiny}{used by shiny app server code to handle errors via validate() instead of stop()}
 
 \item{need_blockwt}{set to FALSE to speed it up if you do not need blockwt}
 
 \item{return_shp}{set to TRUE to get a named list, pts and polys, that are sites2blocks table and spatial data.frame,
 or FALSE to get the pts data.table much like output of \code{\link[=getblocksnearby]{getblocksnearby()}} for latlon points.}
+
+\item{allow_multiple_fips_types}{if enabled, set TRUE to allow mix of blockgroup, tract, city, county, state fips}
 }
 \value{
-same as for \code{\link[=getblocksnearby]{getblocksnearby()}} but one row per FIPS, and the distance column is irrelevant
+data.table with colnames ejam_uniq_id, blockid, distance, blockwt, bgid, fips.
+
+\code{\link[=getblocksnearby]{getblocksnearby()}} output is similar but
+\code{getblocksnearby(testpoints_10, radius = 1)}
+also returns extra columns from input, like lat,lon.
+
+\code{\link[=get_blockpoints_in_shape]{get_blockpoints_in_shape()}} output is similar but
+\code{get_blockpoints_in_shape(testinput_shapes_2)}
+returns a list of pts table and polys table, where the pts data.table has
+colnames ejam_uniq_id, blockid, distance, blockwt, bgid, lat, lon.
 }
 \description{
 Allows EJAM to analyze and compare Counties, for example

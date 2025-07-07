@@ -1075,6 +1075,9 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   if (class(results_bysite$ejam_uniq_id) == "character") { # xxx
     sites2states$ejam_uniq_id <- as.character(sites2states$ejam_uniq_id)
   }
+if (class(sites2states$ejam_uniq_id) == "character") {
+  results_bysite$ejam_uniq_id <- as.character(results_bysite$ejam_uniq_id)
+}
   results_bysite[sites2states, ST := ST, on = "ejam_uniq_id"] # check this, including when ST is NA ***
   # results_bysite[, statename := stateinfo$statename[match(ST, stateinfo$ST)]]
   results_bysite[ , statename := fips2statename(fips_state_from_state_abbrev(ST))]

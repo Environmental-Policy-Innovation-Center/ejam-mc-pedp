@@ -7,33 +7,39 @@
   and there is now a unit test that shows the issue and also it is an issue noted on the github repo and is being looked into.
   The same problem may exist for the State EJ Indexes (for all Envt indicators) -- need to clarify what formula is for state-based EJ percentiles.
 - `ejamit()` now gets or calculates the **area in square miles** of each site more consistently and efficiently. It has new params related to how `area_sqmi()` now can get square mileage info from `blockgroupstats` table without needing to download boundaries. There are new parameters called download_fips_bounds_ok, download_noncity_fips_bounds, and includewater. The new params are also driven by two new defaults in global_defaults_shiny.R The old parameter default_download_fips_bounds_to_calc_areas is no longer a param in `ejamit()`.
-- disabled Start Analysis until Done is clicked, when using FIPS dropdown menu of counties/cities/etc.
-- interactive barplots of indicators will be able to show median not just mean via `ejam2barplot_indicators()` but that is work in progress.
-- DRAFT/TBD: Sort order of output fips and polygons should now always be the same as the order of the inputs (sorted like they were in an uploaded shapefile, uploaded FIPS, or FIPS selected from the dropdown list). 
-
+- Disabled Start Analysis until Done is clicked, when using FIPS dropdown menu of counties/cities/etc.
+- Fixed county population counts obtained from and shown in some maps (via fixes in a function used by `shapes_from_fips()` so, e.g., mapfast(shapes_from_fips(testinput_fips_counties)) now shows the right numbers).
+- DRAFT: interactive barplots of indicators will be able to show median not just mean (via the `ejam2barplot_indicators()` function) but that is work in progress.
+- Sort order of output FIPS codes and polygons should now always be the same as the order of the inputs (sorted like they were in an uploaded shapefile, uploaded FIPS, or FIPS selected from the dropdown list). 
 
 ## RStudio users only
   
-- [installation instructions in vignette/article](../articles/installing.html) were edited
-- README mentions https://www.ejanalysis.com now
-- vignettes/articles were renamed
-- `ejamit()` and `shapes_from_fips()` (and related helper functions):
+- [Installation instructions in vignette/article](../articles/installing.html) were edited.
+- README mentions https://www.ejanalysis.com now.
+- Articles (aka vignettes) were renamed.
+
+- `ejamit()` and `shapes_from_fips()` (and related helper functions) have more consistent outputs:
   - Sorting: The outputs now consistently preserve sort order of the input (points, fips, or polygons). This had not been the case for shapes_from_fips() functions, and ejamit()$results_bysite or doaggregate()$results_bysite were preserving sort order only for the latlon case but not necessarily the fips or shapes cases.
   - Invalid sites: The outputs of `shapes_from_fips()` (and related helper functions) will no longer omit output rows for invalid fips and when boundaries could not be obtained for valid fips -- The number of rows in a shapefile output will be the same as then length of the input fips vector.
-  - Mix of fips types: DRAFT/TBD... See parameter allow_multiple_fips_types in `shapes_from_fips`. `shapes_from_fips()` now accepts a mix of city and noncity fips (state, county, tract, blockgroup), so you can get a shapefile where some polygons are cities and others are counties, etc. Previously that was not possible and caused an error.
-- `getblocksnearby()` and related functions (`getblocksnearby_from_fips()`, `get_blockpoints_in_shape()`, etc.):
-  - Sorting: The output sites are now sorted like the input sitse (points, fips, or polygons), while there are still usually many rows (blocks) per site. It had been sorted primarily by blockid, previously.
-  - Invalid sites: DRAFT/TBD... The output now will include a row of NA values for each site that has no blocks in/near it or where the input (coordinates, fips, or polygon) was invalid or NA. Those sites previously had been left out of the sites2blocks table outputs.
+  - (DRAFT) Mix of fips types: See parameter allow_multiple_fips_types in `shapes_from_fips`. `shapes_from_fips()` now accepts a mix of city and noncity fips (state, county, tract, blockgroup), so you can get a shapefile where some polygons are cities and others are counties, etc. Previously that was not possible and caused an error.
+  
+- `getblocksnearby()` and related functions (`getblocksnearby_from_fips()`, `get_blockpoints_in_shape()`, etc.) also have more consistent outputs:
+  - Unique ID in FIPS case: The ejam_uniq_id column in the outputs of these functions will be 1 through the number of sites in the inputs (with multiple rows per site as needed to include all the blocks). Previously, FIPS codes had been used there sometimes (and still are in the outputs of functions where the output has a table with one row per site).
+  - Sorting: The output sites are now sorted like the input sites (points, fips, or polygons), while there are still usually many rows (blocks) per site. It had been sorted primarily by blockid, previously.
+  - (DRAFT) Invalid sites: The output now will include a row of NA values for each site that has no blocks in/near it or where the input (coordinates, fips, or polygon) was invalid or NA. Those sites previously had been left out of the sites2blocks table outputs.
   - Mix of fips types: `getblocksnearby_from_fips()` now accepts a mix of city and noncity fips (state, county, tract, blockgroup), so you can get a shapefile where some polygons are cities and others are counties, etc. Previously that was not possible and caused an error.
-- testoutput_xyz .xlsx and .html files and dataset R objects updated to reflect the new `?bgej` dataset
-- `mapfastej_counties()` has improved color-coded maps of counties
+
+- testoutput_xyz .xlsx and .html files and dataset R objects have been updated to reflect the new `?bgej` dataset.
+- `mapfastej_counties()` has improved color-coded maps of counties.
 - `convert_units()` now can recognize more abbreviations like "mi^2" via updated `fixnames_aliases()`, and got some bug fixes.
 - `blockgroupstats` documentation was improved.
+- `acs_bybg()` documentation now has notes on the key ACS tables most relevant to EJSCREEN.
 - `test_ejam()` is what used to be called `test_interactively()` -- it was improved and renamed and moved to the R folder as an unexported internal function loaded as part of the package. Also, a new parameter y_skipbasic is used instead of y_basic.
-- `test_coverage_check()` utility was improved, just as a way to for package maintainers/contributors to look at which functions might need unit tests written
+- `test_coverage_check()` utility was improved, just as a way to for package maintainers/contributors to look at which functions might need unit tests written.
 - `linesofcode2()` utility was improved, just as a way for package maintainers/contributors to look at which files have most of the lines of code, are mostly comments, etc.
-- `table_xls_format_api()` is what used to be called table_xls_formatting_api() (but is not used unless the ejscreenapi module or server is working)
-- tests/test_coverage_check() improved
+- `table_xls_format_api()` is what used to be called table_xls_formatting_api() (but is not used unless the ejscreenapi module or server is working).
+- tests/test_coverage_check() was improved.
+- fixed inconsistent use of parameter `in_shiny` versus inshiny, to always call it in_shiny
 
 
 # EJAM v2.32.4 (June 2025)

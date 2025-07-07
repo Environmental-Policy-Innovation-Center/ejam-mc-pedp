@@ -16,8 +16,7 @@
 #' @param myservice_county URL of feature service to get shapes from,
 #'   or "cartographic" or "tiger" to use approx or slow/accurate bounds from tidycensus and tigris packages.
 #'   Note State bounds are built into this package as data so do not need to be downloaded from a service.
-#' @param allow_multiple_fips_types testing this option to allow multiple types
-#'   like a county and a city in the same called to shapes_from_fips()
+#' @param allow_multiple_fips_types if enabled, set TRUE to allow mix of blockgroup, tract, city, county, state fips
 #' @details
 #'  The functions this relies on should return results in the same order as the input fips,
 #'  but will exclude rows for invalid fips, and will also exclude output rows that would
@@ -65,7 +64,7 @@ shapes_from_fips <- function(fips,
                              myservice_county = 'cartographic',
                              #  myservice_county = "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2022/FeatureServer/2/query" # an alternative
                              # myservice_state is built into the package as dataset
-                             allow_multiple_fips_types = FALSE
+                             allow_multiple_fips_types = TRUE
 ) {
 
   if (offline_cat()) {
@@ -76,11 +75,12 @@ shapes_from_fips <- function(fips,
   suppressWarnings({
     ftype <- fipstype(fips)
   })
-  if (allow_multiple_fips_types) {
-    #  start with an empty template to fill in rows of, but that would assume all services return shapefile of same exact format, colnames, etc.!
-    shp <- shapes_empty_table(fips)
+
+  if (allow_multiple_fips_types && length(unique(ftype)) > 1) {
+    shp_combined <- NULL # shapes_empty_table(fips) would work only if assumed the colnames were consistent across types and services
   } else {
-    shp <- NULL
+    shp_combined <- NULL
+    allow_multiple_fips_types <- FALSE
   }
 
   options(tigris_use_cache = TRUE) # But it seems to use cache anyway?
@@ -89,7 +89,7 @@ shapes_from_fips <- function(fips,
   if (all(ftype[!is.na(ftype)] %in% 'block')) {
     if (shiny::isRunning()) {
       validate("Obtaining boundaries of Census blocks is not supported here currently.")
-      shp <- NULL
+      shp_combined <- NULL
     } else {
       warning("Obtaining boundaries of Census blocks is not supported here currently. see  ?tigris::block_groups()")
       return(shapes_empty_table(fips))
@@ -110,7 +110,8 @@ shapes_from_fips <- function(fips,
       return(FALSE)
     }
   }
-
+  ########################### #
+  ##                                                  blockgroup ####
   expectedtype <- 'blockgroup'
   if (allow_multiple_fips_types) {
     oktype <- ftype %in% expectedtype & !is.na(ftype)
@@ -118,14 +119,15 @@ shapes_from_fips <- function(fips,
       x <- try(shapes_blockgroups_from_bgfips(fips[oktype], myservice = myservice_blockgroup), silent = TRUE)
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
-      if (errx) { } else {shp[oktype] <- x} # if errx, do not replace the NA values for these rows -- leave them as NA/empty
+      if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
+      shp_combined <- rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'blockgroup')) {
-      shp <- try(shapes_blockgroups_from_bgfips(fips, myservice = myservice_blockgroup), silent = TRUE)
+      shp_combined <- try(shapes_blockgroups_from_bgfips(fips, myservice = myservice_blockgroup), silent = TRUE)
     }
   }
-
+  ##                                                  tract ####
   expectedtype <- 'tract'
   if (allow_multiple_fips_types) {
     oktype <- ftype %in% expectedtype & !is.na(ftype)
@@ -133,14 +135,15 @@ shapes_from_fips <- function(fips,
       x <- try(shapes_tract_from_tractfips(fips[oktype], myservice = myservice_tract), silent = TRUE)
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
-      if (errx) { } else {shp[oktype] <- x} # if errx, do not replace the NA values for these rows -- leave them as NA/empty
+      if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
+      shp_combined <- rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'tract')) {
-      shp <- try(shapes_tract_from_tractfips(fips, myservice = myservice_tract), silent = TRUE)
+      shp_combined <- try(shapes_tract_from_tractfips(fips, myservice = myservice_tract), silent = TRUE)
     }
   }
-
+  ##                                                  city ####
   expectedtype <- 'city'
   if (allow_multiple_fips_types) {
     oktype <- ftype %in% expectedtype & !is.na(ftype)
@@ -148,14 +151,15 @@ shapes_from_fips <- function(fips,
       x <- try(shapes_places_from_placefips(fips[oktype], myservice = myservice_place), silent = TRUE)
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
-      if (errx) { } else {shp[oktype] <- x} # if errx, do not replace the NA values for these rows -- leave them as NA/empty
+      if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
+      shp_combined <- rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'city')) {
-      shp <- try(shapes_places_from_placefips(fips, myservice = myservice_place), silent = TRUE)
+      shp_combined <- try(shapes_places_from_placefips(fips, myservice = myservice_place), silent = TRUE)
     }
   }
-
+  ##                                                  county ####
   expectedtype <- 'county'
   if (allow_multiple_fips_types) {
     oktype <- ftype %in% expectedtype & !is.na(ftype)
@@ -163,14 +167,15 @@ shapes_from_fips <- function(fips,
       x <- try(shapes_counties_from_countyfips(fips[oktype], myservice = myservice_county), silent = TRUE)
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
-      if (errx) { } else {shp[oktype] <- x} # if errx, do not replace the NA values for these rows -- leave them as NA/empty
+      if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
+      shp_combined <- rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
     }
   } else {
     if (all(ftype %in% 'county')) {
-      shp <- try(shapes_counties_from_countyfips(fips, myservice = myservice_county), silent = TRUE)
+      shp_combined <- try(shapes_counties_from_countyfips(fips, myservice = myservice_county), silent = TRUE)
     }
   }
-
+  ##                                                  state ####
   expectedtype <- 'state'
   if (allow_multiple_fips_types) {
     oktype <- ftype %in% expectedtype & !is.na(ftype)
@@ -178,20 +183,21 @@ shapes_from_fips <- function(fips,
       x <- try(shapes_state_from_statefips(fips[oktype]),  silent = TRUE)
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
-      if (errx) { } else {shp[oktype] <- x} # if errx, do not replace the NA values for these rows -- leave them as NA/empty
+      if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
+      shp_combined <- rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'state')) {
-      shp <- try(shapes_state_from_statefips(fips), silent = TRUE)
+      shp_combined <- try(shapes_state_from_statefips(fips), silent = TRUE)
     }
   }
-
+  ####################### #
   if (allow_multiple_fips_types == FALSE) {
     types <- c('blockgroup', 'tract', 'city', 'county', 'state')
     if (length(intersect(ftype, types)) > 1) {
       if (shiny::isRunning()) {
         validate("This dataset contains more than one type of FIPS code. Analysis can only be run on datasets with one type of FIPS codes.")
-        shp <- NULL
+        shp_combined <- NULL
       } else {
         stop("This dataset contains more than one type of FIPS code. Analysis can only be run on datasets with one type of FIPS codes.")
       }
@@ -199,31 +205,34 @@ shapes_from_fips <- function(fips,
     if (length(intersect(ftype, types)) == 0) {
       if (shiny::isRunning()) {
         validate(paste0("This dataset contains no FIPS codes that are an allowed type. Analysis can only be run on datasets with these types of FIPS codes:", paste0(types, collapse = ",")))
-        shp <- NULL
+        shp_combined <- NULL
       } else {
         # maybe return an empty table
         warning(paste0("This dataset contains no FIPS codes that are an allowed type. Analysis can only be run on datasets with these types of FIPS codes:", paste0(types, collapse = ",")))
-        shp <- shapes_empty_table(fips)
+        shp_combined <- shapes_empty_table(fips)
       }
     }
     if (length(intersect(ftype, types)) == 1) {
-      errshp <- error_downloading(shp)
+      errshp <- error_downloading(shp_combined)
       if (is.null(errshp)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
-      if (errshp) {shp <- shapes_empty_table(fips)} else { } # else shp is ok
+      if (errshp) {shp_combined <- shapes_empty_table(fips)} else { } # else shp_combined is ok
     }
   }
-
-  return(shp)
+  ## a way to combine spatial data.frames that do not all have the same columns:
+  # shp_combined <- rbindlist(list(shp_combined, shp_this), fill = TRUE)
+  return(shp_combined)
 }
+# .------------------------------------ ####
 ########################### # ########################### # ########################### # ########################### #
-# states ####
 
+#                                                   states ####
 
 #' Get boundaries of State(s) for mapping
 #'
 #' @param fips vector of one or more State FIPS codes
 #' @seealso [shapes_from_fips()]
 #' @return spatial data.frame of boundaries
+#'
 #' @keywords internal
 #'
 shapes_state_from_statefips <- function(fips) {
@@ -242,14 +251,17 @@ shapes_state_from_statefips <- function(fips) {
   fips = fips[fips_valid(fips)]
   if (length(fips) == 0) {stop('no valid fips')}
 
-  shp = states_shapefile[match(fips, states_shapefile$GEOID), ]
+  ## ensure original rows ####
+  # original sort order, and ensure NROW(shp) output is same as length(fips) input
+  # retain only 1 row per input fips (even if invalid FIPS or valid FIPS lacking downloaded boundaries)
+  shp <- states_shapefile[match(fips, states_shapefile$GEOID), ]
   shp$FIPS <- shp$GEOID
+
   return(shp)
 }
 ########################### # ########################### # ########################### # ########################### #
 
-# counties ####
-
+#                                                  counties ####
 
 #' Get Counties boundaries via API, to map them
 #'
@@ -307,8 +319,8 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
   if (nchar(Sys.getenv("CENSUS_API_KEY")) == 0) {
     tidycensus_ok <- FALSE
   }
-
   if (myservice[1] %in% c("cartographic", "tiger") && tidycensus_ok) {
+    ## > tidycensus ok ####
 
     # use tidycensus pkg
     # library(tidycensus)
@@ -334,6 +346,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     mystates <- setdiff(mystates, "72")
 
     ## e.g., testing
+    # x[ x$label %in% "Estimate!!Total:" & x$geography  %in% "block group",]
     # shp <- get_acs(
     #   geography = "county",
     #   variables = "B01001_001", # B01001_001 is the correct total population estimate.
@@ -357,7 +370,6 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     )
     # now drop unrequested counties
     shp <- shp[shp$GEOID %in% fips, ] # GEOID is the 5-digit county fips here
-
 
     # tidycensus format initially:
     # > shp
@@ -383,7 +395,6 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     drop_comma_statename = function(countyname_state) {
       gsub(", .*$", "", countyname_state)
     }
-
     names(shp) <- gsub("GEOID", "FIPS", names(shp))
     names(shp) <- gsub("estimate", "pop", names(shp))
     names(shp) <- gsub("moe", "pop_moe", names(shp))
@@ -406,7 +417,12 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
 
     # fips was input, shp$FIPS is output column but need to make the sort order like input order
     if (any(sort(shp$FIPS) != sort(fips))) {warning("fips codes found in shapefile of boundaries are not all the same as fips requested")}
+
+    ## ensure original rows ####
+    # original sort order, and ensure NROW(shp) output is same as length(fips) input
+    # retain only 1 row per input fips (even if invalid FIPS or valid FIPS lacking downloaded boundaries)
     shp <- shp[match(fips, shp$FIPS), ]
+    shp$FIPS <- fips # now include the original fips in output even for rows that came back NA / empty polygon
 
     return(shp)
 
@@ -466,6 +482,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
 
   } else {
     # else:
+    ## > tidycensus NOT ok ####
     if (myservice[1] %in% c("cartographic", "tiger") && !tidycensus_ok) {
       # those were requested but failed due to problem with api key or tidycensus package
       warning(paste0("need tidycensus package and census API key to use myservice = '", myservice[1], "', so using default service instead"))
@@ -493,6 +510,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     # Shape__Length (type: esriFieldTypeDouble, alias: Shape__Length, SQL Type: sqlTypeDouble, nullable: true, editable: false)
 
     if (length(fips) > 50) {
+      ## (loop if over 50 fips) ####
       # The API does let you get >50 at once but instead of figuring out that syntax, this function works well enough
       batchsize <- 50
       batches <- 1 + (length(fips) %/% batchsize)
@@ -501,12 +519,15 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
       for (i in 1:batches) {
         first <- 1 + ((i - 1) * batchsize)
         last <- min(first + batchsize - 1, length(fips))
+
         out[[i]] <- shapes_counties_from_countyfips(fips[first:last], outFields = outFields, myservice = myservice)
+
       }
       out <- do.call(rbind, out)
       return(out)
     }
 
+    # > ejscreen service ####
     if (grepl("ejscreen", myservice, ignore.case = TRUE)) {FIPSVARNAME <- "ID"} else {FIPSVARNAME <- "FIPS"}
     myurl <- httr2::url_parse(myservice)
     myurl$query <- list(
@@ -515,17 +536,20 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
       returnGeometry = "true",
       f = "geojson")
     request <- httr2::url_build(myurl)
-    mymapdata <- sf::st_read(request) # st_read returns data.frame, read_sf returns tibble
+    shp <- sf::st_read(request) # st_read returns data.frame, read_sf returns tibble
 
-    # ensure original sort order, but excluding invalid FIPS and also excluding any rows with unavailable boundaries despite valid FIPS
-    mymapdata <- mymapdata[match(fips, mymapdata$FIPS), ]
+    ### ensure original rows ####
+    # original sort order, and ensure NROW(shp) output is same as length(fips) input
+    # retain only 1 row per input fips (even if invalid FIPS or valid FIPS lacking downloaded boundaries)
+    shp <- shp[match(fips, shp$FIPS), ]
+    shp$FIPS <- fips # now include the original fips in output even for rows that came back NA / empty polygon
 
-    return(mymapdata)
+    return(shp)
   }
 }
 ########################### # ########################### # ########################### # ########################### #
 
-# tracts  ####
+#                                                  tracts  ####
 
 #' Get tract boundaries, via API, to map them
 #'
@@ -573,7 +597,7 @@ shapes_tract_from_tractfips <- function(fips, outFields = c("FIPS", "STATE_ABBR"
   if (length(fips) == 0) {stop('no valid fips')}
 
   if (length(fips) > 50) {
-
+    ## (loop if over 50 fips) ####
     # The API does let you get >50 at once but instead of figuring out that syntax, this function works well enough
     batchsize <- 50
     batches <- 1 + (length(fips) %/% batchsize)
@@ -598,17 +622,19 @@ shapes_tract_from_tractfips <- function(fips, outFields = c("FIPS", "STATE_ABBR"
     returnGeometry = "true",
     f = "geojson")
   request <- httr2::url_build(myurl)
-  mymapdata <- sf::st_read(request) # data.frame not tibble
+  shp <- sf::st_read(request) # data.frame not tibble
 
-  # ensure original sort order, but excluding invalid FIPS and also excluding any rows with unavailable boundaries despite valid FIPS
-  mymapdata <- mymapdata[match(fips, mymapdata$FIPS), ]
+  ## ensure original rows ####
+  # original sort order, and ensure NROW(shp) output is same as length(fips) input
+  # retain only 1 row per input fips (even if invalid FIPS or valid FIPS lacking downloaded boundaries)
+  shp <- shp[match(fips, shp$FIPS), ]
+  shp$FIPS <- fips # now include the original fips in output even for rows that came back NA / empty polygon
 
-  return(mymapdata)
+  return(shp)
 }
 ########################### # ########################### # ########################### # ########################### #
 
-# blockgroups ####
-
+#                                                  blockgroups ####
 
 #' Get blockgroups boundaries, via API, to map them
 #'
@@ -631,7 +657,7 @@ shapes_tract_from_tractfips <- function(fips, outFields = c("FIPS", "STATE_ABBR"
 shapes_blockgroups_from_bgfips <- function(bgfips = '010890029222', outFields = c("FIPS", "STATE_ABBR", "SQMI"),
                                            myservice = c(
                                              "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2022/FeatureServer/5/query",
-                                             "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Block_Groups/FeatureServer/0/query",
+                                             "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Block_Groups/FeatureServer/0/query", # token required?
                                              "cartographic", "tiger")[1]
 ) {
 
@@ -641,6 +667,9 @@ shapes_blockgroups_from_bgfips <- function(bgfips = '010890029222', outFields = 
 
     warning("only arcgis service supported currently, so using that")
     myservice <- "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2022/FeatureServer/5/query"
+    # example, all blockgroups in 1 county:
+    # "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2022/FeatureServer/5/query?where=STCOFIPS%3D10001&objectIds=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&units=esriSRUnit_Meter&relationParam=&returnGeodetic=false&outFields=*&returnGeometry=false&returnCentroid=false&returnEnvelope=false&featureEncoding=esriDefault&multipatchOption=xyFootprint&maxAllowableOffset=&geometryPrecision=&outSR=&defaultSR=&datumTransformation=&applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnQueryGeometry=false&returnDistinctValues=false&cacheHint=false&collation=&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&returnTrueCurves=false&returnExceededLimitFeatures=true&quantizationParameters=&sqlFormat=none&f=html&token="
+    # "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2022/FeatureServer/5/query?where=STCOFIPS%3D10001&outFields=*&returnGeodetic=false"
   }
 
   outFields <- paste0(outFields, collapse = ',')
@@ -666,7 +695,7 @@ shapes_blockgroups_from_bgfips <- function(bgfips = '010890029222', outFields = 
   if (length(fips) == 0) {warning('no valid fips')} # just warn now?
 
   if (length(fips) > 50) {
-
+    ## (loop if over 50 fips) ####
     # The API does let you get >50 at once but instead of figuring out that syntax, this function works well enough
     batchsize <- 50
     batches <- 1 + (length(fips) %/% batchsize)
@@ -693,28 +722,22 @@ shapes_blockgroups_from_bgfips <- function(bgfips = '010890029222', outFields = 
   request <- httr2::url_build(myurl)
   shp <- sf::st_read(request) # data.frame not tibble
 
-  # ensure original rows ####
-  # original sort order, and ensure NROW(shp) output is same as length(fips) input
-  # retain only 1 row per input fips (even if invalid FIPS or valid FIPS lacking downloaded boundaries)
-
   # # ensure all via shapes_from_fips() have a FIPS colname
   if ("GEOID" %in% names(shp) && !("FIPS" %in% names(shp))) {
     shp$FIPS <- shp$GEOID
   }
-  # ensure original rows ####
+  ## ensure original rows ####
   # original sort order, and ensure NROW(shp) output is same as length(fips) input
   # retain only 1 row per input fips (even if invalid FIPS or valid FIPS lacking downloaded boundaries)
   shp <- shp[match(fips, shp$FIPS), ]
   shp$FIPS <- fips # now include the original fips in output even for rows that came back NA / empty polygon
 
-  return(mymapdata)
+  return(shp)
 }
 ########################### # ########################### # ########################### # ########################### #
 
 
-
-# places/ cities ####
-
+#                                                  places/ cities ####
 
 
 ####################################################### #
@@ -732,7 +755,6 @@ shapes_blockgroups_from_bgfips <- function(bgfips = '010890029222', outFields = 
 # seealso [shapes_places_from_placefips()] [shapes_places_from_placenames()]
 #   [fips_place2placename()] [fips_place_from_placename()] [censusplaces]
 
-
 # also see
 #  https://www2.census.gov/geo/pdfs/reference/GARM/Ch9GARM.pdf
 #  https://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2023/TGRSHP2023_TechDoc_Ch3.pdf
@@ -743,12 +765,9 @@ shapes_blockgroups_from_bgfips <- function(bgfips = '010890029222', outFields = 
 # NAD 1983 is what the tigris pkg uses -- it only returns feature geometries for US Census data that default to NAD 1983 (EPSG: 4269) coordinate reference system (CRS).
 #   For help deciding on appropriate CRS, see the crsuggest package.
 
-
 ## used by name2fips or fips_from_name
 # see https://www2.census.gov/geo/pdfs/reference/GARM/Ch9GARM.pdf
-
 ####################################################### #
-
 
 #' Get shapefiles/ boundaries of census places like cities
 #'
@@ -788,7 +807,7 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
 
 
 
-  # should check if census api key available, if needed for tiger ***
+  # >>> should check if census api key available, if needed for tiger *** ####
 
 
 
@@ -804,7 +823,7 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
   if ("GEOID" %in% names(shp) && !("FIPS" %in% names(shp))) {
     shp$FIPS <- shp$GEOID
   }
-  # ensure original rows ####
+  ## ensure original rows ####
   # original sort order, and ensure NROW(shp) output is same as length(fips) input
   # retain only 1 row per input fips (even if invalid FIPS or valid FIPS lacking downloaded boundaries)
   shp <- shp[match(fips, shp$FIPS), ]
@@ -814,6 +833,7 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
 }
 ####################################################### #
 
+## NOT USED
 
 shapes_places_from_placenames <- function(place_st) {
 
@@ -847,59 +867,11 @@ shapes_places_from_placenames <- function(place_st) {
   return(shp)
 }
 ####################################################### #
-
-
-
-####################################################### ######################################################## #
-
-## obsolete
-#
-# shapes_places_from_placefips_oldway <- function(fips) {
-#
-#   fips <- fips_lead_zero(fips)
-#   if (!all(as.integer(fips) %in% censusplaces$fips)) {stop("check fips - some are not found in censusplaces$fips")}
-#
-#   st <- fips2state_abbrev(fips)
-#   place_nost <- fips_place2placename(fips, append_st = FALSE)
-#
-#   shp <- tigris::places(st) %>%
-#     tigris::filter_place(place_nost) # gets shapefile of those places boundaries from census via download
-#   return(shp)
-# }
-####################################################### #
-
-## obsolete
-#
-# shapes_places_from_placenames_oldway <- function(place_st) {
-#
-#   #   This earlier way just relies on the tigris pkg for search/filtering
-#
-#   if (length(st) > 1) {cat("not tested/written to handle more than one state at a time\n")}
-#
-#   # getst = function(x) {gsub(".*(..)", "\\1", x)}  # only works if exact format right like x = c("Port Chester, NY", "White Plains, NY", "New Rochelle, NY")
-#   # st = unique(getst(place_st))
-#   st = unique(post_comma(place_st))
-#
-#   # getnost = function(x) gsub("(.*),.*", "\\1", x) # keep non-state parts, only works if exact format right
-#   # place_nost = getnost(place_st)
-#   place_nost = pre_comma(place_st)
-#
-#   tigrisplaces <-  tigris::places(st) # places(st) is what limits tigrisplaces to just the State st
-#   shp <- tigrisplaces %>% tigris::filter_place(place_nost) # gets shapefile of those places boundaries from census via download
-#
-#   # tigrisplaces$NAME is like Rockland
-#   # tigrisplaces$NAMELSAD  is like Rockland city
-#   # tigrisplaces also has STATEFP, PLACEFP, geometry, ALAND, INTPTLAT, INTPTLON, etc.
-#   #   and in GA,e.g., has more fips than censusplaces does, somehow, and a few fips in censusplaces are not in tigrisplaces
-#   ## censusplaces has these: eparegion ST stfips      countyname countyfips         placename    fips
-#
-#   return(shp)
-# }
-####################################################### #
+# .------
 # empty table if all fips invalid ####
 
 # helper to return spatial data.frame of empty polygons, 1 per input fips,
-# same shape as normal output of shapes_from_fips() and its helpers like shapes_tract_from_tractfips()
+# same shape as one possible output of shapes_from_fips() and its helpers like shapes_tract_from_tractfips()
 # based on structure of normal output of shapes_places_from_placefips() specifically,
 # as is done for anytime 1 or some or all rows are invalid fips
 

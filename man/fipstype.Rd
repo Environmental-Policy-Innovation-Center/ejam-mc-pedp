@@ -25,7 +25,7 @@ either a complete tract fips or a blockgroup fips with a missing leading zero.
  fips_counties_from_statename("Delaware")
  fipstype(9001)
  fipstype("10001")
- 
+
 test_tract_missing0 =   4013116500   # 10 digits tract missing 0
 test_tract_good     = "04013116500"  # 11 digits full tract includes leading 0 !!!!!!!!!!
 test_bg_missing0    =   40131165002  # 11 digits blockgroup missing leading 0 !!!!!!!!!!

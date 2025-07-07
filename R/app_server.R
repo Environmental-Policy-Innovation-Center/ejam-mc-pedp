@@ -1099,7 +1099,7 @@ app_server <- function(input, output, session) {
     ## copy of code used in data_up_fips()
 
     cat("COUNT OF ROWS IN FIPS FILE: ", NROW(fips_dt),"\n")
-    fips_vec <- fips_from_table(fips_table = fips_dt, addleadzeroes = TRUE, inshiny = TRUE)
+    fips_vec <- fips_from_table(fips_table = fips_dt, addleadzeroes = TRUE, in_shiny = TRUE)
     ftypeUpload <- fipstype(fips_vec)
     typesUpload <- c('blockgroup', 'tract', 'city', 'county', 'state')
 
@@ -1173,7 +1173,7 @@ app_server <- function(input, output, session) {
     # fips_clean_shiny_input <- function(fips_dt, placetype) {
 
     cat("COUNT OF ROWS IN FIPS FILE: ", NROW(fips_dt),"\n")
-    fips_vec <- fips_from_table(fips_table = fips_dt, addleadzeroes = TRUE, inshiny = TRUE)
+    fips_vec <- fips_from_table(fips_table = fips_dt, addleadzeroes = TRUE, in_shiny = TRUE)
     ftypeUpload <- fipstype(fips_vec)
     typesUpload <- c('blockgroup', 'tract', 'city', 'county', 'state')
 

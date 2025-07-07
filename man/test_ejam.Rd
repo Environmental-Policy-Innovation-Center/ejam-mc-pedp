@@ -9,7 +9,7 @@ test_ejam(
   ask = TRUE,
   noquestions = TRUE,
   useloadall = TRUE,
-  y_basic = FALSE,
+  y_skipbasic = TRUE,
   y_latlon = TRUE,
   y_shp = TRUE,
   y_fips = TRUE,
@@ -33,13 +33,13 @@ test_ejam(
 \item{useloadall}{logical, TRUE means use \code{\link[=load_all]{load_all()}}, FALSE means use \code{\link[=library]{library()}}.
 But useloadall=T is essential actually, for unexported functions to be found when they are tested!}
 
-\item{y_basic}{logical, whether to only run some basic \code{\link[=ejamit]{ejamit()}} functions, not do unit tests}
+\item{y_skipbasic}{logical, if FALSE, runs some basic \code{\link[=ejamit]{ejamit()}} functions, but NOT any unit tests.}
 
-\item{y_latlon}{logical, if y_basic=T, whether to run the basic \code{\link[=ejamit]{ejamit()}} using points}
+\item{y_latlon}{logical, if y_skipbasic=F, whether to run the basic \code{\link[=ejamit]{ejamit()}} using points}
 
-\item{y_shp}{logical, if y_basic=T, whether to run the basic \code{\link[=ejamit]{ejamit()}} using shapefile}
+\item{y_shp}{logical, if y_skipbasic=F, whether to run the basic \code{\link[=ejamit]{ejamit()}} using shapefile}
 
-\item{y_fips}{logical, if y_basic=T, whether to run the basic \code{\link[=ejamit]{ejamit()}} using FIPS}
+\item{y_fips}{logical, if y_skipbasic=F, whether to run the basic \code{\link[=ejamit]{ejamit()}} using FIPS}
 
 \item{y_coverage_check}{logical, whether to show simple lists of
 which functions might not have unit tests, just based on matching source file and test file names.}
