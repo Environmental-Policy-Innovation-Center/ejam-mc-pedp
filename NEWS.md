@@ -13,10 +13,10 @@
 - Sort order of output FIPS codes and polygons should now always be the same as the order of the inputs (sorted like they were in an uploaded shapefile, uploaded FIPS, or FIPS selected from the dropdown list). 
 
 ## RStudio users only
-  
+
 - [Installation instructions in vignette/article](../articles/installing.html) were edited.
+- Articles (aka vignettes) were renamed (titles and file names).
 - README mentions https://www.ejanalysis.com now.
-- Articles (aka vignettes) were renamed.
 
 - `ejamit()` and `shapes_from_fips()` (and related helper functions) have more consistent outputs:
   - Sorting: The outputs now consistently preserve sort order of the input (points, fips, or polygons). This had not been the case for shapes_from_fips() functions, and ejamit()$results_bysite or doaggregate()$results_bysite were preserving sort order only for the latlon case but not necessarily the fips or shapes cases.
@@ -29,8 +29,9 @@
   - (DRAFT) Invalid sites: The output now will include a row of NA values for each site that has no blocks in/near it or where the input (coordinates, fips, or polygon) was invalid or NA. Those sites previously had been left out of the sites2blocks table outputs.
   - Mix of fips types: `getblocksnearby_from_fips()` now accepts a mix of city and noncity fips (state, county, tract, blockgroup), so you can get a shapefile where some polygons are cities and others are counties, etc. Previously that was not possible and caused an error.
 
-- testoutput_xyz .xlsx and .html files and dataset R objects have been updated to reflect the new `?bgej` dataset.
+- `mapfast()` for a single point now zooms out enough to see the whole radius (e.g., `mapfast(testpoints_10[1,], radius = 10)`)
 - `mapfastej_counties()` has improved color-coded maps of counties.
+- testoutput_xyz .xlsx and .html files and dataset R objects have been updated to reflect the new `?bgej` dataset.
 - `convert_units()` now can recognize more abbreviations like "mi^2" via updated `fixnames_aliases()`, and got some bug fixes.
 - `blockgroupstats` documentation was improved.
 - `acs_bybg()` documentation now has notes on the key ACS tables most relevant to EJSCREEN.
