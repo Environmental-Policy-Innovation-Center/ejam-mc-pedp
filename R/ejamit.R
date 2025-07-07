@@ -387,7 +387,7 @@ ejamit <- function(sitepoints = NULL,
     # but also want to know what type each fips is (probably all should be same like all are tracts or all are county fips)
 
     # RETAIN ORIGINAL SORT ORDER OF SITES
-    original_order <- data.table(n = 1:length(fips), ejam_uniq_id = fips)
+    original_order <- data.table(n = 1:length(fips), ejam_uniq_id = as.character(fips))
 
     # Here we retain all rows, columns include ejam_uniq_id, valid, invalid_msg
     data_uploaded = data.frame(fips = fips, ejam_uniq_id = fips, n = 1:length(fips), valid = fips_valid(fips))
@@ -816,7 +816,7 @@ ejamit <- function(sitepoints = NULL,
   ################################################################ #
 
   # sort outputs like sites were sorted in the inputs to ejamit()
-
+browser()
   # ENSURE outputs SITES ARE SORTED IN SAME ORDER AS THEY WERE IN INPUTS
   out$results_bysite[original_order, n := n, on = "ejam_uniq_id"]
   setorder(out$results_bysite, n)
