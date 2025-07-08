@@ -21,16 +21,17 @@
 - `ejamit()` and `shapes_from_fips()` (and related helper functions) have more consistent outputs:
   - Sorting: The outputs now consistently preserve sort order of the input (points, fips, or polygons). This had not been the case for shapes_from_fips() functions, and ejamit()$results_bysite or doaggregate()$results_bysite were preserving sort order only for the latlon case but not necessarily the fips or shapes cases.
   - Invalid sites: The outputs of `shapes_from_fips()` (and related helper functions) will no longer omit output rows for invalid fips and when boundaries could not be obtained for valid fips -- The number of rows in a shapefile output will be the same as then length of the input fips vector.
-  - (DRAFT) Mix of fips types: See parameter allow_multiple_fips_types in `shapes_from_fips`. `shapes_from_fips()` now accepts a mix of city and noncity fips (state, county, tract, blockgroup), so you can get a shapefile where some polygons are cities and others are counties, etc. Previously that was not possible and caused an error.
+  - Mix of fips types: See parameter allow_multiple_fips_types in `shapes_from_fips`. `shapes_from_fips()` now accepts a mix of city and noncity fips (state, county, tract, blockgroup), so you can get a shapefile where some polygons are cities and others are counties, etc. Previously that was not possible and caused an error.
   
 - `getblocksnearby()` and related functions (`getblocksnearby_from_fips()`, `get_blockpoints_in_shape()`, etc.) also have more consistent outputs:
   - Unique ID in FIPS case: The ejam_uniq_id column in the outputs of these functions will be 1 through the number of sites in the inputs (with multiple rows per site as needed to include all the blocks). Previously, FIPS codes had been used there sometimes (and still are in the outputs of functions where the output has a table with one row per site).
   - Sorting: The output sites are now sorted like the input sites (points, fips, or polygons), while there are still usually many rows (blocks) per site. It had been sorted primarily by blockid, previously.
-  - (DRAFT) Invalid sites: The output now will include a row of NA values for each site that has no blocks in/near it or where the input (coordinates, fips, or polygon) was invalid or NA. Those sites previously had been left out of the sites2blocks table outputs.
+  - Invalid sites: The output now includes a row of NA values for each site input that has NA lat or lon, NA fips, or empty polygon. Those sites previously had been left out of the sites2blocks table outputs. May do this also when no blocks in/near a valid site.
   - Mix of fips types: `getblocksnearby_from_fips()` now accepts a mix of city and noncity fips (state, county, tract, blockgroup), so you can get a shapefile where some polygons are cities and others are counties, etc. Previously that was not possible and caused an error.
 
 - `mapfast()` for a single point now zooms out enough to see the whole radius (e.g., `mapfast(testpoints_10[1,], radius = 10)`)
 - `mapfastej_counties()` has improved color-coded maps of counties.
+- `fips_bg_from_latlon()` drafted as unexported function that identifies which blockgroup each point is inside
 - testoutput_xyz .xlsx and .html files and dataset R objects have been updated to reflect the new `?bgej` dataset.
 - `convert_units()` now can recognize more abbreviations like "mi^2" via updated `fixnames_aliases()`, and got some bug fixes.
 - `blockgroupstats` documentation was improved.

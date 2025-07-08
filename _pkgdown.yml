@@ -191,8 +191,8 @@ reference:
   - fips_valid
   - fips_lead_zero
   - fips2pop
-  - fips_bgs_in_fips
   - fips_from_table
+  - fips_bgs_in_fips
   - fips_place_from_placename
   - censusplaces
 - subtitle: "Counties"
@@ -434,6 +434,7 @@ reference:
   - ejscreenit
 - title: internal
   contents:
+  - fips_bg_from_latlon
   - testshapes_2
   - testoutput_getblocksnearby_10pts_1miles
   - testoutput_getblocksnearby_100pts_1miles

@@ -442,10 +442,7 @@ map_blockgroups_over_blocks <- function(y) {
   if (!exists("bgid2fips_arrow")) {
     dataload_dynamic("bgid2fips", return_data_table = FALSE)
   }
-
-
   bgids_arrow <- arrow::Array$create(bgids)
-
 
   bgfips <- bgid2fips_arrow %>%
     mutate(bgid = cast(.data$bgid, arrow::string())) %>%

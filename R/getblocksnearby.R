@@ -40,16 +40,16 @@
 getblocksnearby  <- function(sitepoints, radius = 3, maxradius = 31.07, radius_donut_lower_edge = 0,
                              avoidorphans = FALSE,
                              # indexgridsize,
-                             quadtree = NULL, 
+                             quadtree = NULL,
                              quaddatatable = NULL,
                              quiet = FALSE,
                              parallel = FALSE,
                              use_unadjusted_distance = TRUE,
                              # a new approach that just uses the distance between site and block when determining which blocks (residents) are within radius
                              # relevant if a block is huge relative to the radius or a block contains a site
-                             # might match EJScreen better? 
-                             # and might be a bit faster, 
-                             # and might find different pop and block count nearby a site 
+                             # might match EJScreen better?
+                             # and might be a bit faster,
+                             # and might find different pop and block count nearby a site
                              # and might give smaller estimates of distance of site to avg person, etc.
                              ...
 ) {
@@ -76,9 +76,9 @@ getblocksnearby  <- function(sitepoints, radius = 3, maxradius = 31.07, radius_d
   # But ok if any/orall lat and/or lon are NA values
 
   ################################################################################## #
-  
+
   # if (is.null(quaddatatable)) {quaddatatable <- quaddata} #?
-  
+
   # timed <- system.time({
   if (missing(quadtree)) {
     if (exists("localtree")) {
@@ -87,10 +87,10 @@ getblocksnearby  <- function(sitepoints, radius = 3, maxradius = 31.07, radius_d
       if (!exists("quaddata") | !exists("blockwts") | !exists("blockpoints") ) {  #| !exists("bgid2fips")
         # should
         cat('census block data file(s) not already loaded, so key data will now be downloaded (or loaded from a local copy if possible)...\n')
-         # loads quaddata needed to make localtree index, and several other large files pkg uses.
+        # loads quaddata needed to make localtree index, and several other large files pkg uses.
 
         dataload_dynamic(varnames = c('quaddata', 'blockwts', 'blockpoints')) # and blockid2fips and bgid2fips and bgej are available
-              }
+      }
       #
       # localtree <- SearchTrees::createTree( quaddata, treeType = "quad", dataType = "point")
       indexblocks() # not really tested yet in this context
@@ -101,9 +101,9 @@ getblocksnearby  <- function(sitepoints, radius = 3, maxradius = 31.07, radius_d
       # ))
     }
   }
-
-  cat("Analyzing", NROW(sitepoints), "points, radius of", radius, "miles around each.\n")
-
+  if (!quiet) {
+    cat("Analyzing", NROW(sitepoints), "points, radius of", radius, "miles around each.\n")
+  }
   ################################################################################## #
   # wrapper to make it simple to (possibly later) switch between functions to use for this, clustered vs not, etc.
 
@@ -113,7 +113,7 @@ getblocksnearby  <- function(sitepoints, radius = 3, maxradius = 31.07, radius_d
                                     avoidorphans = avoidorphans,
                                     use_unadjusted_distance = use_unadjusted_distance,
                                     # indexgridsize = indexgridsize,
-                                    quadtree = quadtree, 
+                                    quadtree = quadtree,
                                     #quaddatatable = quaddatatable,
                                     quiet = quiet,
                                     ...)
