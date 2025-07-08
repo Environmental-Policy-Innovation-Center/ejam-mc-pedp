@@ -35,9 +35,9 @@ resaving_testpoints_excel     <- FALSE
 resaving_testpoints_helpdocs  <-   FALSE
 resaving_testpoints_bad       <- FALSE
 
-recreating_getblocksnearby    <- FALSE  # eg if block data changed, or if recreating_doaggregate_output = TRUE below
-resaving_getblocksnearby_rda  <- FALSE
-resaving_getblocksnearby_helpdocs <- FALSE
+recreating_getblocksnearby    <- TRUE  # eg if block data changed, or if recreating_doaggregate_output = TRUE below
+resaving_getblocksnearby_rda  <- TRUE
+resaving_getblocksnearby_helpdocs <- TRUE
 
 recreating_doaggregate_output <- TRUE # eg if other indicators added to outputs
 if (recreating_doaggregate_output) {recreating_getblocksnearby <- TRUE} # needed

@@ -42,7 +42,8 @@
 - `table_xls_format_api()` is what used to be called table_xls_formatting_api() (but is not used unless the ejscreenapi module or server is working).
 - tests/test_coverage_check() was improved.
 - fixed inconsistent use of parameter `in_shiny` versus inshiny, to always call it in_shiny
-
+- `plotblocksnearby()` rewritten to fix/improve map popups, etc., and a parameter was dropped
+- `getblocksnearby()` based on `getblocksnearbyviaQuadTree()` will no longer include, in its output, the lat lon columns from the input table of sitepoints. That was unintentional and potentially confusing and wasted space.
 
 # EJAM v2.32.4 (June 2025)
 
