@@ -43,6 +43,7 @@
 - tests/test_coverage_check() was improved.
 - fixed inconsistent use of parameter `in_shiny` versus inshiny, to always call it in_shiny
 - `plotblocksnearby()` rewritten to fix/improve map popups, etc., and a parameter was dropped
+- `doaggregate()` and `ejamit()` now report 0 for $results_bysite$blockcount_near_site and $results_bysite$bgcount_near_site if there are none, and total counts are correct.
 - `getblocksnearby()` based on `getblocksnearbyviaQuadTree()` will no longer include, in its output, the lat lon columns from the input table of sitepoints. That was unintentional and potentially confusing and wasted space.
 
 # EJAM v2.32.4 (June 2025)

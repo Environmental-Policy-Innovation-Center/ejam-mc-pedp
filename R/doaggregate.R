@@ -232,12 +232,12 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
                 changing the reported radius now to be the inferred radius')
       radius <- radius_inferred(sites2blocks)
     }
-    if (any(sites2blocks$distance > radius)) {message(paste0(
+    if (any(na.omit(sites2blocks$distance) > radius)) {message(paste0(
       "Restricting this analysis to blocks (residents) at distances smaller than radius of ", radius, "\n",
       "as specified in radius parameter passed to doaggregate(), or else inferred from distances reported to doaggregate()\n",
       "even though some larger distances were somehow found in sites2blocks table passed from getblocksnearby() to doaggregate()\n"
     ))}
-    sites2blocks <- sites2blocks[distance <= radius, ]
+    sites2blocks <- sites2blocks[is.na(distance) | distance <= radius, ] # now distance can be NA so let those through
     # is sites2blocks already keying on distance? that would speed it up! ***
   }
   # end of radius adjustments
@@ -951,8 +951,8 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   #
   # Is that at all useful really?? also, the zero-block zero-population blocks are not in the sites2blocks table, so this is not reporting on those with 0 blocks nearby.
   # "blockcount_near_site"            "bgcount_near_site"
-  blockcount_by_site <- sites2blocks[, .(blockcount_near_site = .N),                    by = ejam_uniq_id]
-  bgcount_by_site    <- sites2blocks[, .(bgcount_near_site = collapse::fnunique(bgid)), by = ejam_uniq_id]
+  blockcount_by_site <- sites2blocks[, .(blockcount_near_site = sum(!is.na(blockid))),  by = ejam_uniq_id]
+  bgcount_by_site    <- sites2blocks[, .(bgcount_near_site = collapse::fnunique(bgid[!is.na(bgid)])), by = ejam_uniq_id]
 
   results_bysite <- merge(results_bysite, blockcount_by_site, by = "ejam_uniq_id")
   results_bysite <- merge(results_bysite, bgcount_by_site,    by = "ejam_uniq_id")
@@ -968,8 +968,8 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   # * overall, HOW OFTEN ARE BLOCKS,BGS NEAR >1 SITE?  ###
   # Note this is NOT like the other metrics - this is just an overall stat to report once over the whole set of sites and bgs.
   count_of_blocks_near_multiple_sites <- (NROW(sites2blocks) - NROW(sites2blocks_overall)) # NEW fraction is over /NROW(sites2blocks_overall)
-  blockcount_overall <-  sites2blocks[, collapse::fnunique( blockid)]
-  bgcount_overall    <-  sites2blocks[, collapse::fnunique( bgid)]
+  blockcount_overall <-  sites2blocks[, collapse::fnunique( blockid[!is.na(blockid)])]
+  bgcount_overall    <-  sites2blocks[, collapse::fnunique( bgid[!is.na(bgid)])]
   # how many blockgroups here were found near 1, 2, or 3 sites?
   # e.g., 6k bg were near only 1/100 sites tested, 619 near 2, 76 bg had 3 of the 100 sites nearby.
   # table(table(sites2bgs_bysite$bgid))

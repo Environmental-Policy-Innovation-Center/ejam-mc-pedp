@@ -108,7 +108,7 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
     ## 2. combine city/non ####
     output <- list()
     ## a way to combine spatial data.frames that do not all have the same columns:
-    output$polys <- rbindlist(list(output_city$polys, output_noncity$polys), fill = TRUE)
+    output$polys <- data.table::rbindlist(list(output_city$polys, output_noncity$polys), fill = TRUE)
     output$pts   <- rbind(         output_city$pts,   output_noncity$pts)
 
     ## 3. sort s2b ####
@@ -141,7 +141,7 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
 
     ## 2. combine city/non ####
     ## a way to combine spatial data.frames that do not all have the same columns:
-    output <- rbindlist(list(output_city, output_noncity), fill = TRUE)
+    output <- data.table::rbindlist(list(output_city, output_noncity), fill = TRUE)
 
     ## 3. sort s2b ####
     # sort data.table using data.table syntax, in same order as original inputs were:

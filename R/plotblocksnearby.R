@@ -103,7 +103,7 @@ plotblocksnearby <- function(sitepoints, radius=3, sites2blocks,
     }
   }
 
-  if (NROW(sites2blocks) == 0) {
+  if (NROW(sites2blocks) == 0 || all(is.na(sites2blocks$blockid))) {
     warning('No block internal points are near the specified sitepoints')
     zeronearby <- TRUE
     x <- copy(sitepoints)
@@ -186,6 +186,7 @@ plotblocksnearby <- function(sitepoints, radius=3, sites2blocks,
       # BLOCKS (SURROUNDING A SITE) ####
 
       xb <- copy(x)
+      if (!("ejam_uniq_id" %in% names(xb))) {xb[, ejam_uniq_id := 1:NROW(xb)]} # ensure it has ejam_uniq_id
       xb[ , blockcount_near_site := .N, by = "ejam_uniq_id"]
       # if ("site.bgid" %in% names(xb)) {xb$site.bgid <- NULL} # retaining this is OK # ok to leave that info on each block since it is named clearly
       xb[, lat := blocklat]

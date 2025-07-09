@@ -120,7 +120,7 @@ shapes_from_fips <- function(fips,
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
       if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
-      shp_combined <- rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
+      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'blockgroup')) {
@@ -136,7 +136,7 @@ shapes_from_fips <- function(fips,
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
       if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
-      shp_combined <- rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
+      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'tract')) {
@@ -152,7 +152,7 @@ shapes_from_fips <- function(fips,
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
       if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
-      shp_combined <- rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
+      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'city')) {
@@ -168,7 +168,7 @@ shapes_from_fips <- function(fips,
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
       if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
-      shp_combined <- rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
+      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
     }
   } else {
     if (all(ftype %in% 'county')) {
@@ -184,7 +184,7 @@ shapes_from_fips <- function(fips,
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
       if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
-      shp_combined <- rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
+      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'state')) {
