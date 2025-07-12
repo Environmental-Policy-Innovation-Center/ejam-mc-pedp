@@ -189,13 +189,55 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     warning("sites2blocks must contain columns named ejam_uniq_id, blockid, and should have distance")
     return(NULL)
   }
-  # RETAIN ORIGINAL SORT ORDER OF SITES (and this also means it does not matter if ejam_uniq_id is 1:NROW() or is fips)
-  original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)), ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
-  # ensure it is a data.table
-  if (!data.table::is.data.table(sites2blocks)) {
-    message('sites2blocks should be a data.table - converting into one')
-    data.table::setDT(sites2blocks, key = c("blockid", "ejam_uniq_id", "distance"))
+
+  # NOTE ORIGINAL SORT ORDER OF SITES ####
+  # (and this also means it does not matter if ejam_uniq_id is 1:NROW() or is fips)
+  # But if sites2states_or_latlon has different sort than sites2blocks, which to use?
+  # If both are sorted the same, keep that order (and ignore what ejam_uniq_id is, 1:N or fips)
+  if (all.equal(unique(sites2blocks$ejam_uniq_id), sites2states_or_latlon$ejam_uniq_id)) {
+    original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)), ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
+  } else {
+    # If sorts differ, but one is sorted on ascending value of ejam_uniq_id, use that and ignore what ejam_uniq_id is (fips vs 1:N)
+    if (all.equal(sort(unique(sites2blocks$ejam_uniq_id)), unique(sites2blocks$ejam_uniq_id))) {
+      original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)), ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
+    } else {
+      if (all.equal(sort((sites2states_or_latlon$ejam_uniq_id)), (sites2states_or_latlon$ejam_uniq_id)))  {
+        original_order <- data.table(n = 1:length(unique(sites2states_or_latlon$ejam_uniq_id)), ejam_uniq_id = unique(sites2states_or_latlon$ejam_uniq_id))
+      } else {
+        # If sorts differ and neither is sorted on ascending ejam_uniq_id, then if both have the same set of values just sort both on that and use result.
+        if (setequal(sites2blocks$ejam_uniq_id, sites2states_or_latlon$ejam_uniq_id)) {
+          # maybe dont bother sorting here? but if we do, we could use setorder() if it is already confirmed to be a data.table
+          sites2blocks <- sites2blocks[order(sites2blocks$ejam_uniq_id), ]
+          sites2states_or_latlon <- sites2states_or_latlon[order(sites2states_or_latlon$ejam_uniq_id),]
+          original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)), ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
+        } else {
+          # If all else fails ie they are not even setequal() then use current order of sites2blocks$ejam_uniq_id (do not re-sort it)
+          original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)), ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
+        }
+      }
+    }
   }
+
+  # inefficient but make a copy in this envt avoid altering this by reference in the calling envt? ***
+  sites2blocks <- data.table::copy(sites2blocks)
+  # ensure sites2blocks is a data.table
+  if (!data.table::is.data.table(sites2blocks)) {
+    data.table::setDT(sites2blocks)
+  }
+  # inefficient but make a copy in this envt avoid altering this by reference in the calling envt? ***
+  sites2states_or_latlon <- data.table::copy(sites2states_or_latlon)
+  if (!data.table::is.data.table(sites2states_or_latlon)) {
+    data.table::setDT(sites2states_or_latlon)
+  }
+
+  setkey(sites2blocks, ejam_uniq_id, blockid, distance)
+  setkey(sites2states_or_latlon, ejam_uniq_id)
+  ##
+  ## do we want to set a key here to speed up grouping and subsetting?
+  ## setkey sorts by reference, but we have retained original order already
+  ## note all NA values (e.g., in distance) get sorted as first
+  ## also see setkey(sites2blocks, blockid, ejam_uniq_id, distance), setindex(), and setorder(),
+  # setkeyv(sites2blocks, c("blockid", "ejam_uniq_id", "distance")
   ###################################################### #
 
   ## validate DISTANCES and RADIUS ####
@@ -237,8 +279,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
       "as specified in radius parameter passed to doaggregate(), or else inferred from distances reported to doaggregate()\n",
       "even though some larger distances were somehow found in sites2blocks table passed from getblocksnearby() to doaggregate()\n"
     ))}
-    sites2blocks <- sites2blocks[is.na(distance) | distance <= radius, ] # now distance can be NA so let those through
-    # is sites2blocks already keying on distance? that would speed it up! ***
+    sites2blocks <- sites2blocks[is.na(distance) | distance <= radius, ] # now distance can be NA so let those through here? if handled later
   }
   # end of radius adjustments
   ###################################################### #
@@ -246,7 +287,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   ## validate other inputs? ####
 
   # could check if optional input params, when provided, are all valid ***
-
 
   ##################################################### #  ##################################################### #
 
@@ -388,8 +428,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   #    getblocksnearby() already did join that added blockwt column
 
   # sort rows
-
-  data.table::setorder(sites2blocks, ejam_uniq_id, bgid, blockid) # might not be needed... this was done at start, and also will resort in original order at end
+  # data.table::setorder(sites2blocks, ejam_uniq_id, bgid, blockid) # might not be needed... this was done at start, and also will resort in original order at end
 
   ################################################################ #
   # Just create some new columns in sites2blocks,
@@ -492,7 +531,6 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
 
   # ___AGGREGATE by BG, the Distances and Sitecounts___ ######
-
 
   ##################################################### #
   ### >>NEED TO CHECK THIS overall calculation here ####
@@ -1211,7 +1249,7 @@ if (class(sites2states$ejam_uniq_id) == "character") {
     idx_not_na_st <- !is.na(st_vector)
 
     columns_bysite_state <- as.list(results_bysite[, ..myvars_to_use])
-
+    ######################################## #
     results_bysite[idx_not_na_st, (valid_state_pctl_names) := mapply(function(var, var_to_use) {
       pctile_from_raw_lookup(
         columns_bysite_state[[var_to_use]][idx_not_na_st],
@@ -1220,7 +1258,7 @@ if (class(sites2states$ejam_uniq_id) == "character") {
         zone = ST[idx_not_na_st]
       )
     }, valid_state_vars, valid_state_vars_to_use, SIMPLIFY = FALSE)]
-
+    ######################################## #
     results_bysite[!idx_not_na_st, (valid_state_pctl_names) := NA_real_]
   }
 
@@ -1683,11 +1721,12 @@ if (class(sites2states$ejam_uniq_id) == "character") {
 
   # Assemble list of results ####
 
-  # SORT output rows (sites) as they were in inputs ####
+  # SORT results_bysite output rows (sites) as they were in inputs ####
+  # , ie n = 1:length(unique(ejam_uniq_id))
   results_bysite[original_order, n := n, on = "ejam_uniq_id"]
   setorder(results_bysite, n)
   results_bysite[, n := NULL]
-  # dont bother to sort results_bybg_people
+  # dont need to sort results_bybg_people or other tables
 
   results <- list(
     results_overall = results_overall,  # each indicator
