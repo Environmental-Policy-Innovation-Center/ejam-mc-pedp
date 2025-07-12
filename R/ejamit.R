@@ -385,6 +385,7 @@ ejamit <- function(sitepoints = NULL,
     ## . check fips ####
 
     # getblocksnearby_from_fips() should include doing something like fips_lead_zero() ?
+    # fips <- as.character(fips) ? ***
 
     # RETAIN ORIGINAL SORT ORDER OF SITES (though doaggregate does handle that)
     original_order <- data.table(n = 1:length(fips), ejam_uniq_id = as.character(fips))
