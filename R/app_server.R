@@ -1828,7 +1828,7 @@ app_server <- function(input, output, session) {
     progress_all$set(value = 0, message = 'Step 1 of 3', detail = 'Getting nearby census blocks')
 
     ################################################# #
-
+    # > ejamit() for FIPS  ####
     if (submitted_upload_method() %in% c('FIPS', 'FIPS_PLACE')) {  # if FIPS, do everything in 1 step right here.
 
       out <- ejamit(fips = data_uploaded(),              # unlike for SHP or latlon cases, this could include invalid FIPS!
@@ -1848,7 +1848,7 @@ app_server <- function(input, output, session) {
                     need_proximityscore = FALSE, #input$need_proximityscore, # not relevant for FIPS
                     # infer_sitepoints = FALSE,
                     # need_blockwt = TRUE,
-                    # updateProgress = ??? , # not sure this is needed or works here
+                    # updateProgress = ??? , # not used here - for noncity fips at least, it is very fast to find blocks
                     in_shiny = TRUE, # not sure this is needed or works here
                     progress_all = progress_all,
                     # quiet = TRUE,
@@ -1875,7 +1875,7 @@ app_server <- function(input, output, session) {
     } else { # everything other than FIPS code analysis:
       #############################################################################  #
 
-      ## get blocks in POLYGONS / SHAPEFILES ####
+      # > ejamit() for POLYGONS / SHAPEFILES ####
 
       if (submitted_upload_method() == "SHP") {
 
@@ -1941,7 +1941,7 @@ app_server <- function(input, output, session) {
       } # end of ejamit() for SHP type
       ################################################# #
 
-      ## get blocks near LAT/LON  POINTS  facilities/latlon # ####
+      # > ejamit() for LAT/LON  POINTS  ####
 
       if (!(submitted_upload_method() %in% c('SHP', 'FIPS', 'FIPS_PLACE'))) {  # if LATITUDE AND LONGITUDE (POINTS), find blocks nearby
 

@@ -315,7 +315,8 @@ ejamit <- function(sitepoints = NULL,
 
     if (!silentinteractive) {cat('Aggregating at each polygon and overall.\n')}
 
-    sites2states_or_latlon <- mysites2blocks # ??? # data.frame(ejam_uniq_id = shp_valid$ejam_uniq_id, ST = NA)  # check this
+    sites2states_or_latlon <- data.table(ejam_uniq_id = unique(mysites2blocks$ejam_uniq_id), ST = NA) # note a polygon can span 2 States !!
+
     #Initialize progress bar and function to track doaggregate
     if (!is.null(progress_all)) {
       progress_all$inc(1/3,
@@ -384,9 +385,8 @@ ejamit <- function(sitepoints = NULL,
     ## . check fips ####
 
     # getblocksnearby_from_fips() should include doing something like fips_lead_zero() ?
-    # but also want to know what type each fips is (probably all should be same like all are tracts or all are county fips)
 
-    # RETAIN ORIGINAL SORT ORDER OF SITES
+    # RETAIN ORIGINAL SORT ORDER OF SITES (though doaggregate does handle that)
     original_order <- data.table(n = 1:length(fips), ejam_uniq_id = as.character(fips))
 
     # Here we retain all rows, columns include ejam_uniq_id, valid, invalid_msg
@@ -405,20 +405,20 @@ ejamit <- function(sitepoints = NULL,
 
     mysites2blocks <- getblocksnearby_from_fips(
 
-      fips = fips,  # these get retained as a column, but ejam_uniq_id numbers the sites 1,2,3,etc.
+      fips = fips,  # these get retained as a column, but inside getblocksnearby_from_fips(), ejam_uniq_id numbers the sites 1,2,3,etc.
       in_shiny = in_shiny,
       need_blockwt = need_blockwt
     )
     if (nrow(mysites2blocks) == 0) {
       return(NULL)
     }
-    # this should have ejam_uniq_id that includes 1 through length(fips), but multiple rows/site.
-    # no lat,lon columns,
-    # outputs similar to getblocksnearby() outputs
-    ## ***BUT, ejamit() here must use fips as the ejam_uniq_id so that the invalid msg code later can track which sites had no blocks, etc.
+    # so far s2b unique(ejam_uniq_id) is 1 through length(fips), with multiple rows/site, outputs similar to getblocksnearby() outputs
+    # but here on, ejamit() will use fips as the ejam_uniq_id (as it must, so that the invalid msg code later can track which sites had no blocks, etc.)
     mysites2blocks[, n := ejam_uniq_id]
     mysites2blocks[, ejam_uniq_id := fips]
-    mysites2blocks[, fips := NULL]
+    mysites2blocks[, fips := NULL] # not needed since we keep track of 1:N and of ejam_uniq_id
+    #see: # cbind( (mysites2blocks[,.(ejam_uniq_id, n = min(n), has_nas_in_distance = any(is.na(distance)), all_nas_in_distance = all(is.na(distance)) ), by = "ejam_uniq_id"]))
+
     sites2states_or_latlon <- data.table(n = seq_along(fips),
                                          ejam_uniq_id = as.character(fips),
                                          ST = fips2state_abbrev(fips)) # includes invalid fips here
