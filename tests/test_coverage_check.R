@@ -142,6 +142,7 @@ test_coverage_check <- function() {
   tdat$notes[!is.na(tdat$testfile) & is.na(tdat$codefile) & tdat$utils_object_is_in_pkg & grepl("test-utils_", tdat$testfile)] <- "ok, testfile prefixed with utils_ but otherwise matches object, though .R filename differs"
   justdata <- "R/data_" == substr(tdat$codefile, 1,7) & !is.na(tdat$codefile)
   tdat$notes[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata  ] <- "cant find testfile"
+  tdat$notes[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata & !tdat$utils_object_is_in_pkg ] <- "cant match this .R filename to a single (exported?) object or testfile - coverage unclear"
 
   funcs_not_in_txt_of_testfiles_at_all = NULL
   func2searchfor = tdat$object[!is.na(tdat$object) & tdat$notes == "cant find testfile"]
@@ -164,8 +165,8 @@ test_coverage_check <- function() {
       MATCHED EXACTLY -- all test files that exactly match name of a .R file: \n\n')
 
   tdat[!is.na(tdat$testfile) & !is.na(tdat$codefile), ] |> print(n = 500)
-  #### *** or maybe   tdat[!is.na(tdat$test) & !is.na(tdat$R), c("R", "test")] |> print(n = 500)
-
+  #### *** or maybe
+  # tdat[!is.na(tdat$testfile) & !is.na(tdat$codefile), c("R", "test")] |> print(n = 500)
   ################################ #
   cat(' -----------------------------------------------
 
@@ -174,8 +175,6 @@ test_coverage_check <- function() {
       but note some are actual objects in the package:\n\n')
 
   tdat[!is.na(tdat$testfile) & is.na(tdat$codefile),  ] |> print(n = 500)
-  #### *** or maybe   tdat[!is.na(tdat$test) & is.na(tdat$R),  ] |> print(n = 500)
-
   ################################ #
   cat(" -----------------------------------------------
 
@@ -188,19 +187,7 @@ test_coverage_check <- function() {
 
   justdata <- "R/data_" == substr(tdat$codefile, 1,7) & !is.na(tdat$codefile)
   x <- tdat[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata, ]
-  # or?
-  # x <- tdat[is.na(tdat$test) & !is.na(tdat$R) & "data_" != substr(tdat$name, 1,5), ] # this left out the R/ part of name but also used $test not $testfile, and $R not $codefile
-
   x[order(x$object), ] |> print(n = 500)
-  ################################ #
-
-  cat(" But those .R files contain functions that may have test files named after the functions not the whole .R file  \n")
-
-  # can use  EJAM:::pkg_functions_and_sourcefiles()  to see which functions are defined within a given .R source filename
-
-
-
-
 
   ################################ #
   cat('

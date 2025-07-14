@@ -5,6 +5,140 @@
 
 # GET FUNCTIONS, DATA, SOURCEFILES, ETC. ####
 
+##################################################################################### #
+# . ####
+# get functions, datasets, filenames - exported & internal
+
+#' utility to see which objects in a loaded/attached package are functions or datasets, exported or not (internal)
+#' @details
+#'   See [pkg_dupeRfiles()] for files supporting a shiny app that is not a package, e.g.
+#'
+#'   See [pkg_dupenames()] for objects that are in R packages.
+#'
+#'   See [pkg_functions_and_data()], pkg_functions_and_sourcefiles(),
+#'
+#'   See [pkg_data()]
+#'
+#' @param pkg name of package as character like "EJAM"
+#' @param alphasort_table default is FALSE, to show internal first as a group, then exported funcs, then datasets
+#' @param internal_included default TRUE includes internal (unexported) objects in the list
+#' @param exportedfuncs_included default TRUE includes exported functions (non-datasets, actually) in the list
+#' @param data_included default TRUE includes datasets in the list, as would be seen via data(package=pkg)
+#' @param vectoronly set to TRUE to just get a character vector of object names instead of the data.frame table output
+#' @seealso [ls()] [getNamespace()] [getNamespaceExports()] [loadedNamespaces()]
+#'
+#' @return data.table with colnames object, exported, data  where exported and data are 1 or 0 for T/F,
+#'   unless vectoronly = TRUE in which case it returns a character vector
+#' @examples  # pkg_functions_and_data("datasets")
+#'
+#' @keywords internal
+#'
+pkg_functions_and_data <- function(pkg,
+                                   alphasort_table = FALSE,
+                                   internal_included = TRUE,
+                                   exportedfuncs_included = TRUE,
+                                   data_included = TRUE,
+                                   vectoronly = FALSE) {
+
+  ## (helpers) ### #
+  if (!internal_included) {
+    if (exists("radius_inferred")) {
+      warning("Looks like you have done load_all() and if so, internal objects will get included in output here, even though you set internal_included = FALSE")
+    }
+    # x = sort(getNamespaceExports("EJAM"))
+    # y = sort(EJAM:::pkg_functions_and_data("EJAM", internal_included = FALSE, vectoronly = T, data_included = F))
+    # length(x); length(y); setdiff(y, x)
+  }
+  dataonly <- function(pkg) {pkg_data(pkg = pkg, simple = TRUE)$Item}
+
+  exported_plus_internal_withdata <- function(pkg) {sort(union(dataonly(pkg), ls(getNamespace(pkg), all.names = TRUE)))} # all.names filters those starting with "."
+  exported_only_withdata          <- function(pkg) {ls(paste0("package:", pkg))}
+  # same as ls(envir = as.environment(x = paste0("package:", pkg)))
+  # same as  getNamespaceExports() except sorted
+
+  exported_plus_internal_nodata <- function(pkg) {sort(setdiff(
+    exported_plus_internal_withdata(pkg = pkg),
+    dataonly(pkg = pkg)))}
+  exported_only_nodata <- function(pkg) {sort(setdiff(
+    exported_only_withdata(pkg = pkg),
+    dataonly(pkg = pkg)))}
+
+  internal_only_withdata <- function(pkg) {sort(setdiff(
+    exported_plus_internal_withdata(pkg = pkg),
+    exported_only_nodata(pkg = pkg)))}
+  internal_only_nodata <- function(pkg) {sort(setdiff(
+    internal_only_withdata(pkg = pkg),
+    dataonly(pkg = pkg)))}
+
+  # # double-checks
+  #
+  # setequal(      exported_plus_internal_withdata("EJAM"),
+  #          union(exported_plus_internal_nodata(  "EJAM"), dataonly("EJAM")))
+  #
+  # setequal(      exported_only_withdata(         "EJAM"),
+  #          union(exported_only_nodata(           "EJAM"), dataonly("EJAM")))
+  #
+  # setequal(      internal_only_withdata(         "EJAM"),
+  #          union(internal_only_nodata(           "EJAM"), dataonly("EJAM")))
+
+  # table format output
+
+  omni <- exported_plus_internal_withdata(pkg)
+  y <- data.frame(
+    object = omni,
+    exported = ifelse(omni %in% exported_only_withdata(pkg), 1, 0),
+    data = ifelse(omni %in% dataonly(pkg), 1, 0)
+  )
+  if (!data_included) {
+    y <- y[y$data == 0, ]
+  }
+  if (!internal_included) {
+    y <- y[!(y$exported == 0), ]
+  }
+  if (!exportedfuncs_included) {
+    y <- y[!(y$exported == 1 & y$data == 0), ]
+  }
+
+  if (!vectoronly) {
+    if (alphasort_table) {
+      # already done by default
+    } else {
+      y <- y[order(y$exported, y$data, y$object), ]
+    }
+    return(y)
+  }
+
+  # vector format output
+
+  if (vectoronly) {
+    # cat('\n\n')
+    # cat(pkg)
+    # cat('\n\n')
+    # print(y)
+    # cat('\n\n')
+
+    return(y$object)
+
+    ################# #
+    # if (internal_included & data_included) {
+    #   x <- exported_plus_internal_withdata(pkg)
+    # }
+    # if (internal_included & !data_included) {
+    #   x <- exported_plus_internal_nodata(pkg)
+    # }
+    # if (!internal_included & data_included) {
+    #   x <- exported_only_withdata(pkg)
+    # }
+    # if (!internal_included & !data_included) {
+    #   x <- exported_only_nodata(pkg)
+    # }
+    #   return(x)
+    ################# #
+
+  }
+}
+##################################################################### #
+# . ####
 
 #' UTILITY - DRAFT - See names and size of data sets in installed package(s) - internal utility function
 #'
@@ -179,46 +313,6 @@ pkg_data <- function(pkg = 'EJAM', len=30, sortbysize=TRUE, simple = TRUE) {
 }
 ##################################################################################### #
 
-
-pkg_functions_with_keywords_internal_tag <- function(funcnames, pkg = "EJAM", full.names = TRUE) {
-
-  # get R/*.R FILENAME that defines each function
-
-  if (missing(funcnames)) {
-    fnames <- pkg_functions_and_data(pkg = pkg)$object
-  }
-  fnames <- vector(length = length(funcnames))
-  fnames <- paste0(pkg, ":::", fnames)
-
-  for (i in seq_along(funcnames)) {
-    # funcname <- "pkg_data"
-    funcname <- funcnames[i]
-    cat(paste0(funcname, ", "))
-    # findInFiles::fifR(pattern = paste0("^ *", funcname, ".*function[(]"), output = "tibble")$file
-    found <- try({parse(text = funcname)}, silent = TRUE) # catch specials like  %||%
-    if (inherits(found, "try-error") || length(found) == 0) {
-      fnames[i] <- NA
-    } else {
-      found <- try({
-
-
-        getSrcFilename(eval(found), full.names = full.names)
-
-
-      }, silent = TRUE)
-      if (inherits(found, "try-error") || length(found) == 0) {
-        fnames[i] <- NA
-      } else {
-        fnames[i] <- found
-      }
-    }
-  }
-  cat("\n")
-
-  fnames
-}
-##################################################################################### #
-
 # # utility to get the filename where a function is defined PLUS other info
 # #
 # # @details returns NA where there are special characters like %, and
@@ -226,15 +320,52 @@ pkg_functions_with_keywords_internal_tag <- function(funcnames, pkg = "EJAM", fu
 # #   like askradius <- ask_number where ask_number = function() {}
 # #
 pkg_functions_and_sourcefiles <- function(pkg = "EJAM",
-                                          internal_included = TRUE, exportedfuncs_included = TRUE) {
+                                          alphasort_table = FALSE, # or use TRUE here?
+                                          internal_included = TRUE,
+                                          exportedfuncs_included = TRUE,
+                                          data_included = FALSE, # or use FALSE here?
+                                          vectoronly = FALSE) {
 
   info <- pkg_functions_and_data(pkg = pkg, internal_included = internal_included, exportedfuncs_included = exportedfuncs_included,
-                                 data_included = FALSE, alphasort_table = TRUE)
-  funcnames <- info$object
+                                 data_included = data_included, alphasort_table = alphasort_table, vectoronly = vectoronly)
+  if (vectoronly) {
+    funcnames <- info
+  } else {
+    funcnames <- info$object
+  }
   if (basename(getwd()) != pkg) {stop("working directory must be the source package folder for pkg", pkg)}
   fnames <- pkg_functions_with_keywords_internal_tag()
   fnames <- fnames[match(funcnames, fnames)] # match to ensure same order as info$object, but check how extra or missing ones are handled
-  return(data.frame(file = fnames, info))
+  if (vectoronly) {
+    return(fnames)
+  } else {
+    return(data.frame(file = fnames, info))
+  }
+}
+##################################################################################### #
+
+# rough notes on draft quick look for file names???
+
+pkg_functions_and_sourcefiles2 <- function(funcnames, pkg = "EJAM", full.names = TRUE) {
+
+  # get R/*.R FILENAME that defines each function
+  if (missing(funcnames)) {fnames <- pkg_functions_and_sourcefiles(pkg = pkg)$object}
+
+  fnames <- paste0(pkg, ":::", vector(length = length(funcnames)))
+  for (i in seq_along(funcnames)) {
+    funcname <- funcnames[i] # funcname <- "pkg_data"
+    cat(paste0(funcname, ", "))
+    # findInFiles::fifR(pattern = paste0("^ *", funcname, ".*function[(]"), output = "tibble")$file
+    found <- try({parse(text = funcname)}, silent = TRUE) # catch specials like  %||%
+    if (inherits(found, "try-error") || length(found) == 0) {
+      fnames[i] <- NA
+    } else {
+      found <- try({getSrcFilename(eval(found), full.names = full.names)}, silent = TRUE)
+      if (inherits(found, "try-error") || length(found) == 0) {fnames[i] <- NA} else {fnames[i] <- found}
+    }
+  }
+  cat("\n")
+  return(fnames)
 }
 ##################################################################################### #
 
@@ -370,138 +501,6 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".") {
   return(results)
   # return(list(blocks = blocks, results = results) ) # for troubleshooting
 }
-##################################################################################### #
-
-# get functions, datasets, filenames - exported & internal
-
-#' utility to see which objects in a loaded/attached package are functions or datasets, exported or not (internal)
-#' @details
-#'   See [pkg_dupeRfiles()] for files supporting a shiny app that is not a package, e.g.
-#'
-#'   See [pkg_dupenames()] for objects that are in R packages.
-#'
-#'   See [pkg_functions_and_data()], pkg_functions_and_sourcefiles(),
-#'
-#'   See [pkg_data()]
-#'
-#' @param pkg name of package as character like "EJAM"
-#' @param alphasort_table default is FALSE, to show internal first as a group, then exported funcs, then datasets
-#' @param internal_included default TRUE includes internal (unexported) objects in the list
-#' @param exportedfuncs_included default TRUE includes exported functions (non-datasets, actually) in the list
-#' @param data_included default TRUE includes datasets in the list, as would be seen via data(package=pkg)
-#' @param vectoronly set to TRUE to just get a character vector of object names instead of the data.frame table output
-#' @seealso [ls()] [getNamespace()] [getNamespaceExports()] [loadedNamespaces()]
-#'
-#' @return data.table with colnames object, exported, data  where exported and data are 1 or 0 for T/F,
-#'   unless vectoronly = TRUE in which case it returns a character vector
-#' @examples  # pkg_functions_and_data("datasets")
-#'
-#' @keywords internal
-#'
-pkg_functions_and_data <- function(pkg,
-                                   alphasort_table = FALSE,
-                                   internal_included = TRUE,
-                                   exportedfuncs_included = TRUE,
-                                   data_included = TRUE,
-                                   vectoronly = FALSE) {
-
-  ## (helpers) ### #
-  if (!internal_included) {
-    if (exists("radius_inferred")) {
-      warning("Looks like you have done load_all() and if so, internal objects will get included in output here, even though you set internal_included = FALSE")
-    }
-    # x = sort(getNamespaceExports("EJAM"))
-    # y = sort(EJAM:::pkg_functions_and_data("EJAM", internal_included = FALSE, vectoronly = T, data_included = F))
-    # length(x); length(y); setdiff(y, x)
-  }
-  dataonly <- function(pkg) {pkg_data(pkg = pkg, simple = TRUE)$Item}
-
-  exported_plus_internal_withdata <- function(pkg) {sort(union(dataonly(pkg), ls(getNamespace(pkg), all.names = TRUE)))} # all.names filters those starting with "."
-  exported_only_withdata          <- function(pkg) {ls(paste0("package:", pkg))}
-  # same as ls(envir = as.environment(x = paste0("package:", pkg)))
-  # same as  getNamespaceExports() except sorted
-
-  exported_plus_internal_nodata <- function(pkg) {sort(setdiff(
-    exported_plus_internal_withdata(pkg = pkg),
-    dataonly(pkg = pkg)))}
-  exported_only_nodata <- function(pkg) {sort(setdiff(
-    exported_only_withdata(pkg = pkg),
-    dataonly(pkg = pkg)))}
-
-  internal_only_withdata <- function(pkg) {sort(setdiff(
-    exported_plus_internal_withdata(pkg = pkg),
-    exported_only_nodata(pkg = pkg)))}
-  internal_only_nodata <- function(pkg) {sort(setdiff(
-    internal_only_withdata(pkg = pkg),
-    dataonly(pkg = pkg)))}
-
-  # # double-checks
-  #
-  # setequal(      exported_plus_internal_withdata("EJAM"),
-  #          union(exported_plus_internal_nodata(  "EJAM"), dataonly("EJAM")))
-  #
-  # setequal(      exported_only_withdata(         "EJAM"),
-  #          union(exported_only_nodata(           "EJAM"), dataonly("EJAM")))
-  #
-  # setequal(      internal_only_withdata(         "EJAM"),
-  #          union(internal_only_nodata(           "EJAM"), dataonly("EJAM")))
-
-  # table format output
-
-  omni <- exported_plus_internal_withdata(pkg)
-  y <- data.frame(
-    object = omni,
-    exported = ifelse(omni %in% exported_only_withdata(pkg), 1, 0),
-    data = ifelse(omni %in% dataonly(pkg), 1, 0)
-  )
-  if (!data_included) {
-    y <- y[y$data == 0, ]
-  }
-  if (!internal_included) {
-    y <- y[!(y$exported == 0), ]
-  }
-  if (!exportedfuncs_included) {
-    y <- y[!(y$exported == 1 & y$data == 0), ]
-  }
-
-  if (!vectoronly) {
-    if (alphasort_table) {
-      # already done by default
-    } else {
-      y <- y[order(y$exported, y$data, y$object), ]
-    }
-    return(y)
-  }
-
-  # vector format output
-
-  if (vectoronly) {
-    # cat('\n\n')
-    # cat(pkg)
-    # cat('\n\n')
-    # print(y)
-    # cat('\n\n')
-
-    return(y$object)
-
-    ################# #
-    # if (internal_included & data_included) {
-    #   x <- exported_plus_internal_withdata(pkg)
-    # }
-    # if (internal_included & !data_included) {
-    #   x <- exported_plus_internal_nodata(pkg)
-    # }
-    # if (!internal_included & data_included) {
-    #   x <- exported_only_withdata(pkg)
-    # }
-    # if (!internal_included & !data_included) {
-    #   x <- exported_only_nodata(pkg)
-    # }
-    #   return(x)
-    ################# #
-
-  }
-}
 ##################################################################### #
 
 # conflicting sourcefile names ####
@@ -550,6 +549,7 @@ pkg_dupeRfiles <- function(folder1 = '../EJAM/R', folder2 = './R') {
   return(out)
 }
 ##################################################################### #
+
 # conflicting exported functions or data ####
 
 #' UTILITY - check conflicting getNamespaceExports (names of exported functions or datasets)
