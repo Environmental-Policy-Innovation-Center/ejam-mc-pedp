@@ -6,67 +6,67 @@
 #' barplot of summary stats on special areas and features at the sites
 #' @description Summary of whether residents at the analyzed locations are more likely to have
 #' certain types of features (schools) or special areas (Tribal, nonattainment, etc.)
-#' @details  See 
+#' @details  See
 #' `varinfo(c(names_featuresinarea, names_flag, names_criticalservice))[,c("longname", "varlist")]`
-#' 
+#'
 #' These are the indicator summary stats shown:
-#' 
+#'
 #'  - [1,] "Number of Schools"
-#'  
+#'
 #'  - [2,] "Number of Hospitals"
-#'  
+#'
 #'  - [3,] "Number of Worship Places"
-#'  
+#'
 #'  - [4,] "Flag for Overlapping with Tribes"
-#'  
+#'
 #'  - [5,] "Flag for Overlapping with Non-Attainment Areas"
-#'  
+#'
 #'  - [6,] "Flag for Overlapping with Impaired Waters"
-#'  
+#'
 #'  - [7,] "Flag for Overlapping with CJEST Disadvantaged Communities"
-#'  
+#'
 #'  - [8,] "Flag for Overlapping with EPA IRA Disadvantaged Communities"
-#'  
+#'
 #'  - [9,] "Flag for Overlapping with Housing Burden Communities"
-#'  
+#'
 #'  - [10,] "Flag for Overlapping with Transportation Disadvantaged Communities"
-#'  
+#'
 #'  - [11,] "Flag for Overlapping with Food Desert Areas"
-#'  
+#'
 #'  - [12,] "% Households without Broadband Internet"
-#'  
+#'
 #'  - [13,] "% Households without Health Insurance"
-#'  
-#' 
+#'
+#'
 #' @param ejamitout output from ejamit()
 #' @param main optional title for plot
 #' @param ylab optional y axis label
 #' @param shortlabels optional alternative labels for the bars
-#' @param caption left blank to avoid default caption used in [plot_barplot_ratios()] 
+#' @param caption left blank to avoid default caption used in [plot_barplot_ratios()]
 #' @seealso [ejam2areafeatures()] [batch.summarize()]
-#' @examples 
+#' @examples
 #' out <- testoutput_ejamit_1000pts_1miles
 #' ejam2barplot_areafeatures(out)
-#' 
+#'
 #' shortlabels = EJAM:::flagged_areas_shortlabels_from_ejam(out)
 #' ejam2barplot_areafeatures(out, shortlabels = shortlabels)
-#' 
+#'
 #' @returns ggplot2 plot
-#' 
+#'
 #' @export
 #'
 ejam2barplot_areafeatures <- function(ejamitout,
                                       main = "% of analyzed population that lives in blockgroups with given features or that overlap given area type",
                                       ylab = "Ratio of Indicator in Analyzed Locations / in US Overall",
                                       shortlabels = NULL) {
-  
+
   ratios <- flagged_areas_ratios_from_ejam(ejamitout)
   plot_barplot_ratios(ratios, main = main, ylab = ylab,
                       shortlabels = shortlabels,
                       caption = "")
 }
-######################################################### # ######################################################### # 
-######################################################### # ######################################################### # 
+######################################################### # ######################################################### #
+######################################################### # ######################################################### #
 
 ################## #
 
@@ -75,28 +75,28 @@ ejam2barplot_areafeatures <- function(ejamitout,
 #' @param ejamitout output from ejamit()
 #' @details
 #' In this table, summary stats mean the following:
-#' 
-#' - The "flag" or "yesno" indicators here are population weighted sums, so they show 
+#'
+#' - The "flag" or "yesno" indicators here are population weighted sums, so they show
 #'   how many people from the analysis live in blockgroups
-#'   that overlap with the given special type of area, such as 
+#'   that overlap with the given special type of area, such as
 #'   non-attainment areas under the Clean Air Act.
-#' 
-#' - The "number" indicators are counts for each site in the 
-#'   `ejamit()$results_overall` table, but here are summarized as 
-#'   what percent of residents overall in the analysis have 
+#'
+#' - The "number" indicators are counts for each site in the
+#'   `ejamit()$results_overall` table, but here are summarized as
+#'   what percent of residents overall in the analysis have
 #'   AT LEAST ONE OR MORE of that type of site in
 #'   the blockgroup they live in.
-#'   
-#' - The "pctno" or % indicators are summarized as what % of the 
+#'
+#' - The "pctno" or % indicators are summarized as what % of the
 #'   residents analyzed lack the critical service.
-#' 
+#'
 #' @returns a data frame with the summary of flagged areas
 #' @seealso [ejam2barplot_areafeatures()] [batch.summarize()]
-#' 
+#'
 #' @export
 #'
 ejam2areafeatures <- function(ejamitout) {
-  
+
   ejamitout$results_summarized$flagged_areas
 }
 ################## #
@@ -112,7 +112,7 @@ flagged_areas_from_ejam <- function(ejamitout) {
 # Helper functions used by batch.summarize() to summarize info from these indicators:
 #
 #  c(names_featuresinarea, names_flag, names_criticalservice) # the varlists
-#  
+#
 # > varinfo(c(names_featuresinarea, names_flag, names_criticalservice))[,c("longname", "varlist")]
 #                                                                                longname               varlist
 # num_school                                                            Number of Schools  names_featuresinarea
@@ -129,10 +129,10 @@ flagged_areas_from_ejam <- function(ejamitout) {
 # pctnobroadband                                  % Households without Broadband Internet names_criticalservice
 # pctnohealthinsurance                              % Households without Health Insurance names_criticalservice
 
-######################################################### # 
+######################################################### #
 
 flagged_count_sites <- function(bysite = testoutput_ejamit_1000pts_1miles$results_bysite, flagvarnames = c(names_featuresinarea, names_flag, names_criticalservice)) {
-  
+
   if (!is.data.table(bysite)) {
     wasnt = TRUE
     setDT(bysite)
@@ -142,7 +142,7 @@ flagged_count_sites <- function(bysite = testoutput_ejamit_1000pts_1miles$result
   stopifnot(all(flagvarnames %in% colnames(bysite)))
   x <- bysite[, lapply(.SD, function(z) {sum(z > 0, na.rm = TRUE)}),
               .SDcols = flagvarnames]
-  
+
   #  note these 2 indicators are %, not count or 1/0:  "pctnobroadband", "pctnohealthinsurance"
   pctvars = c( 'pctnobroadband' , 'pctnohealthinsurance')
   x[, pctvars] <- bysite[, lapply(.SD, function(z) {sum(z, na.rm = TRUE)}),
@@ -155,10 +155,10 @@ flagged_count_sites <- function(bysite = testoutput_ejamit_1000pts_1miles$result
   }
   return(x)
 }
-######################################################### # 
+######################################################### #
 
 flagged_pct_sites <- function(bysite = testoutput_ejamit_1000pts_1miles$results_bysite, flagvarnames = c(names_featuresinarea, names_flag, names_criticalservice), digits = 1) {
-  
+
   if (!is.data.table(bysite)) {
     wasnt = TRUE
     setDT(bysite)
@@ -176,10 +176,10 @@ flagged_pct_sites <- function(bysite = testoutput_ejamit_1000pts_1miles$results_
   }
   return(x)
 }
-######################################################### # 
+######################################################### #
 
 flagged_count_pop <- function(bybg_people = testoutput_ejamit_1000pts_1miles$results_bybg_people, flagvarnames = c(names_featuresinarea, names_flag, names_criticalservice)) {
-  
+
   if (!is.data.table(bybg_people)) {
     wasnt = TRUE
     setDT(bybg_people)
@@ -203,10 +203,10 @@ flagged_count_pop <- function(bybg_people = testoutput_ejamit_1000pts_1miles$res
   }
   return(x)
 }
-######################################################### # 
+######################################################### #
 
 flagged_pct_pop <- function(bybg_people = testoutput_ejamit_1000pts_1miles$results_bybg_people, flagvarnames = c(names_featuresinarea, names_flag, names_criticalservice), digits = 1) {
-  
+
   if (!is.data.table(bybg_people)) {
     wasnt = TRUE
     setDT(bybg_people)
@@ -225,11 +225,11 @@ flagged_pct_pop <- function(bybg_people = testoutput_ejamit_1000pts_1miles$resul
   }
   return(x)
 }
-######################################################### # 
-######################################################### # 
+######################################################### #
+######################################################### #
 
 flagged_count_pop_us <- function(bybg_us = blockgroupstats, flagvarnames = c(names_featuresinarea, names_flag, names_criticalservice)) {
-  
+
   neededvars = c("pop", flagvarnames)
   stopifnot(all(neededvars %in% colnames(bybg_us)))
   x <- bybg_us[, lapply(.SD, function(z) {sum((z > 0) * pop, na.rm = TRUE)}),
@@ -244,10 +244,10 @@ flagged_count_pop_us <- function(bybg_us = blockgroupstats, flagvarnames = c(nam
   }
   return(x)
 }
-######################################################### # 
+######################################################### #
 
 flagged_pct_pop_us <- function(bybg_us = blockgroupstats, flagvarnames = c(names_featuresinarea, names_flag, names_criticalservice), digits = 1) {
-  
+
   neededvars = c("pop", flagvarnames)
   stopifnot(all(neededvars %in% colnames(bybg_us)))
   x <- flagged_count_pop_us(bybg_us = bybg_us, flagvarnames = flagvarnames)
@@ -255,17 +255,17 @@ flagged_pct_pop_us <- function(bybg_us = blockgroupstats, flagvarnames = c(names
   if (interactive()) {
     cat("Population total: ", prettyNum(sum(bybg_us$pop, na.rm = TRUE), big.mark = ","), "\n")
   }
-  # results_overall$pop  is a bit different as denominator than  sum(bybg_us$pop, na.rm = TRUE) 
+  # results_overall$pop  is a bit different as denominator than  sum(bybg_us$pop, na.rm = TRUE)
   return(x)
 }
-######################################################### # 
+######################################################### #
 
 flagged_count_pop_st <- function(ST = stateinfo$ST, bybg_st = blockgroupstats, flagvarnames = c(names_featuresinarea, names_flag, names_criticalservice)) {
-  
+
   # e.g.,
   # flagged_count_pop_st(c('pr', 'dc'))
   # flagged_count_pop_st('dc') + flagged_count_pop_st('pr')
-  
+
   neededvars = c("pop", "ST", flagvarnames)
   stopifnot(all(neededvars %in% colnames(bybg_st)))
   st <- tolower(ST)
@@ -294,22 +294,22 @@ flagged_count_pop_st <- function(ST = stateinfo$ST, bybg_st = blockgroupstats, f
   }
   return(x)
 }
-######################################################### # 
+######################################################### #
 
 flagged_pct_pop_st <- function(ST = stateinfo$ST, bybg_st = blockgroupstats, flagvarnames = c(names_featuresinarea, names_flag, names_criticalservice), digits = 1) {
-  
+
   neededvars = c("pop", "ST", flagvarnames)
   stopifnot(all(neededvars %in% colnames(bybg_st)))
   st <- tolower(ST)
   rm(ST)
-  bybg_st <- bybg_st[tolower(ST) %in% st, ..neededvars] 
+  bybg_st <- bybg_st[tolower(ST) %in% st, ..neededvars]
   x <- flagged_count_pop_st(ST = st, bybg_st = bybg_st, flagvarnames = flagvarnames)
   x <- round(100 * x / sum(bybg_st$pop, na.rm = TRUE), digits = digits)
-  # results_overall$pop  is a bit different as denominator than  sum(bybg_st$pop, na.rm = TRUE) 
+  # results_overall$pop  is a bit different as denominator than  sum(bybg_st$pop, na.rm = TRUE)
   return(x)
 }
-######################################################### # ######################################################### # 
-######################################################### # ######################################################### # 
+######################################################### # ######################################################### #
+######################################################### # ######################################################### #
 
 # helpers to format these summary stats for barplot ####
 
@@ -317,9 +317,9 @@ flagged_areas_ratiosvector_from_flagged_areas <- function(flagged_areas) {
   # reformat the table  ejamit()$results_summarized$flagged_areas
   unlist(as.vector(
     tidyr::pivot_wider(
-      data = flagged_areas[, c('Indicator', 'ratio')], 
+      data = flagged_areas[, c('Indicator', 'ratio')],
       names_from = "Indicator",
-      values_from = "ratio" 
+      values_from = "ratio"
     )
   ))
 }
@@ -357,10 +357,10 @@ flagged_areas_shrinklabels <- function(rnames, n = 30, do_gsub = TRUE) {
 # all.equal(flagged_areas_shrinklabels("yesno_houseburden"),
 # "Housing Burden Commu"
 # )
-# all.equal(flagged_areas_shrinklabels(flagged_areas_testnames), 
-#           c("Schools", "Hospitals", "Worship Places", "Tribes", "Nonattainment Area", 
-#             "Impaired Waters", "CJEST Disadvantaged", "EPA IRA Disadvantage", 
-#             "Housing Burden Commu", "Transportation Disad", "Food Desert", 
+# all.equal(flagged_areas_shrinklabels(flagged_areas_testnames),
+#           c("Schools", "Hospitals", "Worship Places", "Tribes", "Nonattainment Area",
+#             "Impaired Waters", "CJEST Disadvantaged", "EPA IRA Disadvantage",
+#             "Housing Burden Commu", "Transportation Disad", "Food Desert",
 #             "% hhlds no Broadband", "% hhlds no Health In")
 #           )
 ################## #

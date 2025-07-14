@@ -372,7 +372,7 @@ reference:
   contents:
   - testdata
   - testdatafolder
-  - datapack
+  - pkg_data
 - subtitle: "Examples of Inputs (polygons/ shapefiles)"
   contents:
   - testshapes_2

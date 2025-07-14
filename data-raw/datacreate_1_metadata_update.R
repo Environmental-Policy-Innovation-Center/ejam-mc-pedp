@@ -11,7 +11,7 @@
 
 # update ALL metadata for datasets in EJAM/data/
 
-x = datapack('EJAM')
+x = pkg_data('EJAM')
 
 stop('to be continued - NOT TESTED/TRIED OUT YET JUST DRAFTED')
 

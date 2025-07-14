@@ -1,6 +1,8 @@
 ################################ #
 # search for one query term in a list of files
+
 find_in_files <- function(pattern, path = "./tests/testthat", filename_pattern = "\\.R$|\\.r$") {
+
   x <- list.files(path = path, pattern = filename_pattern, recursive = TRUE, full.names = TRUE)
   names(x) <- x
   x |>
@@ -9,7 +11,9 @@ find_in_files <- function(pattern, path = "./tests/testthat", filename_pattern =
 }
 ################################ #
 # search for vector of query terms, to see which ones are found in any of the files
+
 found_in_files <- function(pattern_vector, path = "./R") {
+
   found = vector(length = length(pattern_vector))
   for (i in seq_along(pattern_vector)) {
     hits = find_in_files(pattern_vector[i], path = path)
@@ -22,7 +26,9 @@ found_in_files <- function(pattern_vector, path = "./R") {
 ################################ #
 # frequency of occurrences of each term within a list of files
 # actually how many lines of code does it appear in so counts as 1 each line where it appears even if it appears >1x in that line
+
 found_in_N_files_T_times <- function(pattern_vector, path = "./R") {
+
   nfiles <- vector(length = length(pattern_vector))
   nhits <- vector(length = length(pattern_vector))
   for (i in seq_along(pattern_vector)) {
@@ -82,15 +88,11 @@ found_in_N_files_T_times <- function(pattern_vector, path = "./R") {
 # 16               calc_ejam      8    32  ***
 
 
-
 test_coverage_check <- function() {
 
+  # MUST BE IN ROOT OF A PACKAGE WHOSE NAME MATCHES THE DIR so that pkg_functions_and_data(basename(getwd())) will work
 
-  # MUST BE IN ROOT OF A PACKAGE WHOSE NAME MATCHES THE DIR so that functions_in_pkg(basename(getwd())) will work
-
-
-
-  # removed dependency on fs pkg, and  dplyr, tibble, stringr pkgs are already in Imports of DESCRIPTION file.
+  # remove dependency on fs pkg, and  dplyr, tibble, stringr pkgs are already in Imports of DESCRIPTION file.
 
   cat("Looking in the source package EJAM/R/ folder for files like xyz.R, and in the EJAM/tests/testthat/ folder for test files like test-xyz.R \n")
   tdat = dplyr::bind_rows(
@@ -117,7 +119,7 @@ test_coverage_check <- function() {
   cat("Checking all exported functions, not internal ones, BUT, if you just did load_all() then this will check ALL\n")
   capture.output({
     suppressWarnings({
-      y <- EJAM:::functions_in_pkg(basename(getwd()),data_included = F, exportedfuncs_included = T, internal_included = TRUE )
+      y <- EJAM:::pkg_functions_and_data(basename(getwd()), data_included = F, exportedfuncs_included = T, internal_included = TRUE )
     })
   })
   tdat$object_is_in_pkg <- tdat$object %in% y$object
@@ -140,6 +142,7 @@ test_coverage_check <- function() {
   tdat$notes[!is.na(tdat$testfile) & is.na(tdat$codefile) & tdat$utils_object_is_in_pkg & grepl("test-utils_", tdat$testfile)] <- "ok, testfile prefixed with utils_ but otherwise matches object, though .R filename differs"
   justdata <- "R/data_" == substr(tdat$codefile, 1,7) & !is.na(tdat$codefile)
   tdat$notes[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata  ] <- "cant find testfile"
+  tdat$notes[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata & !tdat$utils_object_is_in_pkg ] <- "cant match this .R filename to a single (exported?) object or testfile - coverage unclear"
 
   funcs_not_in_txt_of_testfiles_at_all = NULL
   func2searchfor = tdat$object[!is.na(tdat$object) & tdat$notes == "cant find testfile"]
@@ -156,11 +159,14 @@ test_coverage_check <- function() {
   cat("\n\nCOVERAGE CHECK \n\n")
   # tdat %>%   print(n = Inf) # to see everything
   ################################ #
+
   cat(' -----------------------------------------------
 
       MATCHED EXACTLY -- all test files that exactly match name of a .R file: \n\n')
 
   tdat[!is.na(tdat$testfile) & !is.na(tdat$codefile), ] |> print(n = 500)
+  #### *** or maybe
+  # tdat[!is.na(tdat$testfile) & !is.na(tdat$codefile), c("R", "test")] |> print(n = 500)
   ################################ #
   cat(' -----------------------------------------------
 
@@ -178,16 +184,18 @@ test_coverage_check <- function() {
       - SOME TEST FILES GROUPED 2+ code files? (note object_is_in_pkg column)
 
       These are the .R files that lack a test file with exactly matching name:\n\n")
+
   justdata <- "R/data_" == substr(tdat$codefile, 1,7) & !is.na(tdat$codefile)
-  x = tdat[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata, ]
+  x <- tdat[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata, ]
   x[order(x$object), ] |> print(n = 500)
+
   ################################ #
   cat('
       -----------------------------------------------\n\n')
 
   junk = capture.output({
     suppressWarnings({
-      y = EJAM:::functions_in_pkg('EJAM', internal_included = TRUE, exportedfuncs_included = T, data_included = F, vectoronly = T)
+      y = EJAM:::pkg_functions_and_sourcefiles('EJAM', internal_included = TRUE, exportedfuncs_included = T, data_included = F, vectoronly = T)
     })})
   # print(setdiff(y, gsub("tests/testthat/test-|.R$", "", tdat$testfile)))
   cat('\n')
@@ -213,6 +221,7 @@ test_coverage_check <- function() {
 
   cat("\n\n")
   cat("also see https://covr.r-lib.org/ and test_coverage() which computes test coverage for your package. It's a shortcut for covr::package_coverage() plus covr::report().\n")
+
   invisible(tdat)
 }
 
@@ -223,12 +232,11 @@ test_coverage_check <- function() {
 #  tdat %>%   print(n = Inf) # to see everything
 
 
-
 ## also see
 
 # test_coverage() computes test coverage for your package. It's a shortcut for covr::package_coverage() plus covr::report().
 
-# y = EJAM:::functions_in_pkg('EJAM')
+# y = EJAM:::pkg_functions_and_data('EJAM')
 
 ## and
 

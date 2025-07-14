@@ -3,7 +3,7 @@
 
 ##  to see test objects and test files once they are created and the package is reloaded/installed/attached:
 ##
-# cbind(data.in.package  = sort(grep("address", datapack()$Item, value = T)))
+# cbind(data.in.package  = sort(grep("address", pkg_data()$Item, value = T)))
 # cbind(files.in.package = sort(basename(testdata('address', quiet = T))))
 
 ##################### #

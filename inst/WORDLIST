@@ -266,7 +266,7 @@ dsubgroups
 dt
 DT
 dupenames
-dupeRfiles
+pkg_dupeRfiles
 DUyn
 dvar
 dvarnames
@@ -503,10 +503,12 @@ fs
 ftpname
 fulloutput
 func
-func_has_keywords_internal_tag
 funcs
-functions_in_pkg
-functions_that_use
+pkg_functions_with_keywords_internal_tag
+pkg_functions_and_data
+pkg_functions_all_equal
+pkg_functions_and_sourcefiles
+pkg_functions_that_use
 funs
 gdb
 generate_ej_header
