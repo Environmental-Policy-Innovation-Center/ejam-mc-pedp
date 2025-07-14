@@ -3,7 +3,7 @@
 ## To read the test files and see number of polygons in each: ####
 
 junk1 <- function() {
-  
+
   fnames = testdata('shape', quiet = TRUE)
   fnames = fnames[fs::is_file(fnames)]
   # print(fnames)
@@ -13,7 +13,7 @@ junk1 <- function() {
     cat("Trying to read #", i, ":", fnames[i], "\n")
     trash <- capture.output({
       sh[[i]] <- try({shapefile_from_any(fnames[i])})
-    }) 
+    })
     if (inherits(sh[[i]], "try-error")) {
       warning("failed to read ", fnames[i])
       sh[[i]] <- NA
@@ -39,43 +39,43 @@ junk1 <- function() {
 junk2 <- function() {
   print("x1 <- mydf_ejam_analyzed_pts <- ejamit(testpoints_10, radius = 2) ")
   trash <- capture.output({
-    x1 <- mydf_ejam_analyzed_pts <- ejamit(testpoints_10, radius = 2) 
-  }) 
+    x1 <- mydf_ejam_analyzed_pts <- ejamit(testpoints_10, radius = 2)
+  })
   cat('sitetype: ', x1$sitetype, '\n')
   #  latlon
   x1$results_bysite[,c("lat", "lon", "radius.miles")]
   cat("-------------------------------------------------------------------------\n")
-  
+
   print("x2 <- mydf_ejam_analyzed_polygons <- ejamit(shapefile = testshapes_2, radius = 0) ")
   trash <- capture.output({
-    x2 <- mydf_ejam_analyzed_polygons <- ejamit(shapefile = testshapes_2, radius = 0) 
-  }) 
+    x2 <- mydf_ejam_analyzed_polygons <- ejamit(shapefile = testshapes_2, radius = 0)
+  })
   cat('sitetype: ', x2$sitetype, '\n')
   # shp
   x2$results_bysite[,c("lat", "lon", "radius.miles")]
   cat("-------------------------------------------------------------------------\n")
-  
+
   print("x3 <- mydf_ejam_analyzed_polygons_PLUS_BUFFER <- ejamit(shapefile = testshapes_2, radius = 0.5) ")
   trash <- capture.output({
-    x3 <- mydf_ejam_analyzed_polygons_PLUS_BUFFER <- ejamit(shapefile = testshapes_2, radius = 0.5) 
-  }) 
+    x3 <- mydf_ejam_analyzed_polygons_PLUS_BUFFER <- ejamit(shapefile = testshapes_2, radius = 0.5)
+  })
   cat('sitetype: ', x3$sitetype, '\n')
   #  shp
   x3$results_bysite[,c("lat", "lon", "radius.miles")]
   cat("-------------------------------------------------------------------------\n")
-  
+
   print('x4 <- other <- ejamit(fips = fips_counties_from_state_abbrev("DE"))')
   trash <- capture.output({
-    x4 <- other <- ejamit(fips = fips_counties_from_state_abbrev("DE")) 
-  }) 
+    x4 <- other <- ejamit(fips = fips_counties_from_state_abbrev("DE"))
+  })
   cat('sitetype: ', x4$sitetype, '\n')
   #  shp
   x4$results_bysite[,c("lat", "lon", "radius.miles")]
   cat("-------------------------------------------------------------------------\n")
-  
+
   ############################################# #
 }
-# 
+#
 # consoleclear()
 # junk2()
 rm(junk1, junk2)
@@ -85,28 +85,28 @@ rm(junk1, junk2)
 
 # test_that("area_sqmi ok within ejamit", {
 #   expect_no_error({
-#     
+#
 #     # to test area_sq() usage in ejamit() (but also see how server uses it)
-#     # 
+#     #
 #     x1 = ejamit(shapefile = testshapes_2)
 #     x1b = ejamit(shapefile = testshapes_2, radius = 0.25)
-#     
+#
 #     x2 = ejamit(shapefile = shapes_from_fips(fips_counties_from_state_abbrev("DE")))
-#     
+#
 #     x3 = ejamit(fips = fips_counties_from_state_abbrev("DE"), download_fips_bounds_to_calc_areas = T)
 #     x3b = ejamit(fips = fips_counties_from_state_abbrev("DE"), download_fips_bounds_to_calc_areas = F)
-#     
+#
 #     x4 = ejamit(testpoints_100, radius = 10)
 #   })
-#   
-#   
+#
+#
 #   # for (this in list(x1,x1b, x2, x3, x3b, x4)) {
-#   #   
+#   #
 #   #   cat(this$sitetype, " - ")
 #   #   cat(this$results_overall$area_sqmi, '\n\n')
-#   #   
+#   #
 #   # }
-#   
+#
 # })
 ############################################# #
 
@@ -155,14 +155,53 @@ test_that("area_sqmi_from_shp ok", {
 
 # area_sqmi_from_fips ####
 
-test_that("area_sqmi_from_fips() ok", {
-  
+test_that("area_sqmi_from_fips() ok for 1 blockgroup", {
+
   expect_no_error({
     junk <- capture_output({
       x <- area_sqmi_from_fips(fips = blockgroupstats$bgfips[40000])
     })
   })
   expect_true(x > 2.4 & x < 2.5)
+})
+########################## #
+
+test_that("area_sqmi_from_fips() adds up bg-tract-county-state", {
+
+  expect_no_error({
+    fips_st       = fips_state_from_state_abbrev('DE') # 1 state
+    fips_counties = fips_counties_from_state_abbrev("DE") # all counties in 1 state
+    fips_tracts = unique(substr(fips_bgs_in_fips1(fips_counties[1]), 1, 11)) # all tracts in 1 county
+    fips_bgs = fips_bgs_in_fips1(fips_tracts[1]) # all bgs in 1 tract
+
+    a_state    <- area_sqmi_from_fips(fips_st)
+    a_counties <- area_sqmi_from_fips(fips_counties)
+    a_tracts   <- area_sqmi_from_fips(fips_tracts)
+    a_bgs      <- area_sqmi_from_fips(fips_bgs)
+  })
+  expect_equal(as.vector(a_state),       sum(a_counties))
+  expect_equal(as.vector(a_counties[1]), sum(a_tracts))
+  expect_equal(as.vector(a_tracts[1]),   sum(a_bgs))
+})
+########################## #
+
+# area_sqmi_from_fips_made_of_bgs ####
+
+test_that("area_sqmi_from_fips_made_of_bgs() adds up", {
+  expect_no_error({
+    fips_st       = fips_state_from_state_abbrev('DE') # 1 state
+    fips_counties = fips_counties_from_state_abbrev("DE") # all counties in 1 state
+    fips_tracts = unique(substr(fips_bgs_in_fips1(fips_counties[1]), 1, 11)) # all tracts in 1 county
+    fips_bgs = fips_bgs_in_fips1(fips_tracts[1]) # all bgs in 1 tract
+
+    a_state    <- area_sqmi_from_fips_made_of_bgs(fips_st)
+    a_counties <- area_sqmi_from_fips_made_of_bgs(fips_counties)
+    a_tracts   <- area_sqmi_from_fips_made_of_bgs(fips_tracts)
+    a_bgs      <- area_sqmi_from_fips_made_of_bgs(fips_bgs)
+  })
+  expect_equal(as.vector(a_state),       sum(a_counties))
+  expect_equal(as.vector(a_counties[1]), sum(a_tracts))
+  expect_equal(as.vector(a_tracts[1]),   sum(a_bgs))
 })
 ############################################# #
 
@@ -199,7 +238,7 @@ test_that("area_sqmi(df) has colname Radius", {
       area_sqmi(df = data.frame(Radius = c(3,3), lat = c(1,2), lon = c(3,4)))
     )  })
 })
-######## # 
+######## #
 
 test_that("area_sqmi(shp)", {
   expect_no_error({
@@ -209,7 +248,7 @@ test_that("area_sqmi(shp)", {
     )
   })
 })
-######## # 
+######## #
 test_that("area_sqmi(fips)", {
   expect_no_error({
     junk <- capture_output({
@@ -218,7 +257,7 @@ test_that("area_sqmi(fips)", {
   })
   expect_true(x > 2.4 & x < 2.5)
 })
-######## # 
+######## #
 test_that("area_sqmi handles error >1 param", {
   expect_error({
     area_sqmi(df = testpoints_10, radius.miles = 3)
@@ -231,5 +270,14 @@ test_that("area_sqmi handles table without usable colnames", {
       rep(NA, 10)
     )
   })
+})
+######## #
+test_that("area_sqmi(2+ types of fips)", {
+  expect_error({
+    junk <- capture_output({
+      x <- area_sqmi(fips = c("06", "10001"))
+    })
+  })
+  expect_true(length(x) == 2)
 })
 ########################## #

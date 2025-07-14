@@ -17,7 +17,7 @@ footer:
     right: [package, versionmsg]
   components:
     draftmsg: 2025
-    versionmsg: Version 2.32.4
+    versionmsg: Version 2.32.5
 development:
   mode: release
   destination:
@@ -32,15 +32,15 @@ articles:
   desc: Overview for EJAM Users
   navbar: Overview for EJAM Users
   contents:
-  - '`0_whatis`'
-  - '`0_webapp`'
+  - '`whatis`'
+  - '`webapp`'
 - title: The EJAM R Package
   desc: For analysts using R
   navbar: For analysts using R
   contents:
-  - '`1_installing`'
-  - '`2_quickstart`'
-  - '`3_analyzing`'
+  - '`installing`'
+  - '`basics`'
+  - '`analyzing`'
   - '`testdata`'
   - '`distances`'
   - '`naics`'
@@ -49,13 +49,13 @@ articles:
   desc: For package/app developers
   navbar: For package/app developers
   contents:
-  - dev_deploy-app
-  - dev_run-shinytests
-  - dev_run-unit-tests
-  - dev_update-datasets
-  - dev_update_documentation
-  - dev_update-package
-  - dev_future_plans
+  - dev-deploy-app
+  - dev-run-shinytests
+  - dev-run-unit-tests
+  - dev-update-datasets
+  - dev-update-documentation
+  - dev-update-package
+  - dev-future-plans
 reference:
 - title: "Key Functions for Starting an Analysis"
   desc: "Starting the Analysis"
@@ -191,8 +191,8 @@ reference:
   - fips_valid
   - fips_lead_zero
   - fips2pop
-  - fips_bgs_in_fips
   - fips_from_table
+  - fips_bgs_in_fips
   - fips_place_from_placename
   - censusplaces
 - subtitle: "Counties"
@@ -434,6 +434,7 @@ reference:
   - ejscreenit
 - title: internal
   contents:
+  - fips_bg_from_latlon
   - testshapes_2
   - testoutput_getblocksnearby_10pts_1miles
   - testoutput_getblocksnearby_100pts_1miles

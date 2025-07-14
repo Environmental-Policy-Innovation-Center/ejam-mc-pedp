@@ -4,7 +4,7 @@
 \alias{getblocksnearby_from_fips2}
 \title{Find all blocks within each of the FIPS codes provided}
 \usage{
-getblocksnearby_from_fips2(fips, inshiny = FALSE, need_blockwt = TRUE)
+getblocksnearby_from_fips2(fips, in_shiny = FALSE, need_blockwt = TRUE)
 }
 \arguments{
 \item{fips}{vector of FIPS codes identifying blockgroups, tracts, counties, or states.
@@ -13,7 +13,7 @@ one will be getting stats on one or more tracts,
 or analyzing and comparing blockgroups in a county,
 or comparing whole counties to each other, within a State.}
 
-\item{inshiny}{used by shiny app server code to handle errors via validate() instead of stop()}
+\item{in_shiny}{used by shiny app server code to handle errors via validate() instead of stop()}
 
 \item{need_blockwt}{ignored now}
 }
@@ -26,10 +26,10 @@ Allows EJAM to analyze and compare Counties, for example
 \examples{
   x <- getblocksnearby_from_fips(fips_counties_from_state_abbrev("DE"))
   counties_ej <- doaggregate(x)
-  #cannot use mapfast(counties_ej$results_bysite) since no lat lon. 
+  #cannot use mapfast(counties_ej$results_bysite) since no lat lon.
   # mapfastej_counties() should work...
   y =  ejamit(fips=fips_counties_from_statename("Delaware"))
-  
+
   # x=getblocksnearby_from_fips("482011000011") # one blockgroup only
   # y=doaggregate(x)
 }

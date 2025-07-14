@@ -55,8 +55,8 @@ data_reponame <- gsub(".*/", "", data_reponame_with_owner)    #       "REPONAME"
 data_reponame_url <- paste0("https://github.com/", data_reponame_with_owner) 
 # "https://github.com/OWNER/REPONAME"
 
-whatislink <- paste0(docs_reponame_url, "/articles/0_whatis.html")
-deploylink <- paste0(docs_reponame_url, "/articles/dev_deploy-app.html")
+whatislink <- paste0(docs_reponame_url, "/articles/whatis.html")
+deploylink <- paste0(docs_reponame_url, "/articles/dev-deploy-app.html")
 ```
 
 <!-- badges: start -->
@@ -76,6 +76,8 @@ The Environmental and Residential Population Analysis Multisite tool lets you ea
 [What is EJAM?](`r whatislink`)
 
 ## Status of EJAM package after mid-June 2025
+
+See https://www.ejanalysis.com/status for more information.
 
 *As of mid-June 2025, content related to what had been the USEPA-hosted open source R package EJAM will be archived (and/or unpublished)*
 

@@ -76,6 +76,56 @@ testthat::test_that("one ejam_uniq_id per VALID input sitepoint THAT HAS RESULTS
   ))
 })
 ################################### #
+################# #  ################# #  ################# #
+
+test_that("getblocksnearby() outputs sorted like input latlon", {
+
+  inputsitenumber <- c(3,1,2,5,4) # this is the sitenumber not the ejam_uniq_id assigned!
+  input_ejam_uniq_id <- 1:5
+  dat <- testpoints_10[inputsitenumber, ]
+  dat <- state_from_sitetable(dat)
+  inputstates <- dat$ST
+  s2b <- getblocksnearby(dat, radius = 1, quiet = TRUE)
+  outputsitenumber <- unique(s2b$sitenumber)
+  outputstates <- unique(EJAM:::state_from_blockid_table(s2b))
+  output_ejam_uniq_id <- unique(s2b$ejam_uniq_id)
+  # print(dat)
+  # print(s2b)
+  #   print(cbind(inputstates = inputstates, outputstates = outputstates,
+  # inputsitenumber = inputsitenumber, outputsitenumber = outputsitenumber,
+  # input_ejam_uniq_id = input_ejam_uniq_id, output_ejam_uniq_id = output_ejam_uniq_id))
+
+  testthat::expect_equal(outputstates, inputstates)
+  testthat::expect_equal(outputsitenumber, inputsitenumber)
+  testthat::expect_equal(output_ejam_uniq_id, input_ejam_uniq_id)
+})
+################# #
+test_that("getblocksnearby() outputs NA rows as needed", {
+
+  inputsitenumber <- c(3,1,2,5,4) # this is the sitenumber not the ejam_uniq_id assigned!
+  input_ejam_uniq_id <- 1:5
+  dat <- testpoints_10[inputsitenumber, ]
+  # ONE INVALID ROW:
+  dat[3, ] <- NA
+  inputsitenumber[3 ] <- NA
+
+  suppressWarnings({
+    suppressMessages({
+      # dat <- state_from_sitetable(dat)
+    })
+    inputstates <- dat$ST
+    s2b <- getblocksnearby(dat, radius = 1, quiet = TRUE)
+  })
+  outputsitenumber <- unique(s2b$sitenumber)
+  # outputstates <- unique(EJAM:::state_from_blockid_table(s2b))
+  output_ejam_uniq_id <- unique(s2b$ejam_uniq_id)
+  # print(dat)
+  # print(s2b)
+  expect_equal(unique(s2b$sitenumber), inputsitenumber)
+})
+################# #  ################# #  ################# #
+
+
 
 test_that("warning if no valid lat lon", {
   suppressWarnings(

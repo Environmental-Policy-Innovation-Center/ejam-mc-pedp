@@ -62,7 +62,7 @@
 #'           3)
 #'       )
 #'
-#' data.frame(value = eg, 
+#' data.frame(value = eg,
 #'            pctile = t(testoutput_ejamit_10pts_1miles$results_overall[ , ..names_d_pctile]))
 #'
 #' data.frame(value = eg, pctile = lookup_pctile(eg, names_d))
@@ -223,7 +223,7 @@ pctile_from_raw_lookup <- function(myvector, varname.in.lookup.table, lookup=usa
     }
 
     # findInterval ####
-    
+
     # 1.) Uses findInterval to bin each percentile vector value into unique percentile vectors; Results are a list of bin values rather than acutal percentiles
     # 2.) Percentile indices are calculated based on the first nonduplicate values (indices are based on 1-100 percentile location)
     # 3.) Percentile indices are applied to the bin values vector in step 1 to assign the appropriate percentile value to vector selection
@@ -232,25 +232,25 @@ pctile_from_raw_lookup <- function(myvector, varname.in.lookup.table, lookup=usa
 
     #nondupvec <- which(!duplicated(myvector_lookup,fromLast = FALSE))
     nondupvec <- which(!duplicated(myvector_lookup,fromLast = TRUE))
-    
+
     ## get list of duplicated values (ties)
     dupvals <- unique(myvector_lookup[which(duplicated(myvector_lookup,fromLast = TRUE))])
-   
+
     whichinterval[zone == z] <- nondupvec[nondupe_interval]
-    
+
     ## check if any inputted values match tied
     if (any(dupvals %in% myvector_selection)) {
-     
+
       for (d in dupvals) {
         ## if they match a tied value, assign lowest of tied percentiles
         whichinterval[zone == z][myvector_selection == d] <- min(which(myvector_lookup == d))
       }
     }
-   
+
     # WARN if raw score < PCTILE 0, in lookup ! ####
     # WARN if a raw value < minimum raw value listed in lookup table (which should be percentile zero). Why would that table lack the actual minimum? when created it should have recorded the min of each indic in each zone as the 0 pctile for that indic in that zone.
     # *** COULD IT BE THAT UNITS ARE MISMATCHED?  e.g., QUERY IS FOR RAW VALUE OF 0.35 (FRACTION OF 1) BUT LOOKUP TABLE USES RAW VALUES LIKE 35 (PERCENT. FRACTION OF 100) ?
-    belowmin <- (myvector_selection < min(myvector_lookup)) 
+    belowmin <- (myvector_selection < min(myvector_lookup))
     if (any(belowmin, na.rm = TRUE)) {
       whichinterval[zone == z][!is.na(belowmin) & belowmin]  <- 1 # which means 0th percentile
       warning("Some raw values were < min (0th PCTILE) seen in the percentile lookup table (you should confirm myvector and lookup are in same units, like percents reported as 0.00 to 1.00 versus as 0 to 100!), so percentile will be reported as 0, in zone = ", z, " for ", varname.in.lookup.table, ".")
@@ -261,8 +261,8 @@ pctile_from_raw_lookup <- function(myvector, varname.in.lookup.table, lookup=usa
     percentiles_reported[zone == z] <- as.numeric(lookup$PCTILE[lookup$REGION == z][whichinterval[zone == z]]) # this is just in case each zone has a different number of or set of PCTILE values.
     # returns NA if belowmin is NA
     percentiles_reported[zone == z][is.na(belowmin)] <- NA
-    
-    
+
+
     #set percentile to zero if myvector_selection <= 0
     percentiles_reported[zone == z][myvector_selection <= 0] <- 0
     # set first nonzero percentile to second value

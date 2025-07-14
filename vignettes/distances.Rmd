@@ -529,9 +529,11 @@ If the blocks in that location are only about 0.28 square miles each, the circle
 might contain or partly contain about 100 blocks.
 
 The dataset used by EJAM called blockwts has a column called block_radius_miles
-that is what the radius would be if the block were circular, and it was created
+that is what the radius would be if the block were circular, and it is
 based on area = pi \* block_radius_miles\^2 or block_radius_miles = sqrt(area /
-pi) where area is in square miles.
+pi) where area is in square miles. However through EJAM v2.32.5, that field
+blockwts$block_radius_miles was always zero and not used at all. See notes
+in EJAM/data-raw/datacreate_blockwts.R if this is needed.
 
 ### Details on the blocks found near one site
 

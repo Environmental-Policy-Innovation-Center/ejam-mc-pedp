@@ -20,7 +20,7 @@ Uses the list of results of ejamit()
 }
 \details{
 See the R package called gt. Also see code that creates html tables from html template
-and code that creates formatted spreadsheets like \code{\link[=table_xls_format]{table_xls_format()}}
+and code that creates formatted spreadsheets like \code{\link[=ejam2excel]{ejam2excel()}} or related functions
 }
 \examples{
  table_gt_from_ejamit(testoutput_ejamit_100pts_1miles)

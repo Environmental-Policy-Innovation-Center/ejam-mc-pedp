@@ -14,7 +14,7 @@ shapes_blockgroups_from_bgfips(
 )
 }
 \arguments{
-\item{bgfips}{one or more block group FIPS codes as 12-character strings in a vector}
+\item{bgfips}{one or more blockgroup FIPS codes as 12-character strings in a vector}
 
 \item{outFields}{can be "*" for all, or can be
 just a vector of variables that particular service provides, like FIPS, SQMI, POPULATION_2020, etc.}

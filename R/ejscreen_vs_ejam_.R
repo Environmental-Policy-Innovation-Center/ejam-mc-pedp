@@ -887,10 +887,6 @@ ejscreen_vs_ejam_see1map <- function(vs, n = 1, overlay_blockgroups = FALSE,
 
       px <- getblocksnearby(sitepoints = datf, radius = radius + extramiles2check)
       px[ , ejam_uniq_id := datf$ejam_uniq_id]
-      # if ("ejam_uniq_id_as_submitted_to_getblocks" %in% names(px)) {
-      #   # try to make siteidvarname hold the original information that was submitted by caller as sitepoints$ejam_uniq_id and might not be 1:NROW
-      #   px[ , ejam_uniq_id := ejam_uniq_id_as_submitted_to_getblocks]
-      # }
     }
   })
 

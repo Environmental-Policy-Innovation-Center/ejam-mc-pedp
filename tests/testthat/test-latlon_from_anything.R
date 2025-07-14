@@ -118,13 +118,14 @@ testthat::test_that("latlon_from_anything works with tibbles", {
 ################################################ #
 
 testthat::test_that("latlon_from_anything (after create tempfile) works with csv", {
-
-  tfile <- tempfile("junk", fileext = ".csv")
-  skip_if(!dir.exists(dirname(tfile)), message = "cannot create tempfile, so skipping test")
-  write.csv(testpoints_10[1:2, ], file = tfile, row.names = FALSE)
+  suppressWarnings({
+    tfile <- tempfile("junk", fileext = ".csv")
+    testthat::skip_if(!dir.exists(dirname(tfile)), message = "cannot create tempfile, so skipping test")
+    write.csv(testpoints_10[1:2, ], file = tfile, row.names = FALSE)
+  })
   x <- latlon_from_anything(tfile)
   y <- latlon_from_anything(testpoints_10[1:2, ])
-  expect_equal(x, y, ignore_attr = TRUE)
+  testthat::expect_equal(x, y, ignore_attr = TRUE)
 })
 ################################################ #
 

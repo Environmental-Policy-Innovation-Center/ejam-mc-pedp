@@ -66,6 +66,13 @@ update_pkgdown = function(
 
 ) {
 
+  # MAYBE NEED TO DELETE ALL IN THE man/ FOLDER TO REMOVE OBSOLETE .Rd files like no longer documented or renamed functions ?
+  cat("You might need to do something like  \n  file.remove(list.files('./man', full.names = TRUE)) \nto delete all of /man/*.* to be sure there is nothing obsolete like renamed or deleted or no-longer-documented functions. \n")
+
+  # MAYBE NEED TO DELETE ALL IN THE docs/ FOLDER TO REMOVE OBSOLETE .html files like no longer used vignettes ?
+  cat("You might need to do \n  pkgdown::clean_site('.') \nor\n  file.remove(list.files('./docs', full.names = TRUE))  \nto delete all of /docs/*.*  to be sure there is nothing obsolete like renamed or deleted or no-longer-documented functions. \n")
+
+
   ############################################################# # ############################################################# #
   ############################################################# # ############################################################# #
 
@@ -117,11 +124,8 @@ update_pkgdown = function(
   if (dotests) {
     cat('doing unit tests \n')
     print(Sys.time())
-    source("./tests/test_interactively.R")
-    # rstudioapi::documentOpen("./tests/test_interactively.R")
-    test_interactively(ask = doask & interactive() & testinteractively )
+    EJAM:::test_ejam(ask = doask & interactive() & testinteractively )
     print(Sys.time())
-    # also see  devtools::test()
   }
   #################### #
 
@@ -185,9 +189,6 @@ update_pkgdown = function(
     golem::detach_all_attached()
     library(devtools) # library() stops with error where require() would only warn
     library(pkgdown) # library() stops with error where require() would only warn
-
-    # MAYBE NEED TO DELETE ALL IN THE man/ FOLDER TO REMOVE OBSOLETE .Rd files like no longer documented or renamed functions ?
-warning("You might need to delete all of /man/*.* to be sure there is nothing obsolete like renamed or deleted or no-longer-documented functions")
 
     cat('trying to do document() \n')
     document()
@@ -299,10 +300,6 @@ warning("You might need to delete all of /man/*.* to be sure there is nothing ob
     cat("Doing build_site()  \n")
     print(Sys.time())
 
-    # MAYBE NEED TO DELETE ALL IN THE docs/ FOLDER TO REMOVE OBSOLETE .html files like no longer used vignettes ?
-    warning("You might need to use pkgdown::clean_site('.') to delete all of /docs/*.*  to be sure there is nothing obsolete like renamed or deleted or no-longer-documented functions?")
-
-
     pkgdown::build_site(
       examples = FALSE, lazy = TRUE,
       devel = FALSE,
@@ -361,6 +358,9 @@ warning("You might need to delete all of /man/*.* to be sure there is nothing ob
 cat(
   "
 To use this function:
+
+Maybe create a background job that runs this:
+  './data-raw/update_pkgdown_background_job.R'
 
 update_pkgdown(doask = TRUE)
 

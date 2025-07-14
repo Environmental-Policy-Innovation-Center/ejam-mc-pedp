@@ -1,9 +1,8 @@
 ---
 name: Bug report
 about: Report a bug (e.g., crash, something doesn't work, number is wrong, typo, UI glitch, etc.)
-labels: 'bug'
+labels: 'bug','submitted-via-template'
 assignees: ''
-
 ---
 
 **What is the bug?**

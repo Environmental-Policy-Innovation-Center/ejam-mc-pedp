@@ -4,10 +4,13 @@ Environmental and Residential Population Analysis Multisite tool
 # <img src="man/figures/logo659.png" align="right" width="220px"/>
 
 <!-- README.md is generated from README.Rmd. Please edit Rmd not md  -->
+
 <!-- badges: start -->
+
 <!-- or we could comment out the badge 
 &#10;[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
  -->
+
 <!-- badges: end -->
 
 The Environmental and Residential Population Analysis Multisite tool
@@ -17,10 +20,11 @@ places, all at the same time.
 
 ## What Can You Do with EJAM?
 
-[What is
-EJAM?](https://ejanalysis.github.io/EJAM/articles/0_whatis.html)
+[What is EJAM?](https://ejanalysis.github.io/EJAM/articles/whatis.html)
 
 ## Status of EJAM package after mid-June 2025
+
+See <https://www.ejanalysis.com/status> for more information.
 
 *As of mid-June 2025, content related to what had been the USEPA-hosted
 open source R package EJAM will be archived (and/or unpublished)*
@@ -79,7 +83,7 @@ which currently returns ejanalysis/ejamdata, so the full URL would be
 ### web app hosting
 
 For information about how to host the web app, see [Deploying the Web
-App](https://ejanalysis.github.io/EJAM/articles/dev_deploy-app.html)
+App](https://ejanalysis.github.io/EJAM/articles/dev-deploy-app.html)
 
 EJScreen and the EJAM/multisite tool web app were *no longer hosted by
 EPA starting in early 2025*. Changes have been taking place in terms of

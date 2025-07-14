@@ -12,7 +12,9 @@ ejam2shapefile(
   crs = 4269,
   shortcolnames = TRUE,
   varnames = "basic250",
-  shp = NULL
+  shp = NULL,
+  quiet = TRUE,
+  ...
 )
 }
 \arguments{
@@ -39,6 +41,10 @@ Can be "all" or NULL to include all columns.}
 
 \item{shp}{data.frame that is also "sf" class, with "geometry" column for mapping,
 rows exactly corresponding to those in ejamitout$results_bysite}
+
+\item{quiet}{Passed to \code{\link[sf:st_write]{sf::st_write()}}}
+
+\item{...}{Passed to \code{\link[sf:st_write]{sf::st_write()}}}
 }
 \value{
 path to saved file

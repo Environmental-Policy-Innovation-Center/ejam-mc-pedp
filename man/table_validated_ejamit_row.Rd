@@ -23,5 +23,5 @@ This is a first step in formatting results in nice tables
 \examples{
   x <- table_validated_ejamit_row(testoutput_ejamit_100pts_1miles$results_bysite[ 1, ])
   x <- table_validated_ejamit_row(testoutput_ejamit_100pts_1miles$results_overall)
-  
+
 }
