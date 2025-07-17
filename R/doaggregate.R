@@ -180,14 +180,26 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
   # ensure it has at least 1 row
   if (NROW(sites2blocks) == 0) {
-    warning('No blocks found within that radius of your site(s). Try a larger radius')
+    warning('sites2blocks information passed to doaggregate() is empty, so no results will be returned')
     return(NULL)
   }
-
   # ensure it has ID columns needed
   if (any(!(c('ejam_uniq_id', 'blockid' ) %in% names(sites2blocks)))) {
     warning("sites2blocks must contain columns named ejam_uniq_id, blockid, and should have distance")
     return(NULL)
+  }
+  ## validate sites2states_or_latlon ####
+  if (missing(sites2states_or_latlon)) {
+    # this case is handled later when checking which state each site is in, but create it here to let code validate sort orders
+    sites2states_or_latlon <- data.table(ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
+  }
+
+  if (!("ejam_uniq_id" %in% colnames(sites2states_or_latlon))) {
+    message("ejam_uniq_id not found in sites2states_or_latlon, so assumed they are in order 1:N")
+    sites2states_or_latlon$ejam_uniq_id <- 1:NROW(sites2states_or_latlon)
+  }
+  if (NROW(sites2states_or_latlon) != length(unique(sites2blocks$ejam_uniq_id))) {
+    warning("sites2states_or_latlon should but does not have one row per unique ejam_uniq_id in sites2blocks!")
   }
 
   # NOTE ORIGINAL SORT ORDER OF SITES ####
@@ -1005,15 +1017,15 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   # * COUNT SITES NEARBY ####
   # * overall, HOW OFTEN ARE BLOCKS,BGS NEAR >1 SITE?  ###
   # Note this is NOT like the other metrics - this is just an overall stat to report once over the whole set of sites and bgs.
-  count_of_blocks_near_multiple_sites <- (NROW(sites2blocks) - NROW(sites2blocks_overall)) # NEW fraction is over /NROW(sites2blocks_overall)
-  blockcount_overall <-  sites2blocks[, collapse::fnunique( blockid[!is.na(blockid)])]
-  bgcount_overall    <-  sites2blocks[, collapse::fnunique( bgid[!is.na(bgid)])]
+  count_of_blocks_near_multiple_sites <- sites2blocks[, length(collapse::na_rm(blockid))] - sites2blocks_overall[, length(collapse::na_rm(blockid))]  # sum(!is.na(sites2blocks$blockid)) - sum(!is.na(sites2blocks_overall$blockid)) # removes NA rows to get right counts
+  blockcount_overall     <-  sites2blocks[, collapse::fnunique(collapse::na_rm(blockid))] # blockid[!is.na(blockid)])]
+  bgcount_overall        <-  sites2blocks[, collapse::fnunique(collapse::na_rm(bgid))]    # bgid[!is.na(bgid)])]
   # how many blockgroups here were found near 1, 2, or 3 sites?
   # e.g., 6k bg were near only 1/100 sites tested, 619 near 2, 76 bg had 3 of the 100 sites nearby.
   # table(table(sites2bgs_bysite$bgid))
 
   results_overall <- cbind(results_overall, blockcount_near_site = blockcount_overall) # 1 new col and then changed name to match it in results_bysite ---------------------------------------------- -
-  results_overall <- cbind(results_overall, bgcount_near_site = bgcount_overall) # 1 new col and then changed name to match it in results_bysite ---------------------------------------------- -
+  results_overall <- cbind(results_overall, bgcount_near_site = bgcount_overall)       # 1 new col and then changed name to match it in results_bysite ---------------------------------------------- -
   ##################################################### #  ##################################################### #
 
   ##################################################### #
@@ -1080,14 +1092,14 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     ## But For now, Approximate for multistate sites by using the nearest block's state:
     # use nearest 1 block's state, which is often but not always right if near state line,
     # but in shapefiles case of a polygon covering 2 states has no distance so just whatever happens to be 1st block in list there.
-    # and never arises for FIPS case (fips is always just a single state).
+    # and never arises for non-city FIPS case (state, county, tract, or blockgroup fips is always just a single state, but possibly some where fipstype() is "city" might span 2 states).
     cat(' *** For now, if sites2states_or_latlon is not provided to doaggregate(),
         for circles covering 2 states, it will use state of nearest block,
         and for Shapefiles spanning 2 States, will just use 1 of the States -
         not selected by area or population, but just whatever happens to be first in the table.
         This should only arise if not in shiny app and not using ejamit() and
         sites2states_or_latlon was not provided to doaggregate() \n')
-    # single-state case
+    # single-state case (or at least block centroids are all in 1 state, which is what matters, even if actual shape covers a bit of an adjacent state -- that does not matter since we dont use any data except via the block points)
     sites2states <- state_from_s2b_bysite(sites2blocks) # works for single-state sites only, NA otherwise
     setDT(sites2states)
     # if ("confirmed this works" == "done?") {
@@ -1106,22 +1118,22 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #Value was 0.8 in non timer approach
   }
   if (!missing( sites2states_or_latlon)) {
-    sites2states <- state_per_site_for_doaggregate(s2b = sites2blocks, s2st = sites2states_or_latlon)
+    sites2states <- state_per_site_for_doaggregate(s2b = sites2blocks, s2st = sites2states_or_latlon) # can use ST, fips, block's parent bgid, then site latlon.
   }
   #  ##################################################### #
 
   if (class(results_bysite$ejam_uniq_id) == "character") { # xxx
     sites2states$ejam_uniq_id <- as.character(sites2states$ejam_uniq_id)
   }
-if (class(sites2states$ejam_uniq_id) == "character") {
-  results_bysite$ejam_uniq_id <- as.character(results_bysite$ejam_uniq_id)
-}
+  if (class(sites2states$ejam_uniq_id) == "character") {
+    results_bysite$ejam_uniq_id <- as.character(results_bysite$ejam_uniq_id)
+  }
   results_bysite[sites2states, ST := ST, on = "ejam_uniq_id"] # check this, including when ST is NA ***
-  # results_bysite[, statename := stateinfo$statename[match(ST, stateinfo$ST)]]
+  suppressWarnings({
   results_bysite[ , statename := fips2statename(fips_state_from_state_abbrev(ST))]
   results_bysite[ , REGION := fips_st2eparegion(fips_state_from_state_abbrev(ST))]
   results_bysite[sites2states, in_how_many_states := in_how_many_states, on = "ejam_uniq_id"]
-
+  })
   results_overall$ST <- NA
   results_overall$statename <- NA
   results_overall$REGION <- NA
@@ -1131,9 +1143,11 @@ if (class(sites2states$ejam_uniq_id) == "character") {
   # results_bybg_people$ST is created from sites2bgs_plusblockgroupdata_bysite$ST and ST is already in that table
   # since ST was joined from blockgroupstats around line 569, for each bg, but that is not always 1 state for a given site.
   # sites2bgs_plusblockgroupdata_bysite[, statename := stateinfo$statename[match(ST, stateinfo$ST)]]  # same as the very slightly slower... fips2statename(fips_state_from_state_abbrev(ST))
+  suppressWarnings({
   sites2bgs_plusblockgroupdata_bysite[, statename := fips2statename(fips_state_from_state_abbrev(ST))]
   sites2bgs_plusblockgroupdata_bysite[, REGION := fips_st2eparegion(fips_state_from_state_abbrev(ST))]
   sites2bgs_plusblockgroupdata_bysite$in_how_many_states <- 1 # since a single blockgroup can only be in one state
+  })
   #  ##################################################### #  ##################################################### #
   if (is.function(updateProgress)) {
     boldtext <- paste0('Computing results')
@@ -1245,21 +1259,37 @@ if (class(sites2states$ejam_uniq_id) == "character") {
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #Value was 0.8 in non timer approach
   }
   if (length(valid_state_vars) > 0) {
+
+    ######################################## #
+    # This now loops over the indicators (via mapply), because
+    #
+    #   pctile_from_raw_lookup() can handle only these options for inputs:
+    #
+    #   A. a vector of scores and vector of corresponding zones (States),
+    #     for only 1 indicator (e.g., pctlowinc)
+    #     i.e., call it inside a loop over say 32 indicators.
+    #
+    #   B. a vector of scores and vector of corresponding indicator names,
+    #     in only 1 zone (e.g. 1 State).
+    #     You would need to use it within a loop over 1 to 50+ "states"
+    ######################################## #
+
+    columns_bysite_state <- as.list(results_bysite[, ..myvars_to_use])
     st_vector <- results_bysite$ST
     idx_not_na_st <- !is.na(st_vector)
 
-    columns_bysite_state <- as.list(results_bysite[, ..myvars_to_use])
-    ######################################## #
+    results_bysite[!idx_not_na_st, (valid_state_pctl_names) := NA_real_]
+
     results_bysite[idx_not_na_st, (valid_state_pctl_names) := mapply(function(var, var_to_use) {
+
       pctile_from_raw_lookup(
         columns_bysite_state[[var_to_use]][idx_not_na_st],
         varname.in.lookup.table = var,
         lookup = statestats,
-        zone = ST[idx_not_na_st]
+        zone = ST # ST is already limited to non_na values via data.table filter above
       )
     }, valid_state_vars, valid_state_vars_to_use, SIMPLIFY = FALSE)]
     ######################################## #
-    results_bysite[!idx_not_na_st, (valid_state_pctl_names) := NA_real_]
   }
 
   if (is.function(updateProgress)) {
