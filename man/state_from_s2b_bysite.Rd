@@ -2,7 +2,7 @@
 % Please edit documentation in R/state_from_s2b_bysite.R
 \name{state_from_s2b_bysite}
 \alias{state_from_s2b_bysite}
-\title{Get State each site is entirely within, quickly, from table of blockid, ejam_uniq_id}
+\title{Get State each site is entirely within, quickly, from table of blocks nearby/at/in each site (via blockid, by ejam_uniq_id)}
 \usage{
 state_from_s2b_bysite(sites2blocks)
 }
@@ -14,40 +14,48 @@ from \code{\link[=getblocksnearby]{getblocksnearby()}} that has columns ejam_uni
 data.table with columns  ejam_uniq_id, ST
 }
 \description{
-Find the 2-character State abbreviation, but only for sites entirely in 1 state.
+Find the 2-character State abbreviation (ST), but only for sites entirely in 1 state.
 }
 \details{
-This only works for sites entirely in 1 state.
-For multistate sites, need lat/lon of site and that is slower.
-This returns NA for any site whose nearby blocks are in multiple states.
-For multistate sites, you need to know the lat/lon of the site to be sure of its state.
-
 This function is for when you need to quickly find out the state each site is in,
 to be able to report state percentiles, This can identify the State
 each site is located in, based on the states of the nearby blocks (and parent blockgroups).
 In many analyses, all the sites will be single-state sites, and this function will be sufficient.
-
-However, for the rare edge case where you did not save the lat,lon of sites you analyzed,
+\itemize{
+\item This function only identifies the State for each site that is entirely in 1 state
+(whose included block internal points are all in the same state).
+\item For each multistate site, this returns NA as the ST.
+\itemize{
+\item For a multistate site defined by radius and latlon (a circular buffer), need lat/lon of site and that is slower,
+and handled elsewhere. (And for the rare edge case where you did not save the lat,lon of sites you analyzed,
 you would need to approximate those from the lat/lon of the blocks and their distances,
-via latlon_from_s2b(), separately.
+via \code{\link[=latlon_from_s2b]{latlon_from_s2b()}}, separately).
+\item For a multistate site defined by a polygon, it is not entirely clear which state to pick for purposes of reporting state percentiles,
+but that is handled elsewhere.
+}
+}
 
-These two functions differ -- one gets the state info for each unique site,
-and the other gets the state abbreviation of each unique block:
-Note: unexported function
-xx = state_from_s2b_bysite(testoutput_getblocksnearby_10pts_1miles)[]
+Note this is an unexported function.
+
+Note that the two functions \code{\link[=state_from_blockid_table]{state_from_blockid_table()}} and \code{\link[=state_from_s2b_bysite]{state_from_s2b_bysite()}} differ
+-- one gets the state info for each unique SITE,
+and the other gets the state abbreviation of each unique BLOCK:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{xx = state_from_s2b_bysite(testoutput_getblocksnearby_10pts_1miles)[]
 NROW(xx)
-[1] 10
+# 10
 length(unique(testoutput_getblocksnearby_10pts_1miles$ejam_uniq_id))
-[1] 10
+# 10
 
 length(EJAM:::state_from_blockid_table(testoutput_getblocksnearby_10pts_1miles))
-[1] 1914
+# 1914
 NROW(testoutput_getblocksnearby_10pts_1miles)
-[1] 1914
+# 1914
+}\if{html}{\out{</div>}}
 }
 \examples{
 \donttest{
-# unexported function
+# unexported function, so use load_all() or :::
 table(state_from_blockid_table(testoutput_getblocksnearby_10pts_1miles))
 state_from_s2b_bysite(testoutput_getblocksnearby_10pts_1miles)[]
 
@@ -62,7 +70,7 @@ state_from_s2b_bysite(testoutput_getblocksnearby_10pts_1miles)[]
   y = read_csv_or_xl(fname)
   x$ST == y$FacState
   }
-  state_from_s2b_bysite(testoutput_getblocksnearby_10pts_1miles) 
+  state_from_s2b_bysite(testoutput_getblocksnearby_10pts_1miles)
 
 }
 \seealso{

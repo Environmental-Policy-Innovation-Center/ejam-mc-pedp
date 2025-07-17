@@ -246,7 +246,7 @@ for (n in nvalues) {
     out_varname_getblocks = paste0(namebase, n, "pts_", myrad, "miles")
     # out_varname_getblocks_alias <- paste0("sites2blocks_example", n, "pts_", myrad, "miles")
     if (recreating_getblocksnearby) {
-      out_data_getblocks <- EJAM::getblocksnearby(testpoints_data, radius = myrad, quiet = TRUE)                     ############# #
+      out_data_getblocks <- getblocksnearby(testpoints_data, radius = myrad, quiet = TRUE)                     ############# #
       assign(out_varname_getblocks, out_data_getblocks)
       ################################## #
       # >_____sites2blocks ALIAS  ####

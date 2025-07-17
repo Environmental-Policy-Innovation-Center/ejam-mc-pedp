@@ -18,7 +18,7 @@ dataset_documenter(
 
 # 2 cities/towns
 
-testinput_fips_cities <- c(2743000, 2743306)
+testinput_fips_cities <- c("2743000", "2743306")
 # 2743000 # minneapolis city
 # Minnetrista city     MN        Hennepin County 2743306
 # shp = shapes_from_fips(testinput_fips_cities)
