@@ -26,7 +26,7 @@ testthat::test_that("shapes_from_fips for statefips", {
     shp <- shapes_from_fips(fipslist$statefips)
   })
   expect_true({'sf' %in% class(shp)})
-  expect_identical(mystates, shp$STUSPS)
+  expect_identical(mystates, shp$STATE_ABBR)
 })
 
 testthat::test_that("shapes_from_fips for countyfips", {
@@ -48,7 +48,7 @@ testthat::test_that("shapes_from_fips for cityfips", {
     shp <- shapes_from_fips(fipslist$cityfips)
   })
   expect_true({'sf' %in% class(shp)})
-  expect_identical(shp$GEOID, fipslist$cityfips)
+  expect_identical(shp$FIPS, fipslist$cityfips)
 })
 
 testthat::test_that("shapes_from_fips for tractfips", {
@@ -89,7 +89,7 @@ testthat::test_that("shapes_from_fips for bgfips keeps sort and handles NA fips 
   })
   expect_true({'sf' %in% class(shp)})
   expect_equal(NROW(shp), length(inputfips))
-  expect_equal(shp$FIPS, inputfips)
+  expect_equal(shp$FIPS, inputfips)       ############     does it include NA in output for the fips that is NA ? ***
 })
 ################ #
 

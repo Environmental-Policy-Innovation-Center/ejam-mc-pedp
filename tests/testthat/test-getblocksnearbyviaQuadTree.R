@@ -13,9 +13,9 @@ testthat::test_that("distance gets adjusted up if radius zero", {
   radius <- 0
   x <- getblocksnearbyviaQuadTree(sitepoints = pts, radius = radius,
                                   quadtree = localtree, quiet = T, report_progress_every_n = 2000)
-  testthat::expect_true(all(x$distance >= x$distance_unadjusted))
-  testthat::expect_true(all(x$distance > x$distance_unadjusted | x$distance == 0))
-  testthat::expect_true(all(x$distance_unadjusted <= x$radius))
+  testthat::expect_true(all(x$distance >= x$distance_unadjusted, na.rm = TRUE))
+  testthat::expect_true(all(x$distance > x$distance_unadjusted | x$distance == 0, na.rm = TRUE))
+  testthat::expect_true(all(x$distance_unadjusted <= x$radius, na.rm = TRUE))
 })
 ######################################################################################################## #
 

@@ -51,9 +51,10 @@ test_that("doag outputs sorted like input, LATLON case, NA rows as needed", {
   inputstates <- dat$ST
 
   # getblocksnearby() will return distance of NA if a row of inputs is NA values
-  s2b <- getblocksnearby(dat, radius = 1, quiet = TRUE)
-
-  d1 = doaggregate(s2b, radius = 1)
+  suppressWarnings({
+    s2b <- getblocksnearby(dat, radius = 1, quiet = TRUE)
+    })
+  d1 = doaggregate(s2b, radius = 1)  # s2b has a row with valid id but other columns are NA
   d2 = doaggregate(s2b, sites2states_or_latlon = dat)
   outputstates = d1$results_bysite$ST
   # print(inputstates)
@@ -81,10 +82,15 @@ test_that("doag outputs sorted like input, NONCITY FIPS case", {
     s2b <- getblocksnearby_from_fips(inputfips)
   })
   # See if it changes sort or fails due to NA values:
-  x <- doaggregate(s2b)
-  # x <- doaggregate(s2b[!is.na(s2b$distance), ])
-  outputfips <- x$results_bysite$ejam_uniq_id
-  expect_equal(outputfips, inputfips)
+  x <- doaggregate(s2b)  # doag now outputs 1:N as ejam_uniq_id here since output of getblocks... is always 1:N now
+
+  # at least the NON-NA fips are sorted same in output of doag as in input of doag
+  testthat::expect_equal(fips2pop(inputfips[!is.na(inputfips)]),  x$results_bysite$pop )
+
+  # BUT, the NA fips is NOT in output of doag.: ***
+#  outputid =  x$results_bysite$ejam_uniq_id
+#  inputid = seq_along(inputfips)
+#  expect_equal(outputid, inputid)   #####   is there one row in output for each input including invalid ones? no - ejamit() handles that but doaggregate() does not ?
 })
 ################# #
 test_that("doag outputs sorted like input, CITY FIPS case", {

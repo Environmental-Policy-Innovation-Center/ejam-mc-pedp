@@ -272,8 +272,8 @@ test_that("area_sqmi handles table without usable colnames", {
   })
 })
 ######## #
-test_that("area_sqmi(2+ types of fips)", {
-  expect_error({
+test_that("area_sqmi now handles 2+ types of fips", {
+  expect_no_error({
     junk <- capture_output({
       x <- area_sqmi(fips = c("06", "10001"))
     })

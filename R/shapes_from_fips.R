@@ -120,7 +120,8 @@ shapes_from_fips <- function(fips,
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
       if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
-      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
+      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE,
+                                            ignore.attr = TRUE) # combines with any other types found so far, even if colnames and class (MULTIPOLYGON vs POLYGON) differ
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'blockgroup')) {
@@ -136,7 +137,8 @@ shapes_from_fips <- function(fips,
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
       if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
-      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
+      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE,
+                                            ignore.attr = TRUE) # combines with any other types found so far, even if colnames and class (MULTIPOLYGON vs POLYGON) differ
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'tract')) {
@@ -152,7 +154,8 @@ shapes_from_fips <- function(fips,
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
       if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
-      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
+      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE,
+                                            ignore.attr = TRUE) # combines with any other types found so far, even if colnames and class (MULTIPOLYGON vs POLYGON) differ
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'city')) {
@@ -168,7 +171,8 @@ shapes_from_fips <- function(fips,
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
       if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
-      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
+      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE,
+                                            ignore.attr = TRUE) # combines with any other types found so far, even if colnames and class (MULTIPOLYGON vs POLYGON) differ
     }
   } else {
     if (all(ftype %in% 'county')) {
@@ -184,7 +188,8 @@ shapes_from_fips <- function(fips,
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
       if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
-      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE) # combines with any other types found so far, even if colnames differ
+      shp_combined <- data.table::rbindlist(list(shp_combined, shp_this), fill = TRUE,
+                                            ignore.attr = TRUE) # combines with any other types found so far, even if colnames and class (MULTIPOLYGON vs POLYGON) differ
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'state')) {
@@ -221,7 +226,16 @@ shapes_from_fips <- function(fips,
   }
   # convert it back into an sf object, since it has been made a non-sf data.table via rbindlist() above
   shp_combined <- sf::st_as_sf(setDF(shp_combined))
+  shp_combined$geometry <- sf::st_cast(shp_combined$geometry) # since some were POLYGON and some MULTIPOLYGON
+  shp_combined <- shp_combined[1:NROW(shp_combined), ] # see note below
   return(shp_combined)
+
+  # NOTE: # somehow that 1:NROW() seemed to help avoid an error msg:
+  # x = c(testinput_fips_blockgroups[1:2], testinput_fips_cities)
+  # x = shapes_from_fips(x)
+  # #sf::st_area(x) # ERROR MSG: Error in CPL_write_wkb(x, EWKB) : Not compatible with requested type: [type=list; target=double].
+  # x = x[1:NROW(x), ]
+  # sf::st_area(x) # NO ERROR MSG.
 }
 # .------------------------------------ ####
 ########################### # ########################### # ########################### # ########################### #
@@ -258,6 +272,9 @@ shapes_state_from_statefips <- function(fips) {
   shp <- states_shapefile[match(fips, states_shapefile$GEOID), ]
   shp$FIPS <- shp$GEOID
 
+  shp <- shapefile_dropcols(shp)
+  shp <- shapefile_addcols(shp)
+  shp <- shapefile_sortcols(shp)
   return(shp)
 }
 ########################### # ########################### # ########################### # ########################### #
@@ -285,7 +302,7 @@ shapes_state_from_statefips <- function(fips) {
 #'
 #' @keywords internal
 #'
-shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c("NAME", "FIPS", "STATE_ABBR", "STATE_NAME", "POP_SQMI"), # "",
+shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c("NAME", "FIPS", "STATE_ABBR", "STATE_NAME"), # "",
                                             myservice = c(
                                               "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2022/FeatureServer/2/query",
                                               "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Counties_and_States_with_PR/FeatureServer/0/query",
@@ -359,7 +376,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
 
     shp <- tidycensus::get_acs(
       geography = "county",
-      variables = "B01001_001",
+      variables = "B01001_001", # we do not actually need it here since blockgroupstats has it
       cb = usecb, ## TRUE MEANS FASTER DOWNLOAD BUT LESS ACCURATE
       state = mystates,
       # county =  substr(unique(fips), 3,5), # this function expects county fips to be only the county portion without the 2 state digits
@@ -369,62 +386,40 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
       # key = , # API key would go here
       show_call = TRUE
     )
+
     # now drop unrequested counties
     shp <- shp[shp$GEOID %in% fips, ] # GEOID is the 5-digit county fips here
-
-    # tidycensus format initially:
-    # > shp
-    # Simple feature collection with 3222 features and 5 fields
-    # Geometry type: MULTIPOLYGON
-    # Dimension:     XY
-    # Bounding box:  xmin: -179.1467 ymin: 17.88328 xmax: 179.7785 ymax: 71.38782
-    # Geodetic CRS:  NAD83
-    # First 10 features:
-    #    GEOID                           NAME   variable estimate  moe                       geometry
-
-    # old output format:
-    # > shp = EJAM:::shapes_counties_from_countyfips(cfips)
-    # > shp
-    # Simple feature collection with 112 features and 5 fields
-    # Geometry type: GEOMETRY
-    # Dimension:     XY
-    # Bounding box:  xmin: -179.1489 ymin: 30.22093 xmax: -84.88825 ymax: 71.36516
-    # Geodetic CRS:  WGS 84
-    # First 10 features:
-    #               NAME  FIPS STATE_ABBR STATE_NAME POP_SQMI                       geometry
-
-    drop_comma_statename = function(countyname_state) {
-      gsub(", .*$", "", countyname_state)
-    }
     names(shp) <- gsub("GEOID", "FIPS", names(shp))
-    names(shp) <- gsub("estimate", "pop", names(shp))
-    names(shp) <- gsub("moe", "pop_moe", names(shp))
-    shp$NAME <-  drop_comma_statename(fips2countyname(shp$FIPS))
-    shp$STATE_ABBR <- fips2state_abbrev(shp$FIPS)
-    shp$STATE_NAME <- fips2statename(shp$FIPS)
-    myarea <- sf::st_area(shp)
-    if (all(units(myarea)$numerator == c('m', 'm'))) {
-      myarea = convert_units(myarea, from = 'sqmeters', towhat = 'sqmi')
-      units(myarea)  <- "mi^2"
-      sqmi = myarea
-    } else {
-      sqmi = NA # unsure of units so report pop density as NA
-    }
-    shp$POP_SQMI <- shp$pop / sqmi
-    shp <- shp[ , c('NAME', 'FIPS', 'STATE_ABBR', 'STATE_NAME', 'POP_SQMI', 'geometry',
-                    # now adding these 2 columns in this case:
-                    'pop', 'pop_moe')]
-    cat("Population estimate is from B01001_001 in American Community Survey 5yr survey ending", acsendyear_carto_tiger, " \n")
+    drop_comma_statename <- function(countyname_state) {gsub(", .*$", "", countyname_state)}
+    shp$NAME <-  drop_comma_statename(fips2countyname(shp$FIPS)) # also done later by fips2name() but ok to leave it like this
+
+    ## STATE_ABBR, STATE_NAME, sqmi, POP_SQMI, pop, etc. all now added by shapefile_addcols()
+    ##
+    ##  can get these pop variables later:
+    ##  now leaving out these 2 columns since pop is just like blockgroupstats data and MOE for county is trivial/NA
+    ##  popvarname, 'pop_moe',
+    ##  popvarname likely but not necessarily the same as pop from fips2pop() which is ACS 5yr from blockgroupstats
+    ##  and pop gets added by shapefile_addcols() now via fips2pop()
+    #
+    # popvarname = paste0("pop_est_acs5_", substr(acsendyear_carto_tiger, 3, 4))
+    # popvarname = "pop_est" # simpler
+    # names(shp) <- gsub("estimate", popvarname, names(shp))
+    # cat("Population estimate", popvarname, "is from B01001_001 in American Community Survey 5yr survey ending", acsendyear_carto_tiger, " \n")
+    # names(shp) <- gsub("moe", "pop_moe", names(shp))
+
+    shp <- shp[ , c('NAME', 'FIPS', 'geometry')]
 
     # fips was input, shp$FIPS is output column but need to make the sort order like input order
     if (any(sort(shp$FIPS) != sort(fips))) {warning("fips codes found in shapefile of boundaries are not all the same as fips requested")}
-
     ## ensure original rows ####
     # original sort order, and ensure NROW(shp) output is same as length(fips) input
     # retain only 1 row per input fips (even if invalid FIPS or valid FIPS lacking downloaded boundaries)
     shp <- shp[match(fips, shp$FIPS), ]
     shp$FIPS <- fips # now include the original fips in output even for rows that came back NA / empty polygon
 
+    shp <- shapefile_dropcols(shp)
+    shp <- shapefile_addcols(shp)
+    shp <- shapefile_sortcols(shp)
     return(shp)
 
     ################## # ################## # ################## #
@@ -545,6 +540,9 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     shp <- shp[match(fips, shp$FIPS), ]
     shp$FIPS <- fips # now include the original fips in output even for rows that came back NA / empty polygon
 
+    shp <- shapefile_dropcols(shp)
+    shp <- shapefile_addcols(shp)
+    shp <- shapefile_sortcols(shp)
     return(shp)
   }
 }
@@ -631,6 +629,9 @@ shapes_tract_from_tractfips <- function(fips, outFields = c("FIPS", "STATE_ABBR"
   shp <- shp[match(fips, shp$FIPS), ]
   shp$FIPS <- fips # now include the original fips in output even for rows that came back NA / empty polygon
 
+  shp <- shapefile_dropcols(shp)
+  shp <- shapefile_addcols(shp)
+  shp <- shapefile_sortcols(shp)
   return(shp)
 }
 ########################### # ########################### # ########################### # ########################### #
@@ -727,12 +728,16 @@ shapes_blockgroups_from_bgfips <- function(bgfips = '010890029222', outFields = 
   if ("GEOID" %in% names(shp) && !("FIPS" %in% names(shp))) {
     shp$FIPS <- shp$GEOID
   }
+
   ## ensure original rows ####
   # original sort order, and ensure NROW(shp) output is same as length(fips) input
   # retain only 1 row per input fips (even if invalid FIPS or valid FIPS lacking downloaded boundaries)
   shp <- shp[match(fips, shp$FIPS), ]
   shp$FIPS <- fips # now include the original fips in output even for rows that came back NA / empty polygon
 
+  shp <- shapefile_dropcols(shp)
+  shp <- shapefile_addcols(shp)
+  shp <- shapefile_sortcols(shp)
   return(shp)
 }
 ########################### # ########################### # ########################### # ########################### #
@@ -804,7 +809,7 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
 
 
 
-  ST <- unique(fips2state_abbrev(fips))
+  ST <- unique(fips2state_abbrev(fips)) # added later by shapefile_addcols() but needed here to download right states
 
 
 
@@ -830,6 +835,9 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
   shp <- shp[match(fips, shp$FIPS), ]
   shp$FIPS <- fips # now include the original fips in output even for rows that came back NA / empty polygon
 
+  shp <- shapefile_dropcols(shp)
+  shp <- shapefile_addcols(shp)
+  shp <- shapefile_sortcols(shp)
   return(shp)
 }
 ####################################################### #
@@ -865,6 +873,10 @@ shapes_places_from_placenames <- function(place_st) {
 
   tp = tigris::places(unique(st))  # DOWNLOAD THE BOUNDARIES of all places in an ENTIRE STATE, for EACH STATE REQUIRED HERE
   shp = tp[match(fips, tp$GEOID), ] # use FIPS of each place to get boundaries
+
+  shp <- shapefile_dropcols(shp)
+  shp <- shapefile_addcols(shp)
+  shp <- shapefile_sortcols(shp)
   return(shp)
 }
 ####################################################### #
@@ -903,6 +915,142 @@ shapes_empty_table <- function(fips) {
   # create an output table where NROW() is length of fips vector, but entries are NA values except the FIPS column
   empty_polygons_table <- empty_polygon_template[1:length(fips), ]
   empty_polygons_table$FIPS <- fips
+
+  empty_polygons_table <- shapefile_dropcols(empty_polygons_table)
+  empty_polygons_table <- cbind(empty_polygons_table, STATE_ABBR = NA, STATE_NAME = NA, SQMI = NA, POP_SQMI = NA)
+  # empty_polygons_table <- shapefile_addcols(empty_polygons_table)  #   would try to calculate and add STATE_ABBR, STATE_NAME, SQMI, POP_SQMI
+  empty_polygons_table <- shapefile_sortcols(empty_polygons_table)
   return(empty_polygons_table)
 }
 ####################################################### #
+# add, drop, reorder columns of sf ####
+################## # ################## # ################## #
+
+
+# utility to drop some less useful columns from spatial data.frame
+
+# eg,
+# shp <- shapefile_dropcols(shp)
+# shp <- shapefile_addcols(shp)
+# shp <- shapefile_sortcols(shp)
+
+shapefile_dropcols <- function(shp,
+                               dropthese = c('STATEFP', 'PLACEFP', 'PLACENS', 'GEOID', 'GEOIDFQ',
+                                             'REGION' ,'DIVISION' , 'STATENS', 'STUSPS' ,
+                                             'LSAD', 'CLASSFP', 'PCICBSA', 'MTFCC', 'FUNCSTAT',
+                                             'ALAND', 'AWATER', 'INTPTLAT', 'INTPTLON')
+) {
+  # drop less useful columns
+  shp[, setdiff(colnames(shp), dropthese)]
+}
+################## # ################## # ################## #
+
+# utility to add some useful columns to spatial data.frame
+
+# eg,
+# shp <- shapefile_dropcols(shp)
+# shp <- shapefile_addcols(shp)
+# shp <- shapefile_sortcols(shp)
+
+shapefile_addcols <- function(shp, addthese = c('fipstype', 'pop', 'NAME', 'STATE_ABBR', 'STATE_NAME', 'SQMI', 'POP_SQMI'),
+                              fipscolname = "FIPS", popcolname = "pop", overwrite = FALSE) {
+  if (!overwrite) {
+    # could warn that user asked to add one that is already there but overwrite is FALSE so it will not get recalculated
+    if (length(intersect(addthese, colnames(shp))) > 0) {
+      message("These already exist and will not be overwritten since overwrite=FALSE: ", paste0(intersect(addthese, colnames(shp)), collapse=", "))
+    }
+    addthese <- setdiff(addthese, colnames(shp))
+  }
+
+  # figure out the FIPS column, get it as a vector
+  if (fipscolname %in% colnames(shp)) {
+    fipsvector <- as.vector(sf::st_drop_geometry(shp)[, fipscolname]) # fipscolname was found
+  } else {
+    if ("fips" %in% fipscolname) {
+      fipsvector <- as.vector(sf::st_drop_geometry(shp)[, 'fips']) # use "fips" lowercase since cant find fipscolname
+    } else {
+      if ("fips" %in% fixnames_aliases(colnames(shp))) {  # use 1st column that is an alias for fips
+        warning(fipscolname, "is not a column name in shp, so using a column that seems to be an alias for FIPS")
+        fipsvector <- as.vector(sf::st_drop_geometry(shp)[, which(fixnames_aliases(colnames(shp)) == "fips")[1]])
+      } else {
+        warning("cannnot find a column that can be identified as the FIPS, so using NA for columns like STATE_ABBR or STATE_NAME")
+        fipsvector <- rep(NA, nrow(shp)) # NA for all rows
+      }
+    }
+  }
+  suppressWarnings({
+    ftype <- fipstype(fipsvector)
+  })
+  if ('fipstype' %in% addthese) {
+    suppressWarnings({
+      shp$fipstype <- fipstype(fipsvector) # NA if fips is NA
+    })
+  }
+  if ('NAME' %in% addthese) {
+    suppressWarnings({
+      shp$NAME <- fips2name(fipsvector) # NA if fips is NA
+    })
+  }
+  if ('STATE_ABBR' %in% addthese) {
+    suppressWarnings({
+      shp$STATE_ABBR <- fips2state_abbrev(fipsvector) # NA if fips is NA
+    })
+  }
+  if ('STATE_NAME' %in% addthese) {
+    suppressWarnings({
+      shp$STATE_NAME <- fips2statename(fipsvector) # NA if fips is NA
+    })
+  }
+  if ('pop' %in% addthese) {
+    suppressWarnings({
+      shp$pop <- fips2pop(fipsvector) # NA for city type
+    })
+  }
+  if ('SQMI' %in% addthese) {
+    shp$SQMI <- area_sqmi_from_fips(fipsvector, download_city_fips_bounds = FALSE, download_noncity_fips_bounds = FALSE)
+    shp$SQMI[ftype == "city" & !is.na(ftype)] <- area_sqmi_from_shp(shp[ftype == "city" & !is.na(ftype), ]) # *** check the numbers
+    shp$SQMI <- round(shp$SQMI, 2)
+  }
+
+  if ('POP_SQMI' %in% addthese) {
+    if ('SQMI' %in% colnames(shp)) {
+      sqmi = shp$SQMI
+    } else {
+      sqmi = area_sqmi_from_shp(shp)
+    }
+    if (popcolname %in% colnames(shp)) {
+      pop = as.vector(sf::st_drop_geometry(shp)[, popcolname])
+      shp$POP_SQMI <- ifelse(sqmi == 0, NA, pop / sqmi)
+      shp$POP_SQMI <- round(shp$POP_SQMI, 2)
+    } else {
+      warning("Cannot find a column that can be identified as the population, so using NA for POP_SQMI")
+      shp$POP_SQMI <- NA
+    }
+  }
+
+  return(shp)
+}
+################## # ################## # ################## #
+
+# eg,
+# shp <- shapefile_dropcols(shp)
+# shp <- shapefile_addcols(shp)
+# shp <- shapefile_sortcols(shp)
+
+
+shapefile_sortcols <- function(x,
+                               putfirst = c("FIPS", "fipstype", "NAME", "ST", "STATE_ABBR", "STATE_NAME", "pop", "pop_est", "pop_moe", "SQMI", "POP_SQMI"),
+                               putlast = c("geometry")) {
+
+  x <- relocate(x, intersect(putfirst, names(x)), .before = 1)
+  x <- relocate(x, intersect(putlast, names(x)), .after = last_col())
+  return(x)
+}
+################## # ################## # ################## #
+
+shapefile_sortcols2 = function(x,
+                               putfirst = c("FIPS", "fipstype", "NAME", "ST", "STATE_ABBR", "STATE_NAME", "pop", "pop_est", "pop_moe", "SQMI", "POP_SQMI"),
+                               putlast = c("geometry")) {
+
+  x[, c(intersect(putfirst, names(x)), setdiff(names(x), c(putfirst, putlast)), intersect(putlast, names(x)))]
+}

@@ -195,7 +195,7 @@ getblocks_diagnostics <- function(x, detailed=FALSE, see_pctiles=FALSE, see_dist
   cat("\n   DISTANCES FROM BLOCKS (AND RESIDENTS) TO SITES (AND FOR CLOSEST SITE) \n")
   if (see_pctiles) {
     cat("\n")
-    print(cbind(percentiles.of.distance = quantile(x$distance, probs = (0:20)/20)))
+    print(cbind(percentiles.of.distance = quantile(x$distance, probs = (0:20)/20, na.rm = TRUE)))
   }
   cat("\n")
   cat(max(x$distance_unadjusted, na.rm = TRUE), "miles is max. distance to block internal point (distance_unadjusted)  ", "\n")

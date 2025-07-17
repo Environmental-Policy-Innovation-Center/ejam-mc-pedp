@@ -1667,11 +1667,11 @@ fips_counties_from_countynamefull <- function(fullname, exact = TRUE) {
 fips2pop <- function(fips) {
 
   pop = rep(NA, times = length(fips))
-  ftype = fipstype(fips)
+  suppressWarnings({ftype = fipstype(fips)})
 
   # to handle possibly multiple types of fips in one shapefile:
-  for (onetype in unique(ftype)) {
-    pop[ftype == onetype]  <- f2p(fips[ftype == onetype], onetype = onetype)
+  for (onetype in unique(ftype[!is.na(ftype)])) {
+    pop[!is.na(ftype) & ftype == onetype]  <- f2p(fips[!is.na(ftype) & ftype == onetype], onetype = onetype)
   }
 
   # Population <- prettyNum(pop, big.mark = ",")
@@ -1974,7 +1974,10 @@ fips2name  <- function(fips, ...) {
     if (any(!nafips & fcity)) { #
       out[!nafips & fcity] <- fips_place2placename(fips = fips[!nafips & fcity], ...)
     }
-
+    ftract <- ftype == "tract"
+    if (any(!nafips & ftract)) {
+      out[!nafips & ftract] <- fips2tractname(fips = fips[!nafips & ftract])
+    }
     fbg <- ftype == "blockgroup"
     if (any(!nafips & fbg)) {
       out[!nafips & fbg] <- fips2blockgroupname(fips = fips[!nafips & fbg], ...)

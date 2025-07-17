@@ -108,7 +108,8 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
     ## 2. combine city/non ####
     output <- list()
     ## a way to combine spatial data.frames that do not all have the same columns:
-    output$polys <- data.table::rbindlist(list(output_city$polys, output_noncity$polys), fill = TRUE)
+    output$polys <- data.table::rbindlist(list(output_city$polys, output_noncity$polys), fill = TRUE) # no longer "sf" class after rbindlist()
+    output$polys <- sf::st_as_sf(data.table::setDF(output$polys)) # convert back to sf class
     output$pts   <- rbind(         output_city$pts,   output_noncity$pts)
 
     ## 3. sort s2b ####
@@ -161,9 +162,10 @@ getblocksnearby_from_fips_cityshape <- function(fips, return_shp = FALSE) {
   suppressWarnings({
     fips <- fips_lead_zero(fips)  # adds leading zeroes and returns as character, 5 characters if seems like countyfips, etc.
   })
-
+suppressWarnings({
   polys <- shapes_places_from_placefips(fips) # preserves exact order, and includes NAs in output if NAs in input. prints info to console.
-  polys <- polys[match(fips, polys$FIPS), ] # adds back in NA rows where fips was NA if missing (but was already handled by shapes_places_from_placefips() )
+})
+polys <- polys[match(fips, polys$FIPS), ] # adds back in NA rows where fips was NA if missing (but was already handled by shapes_places_from_placefips() )
   s2b_pts_polys <- get_blockpoints_in_shape(polys = polys) # had NA row in output for each NA input. Sorted by 1:N ejam_uniq_id, with multiple rows each
 
   ## s2b_pts_polys$polys is a spatial df with FIPS character like fips, and ejam_uniq_id is 1:nrow integer class (since the input is polygons not fips codes)
@@ -240,6 +242,7 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny
     all_bgs <- stack(sapply(fips_vec, fips_bgs_in_fips1)) # Slow:  1.4 seconds for all counties in region 6, e.g.
   })
   names(all_bgs) <- c('bgfips', 'fips')
+  ## NA values got removed, including any we wanted to keep as placeholder for site/fips with no results/no blocks? that is only possible if FIPS is invalid, like fips is NA or not a real fips code
   all_bgs$ejam_uniq_id <- as.integer(all_bgs$fips) # creates 1:N but multiple copies so it is 1 id for each fips
   all_bgs$fips <- as.character(all_bgs$fips)# because stack() always creates a factor column. data.table might have a faster reshaping approach? ***
 
@@ -296,8 +299,8 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny
     ######################################## #
 
     ## handle NAs? ####
-    ## remove any invalid  values? but it is easier to ensure output matches input if NA invalid fips result in NA rows in output of getblocksnearby as is done by getblocksnearby() in the latlon case
-    # fips_blockpoints <- na.omit(fips_blockpoints)
+    ## insert NA row for any invalid fips value?   it is easier to ensure output matches input if NA invalid fips result in NA rows in output of getblocksnearby as is done by getblocksnearby() in the latlon case
+
 
     ## SORT output again just in case (and include NA rows if any were in inputs?) ####
     setorder(fips_blockpoints, ejam_uniq_id)
