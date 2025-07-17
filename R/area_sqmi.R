@@ -35,7 +35,7 @@
 area_sqmi <- function(df = NULL, radius.miles = NULL, shp = NULL, fips = NULL,
                       download_city_fips_bounds = TRUE, download_noncity_fips_bounds = FALSE, includewater = FALSE) {
 
-  # can use to add area to output of doaggregate   and thus ejamit etc.
+  # can use to add area to output of doaggregate   and thus ejamit, map_shapes_leaflet(), shapes_from_fips(),  etc.
 
   if (sum(is.null(df), is.null(radius.miles), is.null(shp), is.null(fips)) != 3) {
     stop("must provide 1 and only 1 of the parameters df, radius.miles, shp, fips")
@@ -96,10 +96,12 @@ area_sqmi_from_pts <- function(radius.miles) {
 }
 ############################################################################### #
 area_sqmi_from_shp <- function(shp, units_needed = "miles^2") {
-  area <- sf::st_area(shp) # answer is in meters^2 or m^2
-  #/ meters_per_mile^2
-  units(area) <- units_needed
-  area <- as.numeric(area) # allows math, comparisons like > 2, etc. but loses metadata about units being square miles or whatever
+
+  area <- sf::st_area(shp)
+  # one way to convert is assume it is in sqmeters or check and then use convert_units(), but st_area() provides units in a way units() understands, so use that.
+  # Convert numbers as needed (e.g. from meters^2 to sqmi) in the process of tagging it as square miles:
+  units(area) <- units_needed # "miles^2"
+  area <- as.numeric(area) # as.numeric() simplifies doing math with the result, like area/pop, or comparisons like > 2, etc. but loses metadata about units being square miles or whatever - not doing this would mean it is more clear what units but then dividing by population e.g. would give result that still is labelled as units being mi^2
   return(area)
 }
 ############################################################################### #
@@ -107,7 +109,7 @@ area_sqmi_from_fips_made_of_bgs <- function(fips, includewater = FALSE) {
 
   # ASSUMES you already checked/confirmed each fips here is made up of some number of 1+ WHOLE blockgroups,
   # fipstype(fips) %in% c("state", "county", "tract", "blockgroup") # not block, not city - for blocks, see  ?tigris::block_groups()
-
+  # Note the blockgroupstats$area column is something else - unclear. arealand and areawater are correct and in sqmeters
   # This can handle case where each fips is a different type, like mix of state, county, tract, blockgroup fips (unlike other functions here)
 
   myfunction = function(f1) {
