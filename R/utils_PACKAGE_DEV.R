@@ -324,7 +324,8 @@ pkg_functions_and_sourcefiles <- function(pkg = "EJAM",
                                           internal_included = TRUE,
                                           exportedfuncs_included = TRUE,
                                           data_included = FALSE, # or use FALSE here?
-                                          vectoronly = FALSE) {
+                                          vectoronly = FALSE,
+                                          loadagain = TRUE, quiet = FALSE) {
 
   info <- pkg_functions_and_data(pkg = pkg, internal_included = internal_included, exportedfuncs_included = exportedfuncs_included,
                                  data_included = data_included, alphasort_table = alphasort_table, vectoronly = vectoronly)
@@ -334,7 +335,8 @@ pkg_functions_and_sourcefiles <- function(pkg = "EJAM",
     funcnames <- info$object
   }
   if (basename(getwd()) != pkg) {stop("working directory must be the source package folder for pkg", pkg)}
-  fnames <- pkg_functions_with_keywords_internal_tag()
+  x <- pkg_functions_with_keywords_internal_tag(loadagain = loadagain, quiet = quiet) # DOES load_all() again if loadagain==TRUE
+  fnames <- x$func
   fnames <- fnames[match(funcnames, fnames)] # match to ensure same order as info$object, but check how extra or missing ones are handled
   if (vectoronly) {
     return(fnames)
@@ -408,11 +410,11 @@ pkg_functions_and_sourcefiles2 <- function(funcnames, pkg = "EJAM", full.names =
 # z[, c('name1', 'keywordval', 'exported')]
 
 
-# NOTE THIS IS SLOW SINCE IT LOADS THE PACKAGE (AND PARSES ALL ROXYGEN TAGS)
+# NOTE THIS IS SLOW SINCE by default IT LOADS THE PACKAGE (AND PARSES ALL ROXYGEN TAGS)
 
-pkg_functions_with_keywords_internal_tag <- function(package.dir = ".") {
+pkg_functions_with_keywords_internal_tag <- function(package.dir = ".", loadagain = TRUE, quiet = FALSE) {
 
-  # Does load_all() first?? so even unexported functions will seem exported, fyi
+  # Does load_all() first if loadagain==TRUE so even unexported functions will seem exported, fyi
   #
   # Does not check undocumented functions (those lacking roxygen tags, like if func_alias <- definedfunc1)
   # but does check unexported functions with roxygen tags
@@ -427,10 +429,14 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".") {
   roxygen2:::roxy_meta_load(base_path)
   packages <- roxygen2:::roxy_meta_get("packages")
   lapply(packages, loadNamespace)
-
-  load_code <- roxygen2:::find_load_strategy(load_code)
-  env <- load_code(base_path) # slow step
+  if (loadagain) {
+    load_code <- roxygen2:::find_load_strategy(load_code)
+    env <- load_code(base_path) # slow step
+  } else {
+    env = globalenv()
+  }
   roxygen2:::local_roxy_meta_set("env", env)
+
   blocks <- roxygen2:::parse_package(base_path, env = NULL)  # slow step
 
   results <- list()
@@ -464,16 +470,19 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".") {
         }
       }
     }
-
-    cat(paste0(i, ". ", paste0(object_call, " / ", object_name), " "))
+    if (!quiet) {
+      cat(paste0(i, ". ", paste0(object_call, " / ", object_name), " "))
+    }
     tags <- roxygen2:::block_get_tags(block, "keywords")
 
     if (length(tags) == 0) {
-      cat(' \n')
+      if (!quiet) {cat(' \n')}
       keywordval <- ""
     } else {
-      if (length(tags) > 1) {cat("   MULTIPLE KEYWORDS TAGS FOUND - showing 1st only\n")}
-      cat(' @keywords ')
+      if (length(tags) > 1) {
+        if (!quiet) {cat("   MULTIPLE KEYWORDS TAGS FOUND - showing 1st only\n")}
+        }
+      if (!quiet) {cat(' @keywords ')}
       # for (tag in tags) {
       #    keyword <- roxygen2:::block_get_tag_value(block, 'keywords')  # or
       tag <- tags[[1]] # only expect one keywords tag per documented object ?
@@ -481,7 +490,7 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".") {
 
       # keywordinfo <- paste0("[", tag$file, ":", tag$line, "] ", tag$val)
       ## line is start of block, not the keywords tag itself
-      cat(keywordval, "\n")
+      if (!quiet) {cat(keywordval, "\n")}
     }
 
     results[[i]] <- data.frame(n = i, func = object_call, name = object_name,
