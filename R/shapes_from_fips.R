@@ -67,39 +67,68 @@ shapes_from_fips <- function(fips,
                              allow_multiple_fips_types = TRUE
 ) {
 
+  # preserve original input SORT order ####
+  original_order <- data.frame(n = seq_along(fips), fips = fips)
+
   if (offline_cat()) {
     stop("Cannot download boundaries - No internet connection seems to be available.")
     # return(NULL)
   }
+  ########################## #
+  # validation of input fips types ####
+
+  oktypes <- c("blockgroup", "tract", "city", "county", "state") # NOT block
 
   suppressWarnings({
-    ftype <- fipstype(fips)
+    ftype <- fipstype(fips) # NULL or NA or one of oktypes or "block"
   })
+  if (is.null(ftype)) {  # this happens if fips is null or length 0 or not vector, e.g.
+    if (shiny::isRunning()) {
+      shiny::validate("Cannot obtain boundaries of Census units because no fips provided.")
+      return(NULL)
+    } else {
+      warning("Cannot obtain boundaries of Census units because no fips provided.")
+      return(NULL)
+    }
+  }
+  ## now confirm they are valid fips -- fipstype() initially just checked if nchar is plausible
+  #
+  ftype[!fips_valid(fips)] <- NA # say the type is NA now, so "99" which fipstype() reported as ftype <- "state" is now just ftype <- NA
 
+  if (!any( ftype[!is.na(ftype)] %in% oktypes)) {
+    if (shiny::isRunning()) {
+      shiny::validate("Cannot obtain boundaries of Census units because no valid fips provided or no fips of a valid type.")
+      return(NULL) # I think shiny app needs NULL, not empty table
+    } else {
+      warning("Cannot obtain boundaries of Census units because no valid fips provided or no fips of a valid type.")
+      return(shapes_empty_table(fips)) # return one row per fips even though they are all invalid
+    }
+  }
+  if (any(!(ftype[!is.na(ftype)] %in% oktypes))) { # probably only possible if some appear to be blocks
+  # if (any(ftype[!is.na(ftype)] %in% 'block')) {
+      if (shiny::isRunning()) {
+      shiny::validate("Cannot obtain boundaries of some Census units because they are not a supported type.")
+        shp_combined <- NULL # but valid types will get appended
+    } else {
+      warning("Cannot obtain boundaries of some Census units because they are not a supported type.")
+      shp_combined <- NULL # but valid types will get appended
+    }
+  }
   if (allow_multiple_fips_types && length(unique(ftype)) > 1) {
-    shp_combined <- NULL # shapes_empty_table(fips) would work only if assumed the colnames were consistent across types and services
+    shp_combined <- NULL
   } else {
     shp_combined <- NULL
     allow_multiple_fips_types <- FALSE
   }
+  ########################## #
 
   options(tigris_use_cache = TRUE) # But it seems to use cache anyway?
   # options(tigris_year = 2022) # uses default of the tigris package version installed
 
-  if (all(ftype[!is.na(ftype)] %in% 'block')) {
-    if (shiny::isRunning()) {
-      validate("Obtaining boundaries of Census blocks is not supported here currently.")
-      shp_combined <- NULL
-    } else {
-      warning("Obtaining boundaries of Census blocks is not supported here currently. see  ?tigris::block_groups()")
-      return(shapes_empty_table(fips))
-    }
-  }
-
   error_downloading <- function(shp) {
     if (inherits(shp, "try-error")) {
       if (shiny::isRunning()) {
-        validate("unable to obtain Census unit boundaries to map the requested fips codes")
+        shiny::validate("unable to obtain Census unit boundaries to map the requested fips codes")
         return(NULL)
       } else {
         # stop("Error in downloading shapefile from API. Check your internet connection and the API URL.")
@@ -199,37 +228,53 @@ shapes_from_fips <- function(fips,
 
   ####################### #
   if (allow_multiple_fips_types == FALSE) {
-    types <- c('blockgroup', 'tract', 'city', 'county', 'state')
-    if (length(intersect(ftype, types)) > 1) {
+    if (length(intersect(ftype, oktypes)) > 1) {
       if (shiny::isRunning()) {
-        validate("This dataset contains more than one type of FIPS code. Analysis can only be run on datasets with one type of FIPS codes.")
+        shiny::validate("This dataset contains more than one type of FIPS code. Analysis can only be run on datasets with one type of FIPS codes.")
         shp_combined <- NULL
       } else {
         stop("This dataset contains more than one type of FIPS code. Analysis can only be run on datasets with one type of FIPS codes.")
       }
     }
-    if (length(intersect(ftype, types)) == 0) {
+    if (length(intersect(ftype, oktypes)) == 0) {
       if (shiny::isRunning()) {
-        validate(paste0("This dataset contains no FIPS codes that are an allowed type. Analysis can only be run on datasets with these types of FIPS codes:", paste0(types, collapse = ",")))
+        shiny::validate(paste0("This dataset contains no FIPS codes that are an allowed type. Analysis can only be run on datasets with these types of FIPS codes:",
+                        paste0(oktypes, collapse = ",")))
         shp_combined <- NULL
       } else {
         # maybe return an empty table
-        warning(paste0("This dataset contains no FIPS codes that are an allowed type. Analysis can only be run on datasets with these types of FIPS codes:", paste0(types, collapse = ",")))
+        warning(paste0("This dataset contains no FIPS codes that are an allowed type. Analysis can only be run on datasets with these types of FIPS codes:",
+                       paste0(oktypes, collapse = ",")))
         shp_combined <- shapes_empty_table(fips)
       }
     }
-    if (length(intersect(ftype, types)) == 1) {
+    if (length(intersect(ftype, oktypes)) == 1) {
       errshp <- error_downloading(shp_combined)
       if (is.null(errshp)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
       if (errshp) {shp_combined <- shapes_empty_table(fips)} else { } # else shp_combined is ok
     }
   }
-  # convert it back into an sf object, since it has been made a non-sf data.table via rbindlist() above
-  shp_combined <- sf::st_as_sf(setDF(shp_combined))
-  shp_combined$geometry <- sf::st_cast(shp_combined$geometry) # since some were POLYGON and some MULTIPOLYGON
-  shp_combined <- shp_combined[1:NROW(shp_combined), ] # see note below
-  return(shp_combined)
+  ####################### #
 
+  # convert it back into an sf object, since it has been made a non-sf data.table via rbindlist() above
+  shp_combined <- sf::st_as_sf(data.table::setDF(shp_combined))
+  shp_combined$geometry <- sf::st_cast(shp_combined$geometry) # since some were POLYGON and some MULTIPOLYGON
+  ####################### #
+
+  ## restore original input SORT order ####
+  ##   original_order <- data.frame(n = seq_along(fips), fips = fips)
+  #
+  #  note this handles NA fips, duplicated fips in inputs, and fips missing from shp_combined:
+  z <- merge(shp_combined, original_order, by.x = "FIPS", by.y = "fips", all.y = TRUE, all.x = FALSE)
+  z <- unique(z)
+  z <- z[order(z$n), ]
+  rownames(z) <- NULL
+  return(z)
+
+  # warn if output shp_combined$FIPS do not match input original_order$fips??
+
+  # shp_combined <- shp_combined[1:NROW(shp_combined), ] # see note below
+  #
   # NOTE: # somehow that 1:NROW() seemed to help avoid an error msg:
   # x = c(testinput_fips_blockgroups[1:2], testinput_fips_cities)
   # x = shapes_from_fips(x)
@@ -957,7 +1002,8 @@ shapefile_addcols <- function(shp, addthese = c('fipstype', 'pop', 'NAME', 'STAT
   if (!overwrite) {
     # could warn that user asked to add one that is already there but overwrite is FALSE so it will not get recalculated
     if (length(intersect(addthese, colnames(shp))) > 0) {
-      message("These already exist and will not be overwritten since overwrite=FALSE: ", paste0(intersect(addthese, colnames(shp)), collapse=", "))
+      ## not really useful msg
+      # message("These already exist and will not be overwritten since overwrite=FALSE: ", paste0(intersect(addthese, colnames(shp)), collapse=", "))
     }
     addthese <- setdiff(addthese, colnames(shp))
   }
