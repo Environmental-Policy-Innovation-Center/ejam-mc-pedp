@@ -62,8 +62,13 @@ metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_pa
 #'  It just makes it easier to set a few metadata attributes similarly
 #'  for a number of data elements, for example,
 #'  to add new or update existing attributes.
+#'
 #' @details This utility would be used in scripts in EJAM/data-raw/ to
 #'   add metadata to objects like x before use_data(x, overwrite=T)
+#'
+#'   Note that by adding attributes, this function changes a vector
+#'   so that is.vector() will no longer be true!
+#'
 #' @param x dataset (or any object) whose metadata (stored as attributes) you want to update or create
 #'  EJAM, EJScreen, and other dataset versions and release dates are tracked in DESCRIPTION
 #'  @param update_date_saved_in_package set to FALSE to avoid changing this attribute

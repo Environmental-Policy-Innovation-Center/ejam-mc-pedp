@@ -180,7 +180,7 @@ for (n in nvalues) {
     ## use dummy values for most columns
     testpoints_data$sitename = paste0("Example Site ", 1:n)
     # Drop other columns to just use lat lon sitenumber sitename
-    # testpoints_data$NAICS = NULL # 722410# testpoints_data$SIC = NULL # 5992  # testpoints_data$REGISTRY_ID = NULL # c(EJAM::testinput_xtrac, rep(NA,n))[1:n] #  # testpoints_data$PGM_SYS_ACRNMS = NULL
+    # testpoints_data$NAICS = NULL # 722410# testpoints_data$SIC = NULL # 5992  # testpoints_data$REGISTRY_ID = NULL # #  # testpoints_data$PGM_SYS_ACRNMS = NULL
     testpoints_data  <- testpoints_data[ , c("lat", "lon", "sitenumber", "sitename")]
 
     assign(testpoints_name, testpoints_data)    #        put the data into an object of the right name

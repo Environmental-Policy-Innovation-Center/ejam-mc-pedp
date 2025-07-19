@@ -46,6 +46,7 @@
   - Invalid sites: The output now includes a row of NA values for each site input that has NA lat or lon, NA fips, or empty polygon. Those sites previously had been left out of the sites2blocks table outputs. May do this also when no blocks in/near a valid site.
 
 - testoutput_xyz .xlsx and .html files and dataset R objects have been updated to reflect the new `?bgej` dataset.
+- Some testinput objects like testinput_fips_counties are now vectors per is.vector(), and no longer have metadata stored as attributes like date_saved_in_package, etc. Adding that info via metadata_add() was making is.vector() FALSE and interfered with some functions that expect the input to be a vector, like shapes_from_fips(). Also, testinput_xtrac was removed.
 - `doaggregate()` and `ejamit()` now report 0 for $results_bysite$blockcount_near_site and $results_bysite$bgcount_near_site if there are none, and total counts are correct.
 - `getblocksnearby()` based on `getblocksnearbyviaQuadTree()` will no longer include, in its output, the lat lon columns from the input table of sitepoints. That was unintentional and potentially confusing and wasted space.
 - `plotblocksnearby()` rewritten to fix/improve map popups, etc., and a parameter was dropped
@@ -53,7 +54,7 @@
 ### Package development/ technical
 
 - `test_ejam()` is what used to be called `test_interactively()` -- it was improved and renamed and moved to the R folder as an unexported internal function loaded as part of the package. Also, a new parameter y_skipbasic is used instead of y_basic.
-- `test_coverage_check()` utility was improved, just as a way to for package maintainers/contributors to look at which functions might need unit tests written.
+- `test_coverage_check()` utility was improved (but somewhat work in progress), just as a way to for package maintainers/contributors to look at which functions might need unit tests written.
 - Utility functions related to package development were renamed, e.g., in utils_PACKAGE_dev.R
 - `linesofcode2()` utility was improved, just as a way for package maintainers/contributors to look at which files have most of the lines of code, are mostly comments, etc.
 - `table_xls_format_api()` is what used to be called table_xls_formatting_api() (but is not used unless the ejscreenapi module or server is working).
