@@ -13,6 +13,7 @@
 #' @param return_shp set to TRUE to get a named list, pts and polys, that are sites2blocks table and spatial data.frame,
 #'   or FALSE to get the pts data.table much like output of [getblocksnearby()] for latlon points.
 #' @param allow_multiple_fips_types if enabled, set TRUE to allow mix of blockgroup, tract, city, county, state fips
+#'
 #' @return data.table with colnames ejam_uniq_id, blockid, distance, blockwt, bgid, fips.
 #'
 #'   [getblocksnearby()] output is similar but
@@ -53,18 +54,19 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
     ftype <- fipstype(fips)
   })
   ftype_city <- ftype %in% "city"
-  ftype_city[is.na(ftype)] <- NA
+  ftype_city[is.na(ftype)] <- FALSE
+  ftype_noncity <- !ftype_city & !is.na(ftype)  # right now this includes invalid fips also !
 
-  if (any(na.omit(ftype_city))) {
+  if (any((ftype_city))) {
     # these need shapefile download
     output_city <- getblocksnearby_from_fips_cityshape(fips = fips[ftype_city],
                                                        return_shp = return_shp)
   } else {
     output_city <- NULL
   }
-  if (any(!na.omit(ftype_city))) {
+  if (any((ftype_noncity))) {
     # these do not need shapefile download, just using FIPS code since blockgroups aggregate into tracts then counties then states
-    output_noncity <- getblocksnearby_from_fips_noncity(fips[!ftype_city],
+    output_noncity <- getblocksnearby_from_fips_noncity(fips[ftype_noncity],
                                                         return_shp = return_shp,
                                                         in_shiny = in_shiny,
                                                         need_blockwt = need_blockwt,
@@ -162,14 +164,17 @@ getblocksnearby_from_fips_cityshape <- function(fips, return_shp = FALSE) {
   suppressWarnings({
     fips <- fips_lead_zero(fips)  # adds leading zeroes and returns as character, 5 characters if seems like countyfips, etc.
   })
-suppressWarnings({
-  polys <- shapes_places_from_placefips(fips) # preserves exact order, and includes NAs in output if NAs in input. prints info to console.
-})
-polys <- polys[match(fips, polys$FIPS), ] # adds back in NA rows where fips was NA if missing (but was already handled by shapes_places_from_placefips() )
-  s2b_pts_polys <- get_blockpoints_in_shape(polys = polys) # had NA row in output for each NA input. Sorted by 1:N ejam_uniq_id, with multiple rows each
-
+  suppressWarnings({
+    polys <- shapes_places_from_placefips(fips) # preserves exact order, and includes NAs in output if NAs in input. prints info to console.
+  })
+  polys <- polys[match(fips, polys$FIPS), ] # adds back in NA rows where fips was NA if missing (but was already handled by shapes_places_from_placefips() )
+  suppressWarnings({
+    s2b_pts_polys <- get_blockpoints_in_shape(polys = polys) # had NA row in output for each NA input. Sorted by 1:N ejam_uniq_id, with multiple rows each
+  })
   ## s2b_pts_polys$polys is a spatial df with FIPS character like fips, and ejam_uniq_id is 1:nrow integer class (since the input is polygons not fips codes)
   ## s2b_pts_polys$pts is a data.table with no fips field, and   ejam_uniq_id is integer class 1:nrow but check sort order of it.
+
+  s2b_pts_polys$pts <- s2b_pts_polys$pts[!is.na(blockid), ]
 
   # SORT
   # table of block points is already sorted, and has many rows (blocks) per fips
@@ -224,9 +229,9 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny
 
   fips_vec <- fips
   names(fips_vec) <- fips
-  if (length(fips_vec) == 1) {
-    fips_vec <- c(fips_vec, na = NA) # quick workaround since code below failed if only 1 FIPS provided, like 1 state or only 1 county
-  }
+  # if (length(fips_vec) == 1) {
+  #   fips_vec <- c(fips_vec, na = NA) # quick workaround since code below failed if only 1 FIPS provided, like 1 state or only 1 county
+  # }
   ######################################## #
 
   ## Get all BLOCKGROUPS in each fips ####
@@ -238,8 +243,19 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny
     # fips_bgs_in_fips() replaces fips_bgs_in_fips1()
     # all_bgs <- stack(sapply(fips_vec, fips_bgs_in_fips)) # newer - fast alone but slow in sapply?
     # *** Note this stack() drops all NA fips, including any originally in the inputs passed to getblocks, and we now may want to retain those, or can add back in later
+    # Slow:  1.4 seconds for all counties in region 6, e.g.
 
-    all_bgs <- stack(sapply(fips_vec, fips_bgs_in_fips1)) # Slow:  1.4 seconds for all counties in region 6, e.g.
+    all_bgs <- (lapply(fips_vec, fips_bgs_in_fips1))
+    ok = !sapply(all_bgs, is.null)
+    all_bgs <- all_bgs[ok]   # drop input fips that had no bgs found
+    fips_vec <- fips_vec[ok] # ditto
+    if (all(sapply(all_bgs, is.null))) {
+      # every element of named list is NULL meaning no bgs found for any input fips, so cannot do stack()
+      all_bgs <- data.frame(bgfips = character(0), fips = character(0), stringsAsFactors = FALSE)
+    } else {
+      names(all_bgs) <- fips_vec
+      all_bgs <- stack(all_bgs)
+    }
   })
   names(all_bgs) <- c('bgfips', 'fips')
   ## NA values got removed, including any we wanted to keep as placeholder for site/fips with no results/no blocks? that is only possible if FIPS is invalid, like fips is NA or not a real fips code
@@ -263,9 +279,11 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny
 
   if (NROW(all_bgs) == 0) {
     if (in_shiny) {
-      shiny::validate('No blockgroups found for these FIP codes.')
+      shiny::validate('No blockgroups found for noncity FIP codes.')
+      return(NULL)
     } else {
-      stop('No blockgroups found for these FIP codes.') # or just give a warning? ***
+      warning('No blockgroups found for noncity FIP codes.') #  just give a warning so that mix of valid city and no valid noncity can continue
+      return(NULL)
     }
   } else {
 
@@ -273,14 +291,14 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny
 
     # WOULD data.table join or merge be faster than dplyr here? ***
     suppressMessages({
-    fips_blockpoints <- dplyr::left_join(all_bgs,
-                                         ## create 12-digit column inline (original table not altered)
-                                         ## do not actually need blockfips here except to join on its first 12 chars
-                                         blockid2fips[, .(blockid, blockfips, blockfips12 = substr(blockfips,1,12))],
-                                         by = c('bgfips' = 'blockfips12'), multiple = 'all') |>
-      dplyr::left_join(blockpoints) |>
-      dplyr::mutate(distance = 0) |>      # or do I want distance to be null, or missing or NA or 0.001, or what? note approximated block_radius_miles is sometimes zero, in blockwts
-      data.table::as.data.table() # makes it a data.table
+      fips_blockpoints <- dplyr::left_join(all_bgs,
+                                           ## create 12-digit column inline (original table not altered)
+                                           ## do not actually need blockfips here except to join on its first 12 chars
+                                           blockid2fips[, .(blockid, blockfips, blockfips12 = substr(blockfips,1,12))],
+                                           by = c('bgfips' = 'blockfips12'), multiple = 'all') |>
+        dplyr::left_join(blockpoints) |>
+        dplyr::mutate(distance = 0) |>      # or do I want distance to be null, or missing or NA or 0.001, or what? note approximated block_radius_miles is sometimes zero, in blockwts
+        data.table::as.data.table() # makes it a data.table
     })
     if (need_blockwt) {
       # provide blockwt to be consistent with getblocksnearby() and doaggregate() understands it if you want to use it after this.

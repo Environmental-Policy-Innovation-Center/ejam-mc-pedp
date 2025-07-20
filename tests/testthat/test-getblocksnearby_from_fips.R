@@ -1,75 +1,248 @@
-################# #  ################# #  ################# ################## #  ################# #  ################# #
-################# #  ################# #  ################# ################## #  ################# #  ################# #
-# if (FALSE) {
-  #   x = function() {
-  # large set of test cases
 
-  f1  <- rev(testinput_fips_blockgroups)
-  f2  <- rev(testinput_fips_tracts)
-  f3  <- rev(testinput_fips_cities)
-  f4  <- rev(testinput_fips_counties)
-  f5  <- rev(testinput_fips_states)
+## ***ensure THESE ARE CONSISTENT AND WORK WITH ejamit() so they all include or all omit rows in s2b for invalid/0 blocks sites.
 
-  testinput_fips_sets <- list(
-    # possibly missing boundaries for some?
-    `one fipstype, no NA fips` = list(
-      bgs     = f1,
-      tracts  = f2,
-      cities  = f3,
-      counties= f4,
-      states  = f5
-    ),
-    `1 has MISSING BOUNDARIES DESPITE VALID FIPS CODE` = list(
-      cities = c(f3, "4273072")
-    ),
-    `mix of just 1 noncity type and city type` = list(
-      cities_counties = c(f3, f4)
-    ),
-    `mix of noncity types, but no city type` = list(
-      all_but_cities = c(f1, f2, f4, f5)
-    ),
-    `mix of all types` = list(
-      all = c(f1, f2, f3, f4, f5)
-    ),
-    # `some fips are 99, some NA` = list(   # DONT WORK
-    #   bgs     = c(NA, f1, 99),
-    #   tracts  = c(NA, f2, 99),
-    #   cities  = c(NA, f3, 99),
-    #   counties= c(NA, f4, 99),
-    #   states  = c(NA, f5, 99)
-    # ),
-    # `same fips duplicated in inputs` = list(    # DONT WORK
-    #   bgs     = c(f1[1], f1, f1[1]),
-    #   tracts  = c(f2[1], f2, f2[1]),
-    #   cities  = c(f3[1], f3, f3[1]),
-    #   counties= c(f4[1], f4, f4[1]),
-    #   states  = c(f5[1], f5, f5[1])
-    # ),
-    `some fips are NA` = list(
-      bgs     = c(NA, f1, NA),
-      tracts  = c(NA, f2, NA),
-      cities  = c(NA, f3, NA),   # ??  f3 is "2743000" "2743306"
-      counties= c(NA, f4, NA),
-      states  = c(NA, f5, NA)
+# y1 <- getblocksnearby_from_fips_cityshape(c( testinput_fips_cities[1]))[]
+# y1
+# y2 <- getblocksnearby_from_fips_cityshape(c( testinput_fips_cities[1], NA))[]
+# y2
+# y3 <- getblocksnearby_from_fips_cityshape(c( testinput_fips_cities[1], "99"))[]
+# y3
+# y4 <- getblocksnearby_from_fips_cityshape("1234567")[]
+# y4
+# y5 <- getblocksnearby_from_fips_cityshape(NA)[]
+# y5
+# y6 <- getblocksnearby_from_fips_cityshape(c(NA, NA))[]
+# y6
+# y7 <- getblocksnearby_from_fips_cityshape(c("1234567", "1234567"))[]
+# y7
+# y8 <- getblocksnearby_from_fips_cityshape(c(NA, "1234567"))[]
+# y8
+# y9 <- getblocksnearby_from_fips_cityshape(c(NA, NA, "1234567", "0234560", testinput_fips_cities[1]))[]
+# y9
+# y10 <- getblocksnearby_from_fips_cityshape(testinput_fips_blockgroups[1])[] # wrong type
+# y10
+# y11 <- getblocksnearby_from_fips_cityshape(c(testinput_fips_cities[1], testinput_fips_blockgroups[1]))[] # wrong type and a valid
+# y11
+
+# ## these do not output a NA row for each bad fips:
+#
+# x1 <- getblocksnearby_from_fips_noncity(c(testinput_fips_blockgroups[1]))[]
+# x1
+# x2 <- getblocksnearby_from_fips_noncity(c(testinput_fips_blockgroups[1], NA))[]
+# x2
+# x3 <- getblocksnearby_from_fips_noncity(c(testinput_fips_blockgroups[1], "99"))[]
+# x3
+# x4 <- getblocksnearby_from_fips_noncity("99")[]
+# x4
+# x5 <- getblocksnearby_from_fips_noncity(NA)[]
+# x5
+# x6 <- getblocksnearby_from_fips_noncity(c(NA, NA))[]
+# x6
+# x7 <- getblocksnearby_from_fips_noncity(c("99", "99"))[]
+# x7
+# x8 <- getblocksnearby_from_fips_noncity(c(NA, "99"))[]
+# x8
+# x9 <- getblocksnearby_from_fips_noncity(c(NA, NA, "77", "99", testinput_fips_blockgroups[1]))[]
+# x9
+# x10 <- getblocksnearby_from_fips_noncity(testinput_fips_cities[1])[] # wrong type
+# x10
+# x11 <- getblocksnearby_from_fips_noncity(c(testinput_fips_cities[1], testinput_fips_blockgroups[1]))[] # wrong type and a valid
+# x11
+
+
+################# #  ################# #  ################# ################## #
+
+# getblocksnearby_from_fips_noncity(), a helper ####
+
+testthat::test_that("getblocksnearby_from_fips_noncity 1 fipstype", {
+
+  f1  <- rev(testinput_fips_blockgroups)[1:2]
+  f2  <- rev(testinput_fips_tracts)[1:2]
+  # f3  <- rev(testinput_fips_cities)[1:2]  #### city
+  f4  <- rev(testinput_fips_counties)[1:2]
+  f5  <- rev(testinput_fips_states)[1:2]
+
+  tlist = list(f1,f2,  f4,f5)
+  for (this in tlist) {
+    expect_no_error({
+      s2b = getblocksnearby_from_fips_noncity(this)
+    })
+    expect_equal(
+      colnames(s2b),
+      c('ejam_uniq_id', 'blockid', 'distance', 'blockwt',  'bgid', 'fips')
     )
+    expect_equal(unique(s2b$fips), this)
+    expect_equal(1:2, unique(s2b$ejam_uniq_id))
+  }
+})
+################# #
+
+testthat::test_that("getblocksnearby_from_fips_noncity fipsmix", {
+
+  fips_mix = c(testinput_fips_blockgroups[2], testinput_fips_tracts[2],  testinput_fips_counties[2], testinput_fips_states[2])
+
+  expect_no_error({
+    s2b = getblocksnearby_from_fips_noncity(fips_mix)
+  })
+  expect_equal(
+    colnames(s2b),
+    c('ejam_uniq_id', 'blockid', 'distance', 'blockwt',  'bgid', 'fips')
   )
+  expect_equal(unique(s2b$fips), fips_mix)
+  expect_equal(1:length(fips_mix), unique(s2b$ejam_uniq_id))
+})
+################# #  ################# #  ################# ################## #
 
-  rm(f1, f2, f3, f4, f5)
+# getblocksnearby_from_fips_cityshape(), a helper ####
 
+testthat::test_that("getblocksnearby_from_fips_cityshape just cities", {
 
+  f3  <- rev(testinput_fips_cities)
+  expect_no_error({
+    s2b = getblocksnearby_from_fips_cityshape(f3)
+  })
+  expect_equal(
+    names(s2b),
+    c("ejam_uniq_id", "blockid", "distance", "blockwt", "bgid", "fips")
+  )
+  expect_equal(unique(s2b$fips), f3)
+  expect_equal(unique(s2b$ejam_uniq_id), 1:2)
+})
+################# #  ################# #  ################# ################## #
 
-  for (allow_multiple_fips_types in TRUE) {
-#  for (allow_multiple_fips_types in c(TRUE, FALSE)) {   # nonessential to allow FALSE here
-    cat("\n\n----------------- allow_multiple_fips_types =", allow_multiple_fips_types, ' ---------------------')
+# getblocksnearby_from_fips(), the main function ####
 
-    for (return_shp in c(FALSE, TRUE)) {
-      cat("\n\n         ----------------- return_shp =", return_shp, ' ---------------------\n\n')
+## simplest tests ####
 
-      for (i in seq_along(testinput_fips_sets)) {
+testthat::test_that("basics: 1 bg, no shp- colnames ok", {
+  testthat::capture_output({
+    testthat::expect_no_error({
+      x <- getblocksnearby_from_fips("482011000011") # one blockgroup only
+    })
+    testthat::expect_setequal(
+      names(x),
+      c("ejam_uniq_id", "blockid", "distance", "blockwt", "bgid", "fips")
+    )
 
-        for (ii in seq_along(testinput_fips_sets[[i]])) {
+  })
+})
+################# #  ################# #  ################# #
 
-     try({     test_that(paste0(names(testinput_fips_sets)[i],
+testthat::test_that("basics: return_shp=T for bgs", {
+
+  testthat::capture_output({
+
+    testthat::expect_no_error({
+      suppressMessages({
+        x <- getblocksnearby_from_fips("482011000011", return_shp=T) # one blockgroup only
+        # y=doaggregate(x)
+      })
+    })
+    testthat::expect_true("sf" %in%  class(  x$polys))
+
+    testthat::expect_no_error({
+      suppressMessages({
+        x <- getblocksnearby_from_fips(fips_counties_from_state_abbrev("DE"), in_shiny = F, need_blockwt = TRUE, return_shp=T)
+      })
+    })
+
+    expect_setequal(names(x), c("polys", "pts"))
+    expect_true("sf" %in% class(x$polys))
+    testthat::expect_setequal(
+      names(x$pts),
+      c("ejam_uniq_id", "blockid", "distance", "blockwt", "bgid", "fips")
+    )
+    # counties_ej <- doaggregate(x)
+    #cannot use mapfast(counties_ej$results_bysite) since no lat lon.  mapfastej_counties() should work...
+
+  })
+
+})
+################# #  ################# #  ################# ################## #  ################# #  ################# #
+################# #  ################# #  ################# ################## #  ################# #  ################# #
+
+## loop tests each fipstypes (bg, tract, city, county, state, mix) ####
+test999 <- function() {
+# large set of test cases
+
+f1  <- rev(testinput_fips_blockgroups)
+f2  <- rev(testinput_fips_tracts)
+f3  <- rev(testinput_fips_cities)
+f4  <- rev(testinput_fips_counties)
+f5  <- rev(testinput_fips_states)
+
+## loop tests bad inputs (invalid, missing poly, NA) ####
+
+testinput_fips_sets <- list(
+  # possibly missing boundaries for some?
+  # `one fipstype, no NA fips` = list(        # i = 1
+  #   bgs     = f1,
+  #   tracts  = f2,
+  #   cities  = f3,
+  #   counties= f4,
+  #   states  = f5
+  # ),
+  # `1 has MISSING BOUNDARIES DESPITE VALID FIPS CODE` = list(       # i = 2
+  #   cities = c(f3, "4273072")
+  # ),
+  # `mix of just 1 noncity type and city type` = list(       # i = 3
+  #   cities_counties = c(f3, f4)
+  # ),
+  # `mix of noncity types, but no city type` = list(       # i = 4
+  #   all_but_cities = c(f1, f2, f4, f5)
+  # ),
+  # `mix of all types` = list(       # i = 5
+  #   all = c(f1, f2, f3, f4, f5)
+  # )
+  # ,
+  `some fips are 99` = list(
+    bgs     = c(f1, 99),
+    tracts  = c(f2, 99),
+    cities  = c(f3, 99),
+    counties= c(f4, 99),
+    states  = c(f5, 99)
+  )
+  # ,
+  # `some fips are NA` = list(      # i = 6
+  #   bgs     = c(NA, f1, NA),  # ii = 1
+  #   tracts  = c(NA, f2, NA),  # ii = 2
+  #   cities  = c(NA, f3, NA),  # ii = 3  # ??  f3 is "2743000" "2743306"
+  #   counties= c(NA, f4, NA),  # ii = 4
+  #   states  = c(NA, f5, NA)   # ii = 5
+  # )
+  # ,
+  # `some fips are 99, some NA` = list(   # DONT WORK  ?
+  #   bgs     = c(NA, f1, 99),
+  #   tracts  = c(NA, f2, 99),
+  #   cities  = c(NA, f3, 99),
+  #   counties= c(NA, f4, 99),
+  #   states  = c(NA, f5, 99)
+  # ),
+  # `same fips duplicated in inputs` = list(    # DONT WORK
+  #   bgs     = c(f1[1], f1, f1[1]),
+  #   tracts  = c(f2[1], f2, f2[1]),
+  #   cities  = c(f3[1], f3, f3[1]),
+  #   counties= c(f4[1], f4, f4[1]),
+  #   states  = c(f5[1], f5, f5[1])
+  # )
+
+)
+
+## loop tests params (return_shp, allow_multi...) ####
+
+for (allow_multiple_fips_types in TRUE) {
+  #  for (allow_multiple_fips_types in c(TRUE, FALSE)) {   # nonessential to allow FALSE here
+  cat("\n\n----------------- allow_multiple_fips_types =", allow_multiple_fips_types, ' ---------------------')
+
+  for (return_shp in c(FALSE, TRUE)) {
+    cat("\n\n         ----------------- return_shp =", return_shp, ' ---------------------\n\n')
+
+    for (i in seq_along(testinput_fips_sets)) {
+
+      for (ii in seq_along(testinput_fips_sets[[i]])) {
+
+        try({
+          test_that(paste0(names(testinput_fips_sets)[i],
                            paste0(" (fipstype: ", names(testinput_fips_sets[[i]][ii]), ")"),
                            " (allow_multiple_fips_types=", substr(allow_multiple_fips_types,1,1), ", return_shp=", substr(return_shp,1,1), ")"), {
 
@@ -81,11 +254,11 @@
 
                              originalfips <- as.character(as.vector(unlist(testinput_fips_sets[[i]][ii])))
                              originalfips_nona = originalfips[!is.na(originalfips)]
+                             originalfips_valid = originalfips[fips_valid(originalfips)]
 
                              if (allow_multiple_fips_types == FALSE & grepl("mix", names(testinput_fips_sets)[i])) {
                                # ("allow_multiple_fips_types=FALSE but this test set has mixed fips types")
-
-                               expect_error({            # or may just warn now
+                               expect_error({            # or may just warn now -----------------  ERROR expected since trying multiple types  when not allowed
                                  junk = capture_output({ suppressMessages({
                                    x <- getblocksnearby_from_fips(
                                      originalfips,
@@ -96,83 +269,76 @@
                                })
                              } else {
 
-                               expect_no_error({
+                               expect_no_error({            #   --------------------------------  OK - allowing multiple types
                                  junk = capture_output({ suppressMessages({
+
                                    x <- getblocksnearby_from_fips(
                                      originalfips,
                                      return_shp = return_shp,
                                      allow_multiple_fips_types = allow_multiple_fips_types
                                    )
+
                                  })})
                                })
 
+################## #  ################# #  ################# #
                                if (return_shp) {
 
-
-
-                                 # ***    fix tests for return_shp case:     failed if any NA values
-
-
-
-                                 # s2b table lacks the NAs but otherwise same ordering?
-                                 expect_equal(unique(x$pts$ejam_uniq_id), seq_along(originalfips_nona))
-                                 expect_equal(unique(x$pts$fips),                   originalfips_nona) # Error in `x$pts`: object of type 'closure' is not subsettable
-
+                                 ## polygons table:
                                  expect_true("sf" %in% class(x$polys))
-                                 expect_equal(x$polys$ejam_uniq_id, seq_along(originalfips))
+                                 expect_equal(       x$polys$ejam_uniq_id, seq_along(originalfips)) # shp df HAS A ROW FOR EACH FIPS EVEN IF NA OR OTHERWISE INVALID?
+                                 expect_equal(unique(x$polys$FIPS),           unique(originalfips))  # BUT WHAT IF MORE THAN ONE NA? AND SORT OF NAS?
+                                 expect_equal(       x$polys$FIPS,                   originalfips)   # even NAs?
 
-                                 expect_setequal(unique(x$polys$FIPS), unique(originalfips))
-                                 expect_equal(x$polys$FIPS,                   originalfips)  # even NAs?
+                                 # s2b table (lacks the NAs and other invalid fips, but otherwise same ordering?)
+                                 # each valid fips input has a uniq id in output
+                                 expect_equal(unique(x$pts$ejam_uniq_id), seq_along(originalfips_valid))
+                                 expect_equal(unique(x$pts$fips),                   originalfips_valid)
 
                                } else {
 
-
-
-
-                                 ## ***    add appropriate tests here
-
-
-
-                                 expect_equal(unique(x$ejam_uniq_id), seq_along(originalfips_nona)) ########## #  seems to be one extra/one missing for some fips are NA bgs
-
-                                 # s2b table lacks the NAs but otherwise same ordering?
-                                 expect_equal(unique(x$fips),                   originalfips_nona)  # not working for city case
+                                 # s2b table (lacks the NAs and other invalid fips, but otherwise same ordering?)
+                                 # each valid fips input has a uniq id in output
+                                 expect_equal(unique(x$ejam_uniq_id), seq_along(originalfips_valid))
+                                 expect_equal(unique(x$fips),                   unique(originalfips_valid))     # BUT WHAT IF MORE THAN ONE NA? AND SORT OF NAS?
 
                                }
+################## #  ################# #  ################# #
+
                              } # end no mixed types case
                            }) # end test_that
-     }) # end try
-        }
-
+        }) # end try
       }
+
     }
   }
-  cat('\n\n')
+}
+cat('\n\n')
+}
 
-# }
+# cleanup
+rm(f1, f2, f3, f4, f5)
+rm(testinput_fips_sets)
 
 ################# #  ################# #  ################# ################## #  ################# #  ################# #
 ################# #  ################# #  ################# ################## #  ################# #  ################# #
 
-testthat::test_that("getblocksnearby_from_fips works 1 bg", {
-  testthat::capture_output({
-    testthat::expect_no_error({
-      x <- getblocksnearby_from_fips("482011000011") # one blockgroup only
-    })
-    testthat::expect_setequal(
-      names(x),
-      c("ejam_uniq_id", "blockid", "distance", "blockwt", "bgid", "fips")
-    )
-  })
-})
+# other older tests - may be redundant ####
+
 ################# #  ################# #  ################# ################## #  ################# #  ################# #
+
+# loop tests each fipstype - older set of tests ####
+
+## 1 type at a time, 2 sites per type ####
 
 testfips_list <- list(testinput_fips_blockgroups, testinput_fips_tracts, testinput_fips_cities, testinput_fips_counties, testinput_fips_states)
 
 for (testfips in testfips_list) {
   testfips <- testfips[1:2]
   ftype <- fipstype(testfips)[1]
-  testthat::test_that(paste0("getblocksnearby_from_fips colnames,fips,id ok for", ftype), {
+
+  testthat::test_that(paste0("colnames,fips,id ok for 1 type: ", ftype), {
+
     testthat::capture_output({
       testthat::expect_no_error({
         suppressMessages({
@@ -195,11 +361,13 @@ for (testfips in testfips_list) {
 rm(testfips_list, testfips, ftype)
 ################# #  ################# #  ################# ################## #  ################# #  ################# #
 
+## mix of types  (one_of_each)   ####
+
 testfips_list <- list(testinput_fips_blockgroups, testinput_fips_tracts, testinput_fips_cities, testinput_fips_counties, testinput_fips_states)
-# one_of_each
 testfips <- sapply(testfips_list, function(x) x[1])
 
-testthat::test_that(paste0("getblocksnearby_from_fips colnames,fips,id  ok for mix of types"), {
+testthat::test_that(paste0("colnames,fips,id  ok for MIX of types"), {
+
   testthat::capture_output({
     testthat::expect_no_error({
       x <- getblocksnearby_from_fips(
@@ -222,39 +390,9 @@ rm(testfips_list, testfips)
 
 
 ################# #  ################# #  ################# #
-
-testthat::test_that("getblocksnearby_from_fips works return_shp=T", {
-
-  testthat::capture_output({
-
-    testthat::expect_no_error({
-      suppressMessages({
-        x <- getblocksnearby_from_fips("482011000011", return_shp=T) # one blockgroup only
-        # y=doaggregate(x)
-      })
-    })
-
-    testthat::expect_no_error({
-      suppressMessages({
-        x <- getblocksnearby_from_fips(fips_counties_from_state_abbrev("DE"), in_shiny = F, need_blockwt = TRUE, return_shp=T)
-      })
-    })
-
-    expect_setequal(names(x), c("polys", "pts"))
-    expect_true("sf" %in% class(x$polys))
-    testthat::expect_setequal(
-      names(x$pts),
-      c("ejam_uniq_id", "blockid", "distance", "blockwt", "bgid", "fips")
-    )
-    # counties_ej <- doaggregate(x)
-    #cannot use mapfast(counties_ej$results_bysite) since no lat lon.  mapfastej_counties() should work...
-
-  })
-
-})
 ################# #  ################# #  ################# #
 
-test_that("getblocksnearby_from_fips() noncity outputs NA rows as needed, sorted as input", {
+test_that("getblocksnearby_from_fips() _noncity case, output has NA rows, sorted as input", {
 
   # getblocksnearby_from_fips_noncity() is used
 
@@ -274,7 +412,7 @@ test_that("getblocksnearby_from_fips() noncity outputs NA rows as needed, sorted
 })
 ################# #  ################# #  ################# #
 
-test_that("getblocksnearby_from_fips() city outputs NA rows as needed, sorted as input", {
+test_that("getblocksnearby_from_fips() _cityshape case, output has NA rows, sorted as input", {
 
   # getblocksnearby_from_fips_cityshape() is used
 
@@ -304,7 +442,7 @@ test_that("getblocksnearby_from_fips() city outputs NA rows as needed, sorted as
 
 })
 ################# #  ################# #  ################# #
-
+################# #  ################# #  ################# #
 
 test_that("getblocksnearby_from_fips() returns NA, handles mix of city & noncity FIPS", {
 

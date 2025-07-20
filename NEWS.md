@@ -43,7 +43,10 @@
 - `getblocksnearby()` and related functions (`getblocksnearby_from_fips()`, `get_blockpoints_in_shape()`, etc.) also have more consistent outputs:
   - Unique ID in FIPS case: The ejam_uniq_id column in the outputs of these functions will be 1 through the number of sites in the inputs (with multiple rows per site as needed to include all the blocks). Previously, FIPS codes had been used there sometimes (and still are in the outputs of functions where the output has a table with one row per site).
   - Sorting: The output sites are now sorted like the input sites (points, fips, or polygons), while there are still usually many rows (blocks) per site. It had been sorted primarily by blockid, previously.
-  - Invalid sites: The output now includes a row of NA values for each site input that has NA lat or lon, NA fips, or empty polygon. Those sites previously had been left out of the sites2blocks table outputs. May do this also when no blocks in/near a valid site.
+  - **Invalid sites: TBD** The outputs of all the getblock... functions will consistently all omit **or TBD** all include a row of NA values for each site input that has zero blocks. Those sites previously had been left out of the sites2blocks table outputs. That includes these situations:
+    - valid input latlon but no blocks found (due to small radius or polygon combined with sparse population)
+    - invalid input, due to NA lat or lon, or NA fips, or empty polygon
+    - invalid input, but not NA (e.g., fips = "99").
 
 - testoutput_xyz .xlsx and .html files and dataset R objects have been updated to reflect the new `?bgej` dataset.
 - Some testinput objects like testinput_fips_counties are now vectors per is.vector(), and no longer have metadata stored as attributes like date_saved_in_package, etc. Adding that info via metadata_add() was making is.vector() FALSE and interfered with some functions that expect the input to be a vector, like shapes_from_fips(). Also, testinput_xtrac was removed.

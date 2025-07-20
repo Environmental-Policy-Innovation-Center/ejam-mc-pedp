@@ -249,6 +249,7 @@ fipstype <- function(fips) {
   ## **** fipstype_from_nchar() would NEED WORK STILL, BEFORE replacing code below,
   ## to handle case of 11 digits ! see is.character(fips) or is.numeric.text(fips) etc. ???
 
+  if (length(fips) == 0 || !is.vector(fips) || !is.atomic(fips)) {return(NULL)}
   ftype <- rep(NA, length(fips))
 
   fips <- fips_lead_zero(fips = fips) # cleans them so each is NA or a valid nchar() string

@@ -183,6 +183,7 @@ x <- EJAM:::test_ejam(
     testlist = list(
 
       test_fips = c(
+        "test-fips_bgs_in_fips.R",  # supports getblocksnearby_from_fips() that is tested in "test-getblocksnearby_from_fips.R"
         "test-FIPS_FUNCTIONS.R",
         "test-state_from_fips_bybg.R",
         "test-state_from_latlon.R",
@@ -324,7 +325,9 @@ x <- EJAM:::test_ejam(
                "test-latlon_as.numeric.R", "test-latlon_df_clean.R", "test-latlon_from_address.R",
                "test-latlon_from_sic.R", "test-latlon_from_vectorofcsvpairs.R",
                "test-latlon_infer.R", "test-latlon_is.valid.R", "test-state_from_sitetable.R",
-               "test-FIPS_FUNCTIONS.R", "test-is.numeric.text.R", "test-state_from_fips_bybg.R",
+               # add    "test-fips_bgs_in_fips.R"
+               "test-FIPS_FUNCTIONS.R",
+               "test-is.numeric.text.R", "test-state_from_fips_bybg.R",
                "test-state_from_latlon.R", "test-fixcolnames.R", "test-fixcolnames_infer.R",
                "test-fixnames.R", "test-fixnames_to_type.R", "test-utils_metadata_add.R",
                "test-varinfo.R", "test-frs_from_naics.R", "test-frs_from_programid.R",
@@ -337,7 +340,10 @@ x <- EJAM:::test_ejam(
                "test-test1.R", "test-test2.R"),
       seconds_byfile = c(74.3, 58.3, 27.3, 11.7, 2, 10.3, 6.2, 10, 3, 4.8, 4.1, 7.2,
                          15.1, 2, 1.9, 40.5, 31.1, 6.5, 6.7, 6.4, 2.1, 6, 3.2, 2, 6, 2.6,
-                         6.9, 1.9, 3.2, 5.5, 2.1, 2, 2.1, 2, 6.4, 30.6, 2, 3.8, 10.5,
+                         6.9, 1.9, 3.2, 5.5, 2.1, 2, 2.1, 2, 6.4,
+                         # add    "test-fips_bgs_in_fips.R"
+                         30.6, # subtract some for removed    "test-fips_bgs_in_fips.R"
+                         2, 3.8, 10.5,
                          4.2, 2.9, 2, 2, 3.7, 2.1, 9, 2.2, 2.1, 2.2, 2.1, 5.8, 1.8, 4.6,
                          1.8, 1.8, 1.8, 2.2, 1.9, 3.8, 2.5, 1.9, 1.9, 1.9, 1.9, 1.7, 1.8
       )), class = "data.frame", row.names = c(NA, -66L
@@ -546,7 +552,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
     print(count_available_files_bygroup)
     cat("\n")
     { #          groupnames shortgroupnames filecount
-      # 1         test_fips            fips         3
+      # 1         test_fips            fips         3 or 4?
       # 2        test_naics           naics         8
       # 3          test_frs             frs         6
       # 4       test_latlon          latlon        10

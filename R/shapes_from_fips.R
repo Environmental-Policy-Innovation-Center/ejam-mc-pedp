@@ -849,7 +849,7 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
   if (!all(ftype[fips %in% validfips] %in% expectedtype)) {
     # if any are an unexpected type, like not "city" when expecting "city",
     # maybe want to return all rows but only fill in the ones of expected type?
-    stop("expected all valid fips to be for", expectedtype)
+    stop("expected all valid fips to be for ", expectedtype)
   }
 
 
