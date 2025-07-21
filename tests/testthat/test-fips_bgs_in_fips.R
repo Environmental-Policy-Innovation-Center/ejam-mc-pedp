@@ -143,7 +143,6 @@ test_that('fips_bgs_in_fips - by CITY', {
   # y <- x[which(startsWith(x, "3651000"))]
   # expect_equal(y, val)
 })
-
 ################## #
 # returns only UNIQUE bg fips once each,
 # even if 2 inputs contain or are inside same bg (turn into same bgid)
@@ -163,7 +162,7 @@ test_that("fips_bgs_in_fips - returns only UNIQUE BGS in and/or containing the(s
     length(fips_bgs_in_fips(c(360710108011012, 360710108011006, 360710108011023))) == 1 # one unique bg returned even if it contains multiple blocks provided as query terms
   })
 })
-
+################## #
 test_that('fips_bgs_in_fips - by BLOCK - uniques only - is that behavior we want?', {
   expect_true( {
     length(fips_bgs_in_fips(rep("360710108011", 5))) == 1
@@ -215,7 +214,7 @@ test_that('fips_bgs_in_fips - returns BGS in tract(s)', {
 # fips_bgs_in_fips("36-071")
 # fips_bgs_in_fips("36-07")
 # fips_bgs_in_fips("$1001")
-
+################## #
 #  NO ERROR for invalid strings, no string cleaning (dashes/dots not removed)
 test_that('fips_bgs_in_fips - NO ERROR if invalid text', {
   suppressWarnings({
@@ -226,7 +225,7 @@ test_that('fips_bgs_in_fips - NO ERROR if invalid text', {
   })
   expect_equal(length(val), 0)
 })
-
+################## #
 #  warnings for invalid strings, no string cleaning (dashes/dots not removed)
 test_that('fips_bgs_in_fips - WARN if invalid text', {
   suppressWarnings({
