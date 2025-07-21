@@ -103,7 +103,7 @@
 #' @param wtdmeancols character vector of names of variables to aggregate within a buffer
 #'   using a population weighted mean or other type of weighted mean.
 #' @param calculatedcols character vector of names of variables to aggregate within a buffer
-#'   using formulas that have to be specified.
+#'   using formulas that have to be specified. currently calculatedcols is not used at all.
 #' @param calctype_maxbg character vector of names of variables to aggregate within a buffer
 #'   using max() of all blockgroup-level values.
 #' @param calctype_minbg character vector of names of variables to aggregate within a buffer
@@ -166,19 +166,17 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
                         showdrinkingwater = TRUE,
                         showpctowned = TRUE,
                         ...) {
-
   ###################################################### #
-
-  #start the timer
-  if (is.function(updateProgress)) {
-    start_time <- Sys.time()
-  }
+  if (is.function(updateProgress)) {start_time <- Sys.time()}
 
   # VALIDATE INPUTS ####
-
+  ###################################################### #
   ## validate sites2blocks ####
 
-  # ensure it has at least 1 row
+  if (!is.data.frame(sites2blocks)) {
+    warning("sites2blocks must be a data.frame or data.table/data.frame")
+    return(NULL)
+  }
   if (NROW(sites2blocks) == 0) {
     warning('sites2blocks information passed to doaggregate() is empty, so no results will be returned')
     return(NULL)
@@ -188,12 +186,24 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     warning("sites2blocks must contain columns named ejam_uniq_id, blockid, and should have distance")
     return(NULL)
   }
+  # setDT(copy() -- avoid altering input data tables by reference in the calling environment, even though copy() slows it down ***
+  sites2blocks <- data.table::copy(sites2blocks)
+  # ensure sites2blocks is a data.table
+  if (!data.table::is.data.table(sites2blocks)) {
+    data.table::setDT(sites2blocks)
+  }
+  ###################################################### #
   ## validate sites2states_or_latlon ####
+
   if (missing(sites2states_or_latlon)) {
-    # this case is handled later when checking which state each site is in, but create it here to let code validate sort orders
+    # this case was handled later when checking which state each site is in, but create it here to let code validate sort orders
+    # but note later misssing() will always FALSE
     sites2states_or_latlon <- data.table(ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
   }
-
+  if (!is.data.frame(sites2states_or_latlon)) {
+    warning("sites2states_or_latlon must be a data.frame or data.table/data.frame, if specified")
+    return(NULL)
+  }
   if (!("ejam_uniq_id" %in% colnames(sites2states_or_latlon))) {
     message("ejam_uniq_id not found in sites2states_or_latlon, so assumed they are in order 1:N")
     sites2states_or_latlon$ejam_uniq_id <- 1:NROW(sites2states_or_latlon)
@@ -201,8 +211,56 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   if (NROW(sites2states_or_latlon) != length(unique(sites2blocks$ejam_uniq_id))) {
     warning("sites2states_or_latlon should but does not have one row per unique ejam_uniq_id in sites2blocks!")
   }
+  # setDT(copy() -- avoid altering input data tables by reference in the calling environment, even though copy() slows it down ***
+  sites2states_or_latlon <- data.table::copy(sites2states_or_latlon)
+  if (!data.table::is.data.table(sites2states_or_latlon)) {
+    data.table::setDT(sites2states_or_latlon)
+  }
+  ###################################################### #
+  ## What State is each site in? (1st step) ####
+  # create sites2blocks table based on sites2states_or_latlon table
+
+  if (!all.equal("ejam_uniq_id", names(sites2states_or_latlon))) {
+    sites2states <- state_per_site_for_doaggregate(s2b = sites2blocks, s2st = sites2states_or_latlon)
+    # can use ST, fips, block's parent bgid, then site latlon.
+  } else {
+    # This happens only if it was missing, i.e., not passed to doaggregate().
+    # This case never arises if using shiny app  or ejamit( at least for latlon, not fips or shp cases ) !!
+    # This is only an edge case where RStudio user had run getblocksnearby(), get_blockpoints_in_shape(), or  getblocksnearby_from_fips() and has sites2blocks but
+    # then tried to run doaggregate() without providing the original points (or fips or shp) that had been used to create sites2blocks.
+    # In this edge case, we can just stop() .. or
+    #   else must figure out ST based on sites2blocks, which means inferring ST of each site from the blocks near it:
+    # 1) for the sites2blocks$ejam_uniq_id values where ALL nearby blocks are from the same state, just use that ST.
+    # 2) for the rest (sites2blocks$ejam_uniq_id values that are multistate),
+    #       - first get the latlon values of the nearby blocks
+    #       - use the block latlon values and distances from site to estimate where the site latlon must have been.
+
+    ## But For now, Approximate for multistate sites by using the nearest block's state:
+    # use nearest 1 block's state, which is often but not always right if near state line,
+    # but in shapefiles case of a polygon covering 2 states has no distance so just whatever happens to be 1st block in list there,
+    # (or could use polygon centroid).
+    # And multistate site never arises for non-city FIPS case (state, county, tract, or blockgroup fips is always just a single state,
+    # but possibly some sites where fipstype() is "city" might span 2 states - probably rare).
+    cat(' *** For now, if sites2states_or_latlon is not provided to doaggregate(),
+        for circles covering 2 states, it will use state of nearest block,
+        and for Shapefiles spanning 2 States, will just use 1 of the States -
+        not selected by area or population, but just whatever happens to be first in the table.
+        This should only arise if not in shiny app and not using ejamit() and
+        sites2states_or_latlon was not provided to doaggregate() \n')
+
+    # single-state case (or at least block centroids are all in 1 state, which is what matters, even if actual shape covers a bit of an adjacent state -- that does not matter since we dont use any data except via the block points)
+    sites2states <- state_from_s2b_bysite(sites2blocks) # works for single-state sites only, NA otherwise
+    # multistate case
+    multistate_ids <- sites2states$ejam_uniq_id[is.na(sites2states$ST)]
+    others <- state_from_nearest_block_bysite(sites2blocks[ejam_uniq_id %in% multistate_ids, ]) # uses bgid to get ST
+    # returns data.table with cols ejam_uniq_id,ST and one row per unique id
+    ## join those but should replace only one with multistate_ids -- match() returns only the first match, as needed.
+    sites2states$ST[is.na(sites2states$ST)] <- others$ST[match(sites2states$ejam_uniq_id[is.na(sites2states$ST)], others$ejam_uniq_id)]
+  }
+  ###################################################### #
 
   # NOTE ORIGINAL SORT ORDER OF SITES ####
+
   # (and this also means it does not matter if ejam_uniq_id is 1:NROW() or is fips)
   # But if sites2states_or_latlon has different sort than sites2blocks, which to use?
   # If both are sorted the same, keep that order (and ignore what ejam_uniq_id is, 1:N or fips)
@@ -229,27 +287,17 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
       }
     }
   }
+  ###################################################### #
 
-  # inefficient but make a copy in this envt avoid altering this by reference in the calling envt? ***
-  sites2blocks <- data.table::copy(sites2blocks)
-  # ensure sites2blocks is a data.table
-  if (!data.table::is.data.table(sites2blocks)) {
-    data.table::setDT(sites2blocks)
-  }
-  # inefficient but make a copy in this envt avoid altering this by reference in the calling envt? ***
-  sites2states_or_latlon <- data.table::copy(sites2states_or_latlon)
-  if (!data.table::is.data.table(sites2states_or_latlon)) {
-    data.table::setDT(sites2states_or_latlon)
-  }
-
-  setkey(sites2blocks, ejam_uniq_id, blockid, distance)
+  setkey(sites2blocks, ejam_uniq_id, blockid, distance) # how long would this take? ***
   setkey(sites2states_or_latlon, ejam_uniq_id)
   ##
-  ## do we want to set a key here to speed up grouping and subsetting?
+  ## do we want to set a key here to speed up joining, grouping, and subsetting?
   ## setkey sorts by reference, but we have retained original order already
   ## note all NA values (e.g., in distance) get sorted as first
   ## also see setkey(sites2blocks, blockid, ejam_uniq_id, distance), setindex(), and setorder(),
   # setkeyv(sites2blocks, c("blockid", "ejam_uniq_id", "distance")
+
   ###################################################### #
 
   ## validate DISTANCES and RADIUS ####
@@ -296,15 +344,38 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   # end of radius adjustments
   ###################################################### #
 
-  ## validate other inputs? ####
+  ## validate misc inputs ####
 
-  # could check if optional input params, when provided, are all valid ***
+  # countcols=NULL, wtdmeancols=NULL,  calctype_maxbg=NULL, calctype_minbg=NULL,    calculatedcols=NULL,# calculatedcols is unused
+      stopifnot(is.null(countcols)      || (is.vector(countcols)      && is.character(countcols))) #### Too restrictive: all(countcols %in% colnames(blockgroupstats))) # or could require they be in map_headernames$rname
+      stopifnot(is.null(wtdmeancols)    || (is.vector(wtdmeancols)    && is.character(wtdmeancols)))
+      stopifnot(is.null(calctype_maxbg) || (is.vector(calctype_maxbg) && is.character(calctype_maxbg)))
+      stopifnot(is.null(calctype_minbg) || (is.vector(calctype_minbg) && is.character(calctype_minbg)))
+  # subgroups_type='nh',
+  stopifnot(!is.null(subgroups_type), all(subgroups_type %in%  c('nh' , 'alone' , 'both')))
+  # include_ejindexes=FALSE, calculate_ratios = TRUE,
+  stopifnot(!is.null(include_ejindexes), is.logical(include_ejindexes), !is.null(calculate_ratios), is.logical(calculate_ratios))
+  # extra_demog=TRUE, need_proximityscore=FALSE,
+  stopifnot(!is.null(extra_demog), is.logical(extra_demog), !is.null(need_proximityscore), is.logical(need_proximityscore))
+  # infer_sitepoints=FALSE,
+  stopifnot(!is.null(infer_sitepoints), is.logical(infer_sitepoints))
+  # called_by_ejamit=FALSE,
+  stopifnot(!is.null(called_by_ejamit), is.logical(called_by_ejamit))
+  # updateProgress = NULL,
+   stopifnot(is.null(updateProgress) || (is.function(updateProgress)  && all(c("message_main" , "value") %in% names(formals(updateProgress)))) )
+  # silentinteractive=TRUE, testing=FALSE,
+  stopifnot(!is.null(silentinteractive), is.logical(silentinteractive), !is.null(testing), is.logical(testing))
+  # showdrinkingwater = TRUE,
+  stopifnot(!is.null(showdrinkingwater), is.logical(showdrinkingwater))
+  # showpctowned = TRUE,
+  stopifnot(!is.null(showpctowned), is.logical(showpctowned))
+  # ...)
 
   ##################################################### #  ##################################################### #
 
-  # CLARIFY WHICH INDICATORS AND FORMULAS TO USE ####
+  # SPECIFY FORMULAS & INDICATORS TO USE ####
 
-  ## *** HARDCODED blockgroup indicator names and formulas, FOR NOW, but...
+  ## *** HARDCODED blockgroup indicator names and formulas, FOR NOW, but..
   #
   # This function could either take as input params these:
   #
@@ -385,7 +456,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     #  or  should this include all that could be calculated using formulas_all and calc_ejam() ?
 
     calculatedcols <- unique(c(
-      'flagged'
+      'flagged'   #  "flagged" is not in names(blockgroupstats) so it gets dropped, but currently calculatedcols is not used at all anyway.
     ))
   }
 
@@ -421,7 +492,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   }
 
   ##################################################### #
-  # ...update progress bar in shiny app ####
+  # ..update progress bar in shiny app ####
   if (is.function(updateProgress)) {
     boldtext <- paste0('Calculating indicators at each site and overall')
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #value was 0.2 in non timer approach
@@ -440,7 +511,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   #    getblocksnearby() already did join that added blockwt column
 
   # sort rows
-  # data.table::setorder(sites2blocks, ejam_uniq_id, bgid, blockid) # might not be needed... this was done at start, and also will resort in original order at end
+  # data.table::setorder(sites2blocks, ejam_uniq_id, bgid, blockid) # might not be needed.. this was done at start, and also will resort in original order at end
 
   ################################################################ #
   # Just create some new columns in sites2blocks,
@@ -529,7 +600,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   #  length(unique(testoutput_getblocksnearby_10pts_1miles$blockid)) [1] 11334
 
   #***  ###################################### #
-  ## ...update progress bar in shiny app ####
+  ## ..update progress bar in shiny app ####
   if (is.function(updateProgress)) {
     boldtext <- paste0('Analyzing blockgroups')
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #Value was 0.4 in non timer approach
@@ -560,7 +631,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   # sites2blocks_overall[, bg_fraction_in_buffer_overall := sum(blockwt),     by="bgid"]  # variable not used !
   # sites2blocks[        , bg_fraction_in_buffer_bysite  := sum(blockwt, na.rm = TRUE), by=c("ejam_uniq_id", "bgid")]
   #
-  # VERSUS this below...
+  # VERSUS this below..
   ##################################################### #
 
   # Distances, Proximity scores, and Site counts nearby ####
@@ -670,7 +741,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   # distance_min  = how close is the closest site to anyone in this bg/site/overall set?f = closest site's distance for any block included in this bg (among all blocks inside buffer)/ at site/ overall.
   # ?distance_avg??  = not really a useful metric? maybe useful to calc avg distance for each demog.
   #   we care about 1 closest, not avg distance to all nearby.
-  ##   Distance could be then summarized a couple different ways...
+  ##   Distance could be then summarized a couple different ways..
   # distance_min_avgperson ## avg of mins: avg person has a site within x distance = closest site for avg person ;
   #    avg of mins by Demog group: save by bg (or maybe by bg by site) to summarize avg by residential population group, overall and possibly by site.
   # distance_min is for the nearest person # min of mins: at least some people have a site within just x distance = what is the min distance of any site to any person
@@ -731,7 +802,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   ##################################################### #  ##################################################### #
 
   ######################### #
-  ## ...update progress bar in shiny app ####
+  ## ..update progress bar in shiny app ####
   if (is.function(updateProgress)) {
     boldtext <- paste0('Joining blockgroups to EJScreen indicators')
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #value was 0.6 in non timer approach
@@ -789,7 +860,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   # ( ENVT, and if include_ejindexes=TRUE, the Summary Indexes too )
   ##################################################### #
 
-  ## started to draft new calc_wtdmeans() etc. here...
+  ## started to draft new calc_wtdmeans() etc. here..
   # cbind(table(EJAM::map_headernames$denominator))
   # cbind(table(calcweight(wtdmeancols)))
   ## age25up           1
@@ -1029,7 +1100,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   ##################################################### #  ##################################################### #
 
   ##################################################### #
-  ## ........update progress bar in shiny app ####
+  ## ..update progress bar in shiny app ####
   if (is.function(updateProgress)) {
     boldtext <- paste0('Computing results')
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #Value was 0.8 in non timer approach
@@ -1056,16 +1127,10 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   #
   ## WHAT STATE IS EACH SITE IN? ####
   #
-  # Assign state abbrev to each site!! (allows for state percentiles and averages to be looked up) (and statename, FIPS.ST, REGION?)
-  # Get ST (state) each site is in, to report scores as state percentiles
-  #
-  # This will be a data.frame with ejam_uniq_id, ST, (and maybe other columns).
-  # Do prelim cleanup of that lookup table that is later used in
-  # reporting each site's scores as state percentiles,
-  #  and then popwtd avg of sites state pctiles will be used as overall state pctiles.
-  #
-  # sites2states lookup table can be used after rollup blocks to BGs, so you can
-  #  convert raw BG scores to state.pctiles, via statestats lookup
+  # Need the US State each site is (mostly) in, to be able to report indicator scores as state percentiles.
+  # Assign each site a ST, statename, REGION, in_how_many_states
+  # using the sites2states table created earlier.
+  # After aggregating blocks to BGs, convert raw BG scores to state.pctiles, via statestats lookup.
   #  [OR, if fast/efficient, maybe every BG in blockgroupstats should already have its own state pctile scores columns, in which case wont need to look up those bg pctiles via raw scores!]
   #
   # * and an extra feature could be-- using BG-scale dataset (per site or at least overall) calc avg state pctile in each Demog group (per site or at least overall).
@@ -1076,49 +1141,9 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   # *** popwtd avg of sites state pctiles (not raw scores) will be used as the overall state pctiles.
   #  (Because each site has a different site, you cannot just convert overall raw scores to state pctiles).
   #  ##################################################### #
-
-  if (missing( sites2states_or_latlon)) {
-
-    # This case never arises if using shiny app  or ejamit( at least for latlon, not fips or shp cases ) !!
-
-    # This is only an edge case where RStudio user had run getblocksnearby(), get_blockpoints_in_shape(), or  getblocksnearby_from_fips() and has sites2blocks but
-    # then tried to run doaggregate() without providing the original points (or fips or shp) that had been used to create sites2blocks.
-    # In this edge case, we must figure out ST based on sites2blocks, which means inferring ST of each site from the blocks near it:
-    # 1) for the sites2blocks$ejam_uniq_id values where ALL nearby blocks are from the same state, just use that ST.
-    # 2) for the rest (sites2blocks$ejam_uniq_id values that are multistate),
-    #       - first get the latlon values of the nearby blocks
-    #       - use the block latlon values and distances from site to estimate where the site latlon must have been.
-
-    ## But For now, Approximate for multistate sites by using the nearest block's state:
-    # use nearest 1 block's state, which is often but not always right if near state line,
-    # but in shapefiles case of a polygon covering 2 states has no distance so just whatever happens to be 1st block in list there.
-    # and never arises for non-city FIPS case (state, county, tract, or blockgroup fips is always just a single state, but possibly some where fipstype() is "city" might span 2 states).
-    cat(' *** For now, if sites2states_or_latlon is not provided to doaggregate(),
-        for circles covering 2 states, it will use state of nearest block,
-        and for Shapefiles spanning 2 States, will just use 1 of the States -
-        not selected by area or population, but just whatever happens to be first in the table.
-        This should only arise if not in shiny app and not using ejamit() and
-        sites2states_or_latlon was not provided to doaggregate() \n')
-    # single-state case (or at least block centroids are all in 1 state, which is what matters, even if actual shape covers a bit of an adjacent state -- that does not matter since we dont use any data except via the block points)
-    sites2states <- state_from_s2b_bysite(sites2blocks) # works for single-state sites only, NA otherwise
-    setDT(sites2states)
-    # if ("confirmed this works" == "done?") {
-    # multistate case
-    multistate_ids <- sites2states$ejam_uniq_id[is.na(sites2states$ST)]
-    others <- state_from_nearest_block_bysite(sites2blocks[ejam_uniq_id %in% multistate_ids, ])
-    # returns data.table with cols ejam_uniq_id,ST and one row per unique id
-    ## join those but should replace only one with multistate_ids
-    ##  ???  xxx
-    sites2states$ST[is.na(sites2states$ST)] <- others$ST[match(sites2states$ejam_uniq_id[is.na(sites2states$ST)], others$ejam_uniq_id)]
-    # }
-  }
-
   if (is.function(updateProgress)) {
     boldtext <- paste0('Computing results')
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #Value was 0.8 in non timer approach
-  }
-  if (!missing( sites2states_or_latlon)) {
-    sites2states <- state_per_site_for_doaggregate(s2b = sites2blocks, s2st = sites2states_or_latlon) # can use ST, fips, block's parent bgid, then site latlon.
   }
   #  ##################################################### #
 
@@ -1142,7 +1167,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
   # results_bybg_people$ST is created from sites2bgs_plusblockgroupdata_bysite$ST and ST is already in that table
   # since ST was joined from blockgroupstats around line 569, for each bg, but that is not always 1 state for a given site.
-  # sites2bgs_plusblockgroupdata_bysite[, statename := stateinfo$statename[match(ST, stateinfo$ST)]]  # same as the very slightly slower... fips2statename(fips_state_from_state_abbrev(ST))
+  # sites2bgs_plusblockgroupdata_bysite[, statename := stateinfo$statename[match(ST, stateinfo$ST)]]  # same as the very slightly slower.. fips2statename(fips_state_from_state_abbrev(ST))
   suppressWarnings({
   sites2bgs_plusblockgroupdata_bysite[, statename := fips2statename(fips_state_from_state_abbrev(ST))]
   sites2bgs_plusblockgroupdata_bysite[, REGION := fips_st2eparegion(fips_state_from_state_abbrev(ST))]

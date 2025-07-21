@@ -254,6 +254,9 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
   # >sort again to return sites in same sort order as inputs were in
   # sitespoints$ejam_uniq_id is vector of ids in correct order, original order. do not assume they are sorted as 1:N
   # do join to return sites2blocks with ejam_unique_id in the order in which they are found in sitepoints, and the .SD prevents it from pulling in the lat lon cols from sitepoints
+# but also omit invalid and no-block sites:
+  # > DROP from s2b SITES WITH NO BLOCKS FOUND ####
+  sites2blocks <- sites2blocks[sitepoints, .SD, on = "ejam_uniq_id"][!is.na(blockid), ]
 
-  return(sites2blocks[sitepoints, .SD, on = "ejam_uniq_id"])
+  return(sites2blocks)
 }

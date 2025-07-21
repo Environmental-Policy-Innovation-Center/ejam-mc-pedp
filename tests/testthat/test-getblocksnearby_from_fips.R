@@ -1,5 +1,9 @@
 
-## ***ensure THESE ARE CONSISTENT AND WORK WITH ejamit() so they all include or all omit rows in s2b for invalid/0 blocks sites.
+## ***ensure THESE ARE CONSISTENT AND WORK WITH ejamit() so they
+##    all do or dont assign uniq id to, and
+##    all include or all omit rows in s2b for
+##    invalid / 0 blocks sites of various kinds
+## (fips can be good, valid but no bounds, valid but wrong type (noncity), looks right but invalid fips, NA, or NULL)
 
 # y1 <- getblocksnearby_from_fips_cityshape(c( testinput_fips_cities[1]))[]
 # y1
@@ -15,7 +19,7 @@
 # y6
 # y7 <- getblocksnearby_from_fips_cityshape(c("1234567", "1234567"))[]
 # y7
-# y8 <- getblocksnearby_from_fips_cityshape(c(NA, "1234567"))[]
+# y8 <- getblocksnearby_from_fips_cityshape(c(NA, "1234567"))[]       #  and check  c("99", NA, '1234567')
 # y8
 # y9 <- getblocksnearby_from_fips_cityshape(c(NA, NA, "1234567", "0234560", testinput_fips_cities[1]))[]
 # y9
@@ -447,7 +451,8 @@ test_that("getblocksnearby_from_fips() _cityshape case, output has NA rows, sort
 test_that("getblocksnearby_from_fips() returns NA, handles mix of city & noncity FIPS", {
 
   inputfips = c("061090011001", # bg
-                "4273072", "1332412", "3920212", # cities where 1 lacks bounds available
+                "4273072",# city  lacks bounds available
+                "1332412", "3920212", # cities
                 "530530723132" , NA, NA, "240338052021", "390490095901", # bgs AND 2 fips are given as NA
                 "99") # Totally INVALID FIPS code but not NA value
   suppressMessages({
@@ -464,7 +469,7 @@ test_that("getblocksnearby_from_fips() returns NA, handles mix of city & noncity
   # 1:            1 061090011001
   # 2:            2      4273072
   # 3:            3      1332412
-  # 4:            4         <NA>     6 & 7 were supposed to be the NA rows, but merging city and noncity fails to keep tract across types?
+  # 4:            4         <NA>     6 & 7 were supposed to be the NA rows, but merging city and noncity failed to keep tract across types?
   # 5:            4      3920212
   # 6:            5         <NA>
   # 7:            5 530530723132

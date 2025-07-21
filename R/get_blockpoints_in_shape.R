@@ -82,6 +82,10 @@ get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby =
   }
   input_ejam_uniq_id <- polys$ejam_uniq_id
 
+  # > dont yet OMIT INVALID POLYGONS?   at end ####
+
+
+
   ############################ ############################ ########################### #
 
   ## define bounding box around each polygon ####
@@ -217,6 +221,9 @@ get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby =
   polys <- polys[match(input_ejam_uniq_id, polys$ejam_uniq_id), ]
   # sort pts data.table like input was sorted
   pts <- pts[data.table(ejam_uniq_id = input_ejam_uniq_id), , on = "ejam_uniq_id"]
+
+  # > DROP from s2b IF NO BLOCKS FOUND ####
+  pts <- pts[!is.na(blockid), ]
 
   data.table::setcolorder(pts, c('ejam_uniq_id', 'blockid', 'distance', 'blockwt', 'bgid', 'lat', 'lon')) # to make it same order as output of getblocksnearby(), plus latlon
 

@@ -48,25 +48,33 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
   })
   # create an overall ejam id, and note the ejam_uniq_id in each of the helpers will be a different count of 1:A and 1:B for the cityshape and noncity cases!
   original_order <- data.table(ejam_uniq_id = seq_along(fips), fips = fips)
+  ok <- fips_valid(fips)
+  original_order$ok <- ok
 
-  # If some fips are city and others not, use approp method for each, then combine and re-sort
   suppressWarnings({
+    # If some fips are city and others not, use approp method for each, then combine and re-sort
     ftype <- fipstype(fips)
   })
   ftype_city <- ftype %in% "city"
-  ftype_city[is.na(ftype)] <- FALSE
-  ftype_noncity <- !ftype_city & !is.na(ftype)  # right now this includes invalid fips also !
+  ftype_city[is.na(ftype) & ok] <- FALSE
+  ftype_noncity <- !ftype_city & !is.na(ftype) & ok
 
+  suppressWarnings({
+    # >  OMIT INVALID FIPS HERE? ####
+    ## but then the $poly spatial data.frame would NOT have a row for every input fips...unless filled back in
+    fips <- fips[ok]
+    # what if none valid at all? ***
+  })
   if (any((ftype_city))) {
     # these need shapefile download
-    output_city <- getblocksnearby_from_fips_cityshape(fips = fips[ftype_city],
+    output_city <- getblocksnearby_from_fips_cityshape(fips = fips[ftype_city[ok]],
                                                        return_shp = return_shp)
   } else {
     output_city <- NULL
   }
   if (any((ftype_noncity))) {
     # these do not need shapefile download, just using FIPS code since blockgroups aggregate into tracts then counties then states
-    output_noncity <- getblocksnearby_from_fips_noncity(fips[ftype_noncity],
+    output_noncity <- getblocksnearby_from_fips_noncity(fips[ftype_noncity[ok]],
                                                         return_shp = return_shp,
                                                         in_shiny = in_shiny,
                                                         need_blockwt = need_blockwt,
@@ -79,10 +87,10 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
   ## each part of s2b table (city and noncity) is already in correct sort order at this point, but need to sort overall now,
   # using  fips[ftype_city] and fips[!ftype_city] and original_order
 
-  original_order[            , ftype_city := ftype_city]
-  original_order[  ftype_city, id_among_subset := .I] # 1:N just among the city subset
-  original_order[ !ftype_city, id_among_subset := .I] # 1:N just among the non-city subset
-  original_order[            , id_overall := ejam_uniq_id]
+  original_order[             , ftype_city := ftype_city]
+  original_order[   ftype_city, id_among_subset := .I] # 1:N just among the city subset
+  original_order[ftype_noncity, id_among_subset := .I] # 1:N just among the non-city subset
+  original_order[             , id_overall := ejam_uniq_id]
 
   if (return_shp) {
     # return_shp case ####
@@ -114,6 +122,12 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
     output$polys <- sf::st_as_sf(data.table::setDF(output$polys)) # convert back to sf class
     output$pts   <- rbind(         output_city$pts,   output_noncity$pts)
 
+
+    # WHAT IF NONE RETURNED AT ALL? e.g. fips seemed valid but all were city fips with no bounds available
+
+
+
+
     ## 3. sort s2b ####
     ## sort pts data.table using data.table syntax, in same order as original inputs were:
     # now that overall ejam_uniq_id is here, sort on that, since it was just 1:N
@@ -142,6 +156,11 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
       output_noncity[, id_among_subset := NULL]
     }
 
+
+    # WHAT IF NONE RETURNED AT ALL? e.g. fips seemed valid but all were city fips with no bounds available
+
+
+
     ## 2. combine city/non ####
     ## a way to combine spatial data.frames that do not all have the same columns:
     output <- data.table::rbindlist(list(output_city, output_noncity), fill = TRUE)
@@ -161,19 +180,27 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
 
 getblocksnearby_from_fips_cityshape <- function(fips, return_shp = FALSE) {
 
+  # assign IDs/ keep original order? so invalid ones get a unique id?
+
+  ##  > OMIT INVALID FIPS HERE? ####
+  ## but then the $poly spatial data.frame would NOT have a row for every input fips unless filled back in
   suppressWarnings({
+    fips <- fips[fips_valid(fips)]
+    # what if none valid at all? ***
     fips <- fips_lead_zero(fips)  # adds leading zeroes and returns as character, 5 characters if seems like countyfips, etc.
   })
   suppressWarnings({
-    polys <- shapes_places_from_placefips(fips) # preserves exact order, and includes NAs in output if NAs in input. prints info to console.
+
+    polys <- shapes_places_from_placefips(fips) # preserves exact order -  and includes NAs in output if NAs in input?  prints info to console.
   })
   polys <- polys[match(fips, polys$FIPS), ] # adds back in NA rows where fips was NA if missing (but was already handled by shapes_places_from_placefips() )
   suppressWarnings({
-    s2b_pts_polys <- get_blockpoints_in_shape(polys = polys) # had NA row in output for each NA input. Sorted by 1:N ejam_uniq_id, with multiple rows each
+    s2b_pts_polys <- get_blockpoints_in_shape(polys = polys) #   Sorted by 1:N ejam_uniq_id, with multiple rows each
   })
   ## s2b_pts_polys$polys is a spatial df with FIPS character like fips, and ejam_uniq_id is 1:nrow integer class (since the input is polygons not fips codes)
   ## s2b_pts_polys$pts is a data.table with no fips field, and   ejam_uniq_id is integer class 1:nrow but check sort order of it.
 
+  # > in s2b, OMIT ROWS WHERE NO BLOCKS FOUND ####
   s2b_pts_polys$pts <- s2b_pts_polys$pts[!is.na(blockid), ]
 
   # SORT
@@ -201,13 +228,21 @@ getblocksnearby_from_fips_cityshape <- function(fips, return_shp = FALSE) {
 
 getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny = FALSE, need_blockwt = TRUE, allow_multiple_fips_types = TRUE) {
 
+  # assign IDs/ keep original order? so invalid ones get a unique id?
+
   if (!exists('blockid2fips')) {
     dataload_dynamic(varnames = 'blockid2fips')
   }
   if (!exists('bgid2fips')) {
     dataload_dynamic(varnames = 'bgid2fips')
   }
+
+  ##  > OMIT INVALID FIPS HERE? ####
+  ## but then the $poly spatial data.frame would NOT have a row for every input fips...
+
   suppressWarnings({
+    fips <- fips[fips_valid(fips)]
+    # what if none valid at all? ***
     fips <- fips_lead_zero( fips)  # adds leading zeroes and returns as character, 5 characters if seems like countyfips, etc.
   })
   ######################################## #
@@ -316,9 +351,8 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny
     fips_blockpoints[ , lon := NULL]
     ######################################## #
 
-    ## handle NAs? ####
-    ## insert NA row for any invalid fips value?   it is easier to ensure output matches input if NA invalid fips result in NA rows in output of getblocksnearby as is done by getblocksnearby() in the latlon case
-
+    ## > in s2b, OMIT ROWS WHERE NO BLOCKS FOUND ####
+    fips_blockpoints <- fips_blockpoints[!is.na(blockid), ]
 
     ## SORT output again just in case (and include NA rows if any were in inputs?) ####
     setorder(fips_blockpoints, ejam_uniq_id)
@@ -328,7 +362,8 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny
       # do not need to do what getblocksnearby_from_fips_cityshape() since the pts part we can get from FIPS. just need the shapefile polygons part.
       s2b_pts_polys <- list()
       s2b_pts_polys$pts <- fips_blockpoints
-      polys <- shapes_from_fips(fips, allow_multiple_fips_types = allow_multiple_fips_types) # preserves exact order, and includes NAs in output if NAs in input
+      polys <- shapes_from_fips(fips, allow_multiple_fips_types = allow_multiple_fips_types) # preserves exact order,
+      # and includes NAs in output if NAs in input
       s2b_pts_polys$polys <- polys
       return(s2b_pts_polys)
     } else {
