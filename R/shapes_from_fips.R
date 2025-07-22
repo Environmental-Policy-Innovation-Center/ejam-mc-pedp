@@ -837,12 +837,13 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
   suppressWarnings({
     fips <- fips_lead_zero(fips)        # we want this even though it gets done again within fipstype() and fips_valid()
     ftype <- fipstype(fips)             # we want this even though it does fips_lead_zero() again
-    validfips <- fips[fips_valid(fips)] # we want this even though it does fips_lead_zero() and fipstype() again
+    ok <- fips_valid(fips)
+    validfips <- fips[ok] # we want this even though it does fips_lead_zero() and fipstype() again
   })
   # if ALL fips are invalid
-  if (length(validfips) == 0) { # valid is stricter than is.na(fipstype(fips)), since those NA fipstype are always called invalid.
+  if (all(!ok) || length(validfips) == 0 || length(fips) == 0) { # valid is stricter than is.na(fipstype(fips)), since those NA fipstype are always called invalid.
     warning('no valid fips')
-    return(shapes_empty_table(fips))
+    return(shapes_empty_table(fips[!ok]))
   }
   # if at least some are valid, but valid ones are not all of this 1 expected type like "city"
   #
@@ -852,9 +853,7 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
     stop("expected all valid fips to be for ", expectedtype)
   }
 
-
-
-  ST <- unique(fips2state_abbrev(fips)) # added later by shapefile_addcols() but needed here to download right states
+  ST <- unique(fips2state_abbrev(fips[ok])) # added later by shapefile_addcols() but needed here to download right states
 
 
 
@@ -883,6 +882,7 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
   shp <- shapefile_dropcols(shp)
   shp <- shapefile_addcols(shp)
   shp <- shapefile_sortcols(shp)
+  rownames(shp) <- NULL
   return(shp)
 }
 ####################################################### #

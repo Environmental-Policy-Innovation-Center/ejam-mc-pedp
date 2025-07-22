@@ -11,19 +11,19 @@
 #' @param in_shiny used by shiny app server code to handle errors via validate() instead of stop()
 #' @param need_blockwt set to FALSE to speed it up if you do not need blockwt
 #' @param return_shp set to TRUE to get a named list, pts and polys, that are sites2blocks table and spatial data.frame,
-#'   or FALSE to get the pts data.table much like output of [getblocksnearby()] for latlon points.
+#'   or FALSE to get the pts data.table much like output of [getblocksnearby()] or  [get_blockpoints_in_shape()]
 #' @param allow_multiple_fips_types if enabled, set TRUE to allow mix of blockgroup, tract, city, county, state fips
 #'
-#' @return data.table with colnames ejam_uniq_id, blockid, distance, blockwt, bgid, fips.
+#' @return
+#' - if return_shp=F, returns just a sites2blocks data.table with colnames ejam_uniq_id, blockid, distance, blockwt, bgid, fips.
+#'  This is like the [getblocksnearby()] and [get_blockpoints_in_shape()] outputs.
 #'
-#'   [getblocksnearby()] output is similar but
-#'   `getblocksnearby(testpoints_10, radius = 1)`
-#'   also returns extra columns from input, like lat,lon.
+#' - if return_shp=T, returns a named list where pts is the data.table of sites2blocks,
+#'   and polys is the spatial data.frame with one row per input fips (including invalid ones).
 #'
-#'   [get_blockpoints_in_shape()] output is similar but
-#'   `get_blockpoints_in_shape(testinput_shapes_2)`
-#'   returns a list of pts table and polys table, where the pts data.table has
-#'   colnames ejam_uniq_id, blockid, distance, blockwt, bgid, lat, lon.
+#'   The ejam_uniq_id represents which of the input sites is being referred to, and the table
+#'   will only have the ids of the sites where blocks were found. If 10 sites were input but only sites 5 and 8
+#'   were valid and had blocks identified, then the data.table here will only include ejam_uniq_id values of 5 and 8.
 #'
 #' @examples
 #'   x <- getblocksnearby_from_fips(fips_counties_from_state_abbrev("DE"))
@@ -46,39 +46,39 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
   suppressWarnings({
     fips <- fips_lead_zero(fips)  # adds leading zeroes and returns as character, 5 characters if seems like countyfips, etc.
   })
+  ##  > SORT order of input fips is saved including invalid fips input ####
   # create an overall ejam id, and note the ejam_uniq_id in each of the helpers will be a different count of 1:A and 1:B for the cityshape and noncity cases!
   original_order <- data.table(ejam_uniq_id = seq_along(fips), fips = fips)
-  ok <- fips_valid(fips)
-  original_order$ok <- ok
-
+  suppressWarnings({
+    ok <- fips_valid(fips)
+    original_order$ok <- ok
+  })
   suppressWarnings({
     # If some fips are city and others not, use approp method for each, then combine and re-sort
     ftype <- fipstype(fips)
   })
   ftype_city <- ftype %in% "city"
-  ftype_city[is.na(ftype) & ok] <- FALSE
-  ftype_noncity <- !ftype_city & !is.na(ftype) & ok
+  ftype_city[is.na(ftype) & ok] <- FALSE               ## -------------- Drop  invalids from the city type list
+  ftype_noncity <- !ftype_city #  & !is.na(ftype) & ok ## -------------- pass invalid ones as noncity so that getblocksnearby_from_fips_noncity() can include invalids as rows in the polys shp table.
 
-  suppressWarnings({
-    # >  OMIT INVALID FIPS HERE? ####
-    ## but then the $poly spatial data.frame would NOT have a row for every input fips...unless filled back in
-    fips <- fips[ok]
-    # what if none valid at all? ***
-  })
+  # what if none valid at all? ***
   if (any((ftype_city))) {
-    # these need shapefile download
-    output_city <- getblocksnearby_from_fips_cityshape(fips = fips[ftype_city[ok]],
+    # these need shapefile download - pass all incl invalid to get back $polys table with rows for invalids
+    output_city <- getblocksnearby_from_fips_cityshape(fips = fips[ftype_city ],
                                                        return_shp = return_shp)
+    # NULL IF NONE RETURNED AT ALL
   } else {
     output_city <- NULL
   }
   if (any((ftype_noncity))) {
-    # these do not need shapefile download, just using FIPS code since blockgroups aggregate into tracts then counties then states
-    output_noncity <- getblocksnearby_from_fips_noncity(fips[ftype_noncity[ok]],
+    # these do not need shapefile download unless return_shp=T,
+    # else just using FIPS code since blockgroups aggregate into tracts then counties then states
+    output_noncity <- getblocksnearby_from_fips_noncity(fips[ftype_noncity ],
                                                         return_shp = return_shp,
                                                         in_shiny = in_shiny,
                                                         need_blockwt = need_blockwt,
                                                         allow_multiple_fips_types = allow_multiple_fips_types)
+    # NULL IF NONE RETURNED AT ALL
   } else {
     output_noncity <- NULL
   }
@@ -92,12 +92,12 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
   original_order[ftype_noncity, id_among_subset := .I] # 1:N just among the non-city subset
   original_order[             , id_overall := ejam_uniq_id]
 
+  ####################################### #
+  # ~ ####
+  # return_shp = TRUE ####
   if (return_shp) {
-    # return_shp case ####
 
-    ## 1a. pull in id_overall as the new ejam_uniq_id value ####
-    # in output_city$pts, and then in output_noncity$pts
-    # by joining each to original_order on = "id_among_subset"
+    ###  1a. use id_overall as new ejam_uniq_id value for s2b ####
 
     if (!is.null(output_city)) {
       output_city$pts[, id_among_subset := ejam_uniq_id]
@@ -110,40 +110,52 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
       output_noncity$pts[, id_among_subset := NULL]
     }
 
-    # 1b. pull in id_overall as the new ejam_uniq_id value
-    # in output_city$polys, output_noncity$polys
-    output_city$polys$ejam_uniq_id    <- original_order$ejam_uniq_id[ ftype_city]
-    output_noncity$polys$ejam_uniq_id <- original_order$ejam_uniq_id[!ftype_city]
+    ##  1b. use id_overall for spatial data.frame ####
+    #     in output_city$polys, output_noncity$polys
+    if (!is.null(output_city)) {
+      output_city$polys$ejam_uniq_id    <- original_order$ejam_uniq_id[ ftype_city]
+    }
+    if (!is.null(output_noncity)) {
+      output_noncity$polys$ejam_uniq_id <- original_order$ejam_uniq_id[!ftype_city]
+    }
 
-    ## 2. combine city/non ####
-    output <- list()
-    ## a way to combine spatial data.frames that do not all have the same columns:
-    output$polys <- data.table::rbindlist(list(output_city$polys, output_noncity$polys), fill = TRUE) # no longer "sf" class after rbindlist()
-    output$polys <- sf::st_as_sf(data.table::setDF(output$polys)) # convert back to sf class
-    output$pts   <- rbind(         output_city$pts,   output_noncity$pts)
+    ##  2. combine city & noncity ####
+    if (is.null(output_city) && is.null(output_noncity)) {
+      pts = data.table(ejam_uniq_id = integer(0), blockid = character(0),
+                       distance = numeric(0), blockwt = numeric(0), bgid = character(0), fips = character(0))
+      polys = sf::st_as_sf(data.frame(FIPS = original_order$fips, fipstype=fipstype(original_order$fips),
+                                      NAME=NA, STATE_ABBR=NA, STATE_NAME=NA,  pop= NA,   SQMI=NA, POP_SQMI=NA, n = 1:length(original_order$fips),
+                                      ejam_uniq_id = original_order$ejam_uniq_id,
+                                      geometry = sf::st_sfc(NA)))
+      # c('FIPS', 'fipstype', 'NAME', 'STATE_ABBR' ,'STATE_NAME' , 'pop'  , 'SQMI', 'POP_SQMI' ,'n' ,'ejam_uniq_id', 'geometry')
+      output <- list(polys = polys, pts = pts)
+    } else {
+      output <- list()
+      ##    use rbindlist() to combine spatial data.frames that do not all have the same columns:
+      output$polys <- data.table::rbindlist(list(output_city$polys, output_noncity$polys), fill = TRUE,
+                                            ignore.attr=TRUE) # no longer "sf" class after rbindlist()
+      output$polys <- sf::st_as_sf(data.table::setDF(output$polys)) # convert back to sf class
+      output$pts   <- rbind(output_city$pts,   output_noncity$pts)
 
+      ##  3a. sort s2b ####
+      ## sort pts data.table using data.table syntax, in same order as original inputs were:
+      # now that overall ejam_uniq_id is here, sort on that, since it was just 1:N
+      setorder(output$pts, ejam_uniq_id, blockid)
 
-    # WHAT IF NONE RETURNED AT ALL? e.g. fips seemed valid but all were city fips with no bounds available
+      ##  3b. sort spatial data.frame ####
+      # sort  ejam_uniq_id which now is original overall  1:NROW
+      output$polys <- output$polys[order(output$polys$ejam_uniq_id), ]
+    }
+  }
+  ####################################### #
+  # ~ ####
+  # return_shp = FALSE ####
 
+  if (!return_shp) {
 
-
-
-    ## 3. sort s2b ####
-    ## sort pts data.table using data.table syntax, in same order as original inputs were:
-    # now that overall ejam_uniq_id is here, sort on that, since it was just 1:N
-    setorder(output$pts, ejam_uniq_id, blockid)
-
-    ## 4. sort spatial data.frame ####
-    # sort  ejam_uniq_id which now is original overall  1:NROW
-    output$polys <- output$polys[order(output$polys$ejam_uniq_id), ]
-
-  } else {
-    # NOT return_shp case ####
     # each is just a data.table of s2b like pts
 
-    ## 1a. pull in id_overall as the new ejam_uniq_id value ####
-    # in output_city, and then in output_noncity
-    # by joining each to original_order on = "id_among_subset"
+    ###  1. use id_overall as new ejam_uniq_id value for s2b ####
 
     if (!is.null(output_city)) {
       output_city[, id_among_subset := ejam_uniq_id]
@@ -156,56 +168,62 @@ getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRU
       output_noncity[, id_among_subset := NULL]
     }
 
-
-    # WHAT IF NONE RETURNED AT ALL? e.g. fips seemed valid but all were city fips with no bounds available
-
-
-
-    ## 2. combine city/non ####
-    ## a way to combine spatial data.frames that do not all have the same columns:
-    output <- data.table::rbindlist(list(output_city, output_noncity), fill = TRUE)
-
-    ## 3. sort s2b ####
-    # sort data.table using data.table syntax, in same order as original inputs were:
-    # now that overall ejam_uniq_id is here, sort on that, since it was just 1:N
-    setorder(output, ejam_uniq_id, blockid)
+    ##  2. combine city & noncity ####
+    if (is.null(output_city) && is.null(output_noncity)) {
+      output <- data.table(ejam_uniq_id = integer(0), blockid = character(0),
+                           distance = numeric(0), blockwt = numeric(0), bgid = character(0), fips = character(0))
+    } else {
+      ##    use rbindlist() to combine spatial data.frames that do not all have the same columns:
+      output <- data.table::rbindlist(list(output_city, output_noncity), fill = TRUE,
+                                      ignore.attr=TRUE)
+      ##  3. sort s2b ####
+      # sort data.table using data.table syntax, in same order as original inputs were:
+      # now that overall ejam_uniq_id is here, sort on that, since it was just 1:N
+      setorder(output, ejam_uniq_id)
+    }
   }
   return(output)
 }
 ######################################## #  ######################################## #
-
-
+# ~ ####
 # helper used by getblocksnearby_from_fips()
-
 
 getblocksnearby_from_fips_cityshape <- function(fips, return_shp = FALSE) {
 
-  # assign IDs/ keep original order? so invalid ones get a unique id?
+  ##  > SORT order of input fips is saved including invalid fips input ####
+  #   $poly spatial data.frame needs a row for every input fips (or would need to get filled back in)
 
-  ##  > OMIT INVALID FIPS HERE? ####
-  ## but then the $poly spatial data.frame would NOT have a row for every input fips unless filled back in
-  suppressWarnings({
-    fips <- fips[fips_valid(fips)]
-    # what if none valid at all? ***
-    fips <- fips_lead_zero(fips)  # adds leading zeroes and returns as character, 5 characters if seems like countyfips, etc.
-  })
-  suppressWarnings({
+  original_order <- data.table(fips = fips, n = seq_along(fips))
 
-    polys <- shapes_places_from_placefips(fips) # preserves exact order -  and includes NAs in output if NAs in input?  prints info to console.
+  ## > DONT DROP INVALID FIPS  ####
+
+  suppressWarnings({
+    ok <- fips_valid(fips)
+    original_order$ok <- ok
+    fips <- fips_lead_zero( fips)  # adds leading zeroes and returns as character, 5 characters if seems like countyfips, etc.
+    ##  if none valid at all, shapes_places_from_placefips() crashes if given character(0)
+    # fips <- fips[ok]  # # ----------------------------------- ***
   })
-  polys <- polys[match(fips, polys$FIPS), ] # adds back in NA rows where fips was NA if missing (but was already handled by shapes_places_from_placefips() )
+  ## Get POLYGONS of city fips ####
+  # this returns a row for each input fips, even if no shape available:# preserves exact order -  and includes NAs in output if NAs in input
+  suppressWarnings({
+    polys <- shapes_places_from_placefips(fips)
+  })
+  ## Get BLOCKS in each polygon ####
   suppressWarnings({
     s2b_pts_polys <- get_blockpoints_in_shape(polys = polys) #   Sorted by 1:N ejam_uniq_id, with multiple rows each
   })
   ## s2b_pts_polys$polys is a spatial df with FIPS character like fips, and ejam_uniq_id is 1:nrow integer class (since the input is polygons not fips codes)
-  ## s2b_pts_polys$pts is a data.table with no fips field, and   ejam_uniq_id is integer class 1:nrow but check sort order of it.
+  ## s2b_pts_polys$pts is a data.table with no fips field, and   ejam_uniq_id is integer class but will omit rows with no blocks
 
-  # > in s2b, OMIT ROWS WHERE NO BLOCKS FOUND ####
-  s2b_pts_polys$pts <- s2b_pts_polys$pts[!is.na(blockid), ]
+  # > in s2b, DROP FIPS IF NO BLOCKS FOUND ####
+  s2b_pts_polys$pts <- s2b_pts_polys$pts[!is.na(blockid), ] # redundant?
 
-  # SORT
+  ## > ALREADY SORTED output s2b ####
+  ### setorder(s2b_pts_polys$pts, ejam_uniq_id, blockid) # or use original_order ?
   # table of block points is already sorted, and has many rows (blocks) per fips
   # table of polygons is also already sorted, and has 1 row per fips
+
   s2b_pts_polys$pts[s2b_pts_polys$polys, fips := FIPS, on = "ejam_uniq_id"]
   s2b_pts_polys$pts[, lat := NULL]
   s2b_pts_polys$pts[, lon := NULL]
@@ -215,33 +233,29 @@ getblocksnearby_from_fips_cityshape <- function(fips, return_shp = FALSE) {
   } else {
     return(s2b_pts_polys$pts) # multiple rows per fips, but the order of fips was preserved, with no row for fips with no bounds avail.
   }
-
   ## example/test
   # fips = c(4975360, 4262056, 4958070) # 1 of those 3 has no bounds avail.
   # mapview::mapview( shapes_from_fips(fips))
 }
 ######################################## #  ######################################## #
-
+# ~ ####
 
 # helper used by getblocksnearby_from_fips()
 
-
 getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny = FALSE, need_blockwt = TRUE, allow_multiple_fips_types = TRUE) {
 
-  # assign IDs/ keep original order? so invalid ones get a unique id?
+  if (!exists('blockid2fips')) {dataload_dynamic(varnames = 'blockid2fips')}
+  if (!exists('bgid2fips')) {dataload_dynamic(varnames = 'bgid2fips')}
 
-  if (!exists('blockid2fips')) {
-    dataload_dynamic(varnames = 'blockid2fips')
-  }
-  if (!exists('bgid2fips')) {
-    dataload_dynamic(varnames = 'bgid2fips')
-  }
+  ##  > SORT order of input fips is saved including invalid fips input ####
+  original_order <- data.table(fips = fips, n = seq_along(fips))
 
-  ##  > OMIT INVALID FIPS HERE? ####
-  ## but then the $poly spatial data.frame would NOT have a row for every input fips...
+  ## > DROP INVALID FIPS? ####
 
   suppressWarnings({
-    fips <- fips[fips_valid(fips)]
+    ok <- fips_valid(fips)
+    original_order$ok <- ok
+    fips <- fips[ok]# # ----------------------------------- ***
     # what if none valid at all? ***
     fips <- fips_lead_zero( fips)  # adds leading zeroes and returns as character, 5 characters if seems like countyfips, etc.
   })
@@ -257,60 +271,56 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny
         stop('noncity fips must all be same number of characters, like all are 5-digit county fips with leading zeroes counted')
       }}
     #  see   fipstype() function.
-    # > length(unique(substr(blockid2fips$blockfips,1,12)))  # [1] 242335
-    # > length(unique(substr(blockid2fips$blockfips,1,11)))  # [1] 85395
-    # > length(unique(substr(blockid2fips$blockfips,1,5)))  # [1] 3221
   }
-
   fips_vec <- fips
   names(fips_vec) <- fips
-  # if (length(fips_vec) == 1) {
-  #   fips_vec <- c(fips_vec, na = NA) # quick workaround since code below failed if only 1 FIPS provided, like 1 state or only 1 county
-  # }
+  ######################################## #  ######################################## #
+
+  ## Get BLOCKGROUPS in each fips ####
+
   ######################################## #
-
-  ## Get all BLOCKGROUPS in each fips ####
-
   ### Get bgfips:
-  suppressWarnings({ # because if length was 1 and added NA at end, this reports irrelevant warning
+
+  suppressWarnings({
+    ######################################## #
     ## create two-column dataframe with bgs (values) and original fips (ind)
     # fips_bgs_in_fips1() returns all blockgroup fips codes contained within each fips provided
     # fips_bgs_in_fips() replaces fips_bgs_in_fips1()
     # all_bgs <- stack(sapply(fips_vec, fips_bgs_in_fips)) # newer - fast alone but slow in sapply?
-    # *** Note this stack() drops all NA fips, including any originally in the inputs passed to getblocks, and we now may want to retain those, or can add back in later
-    # Slow:  1.4 seconds for all counties in region 6, e.g.
+    ######################################## #
+    # SLOW -- e.g. 1.4 seconds for all counties in region 6
+    # *** It might be more efficient to
+    #     replace the above fips_bgs_in_fips1()
+    #     or make a new func to provide bgid_from_anyfips()
+    #     instead of 1st getting bgfips and then needing to look up bgid by bgfips.
+    # Consider trying to do it like this:
+    #      use fips_bgs_in_fips() to get all bg fips values
+    #      use join to blockgroupstats on bgfips, to get all bgid values
+    #      use join to blockwts on bgid, to get all the blockid values.
+    ######################################## #
 
-    all_bgs <- (lapply(fips_vec, fips_bgs_in_fips1))
-    ok = !sapply(all_bgs, is.null)
-    all_bgs <- all_bgs[ok]   # drop input fips that had no bgs found
-    fips_vec <- fips_vec[ok] # ditto
+    all_bgs <- lapply(fips_vec, fips_bgs_in_fips1)
+    oknow <- !sapply(all_bgs, is.null)
+    all_bgs   <- all_bgs[oknow]   # drop input fips that had no bgs found
+    fips_vec <- fips_vec[oknow] # ditto
     if (all(sapply(all_bgs, is.null))) {
       # every element of named list is NULL meaning no bgs found for any input fips, so cannot do stack()
       all_bgs <- data.frame(bgfips = character(0), fips = character(0), stringsAsFactors = FALSE)
     } else {
       names(all_bgs) <- fips_vec
-      all_bgs <- stack(all_bgs)
+      all_bgs <- stack(all_bgs)      # *** Note stack() drops all NA fips.  stack() seems slow here
     }
   })
   names(all_bgs) <- c('bgfips', 'fips')
-  ## NA values got removed, including any we wanted to keep as placeholder for site/fips with no results/no blocks? that is only possible if FIPS is invalid, like fips is NA or not a real fips code
-  all_bgs$ejam_uniq_id <- as.integer(all_bgs$fips) # creates 1:N but multiple copies so it is 1 id for each fips
-  all_bgs$fips <- as.character(all_bgs$fips)# because stack() always creates a factor column. data.table might have a faster reshaping approach? ***
+  ##### get ejam_uniq_id taking into account any invalid fips removed
+  setDT(all_bgs)
+  all_bgs[original_order, ejam_uniq_id := n, on = "fips"]
+  all_bgs$fips <- as.character(all_bgs$fips) # because stack() always creates a factor column. data.table might have a faster reshaping approach? ***
 
+  ######################################## #
   ### Get bgid:
-  all_bgs$bgid <- bgid2fips[match(all_bgs$bgfips, bgfips), bgid]
-  ######################################## #
 
-  ######################################## #
-  # *** It actually could be more efficient to replace the above fips_bgs_in_fips1()
-  # or make a new func to provide bgid_from_anyfips()
-  # instead of 1st getting bgfips and then needing to look up bgid by bgfips -
-  #
-  #    Can we just change to this?...
-  #      use fips_bgs_in_fips() to get all bg fips values
-  #      use join to blockgroupstats on bgfips, to get all bgid values
-  #      use join to blockwts on bgid, to get all the blockid values.
-  ######################################## #
+  all_bgs[bgid2fips, bgid := bgid, on = "bgfips"]
 
   if (NROW(all_bgs) == 0) {
     if (in_shiny) {
@@ -321,50 +331,55 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny
       return(NULL)
     }
   } else {
+    ######################################## #  ######################################## #
 
-    ## Get all BLOCKS in each blockgroup ####
+    ## Get BLOCKS in each blockgroup ####
 
-    # WOULD data.table join or merge be faster than dplyr here? ***
+    # WOULD data.table join or merge be faster than dplyr here? This seems SLOW ***
+
     suppressMessages({
+      setDF(all_bgs)
       fips_blockpoints <- dplyr::left_join(all_bgs,
                                            ## create 12-digit column inline (original table not altered)
                                            ## do not actually need blockfips here except to join on its first 12 chars
                                            blockid2fips[, .(blockid, blockfips, blockfips12 = substr(blockfips,1,12))],
                                            by = c('bgfips' = 'blockfips12'), multiple = 'all') |>
         dplyr::left_join(blockpoints) |>
-        dplyr::mutate(distance = 0) |>      # or do I want distance to be null, or missing or NA or 0.001, or what? note approximated block_radius_miles is sometimes zero, in blockwts
-        data.table::as.data.table() # makes it a data.table
+        dplyr::mutate(distance = 0) |>     # or do I want distance to be null, or missing or NA or 0.001, or what? note approximated block_radius_miles is sometimes zero, in blockwts
+        data.table::as.data.table()        # makes it a data.table
     })
     if (need_blockwt) {
       # provide blockwt to be consistent with getblocksnearby() and doaggregate() understands it if you want to use it after this.
-      #fips_blockpoints[,blockwt := 1] # since doaggregate() uses blockwt even though we know the resulting bgwt will be 1 in every case if used FIPS codes bigger than blocks (blockgroups, tracts, counties, states, whatever)
-      fips_blockpoints <- merge(fips_blockpoints, blockwts[,.(blockid, blockwt)], by = "blockid")
+      # fips_blockpoints[, blockwt := 1] # since doaggregate() uses blockwt even though we know the resulting bgwt will be 1 in every case if used FIPS codes bigger than blocks (blockgroups, tracts, counties, states, whatever)
+      fips_blockpoints <- merge(fips_blockpoints, blockwts[, .(blockid, blockwt)], by = "blockid") # may not be needed for noncity case (all blocks of bg are always there)
     }
-
     # Emulate the normal output of  getblocksnearby() which is a data.table with
-    #  ejam_uniq_id, blockid, distance, blockwt, bgid
-    # but do not really need to return bgfips, blockfips, lat, lon here.
+    #   ejam_uniq_id, blockid, distance, blockwt, bgid
+    #   but do not really need to return bgfips, blockfips, lat, lon here.
     setcolorder(fips_blockpoints, c('ejam_uniq_id', 'blockid', 'distance', 'blockwt', 'bgid'))
     fips_blockpoints[ , bgfips := NULL]
     fips_blockpoints[ , blockfips := NULL]
     fips_blockpoints[ , lat := NULL]
     fips_blockpoints[ , lon := NULL]
-    ######################################## #
+    ######################################## #  ######################################## #
 
-    ## > in s2b, OMIT ROWS WHERE NO BLOCKS FOUND ####
+    ## > in s2b, DROP FIPS IF NO BLOCKS FOUND ####
     fips_blockpoints <- fips_blockpoints[!is.na(blockid), ]
 
-    ## SORT output again just in case (and include NA rows if any were in inputs?) ####
-    setorder(fips_blockpoints, ejam_uniq_id)
+    ## > ALREADY SORTED output s2b ####
+    setorder(fips_blockpoints, ejam_uniq_id, blockid)
 
-    ## get boundaries if return_shp ####
+    ## return_shp = TRUE ####
+    ## Get POLYGONS ####
     if (return_shp) {
       # do not need to do what getblocksnearby_from_fips_cityshape() since the pts part we can get from FIPS. just need the shapefile polygons part.
       s2b_pts_polys <- list()
       s2b_pts_polys$pts <- fips_blockpoints
-      polys <- shapes_from_fips(fips, allow_multiple_fips_types = allow_multiple_fips_types) # preserves exact order,
+      ## get bounds for ALL originally input fips (as recorded in original_order$fips), not just fips (the filtered ok ones).
+      polys <- shapes_from_fips(original_order$fips, allow_multiple_fips_types = allow_multiple_fips_types) # preserves exact order,
       # and includes NAs in output if NAs in input
       s2b_pts_polys$polys <- polys
+
       return(s2b_pts_polys)
     } else {
       return(fips_blockpoints)

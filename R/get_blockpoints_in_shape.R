@@ -48,13 +48,18 @@ shapefile2blockpoints <- function(polys, addedbuffermiles = 0, blocksnearby = NU
 #' @param updateProgress optional Shiny progress bar to update
 #' @return Block points table for those blocks whose internal point is inside the buffer
 #'   which is just a circular buffer of specified radius if polys are just points.
+#'   This is like the output of  [getblocksnearby()], or [getblocksnearby_from_fips()] if return_shp=F.
+#'
+#'   The ejam_uniq_id represents which of the input sites is being referred to, and the table
+#'   will only have the ids of the sites where blocks were found. If 10 sites were input but only sites 5 and 8
+#'   were valid and had blocks identified, then the data.table here will only include ejam_uniq_id values of 5 and 8.
 #'
 #' @examples
 #'   # y <- get_blockpoints_in_shape()
 #'
 #'   # x = shapefile_from_sitepoints(testpoints_n(2))
 #'   # y = get_blockpoints_in_shape(x, 1)  # very very slow
-#' @seealso [get_blockpoints_in_shape()] [shapefile_from_sitepoints()] [shape_buffered_from_shapefile_points()]
+#' @seealso [getblocksnearby()]  [getblocksnearby_from_fips()]  [shapefile_from_sitepoints()] [shape_buffered_from_shapefile_points()]
 #'
 #' @export
 #'
