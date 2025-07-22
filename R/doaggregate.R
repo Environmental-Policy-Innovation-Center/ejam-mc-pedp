@@ -208,8 +208,8 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     message("ejam_uniq_id not found in sites2states_or_latlon, so assumed they are in order 1:N")
     sites2states_or_latlon$ejam_uniq_id <- 1:NROW(sites2states_or_latlon)
   }
-  if (NROW(sites2states_or_latlon) != length(unique(sites2blocks$ejam_uniq_id))) {
-    warning("sites2states_or_latlon should but does not have one row per unique ejam_uniq_id in sites2blocks!")
+  if (NROW(sites2states_or_latlon) < length(unique(sites2blocks$ejam_uniq_id))) {
+    warning("sites2states_or_latlon should but does not have all the unique ejam_uniq_id found in sites2blocks!")
   }
   # setDT(copy() -- avoid altering input data tables by reference in the calling environment, even though copy() slows it down ***
   sites2states_or_latlon <- data.table::copy(sites2states_or_latlon)
@@ -220,7 +220,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   ## What State is each site in? (1st step) ####
   # create sites2blocks table based on sites2states_or_latlon table
 
-  if (!all.equal("ejam_uniq_id", names(sites2states_or_latlon))) {
+  if (!(1 == length(names(sites2states_or_latlon)) && "ejam_uniq_id" %in% names(sites2states_or_latlon))) {
     sites2states <- state_per_site_for_doaggregate(s2b = sites2blocks, s2st = sites2states_or_latlon)
     # can use ST, fips, block's parent bgid, then site latlon.
   } else {
@@ -263,26 +263,41 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
   # (and this also means it does not matter if ejam_uniq_id is 1:NROW() or is fips)
   # But if sites2states_or_latlon has different sort than sites2blocks, which to use?
-  # If both are sorted the same, keep that order (and ignore what ejam_uniq_id is, 1:N or fips)
-  if (all.equal(unique(sites2blocks$ejam_uniq_id), sites2states_or_latlon$ejam_uniq_id)) {
+  # If both are sorted the same (just looking at those with blocks, ie in s2b at all),
+  # keep that order (and ignore what ejam_uniq_id is, 1:N or fips)
+  shared_ids = intersect(unique(sites2blocks$ejam_uniq_id), sites2states_or_latlon$ejam_uniq_id)
+  if (all.equal(
+    unique(sites2blocks$ejam_uniq_id),
+    shared_ids
+    )) {
     original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)), ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
   } else {
     # If sorts differ, but one is sorted on ascending value of ejam_uniq_id, use that and ignore what ejam_uniq_id is (fips vs 1:N)
-    if (all.equal(sort(unique(sites2blocks$ejam_uniq_id)), unique(sites2blocks$ejam_uniq_id))) {
-      original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)), ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
+    if (all.equal(
+      sort(shared_ids),
+      shared_ids
+      )) {
+      original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)),
+                                   ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
     } else {
-      if (all.equal(sort((sites2states_or_latlon$ejam_uniq_id)), (sites2states_or_latlon$ejam_uniq_id)))  {
-        original_order <- data.table(n = 1:length(unique(sites2states_or_latlon$ejam_uniq_id)), ejam_uniq_id = unique(sites2states_or_latlon$ejam_uniq_id))
+      if (all.equal(
+        sort((sites2states_or_latlon$ejam_uniq_id)),
+        sites2states_or_latlon$ejam_uniq_id
+        ))  {
+        original_order <- data.table(n = 1:length(unique(sites2states_or_latlon$ejam_uniq_id)),
+                                     ejam_uniq_id = unique(sites2states_or_latlon$ejam_uniq_id))
       } else {
-        # If sorts differ and neither is sorted on ascending ejam_uniq_id, then if both have the same set of values just sort both on that and use result.
+        # If sorts differ and neither is sorted on ascending ejam_uniq_id, then if both have the exact same set of values (no invalid sites with 0 blocks) just sort both on that and use result.
         if (setequal(sites2blocks$ejam_uniq_id, sites2states_or_latlon$ejam_uniq_id)) {
           # maybe dont bother sorting here? but if we do, we could use setorder() if it is already confirmed to be a data.table
           sites2blocks <- sites2blocks[order(sites2blocks$ejam_uniq_id), ]
           sites2states_or_latlon <- sites2states_or_latlon[order(sites2states_or_latlon$ejam_uniq_id),]
-          original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)), ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
+          original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)),
+                                       ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
         } else {
           # If all else fails ie they are not even setequal() then use current order of sites2blocks$ejam_uniq_id (do not re-sort it)
-          original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)), ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
+          original_order <- data.table(n = 1:length(unique(sites2blocks$ejam_uniq_id)),
+                                       ejam_uniq_id = unique(sites2blocks$ejam_uniq_id))
         }
       }
     }
