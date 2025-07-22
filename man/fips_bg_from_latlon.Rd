@@ -43,4 +43,7 @@ mapfast(testpoints_100[34, ], radius = 0.1)
   }
 
 }
+\seealso{
+\code{\link[=state_from_latlon]{state_from_latlon()}}
+}
 \keyword{internal}

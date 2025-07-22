@@ -645,6 +645,13 @@ setorder(s2b_stats, ejam_uniq_id)
 head(s2b_stats)
 ```
 
+These sites have no blocks within 1 mile, but do have blocks within 1.5 miles:
+```{r}
+ getblocksnearby(testpoints_1000[c(42,186,350,401,984), ], radius = 1)[]   # these have no blocks within 1 mile
+ getblocksnearby(testpoints_1000[c(42,186,350,401,984), ], radius = 1.5)[] # but all have blocks within 1.5 miles
+```
+
+
 ### CDF of how many blocks are nearby a site
 
 ```{r plot_count_of_blocks_nearby, fig.cap="How many blocks are near each of these 100 facilities?", fig.alt="scatterplot of 100 ranked sites with y axis showing count of blocks nearby rising from zero to almost 800 blocks at a given site, and around 150-200 at the average site", eval=TRUE, echo=FALSE, fig.height=5, fig.width=6}
