@@ -2,12 +2,9 @@
 
 ## Web  app
 
-- Summary Indexes (aka EJ Indexes) were found to have some incorrect numbers, so this release has replaced `?bgej` dataset with correct numbers, drawn from the internet archive version at https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip that was a copy of the datasets EPA had posted August 2024 at https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip
-  But there are still be some problem with the ozone and drinking EJ Indexes -- unlike the other EJ Indexes, they appear to be hard to replicate via formula, 
-  and there is now a unit test that shows the issue and also it is an issue noted on the github repo and is being looked into.
-  The same problem may exist for the State EJ Indexes (for all Envt indicators) -- need to clarify what formula is for state-based EJ percentiles.
+- Summary Indexes (aka EJ Indexes) had some incorrect numbers, so this release has replaced `?bgej` dataset with correct numbers, drawn from the internet archive version at https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip that was a copy of the datasets EPA had posted August 2024 at https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip
 - `ejamit()` now gets or calculates the **area in square miles** of each site more consistently and efficiently. It has new params related to how `area_sqmi()` now can get square mileage info from `blockgroupstats` table without needing to download boundaries. There are new parameters called download_fips_bounds_ok, download_noncity_fips_bounds, and includewater. The new params are also driven by two new defaults in global_defaults_shiny.R The old parameter default_download_fips_bounds_to_calc_areas is no longer a param in `ejamit()`.
-- Disabled Start Analysis until Done is clicked, when using FIPS dropdown menu of counties/cities/etc.
+- Disabled "Start Analysis" until "Done" is clicked, when using FIPS dropdown menu of counties/cities/etc.
 - Fixed county population counts obtained from and shown in some maps (via fixes in a function used by `shapes_from_fips()` so, e.g., mapfast(shapes_from_fips(testinput_fips_counties)) now shows the right numbers).
 - DRAFT: interactive barplots of indicators will be able to show median not just mean (via the `ejam2barplot_indicators()` function) but that is work in progress.
 - Sort order of output FIPS codes and polygons should now always be the same as the order of the inputs (sorted like they were in an uploaded shapefile, uploaded FIPS, or FIPS selected from the dropdown list). 
@@ -37,7 +34,7 @@
 
 - `ejamit()` and `shapes_from_fips()` (and related helper functions) have more consistent, useful outputs:
   - Sorting: The outputs now consistently preserve sort order of the input (points, fips, or polygons). This had not been the case for shapes_from_fips() functions, and ejamit()$results_bysite or doaggregate()$results_bysite were preserving sort order only for the latlon case but not necessarily the fips or shapes cases.
-  - Invalid sites: The outputs of `shapes_from_fips()` (and related helper functions) will no longer omit output rows for invalid fips and when boundaries could not be obtained for valid fips -- The number of rows in a shapefile output will be the same as then length of the input fips vector.
+  - Invalid sites: The outputs of `shapes_from_fips()` (and related helper functions) will have a row for each valid or invalid input site (it will no longer omit output rows for invalid fips and when boundaries could not be obtained for valid fips) -- The number of rows in a shapefile output will be the same as then length of the input fips vector. The output in `ejamit()`$results_bysite also has a row for each valid or invalid input site. The output of `doaggregate()` in contrast does _not_ have a row for any site lacking blocks, since the input is from getblock_xyz functions, which don't provide those sites.
   - Columns from `shapes_from_fips()` and related helpers: The output columns are ordered in a more useful way and are more consitent across functions. The output also consistently tries to add population, area in square miles, name of census unit, state abbreviation, etc., via new helpers like `shapefile_addcols()`
 
 - `getblocksnearby()` and related functions (`getblocksnearby_from_fips()`, `get_blockpoints_in_shape()`, etc.) also have more consistent outputs:
@@ -53,6 +50,7 @@
 
 ### Package development/ technical
 
+- Many unit tests added, especially for 1doaggregate()` and `getblocksnearby_from_fips()` and related.
 - `test_ejam()` is what used to be called `test_interactively()` -- it was improved and renamed and moved to the R folder as an unexported internal function loaded as part of the package. Also, a new parameter y_skipbasic is used instead of y_basic.
 - `test_coverage_check()` utility was improved (but somewhat work in progress), just as a way to for package maintainers/contributors to look at which functions might need unit tests written.
 - Utility functions related to package development were renamed, e.g., in utils_PACKAGE_dev.R
