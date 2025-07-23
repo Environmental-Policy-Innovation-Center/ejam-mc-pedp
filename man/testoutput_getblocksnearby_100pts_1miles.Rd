@@ -5,7 +5,7 @@
 \alias{testoutput_getblocksnearby_100pts_1miles}
 \title{test output of getblocksnearby(), and is an input to doaggregate()}
 \format{
-An object of class \code{data.table} (inherits from \code{data.frame}) with 14919 rows and 6 columns.
+An object of class \code{data.table} (inherits from \code{data.frame}) with 14918 rows and 6 columns.
 }
 \usage{
 testoutput_getblocksnearby_100pts_1miles
