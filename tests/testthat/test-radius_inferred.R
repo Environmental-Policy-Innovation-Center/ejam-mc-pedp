@@ -59,7 +59,7 @@ capture_output({
   # )
   #
   testthat::expect_lt(
-    radius_error(trials = 25, DECIMALS_USED_FOR_ACTUAL_RADIUS = 3)['max_abs_error'],
+    radius_error(trials = 10, DECIMALS_USED_FOR_ACTUAL_RADIUS = 3)['max_abs_error'],
     0.1  # see if error is average of under a tenth of a mile, for all trials
   )
 

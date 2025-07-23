@@ -1178,18 +1178,26 @@ fips_place_from_placename = function(place_st, geocoding = FALSE, exact = FALSE,
 }
 ####################################################### ######################################################## #
 
+# see also fips_bg____ or bgid2fips table or bgid2___
 
 # DRAFT - utility to get the blockgroup fips codes of the bgs that contain the site points defined by lat,lon
-# Should be faster ??? than downloading lots of blockgroups or doing an intersect on all US blockgroups
+#
+# Which approach is faster?
+# - fips_bg_from_latlon() should be fast, but
+# - state_from_latlon() seems at least as fast, surprisingly.
+#
+# One would expect that fips_bg_from_latlon() should be faster than
+#  downloading lots of blockgroups or doing an intersect on all US blockgroups,
 #  because it quickly figures out which blockgroups are good candidates for being the one containing a given point
 #  and only downloads those few candidates, and then uses sf::st_intersects() on just those
-# to find the ones that actually contain the points.
+#  to find the ones that actually contain the points.
 #  This takes about 2 or 3 seconds for testpoints_100, for example, maybe after some caching took place.
-#  BUT the downloads seem to stall... possibly rate limits on using the API??
+#  BUT the downloads seem to stall... possibly rate limits on using the API?
 
-# And the function state_from_latlon() seems at least as fast, surprisingly?
 
 #' FIPS - for a set of points (lat,lon) quickly find the blockgroup each is inside
+#'
+#' @seealso [state_from_latlon()] (different approach, unclear which is faster)
 #'
 #' @param df data.frame or data.table with columns lat, lon, and ejam_uniq_id
 #' @param nblocks number of candidate blocks to check at each site
@@ -1197,7 +1205,7 @@ fips_place_from_placename = function(place_st, geocoding = FALSE, exact = FALSE,
 #' @param radius1 initial search radius for relevant block points
 #' @param quiet whether to print more while it downloads etc.
 #' @returns vector of blockgroup FIPS codes, same length as NROW(df)
-#' @seealso [state_from_latlon()]
+#'
 #' @examples
 #' \dontrun{
 #' # Looks like it finds the right blockgroup:
