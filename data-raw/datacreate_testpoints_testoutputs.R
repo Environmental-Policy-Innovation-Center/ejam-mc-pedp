@@ -35,9 +35,9 @@ resaving_testpoints_excel     <- FALSE
 resaving_testpoints_helpdocs  <-   FALSE
 resaving_testpoints_bad       <- FALSE
 
-recreating_getblocksnearby    <- FALSE  # eg if block data changed, or if recreating_doaggregate_output = TRUE below
-resaving_getblocksnearby_rda  <- FALSE
-resaving_getblocksnearby_helpdocs <- FALSE
+recreating_getblocksnearby    <- TRUE  # eg if block data changed, or if recreating_doaggregate_output = TRUE below
+resaving_getblocksnearby_rda  <- TRUE
+resaving_getblocksnearby_helpdocs <- TRUE
 
 recreating_doaggregate_output <- TRUE # eg if other indicators added to outputs
 if (recreating_doaggregate_output) {recreating_getblocksnearby <- TRUE} # needed
@@ -57,6 +57,13 @@ redoing_ejscreenit_10_for_ejam_to_have  <- FALSE # no longer in the mid-2025 ver
 if (basename(getwd()) != "EJAM") {stop('do this from EJAM source package folder')}
 # library(EJAM) # does this need to be here? will it possibly be a problem in some situation like before the package is installed but source can be loaded, or while changes are being made and not yet reinstalled with updates, etc.?
 #  EJAM package must be loaded or at least the functions available
+
+# ensure access to logo file path ?
+
+ if (file.exists("./inst/global_defaults_package.R")) {source("./inst/global_defaults_package.R")} else {stop('need path to logo file')}
+
+
+
 ###################################################### #
 
 # Create and save datasets  ####
@@ -180,7 +187,7 @@ for (n in nvalues) {
     ## use dummy values for most columns
     testpoints_data$sitename = paste0("Example Site ", 1:n)
     # Drop other columns to just use lat lon sitenumber sitename
-    # testpoints_data$NAICS = NULL # 722410# testpoints_data$SIC = NULL # 5992  # testpoints_data$REGISTRY_ID = NULL # c(EJAM::testinput_xtrac, rep(NA,n))[1:n] #  # testpoints_data$PGM_SYS_ACRNMS = NULL
+    # testpoints_data$NAICS = NULL # 722410# testpoints_data$SIC = NULL # 5992  # testpoints_data$REGISTRY_ID = NULL # #  # testpoints_data$PGM_SYS_ACRNMS = NULL
     testpoints_data  <- testpoints_data[ , c("lat", "lon", "sitenumber", "sitename")]
 
     assign(testpoints_name, testpoints_data)    #        put the data into an object of the right name
@@ -246,7 +253,7 @@ for (n in nvalues) {
     out_varname_getblocks = paste0(namebase, n, "pts_", myrad, "miles")
     # out_varname_getblocks_alias <- paste0("sites2blocks_example", n, "pts_", myrad, "miles")
     if (recreating_getblocksnearby) {
-      out_data_getblocks <- EJAM::getblocksnearby(testpoints_data, radius = myrad, quiet = TRUE)                     ############# #
+      out_data_getblocks <- getblocksnearby(testpoints_data, radius = myrad, quiet = TRUE)                     ############# #
       assign(out_varname_getblocks, out_data_getblocks)
       ################################## #
       # >_____sites2blocks ALIAS  ####

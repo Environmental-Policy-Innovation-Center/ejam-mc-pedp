@@ -237,7 +237,6 @@ map_counties_in_state <- function(ST = "DE", colorcolumn = c('pop', "NAME", "POP
 
   cshapes <- shapes_counties_from_countyfips(fips_counties_from_state_abbrev(ST))
 
-  # area_sqmi_from_shp <- function(shp) {sf::st_area(shp) / meters_per_mile^2}
   cshapes$area_sqmi <- round(area_sqmi(shp = cshapes), 0)
 
   countypops <- blockgroupstats[substr(bgfips, 1, 5) %in% cshapes$FIPS,
@@ -442,10 +441,7 @@ map_blockgroups_over_blocks <- function(y) {
   if (!exists("bgid2fips_arrow")) {
     dataload_dynamic("bgid2fips", return_data_table = FALSE)
   }
-
-
   bgids_arrow <- arrow::Array$create(bgids)
-
 
   bgfips <- bgid2fips_arrow %>%
     mutate(bgid = cast(.data$bgid, arrow::string())) %>%
@@ -514,8 +510,11 @@ map_shapes_leaflet <- function(shapes, color = "green", popup = NULL, fillOpacit
       shapes$area_sqmi <- 0
     }
   } else {
-    area_sqmi_from_shp <- function(shp) {sf::st_area(shp) / meters_per_mile^2}
-    shapes$area_sqmi <- round(area_sqmi_from_shp(shapes), 0)
+    if("SQMI" %in% colnames(shapes)) {
+      shapes$area_sqmi <- round(shapes$SQMI, 1)
+    } else {
+    shapes$area_sqmi <- round(area_sqmi_from_shp(shapes), 1)
+    }
   }
 
   if ("FIPS" %in% names(shapes) & !("pop" %in% names(shapes))) {

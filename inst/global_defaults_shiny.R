@@ -253,7 +253,8 @@ global_defaults_shiny <- list(
 
   ## ------------------------ doaggregate() params ####
 
-  default_download_fips_bounds_to_calc_areas = FALSE,
+default_download_city_fips_bounds = TRUE, # if FALSE, area in sq miles would be NA for any city/CDP types of FIPS
+default_download_noncity_fips_bounds = FALSE, # if false, area_sqmi() uses arealand column from blockgroupstats
 
   # > cbind(formals(doaggregate))
   #

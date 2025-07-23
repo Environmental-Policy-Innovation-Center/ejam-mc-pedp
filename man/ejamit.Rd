@@ -39,7 +39,8 @@ ejamit(
   testing = FALSE,
   showdrinkingwater = TRUE,
   showpctowned = TRUE,
-  download_fips_bounds_to_calc_areas = FALSE,
+  download_city_fips_bounds = TRUE,
+  download_noncity_fips_bounds = FALSE,
   ...
 )
 }
@@ -143,7 +144,9 @@ passed to \code{\link[=doaggregate]{doaggregate()}} also. app server sets this t
 
 \item{showpctowned}{T/f whether to include percent owner-occupied units indicator values or display as NA. Defaults to TRUE.}
 
-\item{download_fips_bounds_to_calc_areas}{if set to TRUE, it is slower because it downloads bounds of each unit to calculate area in square miles}
+\item{download_city_fips_bounds}{passed to \code{\link[=area_sqmi]{area_sqmi()}}}
+
+\item{download_noncity_fips_bounds}{passed to \code{\link[=area_sqmi]{area_sqmi()}}}
 
 \item{...}{passed to \code{\link[=getblocksnearby]{getblocksnearby()}} etc. such as  report_progress_every_n = 0}
 }

@@ -19,5 +19,20 @@ ACS data from \verb{r a2018-2022 Each year this should be re-created as for the 
 It is a data.table of US Census blockgroups (not blocks).
 With PR, and Island Areas
 
-Column names include \code{bgfips}, \code{bgid} (for join to \link{blockwt} by/on \code{bgid}), \code{pop}, \code{pctlowinc}, etc.
+Column names include \code{bgfips}, \code{bgid} (for join to \link{blockwt} by/on \code{bgid}),
+\code{pop}, \code{pctlowinc}, etc.
+
+To see definitions of the columns (indicators) and some basic info on each:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{x = data.frame(
+ colname = names(blockgroupstats),
+ definition = fixcolnames(names(blockgroupstats), 'r', 'long'),
+ varinfo(names(blockgroupstats), info = c("varlist", "varcategory",
+ "vartype", "calculation_type", "denominator", "sigfigs", "decimals")))
+}\if{html}{\out{</div>}}
+
+The columns called arealand and areawater are in square meters,
+not square miles - to convert units:
+\code{convert_units(sum( blockgroupstats$arealand) , "sqm", "sqmi")}
+The column called "area" is not used and not documented.
 }

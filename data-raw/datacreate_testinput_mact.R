@@ -5,7 +5,11 @@
 #  but may want testdata objects to try out relevant functions that turn these into latlon
 
 testinput_mact <- "OOOO"
-testinput_mact <- metadata_add(testinput_mact)
+
+## Do not use metadata_add() now since the output is no longer a vector per is.vector()
+## and it is not essential to note version of this test data as metadata / attribute
+# testinput_mact <- metadata_add(testinput_mact)
+
 # latlon_from_mactsubpart(testinput_mact)[1:5,]
 usethis::use_data(testinput_mact, overwrite = TRUE)
 dataset_documenter(

@@ -1099,7 +1099,7 @@ app_server <- function(input, output, session) {
     ## copy of code used in data_up_fips()
 
     cat("COUNT OF ROWS IN FIPS FILE: ", NROW(fips_dt),"\n")
-    fips_vec <- fips_from_table(fips_table = fips_dt, addleadzeroes = TRUE, inshiny = TRUE)
+    fips_vec <- fips_from_table(fips_table = fips_dt, addleadzeroes = TRUE, in_shiny = TRUE)
     ftypeUpload <- fipstype(fips_vec)
     typesUpload <- c('blockgroup', 'tract', 'city', 'county', 'state')
 
@@ -1173,7 +1173,7 @@ app_server <- function(input, output, session) {
     # fips_clean_shiny_input <- function(fips_dt, placetype) {
 
     cat("COUNT OF ROWS IN FIPS FILE: ", NROW(fips_dt),"\n")
-    fips_vec <- fips_from_table(fips_table = fips_dt, addleadzeroes = TRUE, inshiny = TRUE)
+    fips_vec <- fips_from_table(fips_table = fips_dt, addleadzeroes = TRUE, in_shiny = TRUE)
     ftypeUpload <- fipstype(fips_vec)
     typesUpload <- c('blockgroup', 'tract', 'city', 'county', 'state')
 
@@ -1828,7 +1828,7 @@ app_server <- function(input, output, session) {
     progress_all$set(value = 0, message = 'Step 1 of 3', detail = 'Getting nearby census blocks')
 
     ################################################# #
-
+    # > ejamit() for FIPS  ####
     if (submitted_upload_method() %in% c('FIPS', 'FIPS_PLACE')) {  # if FIPS, do everything in 1 step right here.
 
       out <- ejamit(fips = data_uploaded(),              # unlike for SHP or latlon cases, this could include invalid FIPS!
@@ -1848,14 +1848,15 @@ app_server <- function(input, output, session) {
                     need_proximityscore = FALSE, #input$need_proximityscore, # not relevant for FIPS
                     # infer_sitepoints = FALSE,
                     # need_blockwt = TRUE,
-                    # updateProgress = ??? , # not sure this is needed or works here
+                    # updateProgress = ??? , # not used here - for noncity fips at least, it is very fast to find blocks
                     in_shiny = TRUE, # not sure this is needed or works here
                     progress_all = progress_all,
                     # quiet = TRUE,
                     silentinteractive = TRUE,
                     # called_by_ejamit = TRUE, # not sure this is needed or works here
                     testing = input$testing,
-                    download_fips_bounds_to_calc_areas = EJAM:::global_or_param("default_download_fips_bounds_to_calc_areas"), # SLOW IF TRUE, defined in global_defaults_*.R
+                    download_city_fips_bounds = EJAM:::global_or_param("default_download_city_fips_bounds"),
+                    download_noncity_fips_bounds = EJAM:::global_or_param("default_download_noncity_fips_bounds"),
                     thresholds   = list(input$an_thresh_comp1, input$an_thresh_comp2), # thresholds = list(90, 90), # or 80,80
                     threshnames  = list(input$an_threshnames1, input$an_threshnames2), # list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
                     threshgroups = list(sanitized_an_threshgroup1(), sanitized_an_threshgroup2()) # list("EJ-US-or-ST", "Supp-US-or-ST")
@@ -1874,7 +1875,7 @@ app_server <- function(input, output, session) {
     } else { # everything other than FIPS code analysis:
       #############################################################################  #
 
-      ## get blocks in POLYGONS / SHAPEFILES ####
+      # > ejamit() for POLYGONS / SHAPEFILES ####
 
       if (submitted_upload_method() == "SHP") {
 
@@ -1927,7 +1928,8 @@ app_server <- function(input, output, session) {
                       # called_by_ejamit = TRUE, # not sure this is needed or works here
                       progress_all = progress_all,
                       testing = input$testing,
-                      download_fips_bounds_to_calc_areas = default_download_fips_bounds_to_calc_areas, # SLOW IF TRUE, defined in global.R
+                      # download_city_fips_bounds = EJAM:::global_or_param("default_download_city_fips_bounds"), # not relevant in shapefile case
+                      # download_noncity_fips_bounds = EJAM:::global_or_param("default_download_noncity_fips_bounds"), # not relevant in shapefile case
                       thresholds   = list(input$an_thresh_comp1, input$an_thresh_comp2), # thresholds = list(90, 90), # or 80,80
                       threshnames  = list(input$an_threshnames1, input$an_threshnames2), # list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
                       threshgroups = list(sanitized_an_threshgroup1(), sanitized_an_threshgroup2()), # list("EJ-US-or-ST", "Supp-US-or-ST")
@@ -1939,7 +1941,7 @@ app_server <- function(input, output, session) {
       } # end of ejamit() for SHP type
       ################################################# #
 
-      ## get blocks near LAT/LON  POINTS  facilities/latlon # ####
+      # > ejamit() for LAT/LON  POINTS  ####
 
       if (!(submitted_upload_method() %in% c('SHP', 'FIPS', 'FIPS_PLACE'))) {  # if LATITUDE AND LONGITUDE (POINTS), find blocks nearby
 

@@ -17,7 +17,7 @@
 ##
 ##  to see test objects and test files:
 ##
-# cbind(data.in.package  = sort(grep("address", datapack()$Item, value = T)))
+# cbind(data.in.package  = sort(grep("address", pkg_data()$Item, value = T)))
 # cbind(files.in.package = sort(basename(testdata('address', quiet = T))))
 
 # testinput_address_parts

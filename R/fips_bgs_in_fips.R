@@ -6,7 +6,7 @@
 #'   among or within or containing those FIPS
 #'
 #' @details  This is a way to get a list of blockgroups, specified by state/county/tract or even block.
-#' 
+#'
 #' Takes a vector of one or more FIPS that could be State (2-digit), County (5-digit),
 #'   Tract (11-digit), or blockgroup (12 digit), or even block (15-digit fips).
 #'
@@ -22,33 +22,46 @@
 #'
 #' @examples
 #'
-#'   # all blockgroups in one state
-#'   fips_counties_from_state_abbrev("DE")
+#'   # all blockgroups in one state (as a single vector)
+#'   fips_counties_from_state_abbrev("DE") # there are 3 counties
 #'   fips_bgs_in_fips( fips_counties_from_state_abbrev("DE") )
 #'
 #'   blockgroupstats[,.N,by=substr(bgfips,1,2)]
-#'   length(fips_bgs_in_fips("72"))
+#'   length(fips_bgs_in_fips("72")) # finds all that blockgroupstats has
 #'
 #'   # all blockgroups in this one county
 #'   fips_bgs_in_fips(30001)
-#'   fips_bgs_in_fips("30001")
-#'   fips_bgs_in_fips(fips_counties_from_statename("Rhode Island")[1])
 #'
-#'   # all blockgroups that contain any of these 6 blocks (i.e., just one bg)
-#'   ## dataload_dynamic("blockid2fips") # very large file to avoid using unless essential
-#'   ## x = blockid2fips$blockfips[1:6] 
+#'   # all blockgroups for (that contain any of) these 6 blocks (i.e., just one bg)
 #'   x = c("010010201001000", "010010201001001", "010010201001002",
 #'    "010010201001003", "010010201001004", "010010201001005")
 #'   fips_bgs_in_fips(x)
 #'
-#'   # 2 counties
-#'   fips_bgs_in_fips(c(36009,36011))
+#' testfipslist <- list(
+#'   blockgroup = testinput_fips_blockgroups,
+#'   tract = testinput_fips_tracts,
+#'   city = testinput_fips_cities, # for cities, must use getblocksnearby_from_fips()
+#'   county = testinput_fips_counties,
+#'   state = testinput_fips_states,
+#'   mix = c(testinput_fips_blockgroups[1],
+#'           testinput_fips_tracts[3],
+#'           testinput_fips_cities[1],
+#'           "53023",
+#'           56) # name2fips('WY')
+#' )
+#' testfipslist = lapply(testfipslist, function(z) {attributes(z) <- NULL; z}) # drop distracting metadata
+#'
+#' x  = sapply(testfipslist, function(v) sapply(v, fips_bgs_in_fips ))
+#' x1 = sapply(testfipslist, function(v) sapply(v, fips_bgs_in_fips1))
+#' all.equal(x, x1)
+#' x['tract']
+#' x['county']
 #'
 #' @export
 #' @keywords internal
-#' 
+#'
 fips_bgs_in_fips <- function(fips) {
-  
+
   fips <- fips_lead_zero(fips)
   fips[fipstype(fips) %in% "city"] <- NA # because a 7-digit place/city/town FIPS cannot be neatly broken into blockgroups
   if (anyNA(fips)) {
@@ -56,7 +69,7 @@ fips_bgs_in_fips <- function(fips) {
     warning("NA returned for ", howmanyna," values that failed to match")
     fips <- fips[!is.na(fips)]
   }
-  
+
   # census unit type depends on number of digits (characters) in fips
   #
   # ftype[nchar(fips, keepNA = FALSE) == 15] <- "block"
@@ -65,7 +78,7 @@ fips_bgs_in_fips <- function(fips) {
   # ftype[nchar(fips, keepNA = FALSE) ==  7] <- "city"  # e.g, 5560500 is Oshkosh, WI
   # ftype[nchar(fips, keepNA = FALSE) ==  5] <- "county"
   # ftype[!is.na(fips) & nchar(fips) ==  2] <- "state"
-  
+
   len <- nchar(fips)
   if (any(len > 12)) {
     # if len >12 it is a block, so just retain it as the parent blockgroup fips of 12 characters
@@ -74,7 +87,7 @@ fips_bgs_in_fips <- function(fips) {
   }
   # start with the ones that were blocks or blockgroups
   bgs <- unique(fips[len == 12])
-  
+
   # add all blockgroups contained in larger census units
   # if nchar<12, census unit is bigger than bg (i.e., tract, county, state), so return ALL the child bgs
   lens <- unique(len)

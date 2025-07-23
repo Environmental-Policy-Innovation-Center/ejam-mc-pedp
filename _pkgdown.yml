@@ -191,8 +191,8 @@ reference:
   - fips_valid
   - fips_lead_zero
   - fips2pop
-  - fips_bgs_in_fips
   - fips_from_table
+  - fips_bgs_in_fips
   - fips_place_from_placename
   - censusplaces
 - subtitle: "Counties"
@@ -372,7 +372,7 @@ reference:
   contents:
   - testdata
   - testdatafolder
-  - datapack
+  - pkg_data
 - subtitle: "Examples of Inputs (polygons/ shapefiles)"
   contents:
   - testshapes_2
@@ -434,6 +434,7 @@ reference:
   - ejscreenit
 - title: internal
   contents:
+  - fips_bg_from_latlon
   - testshapes_2
   - testoutput_getblocksnearby_10pts_1miles
   - testoutput_getblocksnearby_100pts_1miles
@@ -551,7 +552,6 @@ reference:
   - testoutput_ejscreenapi_1pts_1miles
   - testoutput_ejscreenRESTbroker_1pts_1miles
   - testpoints_100_dt
-  - testinput_xtrac
   - testoutput_ejscreenapi_plus_5
   - namez
   - names_age

@@ -245,6 +245,11 @@ mapfast <- function(mydf, radius = 3, column_names='all', labels = column_names,
                           popupOptions = list(maxHeight = 400, maxWidth = 850),
                           popup = mypop) |>
       leaflet.extras2::addEasyprint( ) # button to print or print to pdf and save
+    if (NROW(mydf) == 1) {
+      # zoom out to see the whole circle around the single point
+      bb <- sf::st_bbox(shape_buffered_from_shapefile_points(shapefile_points = shapefile_from_sitepoints(mydf), radius.miles = radius))
+      x <- leaflet::fitBounds(x, as.vector(bb[1]), as.vector(bb[2]), as.vector(bb[3]), as.vector(bb[4]))
+    }
     # now x is a Leaflet map widget using the htmlwidgets package
     xok <- TRUE
 

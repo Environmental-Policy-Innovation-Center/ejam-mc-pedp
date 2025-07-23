@@ -52,7 +52,7 @@
   #        EJAM function indexblocks() does this, using quaddata - see ?indexblocks
   #
   #     3- Load into memory some datasets installed with EJAM (blockgroupstats, usastats, etc.)
-  #        EJAM function dataload_from_package() can do this - see ?dataload_from_package and ?datapack()
+  #        EJAM function dataload_from_package() can do this - see ?dataload_from_package and ?pkg_data()
   #        Otherwise these are only lazyloaded at the moment they are needed, making a user wait.
   #        blockgroupstats (>60 MB on disk, >200 MB in RAM) and usastats, statestats are essential.
   #        frs-related tables are huge and not always required - needed to look up regulated sites by ID.

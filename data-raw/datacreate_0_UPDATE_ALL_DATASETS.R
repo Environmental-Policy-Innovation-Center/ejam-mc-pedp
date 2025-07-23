@@ -378,7 +378,7 @@ datawrite_to_local(these) # maybe obsolete
 # rstudioapi::documentOpen("./data-raw/datacreate_bgpts.R")
 
 cat( "Is it loaded/attached already? "); cat("bgpts" %in% ls(), '\n');
-cat("Is it a dataset in installed EJAM pkg? "); junk <- capture.output({XYZ <- datapack("EJAM")$Item}); cat("bgpts" %in% XYZ, '\n');
+cat("Is it a dataset in installed EJAM pkg? "); junk <- capture.output({XYZ <- pkg_data("EJAM")$Item}); cat("bgpts" %in% XYZ, '\n');
 cat('Is it loadable and/or attached already, per "exists()" ? ', exists("bgpts"), '\n'); rm(junk, XYZ)
 # dataload_dynamic("bgpts", justchecking = TRUE)# bgpts is in EJAM/data/
 #  attributes2(bgpts)
@@ -600,7 +600,7 @@ source_maybe("datacreate_formulas.R")
 # topic = "fips"  # or "shape" or "latlon" or "naics" or "address" etc.
 #
 # # datasets / R objects
-# cbind(data.in.package  = sort(grep(topic, EJAM:::datapack()$Item, value = T)))
+# cbind(data.in.package  = sort(grep(topic, EJAM:::pkg_data()$Item, value = T)))
 #
 # # files
 # cbind(files.in.package = sort(basename(testdata(topic, quiet = T))))

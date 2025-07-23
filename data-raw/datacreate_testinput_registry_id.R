@@ -2,7 +2,7 @@
 ## script to create dataset
 
 #################################### #
-# check what was in INSTALLED package so far 
+# check what was in INSTALLED package so far
 
 ### INSTALLED PACKAGE lazy loaded data test objects - for registryid or programid
 x <- as.data.frame(data(package = "EJAM")$results)
@@ -23,13 +23,16 @@ testinput_registry_id <- c(
   110030509215, 110019033810, 110056111559, 110056982323
 )
 if (anyNA( frs_from_regid(testinput_registry_id)$lat)) {stop("some of the testinput_registry_id are not in the FRS database or lack lat,lon")}
-## or  
+## or
 # latlon_from_regid(testinput_registry_id)
 
 # metadata ####
 
-## requires first load_all() or require() or EJAM::: to access the function
-testinput_registry_id <- metadata_add(testinput_registry_id)
+## stop using metadata_add() so is.vector(testinput_registry_id) will remain true
+# testinput_registry_id <- metadata_add(testinput_registry_id)
+
+# alias
+testinput_regid <- testinput_registry_id
 
 ## compare the one in memory right now to the already-installed one:
 # all.equal(testinput_regid, EJAM::testinput_regid)
@@ -39,6 +42,7 @@ all.equal(testinput_registry_id, EJAM::testinput_registry_id)
 # use_data() ####
 
 usethis::use_data(testinput_registry_id, overwrite = TRUE)
+usethis::use_data(testinput_regid, overwrite = TRUE)
 #################################### #
 
 ## Documentation ####
@@ -47,7 +51,12 @@ dataset_documenter(
   "testinput_registry_id",
   title = "test data, EPA Facility Registry ID numbers to try using",
   details = "Just for convenience, installed with the package",
-  
+)
+dataset_documenter(
+  "testinput_regid",
+  title = "test data, EPA Facility Registry ID numbers to try using",
+  details = "Just for convenience, installed with the package",
+
 )
 #################################### #
 
