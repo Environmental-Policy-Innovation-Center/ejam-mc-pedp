@@ -361,30 +361,30 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
   ## validate misc inputs ####
 
-  # countcols=NULL, wtdmeancols=NULL,  calctype_maxbg=NULL, calctype_minbg=NULL,    calculatedcols=NULL,# calculatedcols is unused
-      stopifnot(is.null(countcols)      || (is.vector(countcols)      && is.character(countcols))) #### Too restrictive: all(countcols %in% colnames(blockgroupstats))) # or could require they be in map_headernames$rname
-      stopifnot(is.null(wtdmeancols)    || (is.vector(wtdmeancols)    && is.character(wtdmeancols)))
-      stopifnot(is.null(calctype_maxbg) || (is.vector(calctype_maxbg) && is.character(calctype_maxbg)))
-      stopifnot(is.null(calctype_minbg) || (is.vector(calctype_minbg) && is.character(calctype_minbg)))
-  # subgroups_type='nh',
-  stopifnot(!is.null(subgroups_type), all(subgroups_type %in%  c('nh' , 'alone' , 'both')))
-  # include_ejindexes=FALSE, calculate_ratios = TRUE,
-  stopifnot(!is.null(include_ejindexes), is.logical(include_ejindexes), !is.null(calculate_ratios), is.logical(calculate_ratios))
-  # extra_demog=TRUE, need_proximityscore=FALSE,
-  stopifnot(!is.null(extra_demog), is.logical(extra_demog), !is.null(need_proximityscore), is.logical(need_proximityscore))
-  # infer_sitepoints=FALSE,
-  stopifnot(!is.null(infer_sitepoints), is.logical(infer_sitepoints))
-  # called_by_ejamit=FALSE,
-  stopifnot(!is.null(called_by_ejamit), is.logical(called_by_ejamit))
-  # updateProgress = NULL,
-   stopifnot(is.null(updateProgress) || (is.function(updateProgress)  && all(c("message_main" , "value") %in% names(formals(updateProgress)))) )
-  # silentinteractive=TRUE, testing=FALSE,
-  stopifnot(!is.null(silentinteractive), is.logical(silentinteractive), !is.null(testing), is.logical(testing))
-  # showdrinkingwater = TRUE,
-  stopifnot(!is.null(showdrinkingwater), is.logical(showdrinkingwater))
-  # showpctowned = TRUE,
-  stopifnot(!is.null(showpctowned), is.logical(showpctowned))
-  # ...)
+  # ## countcols=NULL, wtdmeancols=NULL,  calctype_maxbg=NULL, calctype_minbg=NULL,    calculatedcols=NULL,# calculatedcols is unused
+  #     stopifnot(is.null(countcols)      || (is.vector(countcols)      && is.character(countcols))) #### Too restrictive: all(countcols %in% colnames(blockgroupstats))) # or could require they be in map_headernames$rname
+  #     stopifnot(is.null(wtdmeancols)    || (is.vector(wtdmeancols)    && is.character(wtdmeancols)))
+  #     stopifnot(is.null(calctype_maxbg) || (is.vector(calctype_maxbg) && is.character(calctype_maxbg)))
+  #     stopifnot(is.null(calctype_minbg) || (is.vector(calctype_minbg) && is.character(calctype_minbg)))
+  # ## subgroups_type='nh',
+  # stopifnot(!is.null(subgroups_type), all(subgroups_type %in%  c('nh' , 'alone' , 'both')))
+  # ## include_ejindexes=FALSE, calculate_ratios = TRUE,
+  # stopifnot(!is.null(include_ejindexes), is.logical(include_ejindexes), !is.null(calculate_ratios), is.logical(calculate_ratios))
+  # ## extra_demog=TRUE, need_proximityscore=FALSE,
+  # stopifnot(!is.null(extra_demog), is.logical(extra_demog), !is.null(need_proximityscore), is.logical(need_proximityscore))
+  # ## infer_sitepoints=FALSE,
+  # stopifnot(!is.null(infer_sitepoints), is.logical(infer_sitepoints))
+  # ## called_by_ejamit=FALSE,
+  # stopifnot(!is.null(called_by_ejamit), is.logical(called_by_ejamit))
+  # ## updateProgress = NULL,
+  #  stopifnot(is.null(updateProgress) || (is.function(updateProgress)  && all(c("message_main" , "value") %in% names(formals(updateProgress)))) )
+  # ## silentinteractive=TRUE, testing=FALSE,
+  # stopifnot(!is.null(silentinteractive), is.logical(silentinteractive), !is.null(testing), is.logical(testing))
+  # ## showdrinkingwater = TRUE,
+  # stopifnot(!is.null(showdrinkingwater), is.logical(showdrinkingwater))
+  # ## showpctowned = TRUE,
+  # stopifnot(!is.null(showpctowned), is.logical(showpctowned))
+  # ## ...)
 
   ##################################################### #  ##################################################### #
 
