@@ -57,6 +57,13 @@ redoing_ejscreenit_10_for_ejam_to_have  <- FALSE # no longer in the mid-2025 ver
 if (basename(getwd()) != "EJAM") {stop('do this from EJAM source package folder')}
 # library(EJAM) # does this need to be here? will it possibly be a problem in some situation like before the package is installed but source can be loaded, or while changes are being made and not yet reinstalled with updates, etc.?
 #  EJAM package must be loaded or at least the functions available
+
+# ensure access to logo file path ?
+
+ if (file.exists("./inst/global_defaults_package.R")) {source("./inst/global_defaults_package.R")} else {stop('need path to logo file')}
+
+
+
 ###################################################### #
 
 # Create and save datasets  ####
