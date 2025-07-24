@@ -455,7 +455,6 @@ reference:
   - blockpoints
   - blockwts
   - quaddata
-  - metadata4pins
   - dataload_from_local
   - dataload_dynamic
   - download_latest_arrow_data

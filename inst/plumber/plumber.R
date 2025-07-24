@@ -296,7 +296,7 @@ function(lat, lon, radius) {
   if (length(radius) != 1) {radius <- 1}
 
   # require(EJAM)
-  # if (!exists("blockwts"))  dataload_from_pins()
+  # if (!exists("blockwts")) {dataload_dynamic('blockwts)}
   # if (!exists("localtree")) indexblocks()
 
   # promises::future_promise({  #
@@ -336,7 +336,7 @@ function(polys,
   return("not working yet for shapefile inputs")
 
   # require(EJAM)
-  # if (!exists("blockwts"))  dataload_from_pins()
+  # if (!exists("blockwts"))  {dataload_dynamic('blockwts)}
   # if (!exists("localtree")) indexblocks()
 
   # promises::future_promise({  # })
@@ -371,7 +371,7 @@ function(sites2blocks, sites2states_or_latlon, countcols, popmeancols, calculate
   # promises::future_promise({
   if (!exists("blockgroupstats")) {library(EJAM)} # to use installed version only if not already attached
   # library(EJAM)
-    if (!exists("blockwts"))  dataload_from_pins()
+    if (!exists("blockwts"))  dataload_dynamic("blockwts")
     if (!exists("localtree")) indexblocks()
     EJAM::doaggregate(sites2blocks = sites2blocks,
                       sites2states_or_latlon = sites2states_or_latlon,

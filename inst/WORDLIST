@@ -711,7 +711,6 @@ md
 metadata_add
 metadata_check
 metadata_mapping
-metadata4pins
 meters_per_mile
 methods
 minbg
@@ -940,7 +939,6 @@ PERSERVING
 pgm
 PhantomJS
 piggyback
-pins
 pjson
 pkgdown
 pkgs

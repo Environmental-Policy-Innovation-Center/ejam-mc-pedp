@@ -90,7 +90,7 @@
 #'
 pctile_from_raw_lookup <- function(myvector, varname.in.lookup.table, lookup=usastats, zone = "USA", quiet=TRUE) {
 
-  #  similar code in ejanalysis package file was lookup.pctiles()
+
 
   # CHECK FOR FATAL PROBLEMS  ####
 

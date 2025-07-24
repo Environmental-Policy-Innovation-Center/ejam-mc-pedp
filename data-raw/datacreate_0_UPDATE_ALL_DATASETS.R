@@ -99,7 +99,7 @@ if (0 == 1) {  # collapsable list
 
          # Census/ACS/geo-related datasets etc.
          "datacreate_blockwts.R", "datacreate_bg_cenpop2020.R", "datacreate_bgpts.R", "datacreate_states_shapefile.R", "datacreate_stateinfo.R", "datacreate_stateinfo2.R", "datacreate_islandareas.R", "datacreate_censusplaces.R",
-         "datacreate_metadata4pins.R",
+
          "datacreate_blockgroupstats2.32.R", "datacreate_blockgroupstats2.32_add_d_acs22columns.R",  "datacreate_blockgroupstats2.32_recalc_language.R", "datacreate_blockgroupstats_extra_api_vars.R",
          "datacreate_usastats2.32.R", "datacreate_usastats2.32_add_dsubgroups.R", "datacreate_avg.in.us.R", "datacreate_high_pctiles_tied_with_min.R", "datacreate_formulas.R",
 
@@ -161,7 +161,7 @@ if (0 == 1) {  # collapsable list
   #
   ##  ejscreen demog and envt data on every blockgroup
   ##  + pctile and avg lookup tables
-  documentOpen("./data-raw/datacreate_metadata4pins.R") # ok
+
   documentOpen('./data-raw/datacreate_blockgroupstats2.32.R') # and bgej      # ok
   documentOpen('./data-raw/datacreate_blockgroupstats2.32_add_d_acs22columns.R')   # ok
   documentOpen("./data-raw/datacreate_blockgroupstats2.32_recalc_language.R")
@@ -441,9 +441,9 @@ loadall()
 ## + pctile & avg lookup tables (usastats, statestats) ####
 
 ######################################### #
-### OBSOLETE datacreate_metadata4pins.R ####
-# rstudioapi::documentOpen("./data-raw/datacreate_metadata4pins.R")
-###   obsolete if not using pins boards now
+
+
+
 
 ######################################### #
 ### datacreate_blockgroupstats2.32.R (also starts making usastats,statestats!!) ####
