@@ -102,7 +102,7 @@ To try installing from github, try this:
 ```{r install_github_main, eval=FALSE, include=TRUE}
 options(timeout = 300) # Just in case the download takes longer than 60 seconds
 if (!require(remotes)) {install.packages("remotes")}
-remotes::install_github(repo = `r quoted_owner_repo`, dependencies = TRUE)
+remotes::install_github(repo = "ejanalysis/EJAM", dependencies = TRUE)
 ```
 
 If that does not work, [check the github repository for the latest release](`r paste0("https://github.com/", EJAM:::repo_from_desc(), "/releases/latest")`) and use the URL to install the package with `remotes::install_url()`, something like this:
