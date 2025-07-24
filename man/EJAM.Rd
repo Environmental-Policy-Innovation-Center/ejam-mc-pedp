@@ -37,7 +37,12 @@ Useful links:
 \itemize{
   \item \url{https://ejanalysis.github.io/EJAM}
   \item \url{https://github.com/ejanalysis/EJAM}
+  \item \url{https://ejanalysis.org}
 }
+
+}
+\author{
+\strong{Maintainer}: Mark A. Corrales \email{ejam@ejanalysis.com} (\href{https://orcid.org/0000-0002-1696-5638}{ORCID})
 
 }
 \keyword{internal}
