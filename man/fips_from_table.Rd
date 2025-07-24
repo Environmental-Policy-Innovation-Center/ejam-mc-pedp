@@ -4,7 +4,7 @@
 \alias{fips_from_table}
 \title{FIPS - Read and clean FIPS column from a table, after inferring which col it is}
 \usage{
-fips_from_table(fips_table, addleadzeroes = TRUE, inshiny = FALSE)
+fips_from_table(fips_table, addleadzeroes = TRUE, in_shiny = FALSE)
 }
 \arguments{
 \item{fips_table}{data.frame or data.table of FIPS codes for counties, states, or tracts,
@@ -16,7 +16,7 @@ Aliases are: c("FIPS", "fips", "fips_code", "fipscode", "Fips", "statefips",
 
 \item{addleadzeroes}{whether to add leading zeroes where needed as for a State whose FIPS starts with "01"}
 
-\item{inshiny}{used by server during shiny app}
+\item{in_shiny}{used by server during shiny app}
 }
 \value{
 vector of fips codes

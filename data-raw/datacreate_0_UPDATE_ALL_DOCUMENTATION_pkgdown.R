@@ -66,6 +66,13 @@ update_pkgdown = function(
 
 ) {
 
+  # MAYBE NEED TO DELETE ALL IN THE man/ FOLDER TO REMOVE OBSOLETE .Rd files like no longer documented or renamed functions ?
+  cat("You might need to do something like  \n  file.remove(list.files('./man', full.names = TRUE)) \nto delete all of /man/*.* to be sure there is nothing obsolete like renamed or deleted or no-longer-documented functions. \n")
+
+  # MAYBE NEED TO DELETE ALL IN THE docs/ FOLDER TO REMOVE OBSOLETE .html files like no longer used vignettes ?
+  cat("You might need to do \n  pkgdown::clean_site('.') \nor\n  file.remove(list.files('./docs', full.names = TRUE))  \nto delete all of /docs/*.*  to be sure there is nothing obsolete like renamed or deleted or no-longer-documented functions. \n")
+
+
   ############################################################# # ############################################################# #
   ############################################################# # ############################################################# #
 
@@ -117,11 +124,8 @@ update_pkgdown = function(
   if (dotests) {
     cat('doing unit tests \n')
     print(Sys.time())
-    source("./tests/test_interactively.R")
-    # rstudioapi::documentOpen("./tests/test_interactively.R")
-    test_interactively(ask = doask & interactive() & testinteractively )
+    EJAM:::test_ejam(ask = doask & interactive() & testinteractively )
     print(Sys.time())
-    # also see  devtools::test()
   }
   #################### #
 
@@ -186,9 +190,6 @@ update_pkgdown = function(
     library(devtools) # library() stops with error where require() would only warn
     library(pkgdown) # library() stops with error where require() would only warn
 
-    # MAYBE NEED TO DELETE ALL IN THE man/ FOLDER TO REMOVE OBSOLETE .Rd files like no longer documented or renamed functions ?
-warning("You might need to delete all of /man/*.* to be sure there is nothing obsolete like renamed or deleted or no-longer-documented functions")
-
     cat('trying to do document() \n')
     document()
   }
@@ -234,29 +235,11 @@ warning("You might need to delete all of /man/*.* to be sure there is nothing ob
       #################### #
       cat('detaching packages - RESTART R IF THIS FAILS  \n') # got Error: lazy-load database '....EJAM/R/EJAM.rdb' is corrupt
       golem::detach_all_attached()
-      # rstudioapi::restartSession() might be needed.
+      # rstudioapi::restartSession() might be needed. or just relaunch R seems to help.
       library(devtools) # library() stops with error where require() would only warn
       library(pkgdown)
     })
   }
-  #################### # #################### # #################### # #################### #
-  # rmost() ####
-  ########### but rstudio build button makes it try to load data and it connects to pins but does not use those yet-
-  # tries to use local copies and fails to get .arrow files from local path supposed to be ~/../Downloads/......
-  # so it loads the .rda from aws that are older and not all files are there.
-  ## why did it not use the pins versions since it did connect? and why not found in that local path???
-  ## so did rm(list=ls()) and tried to continue from library( ) above .
-  # cat('doing rm() for most objects  \n')
-  # EJAM:::rmost(notremove = c('doask', 'dotests', 'testinteractively',   'dodocument', 'doinstall', 'doloadall_not_library', 'dobuild_site', "dataload_pin_available"))
-  # doask              = FALSE,
-  # dotests            = FALSE,
-  # testinteractively  = FALSE, ## maybe we want to do this interactively even if ask=F ?
-  # doyamlcheck        = TRUE, ## dataset_pkgdown_yaml_check() does siterep but also check internal v exported, listed in pkgdown reference TOC etc.
-  # dodocument         = TRUE,  ## in case we just edited help, exports, or func names,
-  # ##   since doinstall=T via this script omits document()
-  # doinstall          = TRUE,  ## but skips document() and vignettes
-  # doloadall_not_library = TRUE, ## (happens after install, if that is being done here)
-  # dobuild_site      = TRUE     ## use build_site() or just stop?
   #################### # #################### # #################### # #################### #
 
   # LOAD ALL FROM SOURCE  ####
@@ -287,7 +270,7 @@ warning("You might need to delete all of /man/*.* to be sure there is nothing ob
   #   usethis::use_pkgdown_github_pages()  # only ONCE
   #
   # B) But, if not using GitHub (or if GitHub Actions have trouble rendering vignettes to html
-  #   due to lacking access to pins board etc.)
+  #   due to lacking access to large dataset files etc.)
   #   then you'll have to run this manually EVERY TIME you want to update the site:
 
   #   pkgdown::build_site()
@@ -298,10 +281,6 @@ warning("You might need to delete all of /man/*.* to be sure there is nothing ob
   if (dobuild_site) {
     cat("Doing build_site()  \n")
     print(Sys.time())
-
-    # MAYBE NEED TO DELETE ALL IN THE docs/ FOLDER TO REMOVE OBSOLETE .html files like no longer used vignettes ?
-    warning("You might need to use pkgdown::clean_site('.') to delete all of /docs/*.*  to be sure there is nothing obsolete like renamed or deleted or no-longer-documented functions?")
-
 
     pkgdown::build_site(
       examples = FALSE, lazy = TRUE,
@@ -331,9 +310,7 @@ warning("You might need to delete all of /man/*.* to be sure there is nothing ob
     # pkgdown::build_site_github_pages() is meant to be used as part of github actions
     #   # https://pkgdown.r-lib.org/reference/build_site_github_pages.html
   }
-
   print(Sys.time())
-
   ################################################################## #
   # # ~ ####
   # remember to push so gh actions publish it ####
@@ -361,6 +338,9 @@ warning("You might need to delete all of /man/*.* to be sure there is nothing ob
 cat(
   "
 To use this function:
+
+Maybe create a background job that runs this:
+  './data-raw/update_pkgdown_background_job.R'
 
 update_pkgdown(doask = TRUE)
 

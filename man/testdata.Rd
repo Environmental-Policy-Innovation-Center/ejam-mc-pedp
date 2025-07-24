@@ -8,7 +8,7 @@ See list of samples of input files to try in EJAM, and output examples from EJAM
 testdata(pattern = NULL, installed = TRUE, quiet = FALSE)
 }
 \arguments{
-\item{pattern}{optional query expression, used as regexp passed to \code{\link[fs:dir_ls]{fs::dir_ls()}}}
+\item{pattern}{optional query regular expression, used as filter using when getting filenames}
 
 \item{installed}{If you are a developer who has the local source package,
 you can set this parameter to FALSE if you want to work with the
@@ -28,7 +28,7 @@ See list of samples of input files to try in EJAM, and output examples from EJAM
 \examples{
 testdata('shapes', quiet = T)
 x <- testdata('shape', quiet = TRUE)
-x[fs::is_file(x)]
+x[file.exists(x)]
 
 testdata('fips', quiet = T)
 testdata('registryid', quiet = T)
@@ -39,7 +39,7 @@ testdata("address", quiet = T)
 topic = "fips"  # or "shape" or "latlon" or "naics" or "address" etc.
 
 # datasets / R objects
-cbind(data.in.package  = sort(grep(topic, EJAM:::datapack()$Item, value = T)))
+cbind(data.in.package  = sort(grep(topic, EJAM:::pkg_data()$Item, value = T)))
 
 # files
 cbind(files.in.package = sort(basename(testdata(topic, quiet = T))))

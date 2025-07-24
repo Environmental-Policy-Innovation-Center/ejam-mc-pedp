@@ -2,7 +2,7 @@
 % Please edit documentation in R/shapes_from_fips.R
 \name{shapes_from_fips}
 \alias{shapes_from_fips}
-\title{Download shapefiles based on FIPS codes of States, Counties, Cities/CDPs, Tracts, or Blockgroups}
+\title{Download shapefiles based on FIPS codes of States, Counties, Cities/CDPs, Tracts, or Blockgroups (not blocks)}
 \usage{
 shapes_from_fips(
   fips,
@@ -11,7 +11,9 @@ shapes_from_fips(
   myservice_tract =
     "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2022/FeatureServer/4/query",
   myservice_place = "tiger",
-  myservice_county = "cartographic"
+  myservice_county = "cartographic",
+  allow_multiple_fips_types = TRUE,
+  year = 2024
 )
 }
 \arguments{
@@ -28,18 +30,33 @@ or "cartographic" or "tiger" to use approx or slow/accurate bounds from tidycens
 \item{myservice_county}{URL of feature service to get shapes from,
 or "cartographic" or "tiger" to use approx or slow/accurate bounds from tidycensus and tigris packages.
 Note State bounds are built into this package as data so do not need to be downloaded from a service.}
+
+\item{allow_multiple_fips_types}{if enabled, set TRUE to allow mix of blockgroup, tract, city, county, state fips}
+
+\item{year}{passed to \code{\link[tigris:places]{tigris::places()}} for bounds or city/town type of fips}
 }
 \value{
 spatial data.frame with one row per fips (assuming any fips are valid)
 }
 \description{
-Download shapefiles based on FIPS codes of States, Counties, Cities/CDPs, Tracts, or Blockgroups
+Download shapefiles based on FIPS codes of States, Counties, Cities/CDPs, Tracts, or Blockgroups (not blocks)
 }
 \details{
-when using tigris package ("tiger" as service-related parameter here),
+The functions this relies on should return results in the same order as the input fips,
+but will exclude rows for invalid fips, and will also exclude output rows that would
+correspond to fips for which boundaries could not be obtained for some reason.
+So the output table might not have the same number of rows as the input fips vector.
+
+When using tigris package ("tiger" as service-related parameter here),
 it uses the year that is the default in the version of the tigris package that is installed.
 You can use options(tigris_year = 2022) for example to specify it explicitly.
 This function also sets options(tigris_use_cache = TRUE), but each individual shapes_xyz_from_ function may not specify.
+
+Blocks are not implemented yet here. For info on blocks bounds, see  \code{\link[tigris:block_groups]{tigris::block_groups()}}
+Also note the \link{blockwts} dataset had a placeholder column block_radius_miles that as of
+v2.32.5 was just zero values, but see notes in EJAM/data-raw/datacreate_blockwts.R on how it could be obtained.
+If it were used, it could be a way to quickly get the area of each block,
+using the formula  area = pi * (block_radius_miles^2)
 }
 \examples{
  # shp2 = shapes_from_fips("10001", "10005")

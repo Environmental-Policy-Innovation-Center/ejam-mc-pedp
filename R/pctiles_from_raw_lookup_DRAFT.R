@@ -9,13 +9,13 @@
 # results_bysite, results_overall  - large data.tables as parameters or by reference?
 # pctile_from_raw_lookup()  - old slow function for doing this on just 1 indicator (vector of sites), but any zones.
 # usastats, statestats   - largish lookup tables as either data.frame (old way) or data.table (may switch to this for speed)
-# c(names_e,  names_d, names_d_subgroups), c(names_ej, names_ej_state, names_ej_supp, names_ej_supp_state)  - lists of indicator names that must be /should be in colnames of usastats, statestats, and 
+# c(names_e,  names_d, names_d_subgroups), c(names_ej, names_ej_state, names_ej_supp, names_ej_supp_state)  - lists of indicator names that must be /should be in colnames of usastats, statestats, and
 
 # statestats has some NA values and some missing columns:
-# 
+#
 # pm and ozone had raw and EJ eo and EJ supp indicators in AK, HI, PR all NA values
 # also, NPDES all 3 vars all NA in AK only.
-# also, lowlifex all NA in PR only. 
+# also, lowlifex all NA in PR only.
 # also, no Island Areas here
 # also, no d_subgroups
 #                                   var  AK  AL  AR  AZ  CA  CO  CT  DC  DE  FL  GA  HI  IA  ID  IL  IN  KS  KY  LA  MA  MD  ME  MI  MN  MO  MS  MT  NC  ND  NE  NH  NJ  NM  NV  NY  OH  OK  OR  PA  PR  RI  SC  SD  TN  TX  UT  VA  VT  WA  WI  WV  WY
@@ -30,9 +30,9 @@
 if (1 == 0) {
 
 ##################################################### #
-## PERCENTILES - express raw scores (from results_bysite AND  results_overall) in percentile terms #### 
+## PERCENTILES - express raw scores (from results_bysite AND  results_overall) in percentile terms ####
 #  VIA  lookup tables of US/State  percentiles, called EJAM::usastats   and statestats
-#  note: usastats is  like ejscreen package file lookupUSA , and EJAM::pctile_from_raw_lookup is like ejanalysis package file lookup.pctile()
+#
 #
 #  *** this should be extracted as a function (but keeping the efficiency of data.table changes by reference using := or set___)
 #      so that it can be used again later to assign percentiles to summary indexes once they are calculated from other scores and percentiles.
@@ -60,53 +60,53 @@ us.pctile.cols_overall    <- data.frame(matrix(nrow = NROW(results_overall), nco
 #  >>>> VERY SLOW STEP; also the function  pctile_from_raw_lookup()  may need to be optimized or avoid passing dt as param to it. ####
 
 for (i in seq_along(varsneedpctiles)) {
-  
+
   myvar <- varsneedpctiles[i]
-  
-  # USA ########################## # 
-  
-  if ((myvar %in% names(usastats)) & (myvar %in% names(results_bysite)) & (myvar %in% names(results_overall))) {  
+
+  # USA ########################## #
+
+  if ((myvar %in% names(usastats)) & (myvar %in% names(results_bysite)) & (myvar %in% names(results_overall))) {
     # use this function to look in the lookup table to find the percentile that corresponds to each raw score value:
-    
+
     us.pctile.cols_bysite[    , varnames.us.pctile[[i]]]    <- pctile_from_raw_lookup(
-      unlist(results_bysite[  , ..myvar]), varname.in.lookup.table = myvar, lookup = usastats) 
+      unlist(results_bysite[  , ..myvar]), varname.in.lookup.table = myvar, lookup = usastats)
     us.pctile.cols_overall[   , varnames.us.pctile[[i]]]    <- pctile_from_raw_lookup(
-      unlist(results_overall[ , ..myvar]), varname.in.lookup.table = myvar, lookup = usastats) 
+      unlist(results_overall[ , ..myvar]), varname.in.lookup.table = myvar, lookup = usastats)
     # (note it is a bit hard to explain using an average of state percentiles   in the "overall" summary)
-    
+
   } else { # cannot find that variable in the percentiles lookup table
-    
+
     us.pctile.cols_bysite[    , varnames.us.pctile[[i]]] <- NA
     us.pctile.cols_overall[   , varnames.us.pctile[[i]]] <- NA
   }
-  
-  # STATES ########################## # 
-  
+
+  # STATES ########################## #
+
   if ((myvar %in% names(statestats)) & (myvar %in% names(results_bysite)) ) {
-    
-    
+
+
     ### VERY SLOW STEP 289 msec
-    
+
     state.pctile.cols_bysite[ , varnames.state.pctile[[i]]] <- pctile_from_raw_lookup(
-      unlist(results_bysite[  , ..myvar]), 
-      varname.in.lookup.table = myvar, 
-      lookup = statestats, 
+      unlist(results_bysite[  , ..myvar]),
+      varname.in.lookup.table = myvar,
+      lookup = statestats,
       zone =  results_bysite$ST
     )
-    
-    
-    
+
+
+
     ## These must be done later, as avg of sites:
     # state.pctile.cols_overall[, varnames.state.pctile[[i]]] <- pctile_from_raw_lookup(unlist(results_overall[ , ..myvar]), varname.in.lookup.table = myvar, lookup = statestats, zone =  results_overall$ST)
-    
+
   } else {
-    
+
     state.pctile.cols_bysite[ , varnames.state.pctile[[i]]] <- NA
-    
+
     # state.pctile.cols_overall[, varnames.state.pctile[[i]]] <- NA #  must be done later, as avg of sites
   }
-  
-  
+
+
 } # end loop over indicators that need to be reported as percentiles
 
 

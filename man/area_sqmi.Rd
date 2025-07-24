@@ -4,7 +4,15 @@
 \alias{area_sqmi}
 \title{utility to get areas of places (points with radius at each, or polygons, or census units by FIPS)}
 \usage{
-area_sqmi(df = NULL, radius.miles = NULL, shp = NULL, fips = NULL)
+area_sqmi(
+  df = NULL,
+  radius.miles = NULL,
+  shp = NULL,
+  fips = NULL,
+  download_city_fips_bounds = TRUE,
+  download_noncity_fips_bounds = FALSE,
+  includewater = FALSE
+)
 }
 \arguments{
 \item{df}{optional data.frame, one place per row -
@@ -19,6 +27,14 @@ an alias for fips, or as last resort, 3) a column that is an alias for radius.mi
 \item{fips}{optional vector of character Census FIPS codes, with leading zeroes,
 2 digits for State, 5 for county, etc. If you already have the boundaries
 then provide that as shp instead of this parameter (much faster that way).}
+
+\item{download_city_fips_bounds}{if TRUE, fips that are "city" are handled by trying to download shapefile boundaries to calculate area. otherwise they are returned as NA.}
+
+\item{download_noncity_fips_bounds}{if set to TRUE, fips that are state, county, tract, or blockgroup types have their area estimate come from
+the column blockgroupstats$arealand. If FALSE, it more slowly downloads boundary shapefiles and then uses sf::sf_area to calculate areas. These two methods give roughly the same answer.}
+
+\item{includewater}{whether to add blockgroupstats$areawater not just $arealand. includewater only matters when download_noncity_fips_bounds = FALSE,
+and only for state, county, tract, blockgroup FIPS, not "city" types of fips as identified by \code{\link[=fipstype]{fipstype()}}}
 }
 \value{
 vector of numbers same length as length(radius.miles) or length(fips) or NROW(shp)

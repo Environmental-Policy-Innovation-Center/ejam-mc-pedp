@@ -1,3 +1,70 @@
+# EJAM v2.32.5 (July 2025)
+
+## Web  app
+
+- **Cities, Counties, States:** Census units like States, Counties, and Cities/Towns/CDPs can be selected from a menu or searched by typing part of the name. Clicking "Done" will check online for the boundaries of those places, at which point the "Start Analysis" button will be enabled. Then clicking the "Start Analysis" button analyzes the sites for which bounds were found.
+- **Area in square miles**: The app now gets or calculates the area of each site more consistently and efficiently. (The function `ejamit()` has new params related to how `area_sqmi()` now can get square mileage info from `?blockgroupstats` table without needing to download boundaries. There are new parameters called `download_fips_bounds_ok`, `download_noncity_fips_bounds`, and `includewater`. The new params are also driven by two new defaults in `global_defaults_shiny.R` The old parameter default_download_fips_bounds_to_calc_areas is no longer a param in `ejamit()`).
+- **County population counts:** Fixed county population counts obtained from and shown in some maps (via fixes in a function used by `shapes_from_fips()` so, e.g., if using `mapfast()`, `mapfast(shapes_from_fips(testinput_fips_counties))` now shows the right numbers).
+- **Summary Indexes (aka EJ Indexes)** had some incorrect numbers, so this release has replaced `?bgej` dataset with correct numbers. (Correct numbers were drawn from the [internet archive version](https://web.archive.org/web/20250203215307/https://gaftp.epa.gov/ejscreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip) that was a copy of the [datasets EPA had posted August 2024](https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/EJSCREEN_2024_BG_with_AS_CNMI_GU_VI.csv.zip)).
+- **Sort order of FIPS Census units:** Sort order of output FIPS codes and polygons should now always be the same as the order of the inputs (sorted like they were in an uploaded shapefile, uploaded FIPS, or FIPS selected from the dropdown list). 
+- **Medians in barplots:** DRAFT feature/ work in progress -- interactive barplots of indicators will be able to show median not just mean (via the `ejam2barplot_indicators()` function).
+
+## RStudio users only
+
+### Documentation updates
+
+- [Installation instructions in vignette/article](../articles/installing.html) were redone.
+- Articles (aka vignettes) were renamed (titles and file names).
+- [README](https://github.com/ejanalysis/EJAM/#readme) mentions https://www.ejanalysis.com now.
+ `?blockgroupstats` documentation was improved.
+- `acs_bybg()` documentation now has notes on the key ACS demographic data tables most relevant to EJSCREEN.
+- Edited files `DESCRIPTION`, `CITATION.cff` (new), `CITATION`, `LICENSE` (new), `LICENSE.md`, etc.
+
+### Functions added or improved
+
+- Mix of fips types allowed:
+  - `shapes_from_fips()` now accepts a mix of city and noncity fips (state, county, tract, blockgroup), so you can get a shapefile where some polygons are cities and others are counties, etc. Previously that was not possible and caused an error. See parameter `allow_multiple_fips_types` in `shapes_from_fips()`.
+  - `getblocksnearby_from_fips()` now accepts a mix of city and noncity fips (state, county, tract, blockgroup), so you can get a shapefile where some polygons are cities and others are counties, etc. Previously that was not possible and caused an error.
+- `fips2name()` now also provides text name for a tract
+- `mapfast()` for a single point now zooms out enough to see the whole radius (e.g., `mapfast(testpoints_10[1,], radius = 10)`)
+- `mapfastej_counties()` has improved color-coded maps of counties.
+- `convert_units()` now can recognize more abbreviations like "mi^2" via updated `fixnames_aliases()`, and got some bug fixes.
+- `fips_bg_from_latlon()` drafted as unexported function that identifies which blockgroup each point is inside.
+
+### Functions fixed or modified
+
+- `ejamit()` and `shapes_from_fips()` (and related helper functions) have more consistent, useful outputs:
+  - *Sorting*: The outputs now consistently preserve sort order of the input (points, fips, or polygons). This had not been the case for `shapes_from_fips()` outputs, and the table `results_bysite` from `ejamit()` or `doaggregate()` was preserving sort order only for the latlon case but not necessarily the fips or shapes cases.
+  - *Invalid sites*: The outputs of `shapes_from_fips()` (and related helper functions) will have a row for each valid or invalid input site (it will no longer omit output rows for invalid fips and when boundaries could not be obtained for valid fips) -- The number of rows in a shapefile output will be the same as then length of the input fips vector. The output table `results_bysite` from `ejamit()` also has a row for each valid or invalid input site. That table in the output of `doaggregate()` in contrast does _not_ have a row for any site lacking blocks, since the input is from getblock_xyz functions (`getblocksnearby()`, `getblocksnearby_from_fips()`, `get_blockpoints_in_shape()`), which don't provide those sites.
+  - *Columns* from `shapes_from_fips()` and related helpers: The output columns are ordered in a more useful way and are more consistent across functions. The output also consistently tries to add population, area in square miles, name of census unit, state abbreviation, etc., via new helpers like `shapefile_addcols()`
+
+- `getblocksnearby()` and related functions (`getblocksnearby_from_fips()`, `get_blockpoints_in_shape()`, etc.) also have more consistent outputs:
+  - *Unique ID in FIPS case*: The `ejam_uniq_id` column in the outputs of these functions will be based on 1 through the number of sites in the inputs (with multiple rows per site as needed to include all the blocks). Previously, FIPS codes had been used as the `ejam_uniq_id` sometimes (and still are in the outputs of functions like `ejamit()` where the output has a table with one row per site).
+  - *Sorting*: The output sites are now sorted like the input sites (points, fips, or polygons), while there are still usually many rows (blocks) per site. It had been sorted primarily by blockid, previously.
+  - **Invalid sites:** The outputs of all the getblock... functions will be consistent -- They all provide a sites2blocks data.table output (like `?testoutput_getblocksnearby_10pts_1miles`) that does not include any sites that have zero blocks. The `ejam_uniq_id` will still correspond to the input vector, so if an invalid and valid site were input in that order, 2 would be the only `ejam_uniq_id` in the sites2blocks table. The FIPS-based functions, though, like `getblocksnearby_from_fips()`, when returning a spatial data.frame, will include all the sites in the output, even if they have no blocks, so that the number of rows in the output shapefile will match the number of sites in the input fips vector.
+
+- `shapes_from_fips()` (and related) have new `year` parameter, passed to [tigris::places()], defaulting to the 2024 boundaries polygons of cities/towns.
+- testoutput_xyz .xlsx and .html files and dataset R objects like `?testoutput_ejamit_100pts_1miles` have been updated to reflect the new `?bgej` dataset, typo fixes, and other edits.
+- Some testinput objects like testinput_fips_counties are now vectors per is.vector(), and no longer have metadata stored as attributes like date_saved_in_package, etc. Adding that info via `metadata_add()` was making is.vector() FALSE and interfered with some functions that expect the input to be a vector, like `shapes_from_fips()`. Also, `testinput_xtrac` was removed.
+- `doaggregate()` and `ejamit()` now report 0 for `results_bysite$blockcount_near_site` and `results_bysite$bgcount_near_site` if there are none, and total counts are correct.
+- `getblocksnearby()` based on `getblocksnearbyviaQuadTree()` will no longer include, in its output, the lat lon columns from the input table of sitepoints. That was unintentional and potentially confusing and wasted space.
+- `plotblocksnearby()` rewritten to fix/improve map popups, etc., and a parameter was dropped
+
+### Package development/ technical
+
+- Many unit tests added, especially for `doaggregate()` and `getblocksnearby_from_fips()` and related.
+- `test_ejam()` is what used to be called `test_interactively()` -- it was improved and renamed and moved to the R folder as an unexported internal function loaded as part of the package. Also, a new parameter y_skipbasic is used instead of y_basic.
+- `test_coverage_check()` utility was improved (but somewhat work in progress), just as a way to for package maintainers/contributors to look at which functions might need unit tests written.
+- Utility functions related to package development were renamed, e.g., in utils_PACKAGE_dev.R
+- `linesofcode2()` utility was improved, just as a way for package maintainers/contributors to look at which files have most of the lines of code, are mostly comments, etc.
+- `table_xls_format_api()` is what used to be called table_xls_formatting_api() (but is not used unless the ejscreenapi module or server is working).
+- fixed inconsistent use of parameter `in_shiny` versus `inshiny`, to always call it `in_shiny`
+- removed functions and text related to pins board (obsolete)
+- renamed map_headernames spreadsheet file to reflect a new version (`EJAM/data-raw/map_headernames_2.32.5.xlsx`), made edits/fixes (spelling of CEJST, e.g.), and updated the data object `?map_headernames`.
+- rebuilt favicons per updates in {pkgdown}
+- Edited DESCRIPTION file to specify minimum versions for most packages in Imports, and a newer version of R. Almost all of these just refer to the latest version on CRAN as of this release, even though several were not strictly necessary for the functions to work correctly.
+
+
 # EJAM v2.32.4 (June 2025)
 
 Note the URLs, emails, and notes about repository locations/owners were edited to reflect this forked non-EPA version of the EJAM package being located at ejanalysis/EJAM, so the package called the v2.32.4 release on ejanalysis/EJAM is slightly different than the version called the v2.32.4 release that was released on USEPA/EJAM-open.
@@ -8,36 +75,35 @@ Note the URLs, emails, and notes about repository locations/owners were edited t
 - corrected spelling in app and documentation
 - added better examples of params one can pass via `run_app()`
 
-## RStudio users
+## RStudio users only
 
 - New summary table and plot are available via `ejam2areafeatures()` and `ejam2barplot_areafeatures()`. 
   Changes in `ejamit()` provide information about what fraction of residents have 
   certain features or types of areas where they live, such as schools, hospitals,
-  Tribal areas, nonattainment areas, CJEST areas, etc. This is done via many changes to `batch.summarize()`.
+  Tribal areas, nonattainment areas, CEJST areas, etc. This is done via many changes to `batch.summarize()`.
 - added better examples of params one can pass via `run_app()`
 - documented `get_global_defaults_or_user_options()` and `global_or_param()`
 - fixed `ejam2means()`
 - `ejam2report()` gets new params, and in `build_community_report()` added report_title = NULL, logo_path = NULL, logo_html = NULL.
 - `plot_barplot_ratios()` gets new ylab and caption params
 - added warning in `url_countyhealthrankings()` if default year seems outdated
-- unexported read_and_clean_points()
-- unexported ejam2quantiles()
-- removed reference to obsolete testids_registry_id, replaced by testinput_regid
+- unexported draft `read_and_clean_points()`
+- unexported draft `ejam2quantiles()`
+- removed reference to obsolete testids_registry_id, replaced by `?testinput_regid`
 
 ## Technical / internal changes:
 
-- enabled testing of web app functionality from the test_interactively() utility or via test_local(), etc., not just from a github action. (See /tests/setup.R which now has a copy of what is also in app-functionality.R)
-- drafted revisions to ui and server to try to allow for more `run_app()` params or advanced tab or global_defaults_xyz to alter default method of upload vs dropdown, e.g., output ss_choose_method_ui, default_ss_choose_method, default_upload_dropdown. This included revising server and ui to use just EJAM:::global_or_param("xyz") not golem::get_golem_options("xyz"), so that non-shiny global defaults can work (e.g., logo path as `global_defaults_package$.community_report_logo_path`) even outside shiny when global_defaults_package has happened via onattach but global_defaults_shiny etc. has not happened.
-- changed .onAttach() to do source(global_defaults_package) with  local = FALSE not TRUE, but this might need to be revisited -- note both local = F and local = T are used in .onAttach() versus get_global_defaults_or_user_options()
-- in server, `ejam2excel()` now figures out value of radius_or_buffer_description, ejam2excel() gets new parameters
+- enabled testing of web app functionality from the test_interactively() utility (which has more recently been renamed `test_ejam()` and put in R folder as an unexported internal function loaded as part of the package) or via test_local(), etc., not just from a github action. (See /tests/setup.R which now has a copy of what is also in app-functionality.R)
+- drafted revisions to ui and server to try to allow for more `run_app()` params or advanced tab or global_defaults_xyz to alter default method of upload vs dropdown, e.g., output ss_choose_method_ui, default_ss_choose_method, default_upload_dropdown. This included revising server and ui to use just `EJAM:::global_or_param()` not `golem::get_golem_options()`, so that non-shiny global defaults can work (e.g., logo path as `global_defaults_package$.community_report_logo_path`) even outside shiny when global_defaults_package has happened via onattach but global_defaults_shiny etc. has not happened.
+- changed `.onAttach()` to do source(global_defaults_package) with  local = FALSE not TRUE, but this might need to be revisited -- note both local = F and local = T are used in `.onAttach()` versus `get_global_defaults_or_user_options()`
+- in server, `ejam2excel()` now figures out value of radius_or_buffer_description, `ejam2excel()` gets new parameters
 table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ejam2report()` to add a report in one tab.
 - reorganized server code by moving v1_demog_table() and v1_envt_table to long report section of server file
 - cleaned up server code (eg, remove obsolete input$disconnect, remove obsolete community_download() and report_community_download(), and remove repetitive `ejam2repor()`, remove old EJScreen Batch Tool tab, used session = session as param in server calls to updateXYZINPUT, etc.)
 - allow shiny.testmode to be TRUE even if not set in options
-- used silent=TRUE in more cases of try()
-- added validate("problem with map_shapes_leaflet() function")
+- used silent=TRUE in more cases of `try()`
+- added validate("problem with `map_shapes_leaflet()` function")
 - added validate(need(data_processed(), 'Please run an analysis to see results.'))
-
 
 # EJAM v2.32.3 (May 2025)
 
@@ -68,7 +134,7 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 
 ## RStudio user-related or internal improvements
 - Clarified/explained 2025 status of API and urls in CONTRIBUTING and README, etc.
-- Extensive additions of and improvements in articles/vignettes, including documentation of how to maintain repo, package, and datasets. Articles/vignettes avoid hardcoded repo urls, and use relative links within pkgdown site... unexported helper function `EJAM:::repo_from_desc()` added, avoids hardcoded repo url; download_latest_arrow_data avoids hardcoded repo url; links to testdata files on webapp UI avoid hardcoded repo url; simpler [What is EJAM](../articles/0_whatis.html) doc.
+- Extensive additions of and improvements in articles/vignettes, including documentation of how to maintain repo, package, and datasets. Articles/vignettes avoid hardcoded repo urls, and use relative links within pkgdown site... unexported helper function `EJAM:::repo_from_desc()` added, avoids hardcoded repo url; download_latest_arrow_data avoids hardcoded repo url; links to testdata files on webapp UI avoid hardcoded repo url; simpler [What is EJAM](../articles/whatis.html) doc.
 - `ejamit()` in interactive mode (RStudio) now lets you select any type of file to upload if no sites specified by parameters
 - Many options or starting values or settings for the shiny app (and in general) can now be set as 
   parameters passed to the `run_app()` function, which overrides the defaults.
@@ -82,13 +148,13 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 - `testdata()` function improved, showing you examples of files that be used as inputs to `ejamit()`. `testdata()` files and data objects cleaned up/renamed consistently and new ones added for fips types, naics, sic, mact, etc.
 - refactored names of plot functions made more consistent to use "plot" singular and "ratios" plural, as in `ejam2boxplot_ratios()`, `boxplot_ratios()`, etc.
 - documentation fixed in some functions (e.g., `ejam2map()`)
-- large datasets managed via `download_latest_arrow_data()` and other new arrow-related functions and no longer on pins board or aws at all.  arrow datasets faster format used most places, other changes to handling downloads etc.
+- large datasets managed via `dataload_dynamic()`, `download_latest_arrow_data()` and other new arrow-related functions and no longer on pins board or aws at all.  arrow datasets faster format used most places, other changes to handling downloads etc.
 - `shape_from_fips()` checks if census API key available and tidycensus pkg now imported, uses alt method (arcgis services) to get boundaries if necessary.
 - Continued towards refactoring/consolidating code in server vs in functions, related to creating summary report as HTML vs for download from shiny app vs from `ejam2report()`,
-  in functions such as `report_residents_within_xyz()`, renamed generate_demog_header to generate_env_demog_header, etc.
+  in helper functions such as `build_community_report()`, `report_residents_within_xyz()`, renamed generate_demog_header to generate_env_demog_header, etc.
 - server uses `ejamit()` for SHP and latlon, and cleanup
-- server uses `ejam2excel()` now not table_xls_format()
-- server uses `ejam2report()` now not obsolete report_community_download() etc. 
+- server uses `ejam2excel()` now (which then relies on `table_xls_format()`)
+- server uses `ejam2report()` now, not obsolete report_community_download() etc. 
 - server uses `shapefile_from_any()` now
 - server: removed use of data_summarized reactive everywhere, use data_processed$...
 - 2 new params `doaggregate()` has, to `ejamit()`, for calctype_maxbg and minbg
@@ -108,6 +174,7 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 - Some edits made considering github repositories and gh pages may change location or go offline
 - Updated FRS datasets, pulled on 2/12/25
 - Remove screenshots from user guide document
+
 
 # EJAM v2.32.1-EJAM (February 2025)
 
@@ -137,6 +204,7 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 
 - Refactored community report functions, `app_server.R` script
 
+
 # EJAM v2.32-EJAM (January 2025)
 
 ## New Features + Improvements
@@ -150,8 +218,9 @@ table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ej
 
 - Added `leaflet.extras2` dependency to Imports, instead of Suggests, which is necessary for new installations
 
+
 # EJAM v2.32.0
 
 - The EJAM R package is available as an open source resource you can
     - clone from the [EJAM-open github repository](https://github.com/USEPA/EJAM-open) or
-    - install using the [installation instructions](../articles/1_installing.html)
+    - install using the [installation instructions](../articles/installing.html)

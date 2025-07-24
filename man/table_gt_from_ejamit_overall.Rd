@@ -23,5 +23,5 @@ Uses the results_overall element of ejamit() output
 }
 \examples{
  x <- table_gt_from_ejamit_overall(testoutput_ejamit_100pts_1miles$results_overall)
- 
+
 }

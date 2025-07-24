@@ -57,7 +57,7 @@ to correctly calculate percent low income.}
 using a population weighted mean or other type of weighted mean.}
 
 \item{calculatedcols}{character vector of names of variables to aggregate within a buffer
-using formulas that have to be specified.}
+using formulas that have to be specified. currently calculatedcols is not used at all.}
 
 \item{calctype_maxbg}{character vector of names of variables to aggregate within a buffer
 using max() of all blockgroup-level values.}

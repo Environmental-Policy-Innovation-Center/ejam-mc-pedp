@@ -49,6 +49,11 @@ same as \code{\link[=get_blockpoints_in_shape]{get_blockpoints_in_shape()}}
 
 Block points table for those blocks whose internal point is inside the buffer
 which is just a circular buffer of specified radius if polys are just points.
+This is like the output of  \code{\link[=getblocksnearby]{getblocksnearby()}}, or \code{\link[=getblocksnearby_from_fips]{getblocksnearby_from_fips()}} if return_shp=F.
+
+The ejam_uniq_id represents which of the input sites is being referred to, and the table
+will only have the ids of the sites where blocks were found. If 10 sites were input but only sites 5 and 8
+were valid and had blocks identified, then the data.table here will only include ejam_uniq_id values of 5 and 8.
 }
 \description{
 Like \code{\link[=getblocksnearby]{getblocksnearby()}}, but for blocks in each polygon rather than
@@ -74,5 +79,5 @@ since otherwise it takes forever for sf:: to check all US blocks.
   # y = get_blockpoints_in_shape(x, 1)  # very very slow
 }
 \seealso{
-\code{\link[=get_blockpoints_in_shape]{get_blockpoints_in_shape()}} \code{\link[=shapefile_from_sitepoints]{shapefile_from_sitepoints()}} \code{\link[=shape_buffered_from_shapefile_points]{shape_buffered_from_shapefile_points()}}
+\code{\link[=getblocksnearby]{getblocksnearby()}}  \code{\link[=getblocksnearby_from_fips]{getblocksnearby_from_fips()}}  \code{\link[=shapefile_from_sitepoints]{shapefile_from_sitepoints()}} \code{\link[=shape_buffered_from_shapefile_points]{shape_buffered_from_shapefile_points()}}
 }

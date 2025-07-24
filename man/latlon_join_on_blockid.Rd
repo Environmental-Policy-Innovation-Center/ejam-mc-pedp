@@ -2,7 +2,7 @@
 % Please edit documentation in R/latlon_join_on_blockid.R
 \name{latlon_join_on_blockid}
 \alias{latlon_join_on_blockid}
-\title{utility to add lat lon columns to data.table by reference, joining on blockid}
+\title{utility to add each block's lat and lon as new columns in data.table by reference, joining on blockid}
 \usage{
 latlon_join_on_blockid(s2b)
 }
@@ -20,7 +20,7 @@ with new lat,lon columns
 }
 \examples{
  s2b = copy(testoutput_getblocksnearby_10pts_1miles)
- latlon_join_on_blockid(s2b) 
+ latlon_join_on_blockid(s2b)
 
 }
 \keyword{internal}

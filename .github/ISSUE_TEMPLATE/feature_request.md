@@ -2,9 +2,8 @@
 name: Feature request
 about: Suggest an idea for this project
 title: ''
-labels: 'feature request'
+labels: 'feature request','submitted-via-template'
 assignees: ''
-
 ---
 
 **What is the need or problem to be addressed?**
