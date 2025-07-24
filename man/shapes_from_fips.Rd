@@ -12,7 +12,8 @@ shapes_from_fips(
     "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2022/FeatureServer/4/query",
   myservice_place = "tiger",
   myservice_county = "cartographic",
-  allow_multiple_fips_types = TRUE
+  allow_multiple_fips_types = TRUE,
+  year = 2024
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ or "cartographic" or "tiger" to use approx or slow/accurate bounds from tidycens
 Note State bounds are built into this package as data so do not need to be downloaded from a service.}
 
 \item{allow_multiple_fips_types}{if enabled, set TRUE to allow mix of blockgroup, tract, city, county, state fips}
+
+\item{year}{passed to \code{\link[tigris:places]{tigris::places()}} for bounds or city/town type of fips}
 }
 \value{
 spatial data.frame with one row per fips (assuming any fips are valid)

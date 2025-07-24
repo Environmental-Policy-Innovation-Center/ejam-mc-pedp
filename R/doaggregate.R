@@ -1196,7 +1196,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   ##################################################### #
   ### PERCENTILES - express raw scores (from results_bysite AND  results_overall) in percentile terms ####
   #  VIA  lookup tables of US/State  percentiles, called usastats   and statestats
-  #  note: usastats is  like ejscreen package file lookupUSA , and pctile_from_raw_lookup is like ejanalysis package file lookup.pctile()
+  #
   #
   #  *** this should be extracted as a function (but keeping the efficiency of data.table changes by reference using := or set___)
   # these lines about names of variables should be pulled out of here and defined as params or another way

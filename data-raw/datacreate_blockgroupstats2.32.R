@@ -96,18 +96,6 @@ usastats_new_explained.xlsx      <- "EJScreen_2024_BG_Percentiles_Columns.xlsx"
 statestats_new_explained.xlsx    <- "EJScreen_2024_BG_State_Percentiles_Columns.xlsx"
 
 ## some are .zip some .xlsx some .csv and some are found inside the .zip files
-
-############################################################################################ #
-
-############################################################################################ #
-## older scripts:
-# /dev/notes_datasets
-# [1] "0_SCRIPT_overview_get_ejscreendata.R"             "1_SCRIPT_EJAMejscreen_download.R"
-# [3] "2_SCRIPT_FOR_FIPS_ST_TRACT_CNTY.R"                "3_SCRIPT_create_bgDemog_ejscreen2.1_andtracts.R"
-# [5] "4_SCRIPT_ADD_PUERTORICO_DEMOG_SUBGROUPS.R"        "5_SCRIPT_merge_demogsubgroups_v2.1.R"
-# [7] "6_SCRIPT_create_blockgroupstats.R"                "8_SCRIPT_make_MeansByGroup_and_Ratios_RRS.US22.R"
-# [9] "9_SCRIPT_PCTILELOOKUPS_READ-CSVS-MID-2022.R"      "NOTES_which_states_are_in_which_datasets.R"
-# [11] "PINSURLTRY.R"
 ############################################################################################ #
 
 # DOWNLOAD ZIP and CSV ####

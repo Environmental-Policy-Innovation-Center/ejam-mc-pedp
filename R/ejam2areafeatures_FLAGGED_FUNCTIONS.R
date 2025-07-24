@@ -23,7 +23,7 @@
 #'
 #'  - [6,] "Flag for Overlapping with Impaired Waters"
 #'
-#'  - [7,] "Flag for Overlapping with CJEST Disadvantaged Communities"
+#'  - [7,] "Flag for Overlapping with CEJST Disadvantaged Communities"
 #'
 #'  - [8,] "Flag for Overlapping with EPA IRA Disadvantaged Communities"
 #'
@@ -121,7 +121,7 @@ flagged_areas_from_ejam <- function(ejamitout) {
 # yesno_tribal                                           Flag for Overlapping with Tribes            names_flag
 # yesno_airnonatt                          Flag for Overlapping with Non-Attainment Areas            names_flag
 # yesno_impwaters                               Flag for Overlapping with Impaired Waters            names_flag
-# yesno_cejstdis                Flag for Overlapping with CJEST Disadvantaged Communities            names_flag
+# yesno_cejstdis                Flag for Overlapping with CEJST Disadvantaged Communities            names_flag
 # yesno_iradis                Flag for Overlapping with EPA IRA Disadvantaged Communities            names_flag
 # yesno_houseburden                  Flag for Overlapping with Housing Burden Communities names_criticalservice
 # yesno_transdis       Flag for Overlapping with Transportation Disadvantaged Communities names_criticalservice
@@ -359,7 +359,7 @@ flagged_areas_shrinklabels <- function(rnames, n = 30, do_gsub = TRUE) {
 # )
 # all.equal(flagged_areas_shrinklabels(flagged_areas_testnames),
 #           c("Schools", "Hospitals", "Worship Places", "Tribes", "Nonattainment Area",
-#             "Impaired Waters", "CJEST Disadvantaged", "EPA IRA Disadvantage",
+#             "Impaired Waters", "CEJST Disadvantaged", "EPA IRA Disadvantage",
 #             "Housing Burden Commu", "Transportation Disad", "Food Desert",
 #             "% hhlds no Broadband", "% hhlds no Health In")
 #           )

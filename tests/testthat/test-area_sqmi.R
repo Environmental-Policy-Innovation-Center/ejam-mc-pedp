@@ -5,7 +5,7 @@
 junk1 <- function() {
 
   fnames = testdata('shape', quiet = TRUE)
-  fnames = fnames[fs::is_file(fnames)]
+  fnames = fnames[file.exists(fnames)]
   # print(fnames)
   cat("\n")
   sh = list()

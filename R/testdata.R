@@ -7,29 +7,29 @@
 #' you can set this parameter to FALSE if you want to work with the
 #' local source package version of the testdata folders
 #' rather than the locally installed version.
-#' @param pattern optional query expression, used as regexp passed to [fs::dir_ls()]
+#' @param pattern optional query regular expression, used as filter using when getting filenames
 #' @param quiet set TRUE if you want to just get the path
 #'   without seeing all the info in console and without browsing to the folder
 #' @return path to local testdata folder comes with the EJAM package
 #' @examples
 #' testdata('shapes', quiet = T)
 #' x <- testdata('shape', quiet = TRUE)
-#' x[fs::is_file(x)]
+#' x[file.exists(x)]
 #'
 #' testdata('fips', quiet = T)
 #' testdata('registryid', quiet = T)
 #' testdata("address", quiet = T)
 #'
 #' # datasets as lazyloaded objects vs. files installed with package
-#' 
+#'
 #' topic = "fips"  # or "shape" or "latlon" or "naics" or "address" etc.
-#' 
+#'
 #' # datasets / R objects
 #' cbind(data.in.package  = sort(grep(topic, EJAM:::pkg_data()$Item, value = T)))
-#' 
+#'
 #' # files
 #' cbind(files.in.package = sort(basename(testdata(topic, quiet = T))))
-#' 
+#'
 #' @keywords internal
 #' @export
 #'
@@ -54,34 +54,33 @@ testdata <- function(pattern = NULL, installed = TRUE, quiet = FALSE) {
     testdata_folder <- testdatafolder(installed = installed)
   })
   if (!quiet && interactive()) {
-
     # show the full tree folders structure:
     # want to show tree of relevant folders only, using regex if relevant
     cat('\n')
-    fs::dir_tree(testdata_folder, recurse = 1, regex = pattern)
-    # ... gets passed to dir_ls() which has a param recurse = FALSE DEFAULT!
-    # recurse=1 means go down only 1 level, type can be "any", "file", "directory", glob or regexp can be used too
-    cat("\n")
 
+    fs::dir_tree(testdata_folder, recurse = 1, regex = pattern)
+    ## *** It would not be very easy to replace dir_tree() to remove dependence on fs pkg
+    ##    gets passed to dir_ls() which has a param recurse = FALSE DEFAULT!
+    ##   recurse=1 means go down only 1 level, type can be "any", "file", "directory", glob or regexp can be used too
+
+    cat("\n")
     # show the info captured (path shown 3 ways)
     cat(paste0(info_to_print, collapse = "\n"), '\n')
     # cat(text_to_print, '\n') # redundant
-
     # open file explorer to view the (overall) folder
     browseURL(normalizePath(testdata_folder[1]))
   }
-
   # filter to show folder(s) that matched? not the files themselves?
   if (!is.null(pattern)) {
     matches <- fs::dir_ls(testdata_folder, regexp = pattern, ignore.case = TRUE, recurse = 1)
-    # matches <- list.files(testdata_folder, pattern = pattern,
-    #                       full.names = TRUE, recursive = TRUE, include.dirs = TRUE, ignore.case = TRUE)
+    # matches <- list.files(testdata_folder, pattern = pattern, ignore.case = TRUE, recursive = TRUE,
+    ## *** fs pkg is useful since cant limit recurse to just 1 level down with base list.files()
+    ##                       full.names = TRUE, include.dirs = TRUE)
   } else {
     matches <- testdata_folder
   }
   # show the matching folder(s) only...
   # matches is a vector of folders and or paths to files
-
 
   return(matches)
 }
@@ -108,7 +107,6 @@ testdatafolder = function(installed = TRUE) {
     testdata_folder_shortcode_text <- "'./inst/testpath'" # shortest
     testdata_folder_shortcode_sourceable      <- "file.path(getwd(), 'inst/testdata')" # or  "path.expand('./inst/testdata')" # just so source() returns './inst/testdata' )
   }
-
   testdata_folder <- source_this_codetext(testdata_folder_shortcode_sourceable)
   rpath <- gsub('\\\\', '/', normalizePath(testdata_folder)) # only needed if !installed but ok if installed
 

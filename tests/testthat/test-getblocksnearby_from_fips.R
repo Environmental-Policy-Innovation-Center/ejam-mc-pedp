@@ -4,14 +4,17 @@
 ##    all include or all omit rows in s2b for
 ##    invalid / 0 blocks sites of various kinds
 ## (fips can be good, valid but no bounds, valid but wrong type (noncity), looks right but invalid fips, NA, or NULL)
+#################################################################### #
+# LOOP OF TEST CASES - to just print results not run unit test ####
+## getblocksnearby_from_fips_cityshape()   ####
 
-testprint888 = function(rs=TRUE) {
+testcases_city = function(rs=TRUE, printall=FALSE, testall=FALSE) {
 
   check = function(y,rs=TRUE) {
     print(deparse1(substitute(y)))
     if (rs) {
       if (NROW(y$polys) > 0) {
-        print(y$polys[,c('FIPS', 'geometry','ejam_uniq_id')])
+        print(y$polys[, intersect(names(y$polys), c('FIPS', 'geometry','ejam_uniq_id'))])
       } else {
         print("No polys table")
       }
@@ -24,30 +27,66 @@ testprint888 = function(rs=TRUE) {
     cat("--------------------------------------------------------\n")
     return(NULL)
   }
+  tcaselist = list(
+    c( testinput_fips_cities[1]),
+    c( testinput_fips_cities[1], NA),
+    c( testinput_fips_cities[1], "99"),
+    "1234567",
+    NA,
+    c(NA,NA),
+    c("1234567", "1234567"),
+    c(NA, "1234567"),
+    c(NA, NA, "1234567", "0234560", testinput_fips_cities[1]),
+    testinput_fips_blockgroups[1],
+    c(testinput_fips_cities[1], testinput_fips_blockgroups[1])
+  )
+  for (i in seq_along(tcaselist)) {
+    n = i
+    if (printall) {
+      cat("input: ", paste0(tcaselist[[i]], collapse = ", "), "\n")
+    }
+    if (testall) {
+    test_that(paste0("city case ", n," ok"), {
 
-  z <- y1 <- try(getblocksnearby_from_fips_cityshape(c( testinput_fips_cities[1]), return_shp = rs)[])
-  if (!inherits(z, "try-error")) check(y1,rs)
-  z <- y2 <- try(getblocksnearby_from_fips_cityshape(c( testinput_fips_cities[1], NA), return_shp = rs)[])
-  if (!inherits(z, "try-error")) check(y2,rs)
-  z <- y3 <- try(getblocksnearby_from_fips_cityshape(c( testinput_fips_cities[1], "99"), return_shp = rs)[])
-  if (!inherits(z, "try-error")) check(y3,rs)
-  z <- y4 <- try(getblocksnearby_from_fips_cityshape("1234567", return_shp = rs)[])
-  if (!inherits(z, "try-error")) check(y4,rs)
-  z <- y5 <- try(getblocksnearby_from_fips_cityshape(NA, return_shp = rs)[])
-  if (!inherits(z, "try-error")) check(y5,rs)
-  z <- y6 <- try(getblocksnearby_from_fips_cityshape(c(NA, NA), return_shp = rs)[])
-  if (!inherits(z, "try-error")) check(y6,rs)
-  z <- y7 <- try(getblocksnearby_from_fips_cityshape(c("1234567", "1234567"), return_shp = rs)[])
-  if (!inherits(z, "try-error")) check(y7,rs)
-  z <- y8 <- try(getblocksnearby_from_fips_cityshape(c(NA, "1234567"), return_shp = rs)[])       #  and check  c("99", NA, '1234567')
-  if (!inherits(z, "try-error")) check(y8,rs)
-  z <- y9 <- try(getblocksnearby_from_fips_cityshape(c(NA, NA, "1234567", "0234560", testinput_fips_cities[1]), return_shp = rs)[])
-  if (!inherits(z, "try-error")) check(y9,rs)
-  z <- y10 <- try(getblocksnearby_from_fips_cityshape(testinput_fips_blockgroups[1], return_shp = rs)[]) # wrong type
-  if (!inherits(z, "try-error")) check(y10,rs)
-  z <- y11 <- try(getblocksnearby_from_fips_cityshape(c(testinput_fips_cities[1], testinput_fips_blockgroups[1]), return_shp = rs)[] )# wrong type and a valid
-  if (!inherits(z, "try-error")) check(y11,rs)
-  #
+     x =  try({
+      expect_no_error({
+        z = getblocksnearby_from_fips_cityshape(tcaselist[[i]], return_shp = rs)[]
+      })
+       expect_true({if (rs) {"sf" %in% class(z$polys)} else { is.data.frame(z)}})
+      })
+    })
+    }
+  }
+  return(NULL)
+}
+
+## was using this to print results during debugging
+# testcases_city()
+rm(testcases_city)
+# cat("Done with loop of test cases for getblocksnearby_from_fips_cityshape()\n")
+#################################################################### #
+
+## getblocksnearby_from_fips_noncity()   ####
+
+print_testcases_noncity = function(rs=TRUE) {
+
+  check = function(y,rs=TRUE) {
+    print(deparse1(substitute(y)))
+    if (rs) {
+      if (NROW(y$polys) > 0) {
+        print(y$polys[, intersect(names(y$polys), c('FIPS', 'geometry','ejam_uniq_id'))])
+      } else {
+        print("No polys table")
+      }
+      x <- y$pts
+    } else {
+      x <- y
+    }
+    if (!NROW(x) == 0) {x = x[,.SD[1],by="ejam_uniq_id"]}
+    print(x)
+    cat("--------------------------------------------------------\n")
+    return(NULL)
+  }
   ## these do not output a NA row for each bad fips:
 
   z <- x1 <- try(getblocksnearby_from_fips_noncity(c(testinput_fips_blockgroups[1]), return_shp = rs)[])
@@ -75,7 +114,12 @@ testprint888 = function(rs=TRUE) {
   return(NULL)
 }
 
-testprint888()
+## was using this to print results during debugging
+# print_testcases_noncity()
+rm(print_testcases_noncity)
+# cat("Done with loop of test cases for getblocksnearby_from_fips_noncity()\n")
+#################################################################### #
+# . ####
 
 
 ################# #  ################# #  ################# ################## #
@@ -137,7 +181,7 @@ testthat::test_that("getblocksnearby_from_fips_cityshape just cities", {
   expect_equal(unique(s2b$ejam_uniq_id), 1:2)
 })
 ################# #  ################# #  ################# ################## #
-
+# . ------------------------------------------------------ - ####
 # getblocksnearby_from_fips(), the main function ####
 
 ## simplest tests ####
@@ -185,10 +229,15 @@ testthat::test_that("basics: return_shp=T for bgs", {
 })
 ################# #  ################# #  ################# ################## #  ################# #  ################# #
 ################# #  ################# #  ################# ################## #  ################# #  ################# #
+# . ####
+# LOOP OF TEST CASES: ####
 
-## loop tests each fipstypes (bg, tract, city, county, state, mix) ####
-test999 <- function() {
+## getblocksnearby_from_fips() - loop of test cases ####
+
+testcases_each_fipstype <- function() {
+
   # large set of test cases
+  # (bg, tract, city, county, state, mix)
 
   f1  <- rev(testinput_fips_blockgroups)
   f2  <- rev(testinput_fips_tracts)
@@ -196,7 +245,7 @@ test999 <- function() {
   f4  <- rev(testinput_fips_counties)
   f5  <- rev(testinput_fips_states)
 
-  ## loop tests bad inputs (invalid, missing poly, NA) ####
+  ## bad inputs to test (invalid, missing poly, NA)   ####
 
   testinput_fips_sets <- list(
     ## possibly missing boundaries for some?
@@ -228,7 +277,7 @@ test999 <- function() {
       states  = c(f5, 99)
     )
     ,
-    `some fips are NA` = list(      # i = 6
+    `some fips are NA` = list(      #
       bgs     = c(NA, f1, NA),  # ii = 1
       tracts  = c(NA, f2, NA),  # ii = 2
       cities  = c(NA, f3, NA),  # ii = 3  # ??  f3 is "2743000" "2743306"
@@ -236,14 +285,14 @@ test999 <- function() {
       states  = c(NA, f5, NA)   # ii = 5
     )
     ,
-    `some fips are 99, some NA` = list(   # DONT WORK  ?
+    `some fips are 99, some NA` = list(
       bgs     = c(NA, f1, 99),
       tracts  = c(NA, f2, 99),
       cities  = c(NA, f3, 99),
       counties= c(NA, f4, 99),
       states  = c(NA, f5, 99)
     ),
-    `same fips duplicated in inputs` = list(    # DONT WORK
+    `same fips duplicated in inputs` = list(
       bgs     = c(f1[1], f1, f1[1]),
       tracts  = c(f2[1], f2, f2[1]),
       cities  = c(f3[1], f3, f3[1]),
@@ -253,7 +302,7 @@ test999 <- function() {
 
   )
 
-  ## loop tests params (return_shp, allow_multi...) ####
+  ## params to test (return_shp, allow_multi...) ####
 
   for (allow_multiple_fips_types in TRUE) {
     #  for (allow_multiple_fips_types in c(TRUE, FALSE)) {   # nonessential to allow FALSE here
@@ -342,14 +391,14 @@ test999 <- function() {
 
 #    RUN ALL THOSE TESTS:
 
-test999()
-
+testcases_each_fipstype()
+cat("Done with loop of test cases for getblocksnearby_from_fips()\n")
 # cleanup
-rm(test999)
+rm(testcases_each_fipstype)
 
 ################# #  ################# #  ################# ################## #  ################# #  ################# #
 ################# #  ################# #  ################# ################## #  ################# #  ################# #
-
+# . ####
 # other older tests - may be redundant ####
 
 ################# #  ################# #  ################# ################## #  ################# #  ################# #

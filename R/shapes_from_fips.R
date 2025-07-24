@@ -17,6 +17,7 @@
 #'   or "cartographic" or "tiger" to use approx or slow/accurate bounds from tidycensus and tigris packages.
 #'   Note State bounds are built into this package as data so do not need to be downloaded from a service.
 #' @param allow_multiple_fips_types if enabled, set TRUE to allow mix of blockgroup, tract, city, county, state fips
+#' @param year passed to [tigris::places()] for bounds or city/town type of fips
 #' @details
 #'  The functions this relies on should return results in the same order as the input fips,
 #'  but will exclude rows for invalid fips, and will also exclude output rows that would
@@ -64,7 +65,8 @@ shapes_from_fips <- function(fips,
                              myservice_county = 'cartographic',
                              #  myservice_county = "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2022/FeatureServer/2/query" # an alternative
                              # myservice_state is built into the package as dataset
-                             allow_multiple_fips_types = TRUE
+                             allow_multiple_fips_types = TRUE,
+                             year = 2024
 ) {
 
   # preserve original input SORT order ####
@@ -179,7 +181,7 @@ shapes_from_fips <- function(fips,
   if (allow_multiple_fips_types) {
     oktype <- ftype %in% expectedtype & !is.na(ftype)
     if (any(oktype)) {
-      x <- try(shapes_places_from_placefips(fips[oktype], myservice = myservice_place), silent = TRUE)
+      x <- try(shapes_places_from_placefips(fips[oktype], myservice = myservice_place, year = year), silent = TRUE)
       errx <- error_downloading(x)
       if (is.null(errx)) {return(NULL)} # NULL means it is in a shiny app, which expects this to abort and return NULL if there is any problem
       if (errx) {shp_this <- shapes_empty_table(fips[oktype])} else {shp_this <- x} # if errx, provide NA rows of empty polygon
@@ -188,7 +190,7 @@ shapes_from_fips <- function(fips,
     }
   } else {
     if (all(ftype[!is.na(ftype)] %in% 'city')) {
-      shp_combined <- try(shapes_places_from_placefips(fips, myservice = myservice_place), silent = TRUE)
+      shp_combined <- try(shapes_places_from_placefips(fips, myservice = myservice_place, year = year), silent = TRUE)
     }
   }
   ##                                                  county ####
@@ -824,12 +826,13 @@ shapes_blockgroups_from_bgfips <- function(bgfips = '010890029222', outFields = 
 #'
 #' @param fips vector of 7-digit City/town/CDP codes as in [censusplaces$fips]
 #' @param myservice only 'tiger' is implemented as source of boundaries, using the tigris package
+#' @param year for [tigris::places()]
 #' @seealso [shapes_from_fips()]
 #' @return spatial data.frame for mapping
 #'
 #' @keywords internal
 #'
-shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
+shapes_places_from_placefips <- function(fips, myservice = 'tiger', year = 2024) {
 
   expectedtype <- 'city'
 
@@ -863,10 +866,10 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
 
   # Downloads ALL places in relevant STATES...  and last step will drop unrequested places
   if (myservice[1] == 'tiger') {
-    shp <- tigris::places(na.omit(ST))
+    shp <- tigris::places(na.omit(ST), year = year)
   } else {
     warning('other sources of boundaries not implemented, so using default')
-    shp <- tigris::places(na.omit(ST))
+    shp <- tigris::places(na.omit(ST), year = year)
   }
 
   # # ensure all via shapes_from_fips() have a FIPS colname
@@ -889,7 +892,7 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger') {
 
 ## NOT USED
 
-shapes_places_from_placenames <- function(place_st) {
+shapes_places_from_placenames <- function(place_st, year = 2024) {
 
   # name2fips()  uses fips_place_from_placename()
 
@@ -916,7 +919,7 @@ shapes_places_from_placenames <- function(place_st) {
   st = censusplaces$ST[match(as.integer(fips), censusplaces$fips)]
   # as.numeric since not stored with leading zeroes there !
 
-  tp = tigris::places(unique(st))  # DOWNLOAD THE BOUNDARIES of all places in an ENTIRE STATE, for EACH STATE REQUIRED HERE
+  tp = tigris::places(unique(st), year = year)  # DOWNLOAD THE BOUNDARIES of all places in an ENTIRE STATE, for EACH STATE REQUIRED HERE
   shp = tp[match(fips, tp$GEOID), ] # use FIPS of each place to get boundaries
 
   shp <- shapefile_dropcols(shp)

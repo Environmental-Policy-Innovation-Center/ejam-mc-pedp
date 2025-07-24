@@ -42,7 +42,7 @@ These are the indicator summary stats shown:
 \item \link{4,} "Flag for Overlapping with Tribes"
 \item \link{5,} "Flag for Overlapping with Non-Attainment Areas"
 \item \link{6,} "Flag for Overlapping with Impaired Waters"
-\item \link{7,} "Flag for Overlapping with CJEST Disadvantaged Communities"
+\item \link{7,} "Flag for Overlapping with CEJST Disadvantaged Communities"
 \item \link{8,} "Flag for Overlapping with EPA IRA Disadvantaged Communities"
 \item \link{9,} "Flag for Overlapping with Housing Burden Communities"
 \item \link{10,} "Flag for Overlapping with Transportation Disadvantaged Communities"
