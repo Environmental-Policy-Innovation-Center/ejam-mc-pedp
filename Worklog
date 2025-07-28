@@ -4,4 +4,5 @@ What's EJAM -> https://ejanalysis.github.io/EJAM/articles/ ?
 
 July 28th, 2025 
 - Created this repo as a fork of the conical repo -> https://github.com/ejanalysis/EJAM
-- ported over .yaml and 
+- ported over .yaml and dockerfile
+- ## TO DO: RUN folder cleanup! 

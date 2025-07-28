@@ -21,9 +21,9 @@ env:
 
   # ECS
   ECS_CLUSTER_NAME: ep_core__dev_us-east-1
-  ECS_FAMILY: ejam_v2
-  ECS_SERVICE_NAME: ejam_v2
-  ECS_SERVICE_SHORT_NAME: ejm_v2
+  ECS_FAMILY: ejam2
+  ECS_SERVICE_NAME: ejam2
+  ECS_SERVICE_SHORT_NAME: ejm2
   ECR_SERVICE_BUILDER_IMAGE: 516937823875.dkr.ecr.us-east-1.amazonaws.com/ep_service_builder:latest
 
   EC2_SERVICE_INSTANCE_TYPE: c6i.xlarge
