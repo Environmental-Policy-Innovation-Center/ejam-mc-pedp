@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_get_global_defaults_or_user_options.R
 \name{get_global_defaults_or_user_options}
 \alias{get_global_defaults_or_user_options}
-\title{utility that reconciles/consolidates user-defined params passed via run_app() and default settings from global_defaults_ files}
+\title{utility that reconciles/ consolidates user-defined params passed via run_app() and settings from global_defaults_ files}
 \usage{
 get_global_defaults_or_user_options(
   user_specified_options = NULL,
@@ -10,7 +10,7 @@ get_global_defaults_or_user_options(
 )
 }
 \arguments{
-\item{user_specified_options}{passed as arguments to \code{run_app()}}
+\item{user_specified_options}{named list of any optonal arguments that were in the call to \code{run_app()}}
 
 \item{bookmarking_allowed}{same as \code{?shinyApp} enableBookmarking param}
 }
@@ -21,16 +21,16 @@ and that later can be retrieved by server or ui via \code{golem::get_golem_optio
 or via \code{global_or_param()} (which both do almost the same thing).
 }
 \description{
-utility that reconciles/consolidates user-defined params passed via run_app() and default settings from global_defaults_ files
+utility that reconciles/ consolidates user-defined params passed via run_app() and settings from global_defaults_ files
 }
 \details{
 This function, called by \code{run_app()},
 collects the shiny-app-related default settings that are defined in these places:
 \enumerate{
-\item parameters passed to \code{run_app()} by a user
-\item settings defined in file \code{global_defaults_shiny_public.R}
-\item settings defined in file \code{global_defaults_shiny.R}
-\item settings defined in file \code{global_defaults_package.R}
+\item "user options" as parameters passed to \code{run_app()} by a user
+\item "global defaults" set in file \code{global_defaults_shiny_public.R}   -- and in that file, depends on value of isPublic if passed as a param to run_app()
+\item "global defaults" set in file \code{global_defaults_shiny.R}    -- sourced here
+\item "global defaults" set in file \code{global_defaults_package.R}  -- sourced here but also initially by .onAttach()
 }
 
 and consolidates them all as a list, to be available to server/ui.
