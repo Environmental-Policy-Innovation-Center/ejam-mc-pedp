@@ -1,5 +1,5 @@
 
-#' create_interactive_table - function that creates interactive html version of site by site table in app
+#' unused now? create_interactive_table - function that creates interactive html version of site by site table in app
 #' @description Builds site by site table after an analysis in EJAM app. Pulls in uploaded and analyzed data to create table
 #'
 #' @param data_processed processed data from app_server
@@ -9,7 +9,7 @@
 #'
 create_interactive_table <- function(data_processed, testing) {
 
-  shinyInput <- function(FUN, len, id, ...) {
+  shinyInputmaker <- function(FUN, len, id, ...) {
     inputs <- character(len)
     for (i in seq_len(len)) {
       inputs[i] <- as.character(FUN(id, ...))
@@ -64,7 +64,7 @@ create_interactive_table <- function(data_processed, testing) {
     dplyr::mutate(
       pop = ifelse(valid == TRUE, pop, NA),
       `Individual Report` = ifelse(valid == TRUE,
-                                shinyInput(FUN = actionButton, len = 1,
+                                   shinyInputmaker(FUN = actionButton, len = 1,
                                            id = paste0('button_', index),
                                            label = "Generate",
                                            onclick = paste0('Shiny.onInputChange(\"select_button', index,'\", this.id)' )

@@ -19,6 +19,8 @@
 #'
 app_server <- function(input, output, session) {
 
+  # hide it and then let reactives figure out whether to show it?
+  hideTab(inputId = 'all_tabs', target = 'Advanced Settings')
   #############################################################################  #
   # Key reactives  data_uploaded(), data_processed(), data_summarized() ####
   ##  data_uploaded   reactive holds selected latlon points or shapefiles. It is defined later.
@@ -43,9 +45,9 @@ app_server <- function(input, output, session) {
     EJAM:::global_or_param("sanitize_text")(input$an_threshgroup2)
   })
 
-  sanitized_bt_rad_buff <- reactive({
-    req(input$bt_rad_buff)
-    EJAM:::global_or_param("sanitize_numeric")(input$bt_rad_buff)
+  sanitized_radius_now <- reactive({
+    req(input$radius_now)
+    EJAM:::global_or_param("sanitize_numeric")(input$radius_now)
   })
   ################################################################### #
   # testing/dev mode settings ####
@@ -54,7 +56,7 @@ app_server <- function(input, output, session) {
     if (input$testing) {cat("testing == TRUE \n ")} else {cat("testing == FALSE \n----------------------\n")}
   })
   observe({
-    if (length(EJAM:::global_or_param("default_shiny.testmode")) > 0  ) { # allow params in run_app() to override default
+    if (length(EJAM:::global_or_param("default_shiny.testmode")) > 0  ) { # allow params in ejamapp() to override default
       if (!isTRUE(EJAM:::global_or_param("default_shiny.testmode"))) {
         updateRadioButtons(session = session, inputId = "shiny.testmode", selected = FALSE)
         # if (!isTRUE(getOption("shiny.testmode"))) {
@@ -135,41 +137,65 @@ app_server <- function(input, output, session) {
   })
   ##    --------------------------  TABS to show/hide    -------------------------- -
 
-  ## start app without showing Results since no analysis done yet
+  ## start app without showing Results since no analysis done yet?
   hideTab(inputId = 'all_tabs', target = 'See Results')
   ## note the app will show and select the results tab once results are finished processing
 
-  ## hide vs show ADVANCED tab at start  ---------------------- #   ***
+  ## hide vs show ADVANCED tab at start  ---------------------- #
 
-  # could use      global_or_param()   here instead
-  if (isTRUE(EJAM:::global_or_param("default_hide_advanced_settings"))) {
+  ## hide vs show ADVANCE tab on button click (button in 'About EJAM' tab)
+  ## and toggle to show hide or show button not both
+
+  observeEvent(input$ui_show_advanced_settings, {
+    showTab(inputId = 'all_tabs', target = 'Advanced Settings')
+    shinyjs::show(id = "ui_hide_advanced_settings")
+    shinyjs::hide(id = "ui_show_advanced_settings")
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$ui_hide_advanced_settings, {
     hideTab(inputId = 'all_tabs', target = 'Advanced Settings')
-  } else {
-    showTab(inputId =  "all_tabs", target = 'Advanced Settings')
-  }
+    shinyjs::hide(id = "ui_hide_advanced_settings")
+    shinyjs::show(id = "ui_show_advanced_settings")
+  })
+  # initial state (or if input$show_advanced_settings is changed in the adv. tab)
+  observe({
+    req(input$show_advanced_settings)
+    if (input$show_advanced_settings == FALSE) {
+      hideTab(inputId = 'all_tabs', target = 'Advanced Settings')
+      isolate({
+        if (input$can_show_advanced_settings) {
+          shinyjs::show(id = "ui_show_advanced_settings")
+          shinyjs::hide(id = "ui_hide_advanced_settings")
+        }
+      })
+    } else {
+      cat("will show tab \n")
+      showTab(inputId =  "all_tabs", target = 'Advanced Settings')
+      isolate({
+        if (input$can_show_advanced_settings) {
+          shinyjs::show(id = "ui_hide_advanced_settings")
+          shinyjs::hide(id = "ui_show_advanced_settings")
+        }
+      })
+    }
+  }, priority = 10)
 
-  ## hide vs show ADVANCE tab on button click (button in 'About EJAM' tab) ***
 
-  observeEvent(input$ui_show_advanced_settings,
-               {showTab(inputId = 'all_tabs', target = 'Advanced Settings')})
-  observeEvent(input$ui_hide_advanced_settings,
-               {hideTab(inputId = 'all_tabs', target = 'Advanced Settings')})
-
-  ## hide vs show ABOUT tab  ---------------------- #   ***
+  ## hide vs show ABOUT tab  ---------------------- #
   if (EJAM:::global_or_param("default_hide_about_tab")) {
     hideTab(inputId = 'all_tabs', target = 'About')
   }
-  ## hide vs show WRITTEN REPORT tab ---------------------- #   ***
+  ## hide vs show WRITTEN REPORT tab ---------------------- #
   if (EJAM:::global_or_param("default_hide_written_report")) {
     hideTab(inputId = 'results_tabs', target = 'Written Report')
   }
 
-  ## hide vs show BARPLOTS tab  ---------------------- #   ***
+  ## hide vs show BARPLOTS tab  ---------------------- #
   if (EJAM:::global_or_param("default_hide_plot_barplot_tab")) {
     hideTab(inputId = 'details_subtabs', target = 'Plot Average Scores')
   }
 
-  ## hide vs show HISTOGRAMS tab  ---------------------- #   ***
+  ## hide vs show HISTOGRAMS tab  ---------------------- #
   if (EJAM:::global_or_param("default_hide_plot_histo_tab")) {
     hideTab(inputId = 'details_subtabs', target = 'Plot Full Range of Scores')
   }
@@ -179,7 +205,7 @@ app_server <- function(input, output, session) {
   max_mb_upload_react <- reactive({
     x <- as.numeric((input$max_mb_upload))
     if (is.null(x) || is.na(x) || length(x) == 0) {
-      x <- default_max_mb_upload
+      x <- EJAM:::global_or_param("default_max_mb_upload") #?
       shiny::updateNumericInput(session = session, inputId = "max_mb_upload", value = x)
     } else {
       if (x > EJAM:::global_or_param("maxmax_mb_upload")) {x <- EJAM:::global_or_param("maxmax_mb_upload")}
@@ -244,13 +270,12 @@ app_server <- function(input, output, session) {
       naics_choices <- setNames(naics_counts_filtered()$NAICS, naics_counts_filtered()$label_no_subs)
     }
 
-    vals <- input$ss_select_naics
+    vals <- ifelse(is.null(input$ss_select_naics), input$default_naics, input$ss_select_naics)
     # update ss_select_NAICS input options ###
     updateSelectizeInput(session = session, inputId = 'ss_select_naics',
                          ## use named list version, grouped by first two code numbers
                          choices = naics_choices, # need to keep formatting
                          selected = vals,
-                         #choices = NAICS, # named list of codes, data loaded with EJAM package
                          server = TRUE)
   })
 
@@ -349,19 +374,39 @@ app_server <- function(input, output, session) {
 
   data_up_shp <- reactive({
 
-    req(input$ss_upload_shp)
-    infiles <- input$ss_upload_shp$datapath # get path and temp (not original) filename of the uploaded file
-    print(infiles)
+    if (is.null(input$ss_upload_shp)) {
+      xshp <- global_or_param("shapefile")
+      if (is.null(xshp) || length(xshp) == 0) {
+        if (input$testing) {cat("should stop here\n")}
+        req(FALSE, cancelOutput = TRUE)
+        if (input$testing) {cat("should not be here\n")}
+      } else {
+        #   ###################################### #
+        # if the file or object (spatial data.frame) was provided as shapefile param in ejamapp()
+        if (input$testing) {cat("trying to read shapefile parameter\n")}
+        shp <- try( shapefile_from_any(xshp, cleanit = FALSE), silent = TRUE)
+        if (inherits(shp, "try-error")) {
+          req(FALSE, cancelOutput = TRUE)
+        }
+        ## if user provided ejamapp(shapefile=xyz) but did not set these also, they will not see their upload ready to run:
+        ## default_upload_dropdown = "upload"  --  input$default_ss_choose_method
+        ## default_selected_type_of_site_upload = "latlon"  or  default_selected_type_of_site_upload = "SHP" --  input$ss_choose_method_upload
+        #shiny::updateRadioButtons(inputId = "default_ss_choose_method", selected = "upload")
+        shiny::updateRadioButtons(session, inputId = "ss_choose_method", selected = "upload")
+        shiny::updateSelectInput(session, inputId = "ss_choose_method_upload", selected = "SHP")
+      }
+    } else {
+      #   ###################################### #
+      # if the file was uploaded via web app button
+      req(input$ss_upload_shp)
+      if (input$testing) {cat("file was uploaded via web app button\n")}
+      infiles <- input$ss_upload_shp$datapath # get path and temp (not original) filename of the uploaded file
+      print(infiles)
+      infile_ext <- tools::file_ext(infiles)
+      required_extensions <- c('shp', 'shx', 'dbf', 'prj', 'json')
+      valid_zip <- 'zip'
+      has_required_files <- all(required_extensions %in% infile_ext) || any(infile_ext == valid_zip)
 
-    infile_ext <- tools::file_ext(infiles)
-
-    required_extensions <- c('shp', 'shx', 'dbf', 'prj', 'json')
-    valid_zip <- 'zip'
-    has_required_files <- all(required_extensions %in% infile_ext) || any(infile_ext == valid_zip)
-
-    if (EJAM:::global_or_param("use_shapefile_from_any")) {
-      ###################################### #
-      # newer way ... uses shapefile_from_any() which uses shapefix()
       allowed_extensions <- EJAM:::global_or_param("default_shp_oktypes_1") # c("zip", "gdb", "geojson", "json", "kml", "shp") # see shapefile_from_any()
       if (all(infile_ext %in% allowed_extensions)) {
         error_message(NULL)
@@ -370,123 +415,26 @@ app_server <- function(input, output, session) {
         error_message(paste("Not an allowed file type. Must be one of these:", paste(allowed_extensions, collapse = ", ")))
         disable_buttons[['SHP']] <- TRUE
       }
-
       shp <- shapefile_from_any(infiles, cleanit = FALSE, inputname = input$ss_upload_shp$name)
+    }
+    #   ###################################### #
+    # do the rest whether it was uploaded or came via ejamapp()
 
-      # if shp contains point features, present message in app
-      ## this case is not caught by shapefile_from_any currently - but could use shapefix somehow
-      if (any(sf::st_geometry_type(shp) == "POINT")) {
-        shp <- NULL
-        disable_buttons[['SHP']] <- TRUE
-        shiny::validate("Shape file must be of polygon geometry.")
-      }
-
-      if (!is.null(attr(shp, "validate_errmsg")))            {shiny::validate(validate_errmsg)}
-      if (!is.null(attr(shp, "disable_buttons_SHP")))        {disable_buttons[['SHP']]        <- attr(shp, "disable_buttons_SHP")}
-      if (!is.null(attr(shp, "num_valid_pts_uploaded_SHP"))) {num_valid_pts_uploaded[['SHP']] <- attr(shp, "num_valid_pts_uploaded_SHP")}
-      if (!is.null(attr(shp, "invalid_alert_SHP")))          {invalid_alert[['SHP']]          <- attr(shp, "invalid_alert_SHP")}
-      #if (!is.null(attr(shp, "an_map_text_shp")))            {an_map_text_shp[['SHP']]            <- attr(shp, "an_map_text_shp")}
-
-      shp
-
-    } else {
-      ###################################### #
-      # older way
-
-      required_extensions <- c('shp', 'shx', 'dbf', 'prj')
-      valid_zip <- 'zip'
-      has_required_files <- all(required_extensions %in% infile_ext) || any(infile_ext == valid_zip)
-
-      if (!has_required_files) {
-        missing_files <- required_extensions[!required_extensions %in% infile_ext]
-        error_message(paste("Missing required file types:", paste(missing_files, collapse = ", ")))
-        disable_buttons[['SHP']] <- TRUE
-      } else {
-        error_message(NULL)
-        disable_buttons[['SHP']] <- FALSE
-      }
-
-      # detect type of file(s) specified, and read it
-      infile_ext <- tools::file_ext(infiles)
-      if (!all(c('shp','shx','dbf','prj') %in% infile_ext) && !('zip' %in% infile_ext) && !('json' %in% infile_ext)) {
-        # cant read file type specified ____________________________________
-        disable_buttons[['SHP']] <- TRUE
-        shiny::validate('Not all required file extensions found.')
-      }
-      if (length(infile_ext) == 1 & any(grepl("json", infile_ext))) {
-        # read json file ____________________________________
-        shp <- shapefile_from_json(infiles)
-
-      } else {
-        if (length(infile_ext) == 1 & any(grepl("zip", infile_ext))) {
-          # read zip file____________________________________
-          shp <- shapefile_from_zip(infiles)
-
-        } else {
-          # read .shp etc.____________________________________
-          dir <- unique(dirname(infiles)) # get folder (a temp one created by shiny for the uploaded file)
-          outfiles <- file.path(dir, input$ss_upload_shp$name) # create new path\name from temp dir plus original filename of file selected by user to upload
-          name <- strsplit(input$ss_upload_shp$name[1], "\\.")[[1]][1] # ??? get filename minus extension, of 1 file selected by user to upload
-          purrr::walk2(infiles, outfiles, ~file.rename(.x, .y)) # rename files from ugly tempfilename to original filename of file selected by user to upload
-          shp <- sf::read_sf(file.path(dir, paste0(name, ".shp"))) # read-in shapefile
-        }
-      }
-
-      # if shp is null, present message in app
-      if (is.null(shp)) {
-        disable_buttons[['SHP']] <- TRUE                                # a reactiveValues object
-        shiny::validate("Uploaded file should contain the following file extensions: shp,shx,dbf,prj or json or zip")
-      }
-
-      # if shp contains point features, present message in app
-      if (any(sf::st_geometry_type(shp) == "POINT")) {
-        disable_buttons[['SHP']] <- TRUE                                # a reactiveValues object
-        shiny::validate("Shape file must be of polygon geometry.")
-      }
-
-      # Drop Z and/or M dimensions from feature geometries, resetting classes appropriately
-      shp <- sf::st_zm(shp)
-
-      # standardize colname to "geometry" since standard name not always seen. Can be "Shape" for example: shp <- shapefile_from_any(system.file('testdata/shapes/portland.gdb.zip', package = "EJAM"))
-      if (any(grepl("sfc", lapply(shp, class)))) {
-        colnames(shp)[grepl("sfc", lapply(shp, class))] <- "geometry"
-        sf::st_geometry(shp) <- "geometry"
-      }
-
-      # check if shp is valid, and
-      # add "valid" and "invalid_msg" columns re invalid rows/polygons
-
-      if (nrow(shp) > 0) {
-        ## terra provides faster valid check than sf
-        shp_valid_check <- terra::is.valid(terra::vect(shp), messages = T)
-        shp_is_valid <- shp_valid_check$valid
-        numna <- sum(!shp_is_valid)
-        num_valid_pts_uploaded[['SHP']] <- length(shp_is_valid) - sum(!shp_is_valid)    # a reactiveValues object
-        invalid_alert[['SHP']] <- numna                                                 # a reactiveValues object
-        #shp_valid <- shp[sf::st_is_valid(shp),] # old way to check which shapes valid
-        shp_valid <- dplyr::mutate(shp, siteid = dplyr::row_number())
-        shp_proj <- sf::st_transform(shp_valid,crs = 4269)
-      } else {
-
-        errmsg    = 'No shapes found in file uploaded.'
-        placetype = 'SHP'
-
-        invalid_alert[[  placetype]] <- 0    # hide warning of invalid sites
-        an_map_text_pts[[placetype]] <- NULL  # hide count of uploaded sites
-        disable_buttons[[placetype]] <- TRUE
-        shiny::validate(errmsg)
-
-      }
-      disable_buttons[['SHP']] <- FALSE                                                 # a reactiveValues object
-      shp_proj$valid <- shp_is_valid
-      shp_proj <- cbind(ejam_uniq_id = 1:nrow(shp_proj), shp_proj)   #  UNIQUE ID HERE
-      shp_proj$invalid_msg <- NA
-      shp_proj$invalid_msg[shp_proj$valid == F] <- shp_valid_check$reason[shp_proj$valid == F]
-      shp_proj$invalid_msg[is.na(shp_proj$geometry)] <- 'bad geometry'
-      class(shp_proj) <- c(class(shp_proj), 'data.table')
-      shp_proj
-    } # end of old way of reading shp, replaced by shapefile_from_any() that uses shapefix()
-    ###################################### #
+    # if shp contains point features, present message in app
+    ## this case is not caught by shapefile_from_any currently - but could use shapefix somehow
+    if (any(sf::st_geometry_type(shp) == "POINT")) {
+      shp <- NULL
+      disable_buttons[['SHP']] <- TRUE
+      shiny::validate("Shape file must be of polygon geometry.")
+    }
+    if (!is.null(attr(shp, "validate_errmsg")))            {shiny::validate(validate_errmsg)}
+    if (!is.null(attr(shp, "disable_buttons_SHP")))        {disable_buttons[['SHP']]        <- attr(shp, "disable_buttons_SHP")}
+    if (!is.null(attr(shp, "num_valid_pts_uploaded_SHP"))) {num_valid_pts_uploaded[['SHP']] <- attr(shp, "num_valid_pts_uploaded_SHP")}
+    if (!is.null(attr(shp, "invalid_alert_SHP")))          {invalid_alert[['SHP']]          <- attr(shp, "invalid_alert_SHP")}
+    if ("sf" %in% class(shp)) {
+      disable_buttons[['SHP']] <- FALSE # Start button enabled
+    }
+    shp
 
   }) # END OF SHAPEFILE UPLOAD
 
@@ -570,15 +518,26 @@ app_server <- function(input, output, session) {
   #############################################################################  #   #############################################################################  #
 
   #############################################################################  #
-  ## reactive: latlon (from table passed to run_app() as param) ####
-  ## NOT YET IMPLEMENTED
+  ## reactive: latlon (from table passed to ejamapp() as param) ####
 
   data_up_tablepassed_latlon <- reactive({
-    req(input$max_pts_upload)
-    ################################# #
-    prepare_table_from_run_app <- function(sitepoints, input_max_pts_upload, input_testing) {
 
-      if (all(sitepoints == 0)) {return(NULL)}
+    sitepoints <- NULL # since never set in global_defaults_*.R, only exists if at all via  get_golem_options()
+    sitepoints <- global_or_param("sitepoints")
+    req(sitepoints)
+
+    ################################# #
+    prepare_table_from_ejamapp <- function(sitepoints, input_max_pts_upload, input_testing) {
+
+      # handle R object or filepath
+      sitepoints <- try(sitepoints_from_anything(sitepoints))
+      if (inherits(sitepoints, "try-error")) {
+        if (input_testing) {cat("Error reading sitepoints from ejamapp() parameter \n")}
+        return(NULL)
+      }
+      if (all(sitepoints %in% 0) || is.null(sitepoints) || NROW(sitepoints) %in% 0 || !is.data.frame(sitepoints)) {
+        return(NULL)
+      }
       if (NROW(sitepoints) > input_max_pts_upload) {
         if (input_testing) {cat("ROW COUNT TOO HIGH IN FILE THAT SHOULD provide lat lon: ", NROW(sitepoints), "\n")}
         return(NULL)
@@ -586,6 +545,7 @@ app_server <- function(input, output, session) {
       if (input_testing) {cat("ROW COUNT IN FILE THAT SHOULD provide lat lon: ", NROW(sitepoints), "\n")}
       ## if column names are found in lat/long alias comparison, process
       if (any(tolower(colnames(sitepoints)) %in% lat_alias) & any(tolower(colnames(sitepoints)) %in% lon_alias)) {
+        sitepoints <- data.table::setDT(data.table::copy(sitepoints))
         sitepoints[, ejam_uniq_id := .I]
         data.table::setcolorder(sitepoints, 'ejam_uniq_id')
         sitepoints <- sitepoints %>%
@@ -595,48 +555,19 @@ app_server <- function(input, output, session) {
         if (input$testing) {cat("ROW COUNT after latlon_df_clean(): ", NROW(sitepoints), "\n")}
         return(sitepoints)
       } else {
-        return("No coordinate columns found.")
+        if (input_testing) {cat("No coordinate columns found.\n")}
+        return(NULL)
       }
     }
     ################################# #
 
-    sitepoints <- 0 # since never set in global_defaults_*.R, only exists if at all via  get_golem_options()
+    sitepoints <- prepare_table_from_ejamapp(sitepoints, input_max_pts_upload = input$max_pts_upload, input_testing = input$testing)
+    req(sitepoints, cancelOutput = TRUE) # stop if failed for any reason
+    # ok, so allow Start button
 
-    sitepoints <- global_or_param("sitepoints")
-    if (all(sitepoints == 0)) {
-      # warn zero places
-      cat('no input sitepoints\n')
-      return(NULL) # ?
-    } else {
-      cat('got input sitepoints\n')
-    }
-
-    sitepoints <- prepare_table_from_run_app(sitepoints, input_max_pts_upload = input$max_pts_upload, input_testing = input$testing)
-
-    if (all(is.null(sitepoints))) {
-
-      errmsg    = paste0('Max allowed points is ', as.character(input$max_pts_upload))
-      placetype = 'latlon'
-
-      invalid_alert[[  placetype]] <- 0    # hide warning of invalid sites
-      an_map_text_pts[[placetype]] <- NULL # hide count of uploaded sites
-      disable_buttons[[placetype]] <- TRUE
-      shiny::validate(errmsg)
-
-    }
-    if (all(sitepoints == "No coordinate columns found.")) {
-
-      errmsg    = 'No coordinate columns found.'
-      placetype = 'latlon'
-
-      invalid_alert[[  placetype]] <- 0    # hide warning of invalid sites
-      an_map_text_pts[[placetype]] <- NULL # hide count of uploaded sites
-      disable_buttons[[placetype]] <- TRUE
-      shiny::validate(errmsg)
-
-    }
-    # ok
     disable_buttons[['latlon']] <- FALSE
+
+    sitepoints
   })
 
   #############################################################################  #
@@ -644,50 +575,38 @@ app_server <- function(input, output, session) {
 
   data_up_latlon <- reactive({
 
-    ## wait for file to be uploaded
-    req(input$ss_upload_latlon)
-
-    ## if acceptable file type, read in; if not, send warning text
-    input_file_path <- input$ss_upload_latlon$datapath
-    # ideally would quickly check file size here before actually trying to read the entire file in case it is > cap.
-
-    ## this part could be replaced each time it happens, by the function sitepoints_from_any
-
-    sitepoints <- as.data.table(read_csv_or_xl(fname = input_file_path))
-
-    # DO NOT USE THE UPLOAD IF IT HAS MORE THAN MAX POINTS ALLOWED FOR UPLOAD
-    #
-    if (NROW(sitepoints) > input$max_pts_upload) {
-
-      cat("ROW COUNT TOO HIGH IN FILE THAT SHOULD provide lat lon: ", NROW(sitepoints), "\n")
-
-      errmsg    = paste0('Max allowed upload of points is ', as.character(input$max_pts_upload))
-      placetype = 'latlon'
-
-      invalid_alert[[  placetype]] <- 0    # hide warning of invalid sites
-      an_map_text_pts[[placetype]] <- NULL # hide count of uploaded sites
-      disable_buttons[[placetype]] <- TRUE
-      shiny::validate(errmsg)
-
+    if (is.null(input$ss_upload_latlon)) {
+      # if nothing uploaded, check if latlon passed as parameter to ejamapp() in the form of "sitepoints" object
+      xsitepoints <- data_up_tablepassed_latlon()
+      if (!is.null(xsitepoints)) {
+        ## if user provided ejamapp(sitepoints=xyz) but did not set these also, they will not see their upload ready to run:
+        ## default_upload_dropdown = "upload"  --  input$default_ss_choose_method
+        ## default_selected_type_of_site_upload = "latlon"  --  input$ss_choose_method_upload
+        # shiny::updateRadioButtons(session = session, inputId = "default_ss_choose_method", selected = "upload")
+        shiny::updateRadioButtons(inputId = "ss_choose_method", selected = "upload")
+        shiny::updateSelectInput(inputId = "ss_choose_method_upload", selected = "latlon")
+        xsitepoints
+      }
     } else {
 
-      cat("ROW COUNT IN FILE THAT SHOULD provide lat lon: ", NROW(sitepoints), "\n")
-      ## if column names are found in lat/long alias comparison, process
-      if (any(tolower(colnames(sitepoints)) %in% lat_alias) & any(tolower(colnames(sitepoints)) %in% lon_alias)) {
-        sitepoints[, ejam_uniq_id := .I]
-        data.table::setcolorder(sitepoints, 'ejam_uniq_id')
-        sitepoints <- sitepoints %>%
-          latlon_df_clean(invalid_msg_table = TRUE) #%>%   # This does latlon_infer() and latlon_as.numeric() and latlon_is.valid()
-        sitepoints$invalid_msg <- NA
-        sitepoints$invalid_msg[is.na(sitepoints$lon) | is.na(sitepoints$lat)] <- 'bad lat/lon coordinates'
-        cat("ROW COUNT after latlon_df_clean(): ", NROW(sitepoints), "\n")
-        disable_buttons[['latlon']] <- FALSE
-        #print(sum(sitepoints$valid))
-        invalid_alert[['latlon']] <- sum(!sitepoints$valid)
-        sitepoints
-      } else {
+      ## now the file has been uploaded since !is.null
+      # req(input$ss_upload_latlon)
 
-        errmsg    = 'No coordinate columns found.'
+      ## if acceptable file type, read in; if not, send warning text
+      input_file_path <- input$ss_upload_latlon$datapath
+      # ideally would quickly check file size here before actually trying to read the entire file in case it is > cap.
+
+      ## this part could be replaced each time it happens, by the function sitepoints_from_any
+
+      sitepoints <- as.data.table(read_csv_or_xl(fname = input_file_path))
+
+      # DO NOT USE THE UPLOAD IF IT HAS MORE THAN MAX POINTS ALLOWED FOR UPLOAD
+      #
+      if (NROW(sitepoints) > input$max_pts_upload) {
+
+        cat("ROW COUNT TOO HIGH IN FILE THAT SHOULD provide lat lon: ", NROW(sitepoints), "\n")
+
+        errmsg    = paste0('Max allowed upload of points is ', as.character(input$max_pts_upload))
         placetype = 'latlon'
 
         invalid_alert[[  placetype]] <- 0    # hide warning of invalid sites
@@ -695,6 +614,32 @@ app_server <- function(input, output, session) {
         disable_buttons[[placetype]] <- TRUE
         shiny::validate(errmsg)
 
+      } else {
+
+        cat("ROW COUNT IN FILE THAT SHOULD provide lat lon: ", NROW(sitepoints), "\n")
+        ## if column names are found in lat/long alias comparison, process
+        if (any(tolower(colnames(sitepoints)) %in% lat_alias) & any(tolower(colnames(sitepoints)) %in% lon_alias)) {
+          sitepoints[, ejam_uniq_id := .I]
+          data.table::setcolorder(sitepoints, 'ejam_uniq_id')
+          sitepoints <- sitepoints %>%
+            latlon_df_clean(invalid_msg_table = TRUE) #%>%   # This does latlon_infer() and latlon_as.numeric() and latlon_is.valid()
+          sitepoints$invalid_msg <- NA
+          sitepoints$invalid_msg[is.na(sitepoints$lon) | is.na(sitepoints$lat)] <- 'bad lat/lon coordinates'
+          cat("ROW COUNT after latlon_df_clean(): ", NROW(sitepoints), "\n")
+          disable_buttons[['latlon']] <- FALSE
+          #print(sum(sitepoints$valid))
+          invalid_alert[['latlon']] <- sum(!sitepoints$valid)
+          sitepoints
+        } else {
+
+          errmsg    = 'No coordinate columns found.'
+          placetype = 'latlon'
+
+          invalid_alert[[  placetype]] <- 0    # hide warning of invalid sites
+          an_map_text_pts[[placetype]] <- NULL # hide count of uploaded sites
+          disable_buttons[[placetype]] <- TRUE
+          shiny::validate(errmsg)
+        }
       }
     }
   })
@@ -1441,11 +1386,11 @@ app_server <- function(input, output, session) {
   #       distance_near_eachother(
   #     lon = data_uploaded()$lon,
   #     lat = data_uploaded()$lat,
-  #     distance = 2 * sanitized_bt_rad_buff()
+  #     distance = 2 * sanitized_radius_now()
   #     ## if switching units between miles and km - not currently used
   #     # distance = ifelse(input$radius_units == 'miles',
-  #     #                   2 * sanitized_bt_rad_buff(),
-  #     #                   2 * sanitized_bt_rad_buff() * 0.62137119
+  #     #                   2 * sanitized_radius_now(),
+  #     #                   2 * sanitized_radius_now() * 0.62137119
   #     #)
   #   )
   # })
@@ -1521,23 +1466,23 @@ app_server <- function(input, output, session) {
 
   output$radius_slider_ui <- renderUI({
 
-    valid_default_miles <- is.numeric(input$default_miles) && input$default_miles >= 0.5
+    valid_radius_default <- is.numeric(input$radius_default) && input$radius_default >= 0.5
     valid_max_miles <- is.numeric(input$max_miles) && input$max_miles > 0
 
-    if (valid_default_miles && valid_max_miles) {
+    if (valid_radius_default && valid_max_miles) {
       shiny::sliderInput(
-        inputId = 'bt_rad_buff',
+        inputId = 'radius_now',
         label = "",
         min = current_slider_min[[current_upload_method()]],
         max = input$max_miles,
-        value = input$default_miles,
+        value = input$radius_default,
         step = EJAM:::global_or_param("stepradius"),
         post = ' miles'
       )
     } else {
-      error_message <- if (!valid_default_miles && !valid_max_miles) {
+      error_message <- if (!valid_radius_default && !valid_max_miles) {
         "The radius input is disabled because both the default and max miles values are invalid. Please set valid distances in the Advanced Settings tab."
-      } else if (!valid_default_miles) {
+      } else if (!valid_radius_default) {
         "The radius input is disabled because the default miles value is invalid. Please set a valid distance in the Advanced Settings tab."
       } else {
         "The radius input is disabled because the max miles value is invalid. Please set a valid maximum distance in the Advanced Settings tab."
@@ -1549,16 +1494,16 @@ app_server <- function(input, output, session) {
   ## disable radius slider when FIPS is selected
   observe({
     if (current_upload_method() %in% c('FIPS', 'FIPS_PLACE')) {
-      shinyjs::disable(id = 'bt_rad_buff')
+      shinyjs::disable(id = 'radius_now')
     } else {
-      shinyjs::enable(id = 'bt_rad_buff')
+      shinyjs::enable(id = 'radius_now')
     }
   })
 
   ## create different initial (and minimum?) radius values for each site selection type
-  ### input$default_miles is set in advanced tab by global_defaults_*.R and then based on user input if any
-  ### or via e.g., radius=3.1 or radius_shapefile=1 param that can be provided to run_app()
-
+  ### input$radius_default is set in advanced tab by global_defaults_*.R and then based on user input if any
+  ### or via e.g., radius=3.1 or radius_shapefile=1 param that can be provided to ejamapp()
+  #minr = EJAM:::global_or_param("minradius")
   current_slider_min <- list(
     # constants defined in global_defaults_*.R
     'latlon' =  EJAM:::global_or_param("minradius"),
@@ -1593,7 +1538,7 @@ app_server <- function(input, output, session) {
 
   observe({
     # Sanitize the input: Convert to numeric or set a default value
-    sanitized_miles <- as.numeric(input$default_miles)
+    sanitized_miles <- as.numeric(input$radius_default)
     # Handle cases where the input cannot be converted to a numeric value
     if (is.na(sanitized_miles)) {
       sanitized_miles <- 0
@@ -1611,30 +1556,30 @@ app_server <- function(input, output, session) {
     for (this in these) {
       current_slider_val[[this]] <- sanitized_miles
     }
-  }) %>% bindEvent(input$default_miles)
+  }) %>% bindEvent(input$radius_default)
 
   # set/update based on advanced tab set by global_defaults_*.R and then might be changed by a user
 
   observe({
     these <- c("FIPS", "FIPS_PLACE", "SHP") # but disabled for FIPS
-    for (this in these) {current_slider_val[[this]] <- input$default_miles_shapefile}
-  }) %>% bindEvent(input$default_miles_shapefile)
+    for (this in these) {current_slider_val[[this]] <- input$radius_default_shapefile}
+  }) %>% bindEvent(input$radius_default_shapefile)
 
   ## update/restore previous radius (and reset the min value) when site selection type changes/changes back
   observe({
-    updateSliderInput(session = session, inputId = 'bt_rad_buff',
+    updateSliderInput(session = session, inputId = 'radius_now',
                       value = current_slider_val[[current_upload_method()]])
   }) %>% bindEvent(current_upload_method())
 
   ## update stored radius when slider changes
   # except this would initially save the one current radius (default) as the current value for all methods including shapefiles which we dont want to do
   observe({
-    current_slider_val[[current_upload_method()]] <- sanitized_bt_rad_buff()
-  }) %>% bindEvent(sanitized_bt_rad_buff())
+    current_slider_val[[current_upload_method()]] <- sanitized_radius_now()
+  }) %>% bindEvent(sanitized_radius_now())
 
   ## Create separate radius label to allow line break
   output$radius_label <- renderUI({
-    val <- sanitized_bt_rad_buff()
+    val <- sanitized_radius_now()
     lab <- paste0('<b>Distance from Site: <br/>', val, ' miles ','(',round(val / 0.62137119, 2), ' km)</b>')
     HTML(lab)
   })
@@ -1646,7 +1591,7 @@ app_server <- function(input, output, session) {
 
     # ***
     ## or...
-    # mapfast(data_uploaded(), radius = sanitized_bt_rad_buff(), column_names = "ej")
+    # mapfast(data_uploaded(), radius = sanitized_radius_now(), column_names = "ej")
     #
     #
     #
@@ -1879,7 +1824,7 @@ app_server <- function(input, output, session) {
 
       if (submitted_upload_method() == "SHP") {
 
-        rad_buff <- sanitized_bt_rad_buff()
+        rad_buff <- sanitized_radius_now()
 
         if (!is.na(rad_buff) && rad_buff > 0) {
           # if (!silentinteractive) {
@@ -1905,7 +1850,7 @@ app_server <- function(input, output, session) {
         }
 
         out <- ejamit(shapefile = shp,
-                      radius = sanitized_bt_rad_buff(),
+                      radius = sanitized_radius_now(),
                       maxradius = input$maxradius,
                       avoidorphans = input$avoidorphans,
                       quadtree = localtree,
@@ -1958,7 +1903,7 @@ app_server <- function(input, output, session) {
         }
 
         out <-  ejamit(sitepoints = data_uploaded(),#d_upload,
-                       radius = sanitized_bt_rad_buff(),
+                       radius = sanitized_radius_now(),
                        #quadtree = localtree,
                        # countcols      = NULL,
                        # wtdmeancols    = NULL,
@@ -1976,6 +1921,9 @@ app_server <- function(input, output, session) {
                        avoidorphans = input$avoidorphans,
                        testing = input$testing,
                        maxradius = input$maxradius,
+                       thresholds   = list(input$an_thresh_comp1, input$an_thresh_comp2), # thresholds = list(90, 90), # or 80,80
+                       threshnames  = list(input$an_threshnames1, input$an_threshnames2), # list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
+                       threshgroups = list(sanitized_an_threshgroup1(), sanitized_an_threshgroup2()), # list("EJ-US-or-ST", "Supp-US-or-ST")
                        quiet = TRUE,
                        updateProgress_getblocks = updateProgress_getblocks)
 
@@ -2075,7 +2023,7 @@ app_server <- function(input, output, session) {
   # Unless user changes it here, use a standard title that has been determined by global_defaults_*.R but then optionally modified by advanced settings tab
 
   output$analysis_title_ui <- renderUI({
-    shiny::textInput('analysis_title',
+    shiny::textInput(inputId = 'analysis_title',
                      label = 'Name of Your Analysis',
                      value = sanitized_standard_analysis_title())
   })
@@ -2102,7 +2050,7 @@ app_server <- function(input, output, session) {
       map_ejam_plus_shp(
         out = data_processed(),
         shp = data_uploaded(),  # here, shp already has ejam_uniq_id assigned (after which invalid rows were dropped I think)
-        radius_buffer = sanitized_bt_rad_buff()
+        radius_buffer = sanitized_radius_now()
       )
 
     } else { #  not shapefile
@@ -2176,7 +2124,7 @@ app_server <- function(input, output, session) {
     req(isTruthy(orig_leaf_map()))
     # clear shapes from map so buffers don't show twice
     leaflet::leafletProxy(mapId = 'an_leaf_map', session) %>% leaflet::clearShapes()
-    rad_buff <- sanitized_bt_rad_buff()
+    rad_buff <- sanitized_radius_now()
 
     # SHP map ------------------------------ #
 
@@ -2216,7 +2164,7 @@ app_server <- function(input, output, session) {
                                   dplyr::select(-any_of(c('valid', 'invalid_msg'))))
       suppressMessages(
         leaflet::leafletProxy(mapId = 'an_leaf_map', session, data = d_upload) %>%
-          map_facilities_proxy(rad = sanitized_bt_rad_buff(),
+          map_facilities_proxy(rad = sanitized_radius_now(),
                                highlight = TRUE, #input$an_map_clusters,
                                popup_vec = popup_vec,
                                use_marker_clusters = nrow(d_upload) > EJAM:::global_or_param("marker_cluster_cutoff"),
@@ -2227,7 +2175,7 @@ app_server <- function(input, output, session) {
   #############################################################################  #
   ## *BARPLOT for short and long reports (avg person D ratios vs US avg) ####
 
-  # compare / merge with  EJAM/R/plot_barplot_ratios.R ***
+  # compare / merge with  ejam2barplot() / plot_barplot_ratios() / plot_barplot_ratios_ez() group of functions ***
   # https://exts.ggplot2.tidyverse.org/gallery/
   ###################  #
 
@@ -2315,7 +2263,7 @@ app_server <- function(input, output, session) {
     } else if (input$plotkind_1pager == "box") {
 
       ## *BOXPLOTS for short report (all sites D ratios vs US avg) ####
-      ejam2boxplot_ratios(ejamitout = data_processed(), radius = sanitized_bt_rad_buff(),
+      ejam2boxplot_ratios(ejamitout = data_processed(), radius = sanitized_radius_now(),
                           main = input$Custom_title_for_bar_plot_of_indicators)
     } # box
     ################## #
@@ -2665,7 +2613,7 @@ app_server <- function(input, output, session) {
         ok2plot = input$ok2plot,
         react.v1_summary_plot = v1_summary_plot(),
         launchexcel = FALSE,
-        radius_or_buffer_in_miles = sanitized_bt_rad_buff(),
+        radius_or_buffer_in_miles = sanitized_radius_now(),
         radius_or_buffer_description = NULL, # radius_or_buffer_description, # the function will figure it out
         buffer_desc = NULL, # "Selected Locations", # the function will figure it out
         in.analysis_title = sanitized_analysis_title(),
@@ -2703,9 +2651,9 @@ app_server <- function(input, output, session) {
       radioButtons(inputId = 'summ_bar_ind',
                    label = h5('Indicator type'),
                    choiceNames = c('Residential Populations', 'Environmental',
-                                   'Summary Index','Suppl. Summary Index'), # displayed versions of names
+                                   'EJ Index', 'Suppl. EJ Index'), # displayed versions of names
                    choiceValues = c('Demographic', 'Environmental',
-                                    'EJ Index','Supplementary Index'), # internal versions of name types as found in map_headernames
+                                    'EJ Index', 'Supplementary Index'), # internal versions of name types as found in map_headernames
                    selected = "Environmental")
     } else {
       radioButtons(inputId = 'summ_bar_ind',
@@ -2819,7 +2767,7 @@ app_server <- function(input, output, session) {
       }
 
     }
-    selectInput('summ_hist_ind', label = 'Choose indicator',
+    selectInput(inputId = 'summ_hist_ind', label = 'Choose indicator',
                 choices = setNames(
                   object = root_nms,
                   nm = friendly_nms
@@ -2847,7 +2795,7 @@ app_server <- function(input, output, session) {
 
     shiny::textInput(inputId = "rg_enter_miles",
                      label = "Analysis Location:",
-                     value = paste0("within ", sanitized_bt_rad_buff(),
+                     value = paste0("within ", sanitized_radius_now(),
                                     ' miles of')#,
                      #input$radius_units, " of")
     )
@@ -2928,7 +2876,7 @@ app_server <- function(input, output, session) {
           analysis_title =   sanitized_analysis_title(),
           zonetype =  input$rg_zonetype,
           where = input$rg_enter_miles,
-          distance = paste0(sanitized_bt_rad_buff(),' miles'), #input$radius_units),
+          distance = paste0(sanitized_radius_now(),' miles'), #input$radius_units),
           sectorname_short = input$rg_enter_sites,
           ## allow for either or
           in_the_x_zone = ifelse(nchar(input$in_the_x_zone_enter) > 0,
@@ -2938,7 +2886,7 @@ app_server <- function(input, output, session) {
                                       input$facilities_studied_enter,
                                       input$facilities_studied),
           ## see newer helper  report_residents_within_xyz()  and code used by ejam2report() ejam2excel() etc.
-          within_x_miles_of = paste0("within ", paste0(sanitized_bt_rad_buff(),' miles'), " of"), # see https://cli.r-lib.org/articles/pluralization.html
+          within_x_miles_of = paste0("within ", paste0(sanitized_radius_now(),' miles'), " of"), # see https://cli.r-lib.org/articles/pluralization.html
           in_areas_where = paste0(input$in_areas_where, ' ', input$in_areas_where_enter),
           risks_are_x = input$risks_are_x,
           source_of_latlons = input$source_of_latlons,
@@ -3010,17 +2958,17 @@ app_server <- function(input, output, session) {
   # Not sure if I can pass a reactive or need to pass reactive value so it can get updated by the module without needing to return a list of values from the module?
   # default_radius_react_passed <- reactiveVal() # initialize/create the variable that will store the latest radius set by outer app
   # observe(
-  #   default_radius_react_passed(sanitized_bt_rad_buff()) # update the value of this reactiveVal anytime outer app slider is adjusted
+  #   default_radius_react_passed(sanitized_radius_now()) # update the value of this reactiveVal anytime outer app slider is adjusted
   # )
 
   # output$mod_ejscreenapi_ui_TO_SHOW_IN_APP_UI <- renderUI({
   #   mod_ejscreenapi_ui("x2",
-  #                      simpleradius_default_for_ui = 1 # ,
+  #                      simpleradiusdefault_for_ui = 1 # ,
   #                      # default_radius_react = default_radius_react_passed
   #                      ) # reactive object gets passed without parentheses. pass a reactive radius HERE to server not ui.
   # })
 
-  # default_radius_react_passed <- reactiveVal(sanitized_bt_rad_buff()) # pass to UI of module not server code of module
+  # default_radius_react_passed <- reactiveVal(sanitized_radius_now()) # pass to UI of module not server code of module
   # default_points_react_passed <- reactiveVal() # initialize it empty
   # observe(
   #   default_points_react_passed(  data_uploaded()  ) # update default_points_react_passed when data_uploaded() changes

@@ -33,12 +33,16 @@
 #'
 #' @keywords internal
 #'
-pkg_functions_and_data <- function(pkg,
+pkg_functions_and_data <- function(pkg = "EJAM",
                                    alphasort_table = FALSE,
                                    internal_included = TRUE,
                                    exportedfuncs_included = TRUE,
                                    data_included = TRUE,
                                    vectoronly = FALSE) {
+
+  if (!paste0("package:", pkg) %in% search()) {
+    stop(paste0("package:", pkg), " is not found in search() -- this function needs the package attached via library() or require() or possibly via devtools::load_all()")
+  }
 
   ## (helpers) ### #
   if (!internal_included) {
@@ -337,7 +341,7 @@ pkg_functions_and_sourcefiles <- function(pkg = "EJAM",
   if (basename(getwd()) != pkg) {stop("working directory must be the source package folder for pkg", pkg)}
   x <- pkg_functions_with_keywords_internal_tag(loadagain = loadagain, quiet = quiet) # DOES load_all() again if loadagain==TRUE
   fnames <- x$func
-  fnames <- fnames[match(funcnames, fnames)] # match to ensure same order as info$object, but check how extra or missing ones are handled
+  fnames <- x$file[match(funcnames, fnames)] # match to ensure same order as info$object, but check how extra or missing ones are handled
   if (vectoronly) {
     return(fnames)
   } else {
@@ -684,7 +688,7 @@ pkg_functions_all_equal <- function(fun="latlon_infer", package1="EJAM", package
 
   # 1) Normally it checks the first two cases of dupe named functions from 2 packages,
   # and answers with FALSE or TRUE (1 value).
-  # But it returns FALSE 3 times only in the case of run_app (but not latlon_is.valid)
+  # But it returns FALSE 3 times for some?
   # pkg_dupenames(ejampackages) # or just pkg_dupenames()
 
   # 2) ### error when checking a package that is loaded but not attached.

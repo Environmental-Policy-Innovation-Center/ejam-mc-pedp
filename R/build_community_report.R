@@ -77,7 +77,7 @@ report_setup_temp_files <- function(Rmd_name = 'community_report_template.Rmd',
 #' @param filename path to file to save HTML content to; if null, returns as string (used in Shiny app)
 #' @param report_title generic name of this type of report, to be shown at top, like "EJAM Multisite Report"
 #' @param logo_path optional relative path to a logo for the upper right of the overall header.
-#'   Ignored if logo_html is specified and not NULL, but otherwise uses default or param set in run_app()
+#'   Ignored if logo_html is specified and not NULL, but otherwise uses default or param set in ejamapp()
 #' @param logo_html optional HTML for img of logo for the upper right of the overall header.
 #'   If specified, it overrides logo_path. If omitted, gets created based on logo_path.
 #'
@@ -166,7 +166,7 @@ build_community_report <- function(output_df,
 
     # 2. Envt & Demog table ####
 
-    generate_env_demog_header(), # title = 'Environmental and Residential Population Indicators'
+    generate_env_demog_header(),
 
     fill_tbl_full(output_df = output_df_rounded,
                   show_ratios_in_report = show_ratios_in_report
