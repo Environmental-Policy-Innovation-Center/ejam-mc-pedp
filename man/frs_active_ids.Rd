@@ -34,16 +34,16 @@ assuming parameter active=TRUE, which is the default
 Download huge national COMBINED file and find which IDs are ACTIVE sites in FRS
 }
 \examples{
-\donttest{
-  cat( 'This takes a while for the download.\n')
-  # frs <- frs_get()
-  # closedid <-  frs_active_ids(active=FALSE) # <- frs_inactive_ids()
-  # frs <- frs_drop_inactive(frs, closedid = closedid)
-  # usethis::use_data(frs, overwrite = TRUE)
+  cat( 'The examples take a while for the download.\n')
+ \dontrun{
+  frs <- frs_get()
+  closedid <-  frs_active_ids(active=FALSE) # <- frs_inactive_ids()
+  frs <- frs_drop_inactive(frs, closedid = closedid)
+  usethis::use_data(frs, overwrite = TRUE)
   }
-  @keywords internal
 
 }
 \seealso{
 \code{\link[=frs_inactive_ids]{frs_inactive_ids()}}  \code{\link[=frs_update_datasets]{frs_update_datasets()}}
 }
+\keyword{internal}

@@ -71,7 +71,7 @@ and then displays a map of those blocks near the specified point.
    # see two sites if already had run getblocksnearby()
    z2 <-  plotblocksnearby(sitepoints = testpoints_10[c(4,10),],
      sites2blocks = eg2, radius = 1)
-  \donttest{
+  \dontrun{
   # See one randomly selected regulated facility from FRS
   and all Census Blocks and Blockgroups within 2 miles:
     plotblocksnearby(testpoints_n(1), 2, overlay_blockgroups=T)
@@ -85,4 +85,5 @@ and then displays a map of those blocks near the specified point.
         c("ejam_uniq_id", "lat", "lon"), with=FALSE],
    radius = 1)
   }
+
 }
