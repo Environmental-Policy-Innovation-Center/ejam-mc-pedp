@@ -144,10 +144,18 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
     nsites <- NROW(ejamitout$results_bysite[ejamitout$results_bysite$valid %in% TRUE, ]) # might differ from ejamout1$sitecount_unique
     # # Get the name of the selected location
     selected_location_name_react <- NULL
+    if (submitted_upload_method %in% "FIPS" && is.null(shp)) {
+      shp <- shapes_from_fips(ejamitout$results_bysite$fips)
+    }
   } else {
     ejamout1 <- ejamitout$results_bysite[sitenumber, ]
-    if (!is.null(shp)) {
-      shp <- shp[sitenumber, ]
+
+    if (submitted_upload_method %in% "FIPS" && is.null(shp)) {
+      shp <- shapes_from_fips(ejamitout$results_bysite$fips[sitenumber])
+    } else {
+      if (!is.null(shp)) {
+        shp <- shp[sitenumber, ]
+      }
     }
     nsites <- 1
     # # Get the name of the selected location
@@ -189,7 +197,6 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
     # > copy .Rmd (template), .png (logo), .css from Rmd_folder to a temp dir subfolder for rendering
     # report_setup_temp_files() copies files to where they need to be for rendering ####
     ## returns path to .Rmd template copied to a temp folder:
-
 
     tempReport <- report_setup_temp_files(
       # Rmd_name = 'community_report_template.Rmd', # default, for summary report
@@ -265,7 +272,7 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
     #Barplot from community report
     plot <- plot_barplot_ratios_ez(ejamitout) + ggplot2::guides(fill = ggplot2::guide_legend(nrow = 2))
 
-    # This presumes shp was provided in both FIPS and SHP cases - otherwise only maps them as points! (does not try to obtain polygon(s) from FIPS when shp not provided here)
+    # This presumes shp was provided in SHP cases
     if (is.null(sitenumber) || length(sitenumber) == 0) {
       # Map from community report should be ALL the sites that were passed here, UNLESS sitenumber param was used to pick 1
       if (sitetype %in% c("fips", "shp") && !is.null(shp)) {
