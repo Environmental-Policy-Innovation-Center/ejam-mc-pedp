@@ -179,6 +179,7 @@ reference:
   - shapes_blockgroups_from_bgfips
   - shape2zip
   - ejam2shapefile
+  - shape2geojson
 - title: "Specify Counties etc."
   desc: >
     Tools to work with Census units and FIPS codes
@@ -414,6 +415,7 @@ reference:
   - testoutput_ejamit_fips_counties
 - title: "Utilities for finding URL or API info"
   contents:
+  - url_ejamapi
   - url_countyhealthrankings
   - url_echo_facility_webpage
   - url_ejscreenmap
