@@ -1,13 +1,26 @@
 
 
 #' Get URL(s) of HTML summary reports for use with EJAM-API
+#' @details
+#' - Work in progress - initial draft relied on API from
+#'   https://github.com/edgi-govdata-archiving/EJAM-API
+#'
+#'   (see parameter `baseurl` that used the /report endpoint)
+#'
+#' - Another option in the future might be to construct a URL that is a link to the live EJAM
+#'   app but has url-encoded parameters that are app settings, such as sitepoints, radius_default, etc.
+#'
+#' - Will try to use the same input parameters as [ejamit()] does.
 #'
 #' @param sitepoints see [ejamit()]
 #' @param radius  see [ejamit()], default is 0 if fips or shapefile specified
 #'
 #' @param fips  see [ejamit()] but this initial version only works for a blockgroup FIPS!
+#'
 #' @param shapefile  see [ejamit()], but each polygon is encoded as geojson string
 #'   which might get too long for encoding in a URL for the API using GET
+#'
+#' @param baseurl "https://ejamapi-84652557241.us-central1.run.app/report?"
 #'
 #' @param ... ignored
 #'
@@ -28,6 +41,8 @@
 #'  z = url_ejamapi(shapefile = testinput_shapes_2[2, c("geometry", "FIPS")])
 #'
 #'  \dontrun{
+#'  browseURL("https://ejamapi-84652557241.us-central1.run.app/report?lat=33&lon=-112&buffer=4")
+#'
 #'  browseURL(x[1])
 #'  browseURL(y[1])
 #'  browseURL(z[1])
@@ -42,10 +57,12 @@ url_ejamapi = function(
   # radius_donut_lower_edge = 0,
   # maxradius = 31.07,
   # avoidorphans = FALSE,
-  # quadtree = NULL,
+  # quadtree = NULL, # not relevant
 
   fips = NULL,
   shapefile = NULL,
+
+  baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?",
 
   ## unused so far:
   # countcols = NULL,
@@ -78,8 +95,6 @@ url_ejamapi = function(
 
   ...
 ) {
-
-  # see https://github.com/edgi-govdata-archiving/EJAM-API/tree/main
 
   ## unused so far:
   {
@@ -119,22 +134,17 @@ url_ejamapi = function(
   "
   }
 
-  #  https://ejamapi-84652557241.us-central1.run.app/report?lat=33&lon=-112&buffer=4
-  baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?"
+  # see https://github.com/edgi-govdata-archiving/EJAM-API/tree/main
+  # baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?"
+  # e.g.,
+  # https://ejamapi-84652557241.us-central1.run.app/report?lat=33&lon=-112&buffer=4
 
   ###################### #
   if (!is.null(shapefile)) {
     if (missing(radius)) {radius <- 0}
-    warning("shapefile input option might not work - draft only")
     # geojson format
     # %7B"type"%3A"FeatureCollection"%2C"features"%3A%5B%7B"type"%3A"Feature"%2C"properties"%3A%7B%7D%2C"geometry"%3A%7B"coordinates"%3A%5B%5B%5B-112.01991856401462%2C33.51124624304089%5D%2C%5B-112.01991856401462%2C33.47010908826502%5D%2C%5B-111.95488826248605%2C33.47010908826502%5D%2C%5B-111.95488826248605%2C33.51124624304089%5D%2C%5B-112.01991856401462%2C33.51124624304089%5D%5D%5D%2C"type"%3A"Polygon"%7D%7D%5D%7D
-    ## break shapefile into a vector of geojson text strings, 1 per row (polygon) in the input spatial data.frame
-    geotxt <- vector()
-    if (NROW(shapefile) > 1) {
-      for (i in 1:NROW(shapefile)) {geotxt[i] <- shape2geojson(shapefile[i, ])}
-    } else {
-      geotxt <- shape2geojson(shapefile)
-    }
+    geotxt <- shape2geojson(shapefile, dissolve = FALSE) # dissolve would combine the rows of the spatial data.frame into one object (probably)
     url <- paste0(
       baseurl,
       "shape=", geotxt, "&",
@@ -163,9 +173,6 @@ url_ejamapi = function(
   ###################### #
   if (!is.null(sitepoints)) {
     x <- latlon_from_anything(sitepoints)
-    if (NROW(x) > 1) {
-      message("sitepoints has >1 point. Returning 1 URL for each.")
-    }
     lat <- x$lat
     lon <- x$lon
     buffer <- radius
