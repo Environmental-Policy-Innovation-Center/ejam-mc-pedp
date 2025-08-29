@@ -7,13 +7,22 @@
   - Changed name of tool back to "Environmental Justice Analysis Multisite" tool (from "Environmental and Residential Population Analysis Multisite" tool, the name used in early 2025 through July 2025)
   - Restored some text: "EJ Indexes" now once again refers to what were called "Summary Indexes" in early 2025 through July 2025. "Supplementary EJ Indexes" is similarly used once again. 
   - Other language related to "environmental justice" was edited in early 2025 at EPA in response to an Executive Order, but has not been changed back to its original language even in this non-EPA version of the package. For anyone interested, notes on those changes were archived in a file saved as "EJAM/data-raw/0_generic_terms_notes.R".
+  - Edited descriptions of some language-related indicators (to be shorter and more consistent)
+  - Fixed missing version number in report footer
+  - Show exact version number ("2.32.6" not just "2.32") in app header, footer of report, etc.
 
-- Shortcuts via ejanalysis.org/
+- Website at [ejanalysis.org](https://www.ejanalysis.org) or [ejanalysis.org/ejam](https://www.ejanalysis.org/ejam)
 
-  - [ejanalysis.org](https://www.ejanalysis.org) or [ejanalysis.org/ejam](https://www.ejanalysis.org/ejam) is an easy alias to remember, and has links to EJAM and EJSCREEN.
+  - [ejanalysis.org](https://www.ejanalysis.org) is an easy URL to remember, with info on and links to EJAM and EJSCREEN.
+  - [ejanalysis.org/about](https://www.ejanalysis.org/about) has [a new emailing list you can join](https://www.ejanalysis.org/about)
   - [ejanalysis.org/ejamapp](https://www.ejanalysis.org/ejamapp) will launch a live version of the EJAM web app
   - [ejanalysis.org/ejscreenapp](https://www.ejanalysis.org/ejscreenapp) will launch a live version of the EJSCREEN web app
-  - [A new emailing list can be joined here](https://www.ejanalysis.org/about)
+  - [ejanalysis.org/ejscreen](https://ejanalysis.org/ejscreen) will have info on EJSCREEN
+  - [ejanalysis.org/ejam](https://ejanalysis.org/ejam) has info on EJAM
+  - [ejanalysis.org/status](https://ejanalysis.org/status) has info about the 2025 status and history of transition from EPA to non-EPA versions of EJSCREEN and EJAM
+  - [ejanalysis.org/ejamdocs](https://www.ejanalysis.org/ejamdocs) directs you to the documentation:
+    - [What is EJAM?](../articles/whatis.html) is an overview of what EJAM can do.
+    - [Accessing the Web App](../articles/webapp.html) is about the web app.
 
 - Web App Documentation
 
@@ -33,16 +42,28 @@
 
 ## R/RStudio Users (Analysts and Developers)
 
-- The app is now once again called the "Environmental Justice Analysis Multisite tool" and that title is stored in the DESCRIPTION file, and is available for vignettes, functions, etc. directly via `as.vector(desc::desc_get("Title"))`. After the package is attached, the name as potentially modified via global_defaults_package.R or parameters to `ejamapp()` is available as `EJAM:::global_or_param(".app_title")`
+- The app is now once again called the "Environmental Justice Analysis Multisite tool" and that title is stored in the DESCRIPTION file, and is available for vignettes, functions, etc. directly via `as.vector(desc::desc_get("Title"))`. After the package is attached, the name as potentially modified via global_defaults_package.R or parameters to `ejamapp()` is available as `EJAM:::global_or_param("app_title")` (and note app_title previously was called .app_title)
 
-- [ejanalysis.org](https://www.ejanalysis.org) or [ejanalysis.org/ejam](https://www.ejanalysis.org/ejam) is an easy alias to remember, and has links to documentation/code/etc. (The .org and .com versions of the URL are synonymous, and these shortcuts/redirects are mostly case-insensitive)
-  - [A new emailing list can be joined here](https://www.ejanalysis.org/about)
-  - [ejanalysis.org/docs](https://www.ejanalysis.org/docs) or [ejanalysis.org/ejamdocs](https://www.ejanalysis.org/ejamdocs) directs you to the documentation for the EJAM package, including articles and vignettes.
-  - [ejanalysis.org/repo](https://www.ejanalysis.org/repo) or [ejanalysis.org/ejamrepo](https://www.ejanalysis.org/ejamrepo) directs you to the GitHub page for the EJAM package.
+- Website now at [ejanalysis.org](https://www.ejanalysis.org) or [ejanalysis.org/ejam](https://www.ejanalysis.org/ejam)
 
-- [GitHub issues can be submitted here](https://github.com/ejanalysis/EJAM/issues)
+  - [ejanalysis.org](https://www.ejanalysis.org) is an easy-to-remember alias with links to documentation, code, and live apps. The .org and .com versions of the URL are synonymous, and these shortcuts/redirects are mostly case-insensitive.
+  - [ejanalysis.org/about](https://www.ejanalysis.org/about) has [a new emailing list you can join](https://www.ejanalysis.org/about)
+  - [ejanalysis.org/ejamapp](https://www.ejanalysis.org/ejamapp) will launch a live version of the EJAM web app
+  - [ejanalysis.org/ejscreenapp](https://www.ejanalysis.org/ejscreenapp) will launch a live version of the EJSCREEN web app
+  - [ejanalysis.org/ejscreen](https://ejanalysis.org/ejscreen) will have info on EJSCREEN
+  - [ejanalysis.org/ejam](https://ejanalysis.org/ejam) has info on EJAM
+  - [ejanalysis.org/status](https://ejanalysis.org/status) has info about the 2025 status and history of transition from EPA to non-EPA versions of EJSCREEN and EJAM
+  - [ejanalysis.org/docs](https://www.ejanalysis.org/docs) or [ejanalysis.org/ejamdocs](https://www.ejanalysis.org/ejamdocs) directs you to the documentation for the EJAM package, including articles and vignettes:
+    - [What is EJAM?](../articles/whatis.html) is an overview of what EJAM can do.
+    - [Accessing the Web App](../articles/webapp.html) is about the web app.
+    - The rest of the [documentation](https://www.ejanalysis.org/ejamdocs) is technical, explaining how to install and use the R package to work directly with the more powerful tools EJAM offers beyond the web app.
+  - [ejanalysis.org/repo](https://www.ejanalysis.org/repo) or [ejanalysis.org/ejamrepo](https://www.ejanalysis.org/ejamrepo) directs you to the GitHub page for the EJAM package open source software.
+  - [GitHub issues now can be submitted here](https://github.com/ejanalysis/EJAM/issues)
+  
+- Lots of changes related to getting URLs of webpages and API-based info: New function `url_columns_bysite()` compiles columns of links based on reports/etc. specified in `global_defaults_package.R` via new setting `default_reports`. Cleaned up and moved various functions that provide various report URLs like `url_ejscreenmap()` etc. Drafted new function `url_ejamapi()` that provides URLs that can be used with EJAM-API to get html summary report on 1 site at a time, given sitepoints, shapefile, or fips. Inputs to this function are like inputs to `ejamit()` but so far limited to radius, sitepoints, fips, shapefile. This will enable the map popups and excel tables of sites to include links to single-site reports, for example. It is limited to blockgroup fips only, right now, and only single-site reports right now.
 - Simplified the `README`
 - Improved the [article on how to install the package](../articles/installing.html).
+- Redid sample report, etc. outputs in testdata folder to reflect changes in version numbers shown in report footer and app header, etc.
 - `ejamapp()` is the new name (alias) for `run_app()`
 - Improved web app ui/server code, allowing many options and defaults to be provided as parameters to `ejamapp()`.
 - Added many examples to `ejamapp()` documention showing how to change defaults and options. You can now
@@ -55,18 +76,17 @@
 - Fixed a bug where threshold-related parameters passed to `ejamapp()` were being ignored in the latlon case.
 - Drafted new article with technical details: [Defaults and Custom Settings for the Web App](../articles/dev-app-settings.html)
 - Changed how Advanced tab visibility is controlled ("default_can_show_advanced_settings" and "default_show_advanced_settings" set initial values of shiny inputs of the same names)
-- Renamed some global_defaults_ variables and shiny app input variables and related variables so they are easier to use as parameters in ejamapp(). For example, radius is now settable by `ejamapp(radius_default=3.1)`
-  - the old global_defaults_ variable "default_default_miles" is now called "radius_default"
-  - the old `input$default_miles` is now called `input$radius_default`
-  - the old `input$bt_rad_buff` is now called `input$radius_now`
+- Renamed some global_defaults_ variables and shiny app input variables and related variables so they are easier to use as parameters in ejamapp(). 
+  - For example, radius is now settable by `ejamapp(radius_default=3.1)` -- the old `input$default_miles` is now called `input$radius_default`, and the old `input$bt_rad_buff` is now called `input$radius_now`
+  - Renamed global defaults related to app title, logo, and version number, to be more clear and consistent, and moved them to global_defaults_package.R. So logos e.g. could be changed via ejamapp(report_logo="www/EPA_logo_white_2.png", app_logo="www/EPA_logo_white_2.png")
   Other similar changes:
   - the old global_defaults_ variable "max_default_miles" is now called "max_radius_default"
   - the old global_defaults_ variable "intro_text" is now called "aboutpage_text"
-  - the old global_defaults_ variable "default_default_miles_shapefile" is now called "radius_default_shapefile"
+  - the old global_defaults_ variable "default_default_miles_shapefile" is now called "radius_default_shapefile" (to buffer polygons)
   - the old reactive sanitized_bt_rad_buff() is now called sanitized_radius_now()
 - Renamed various *.R files and relocated some source code among those, to make some filenames more consistent.
 - Made some functions internal that until now had been exported, to simplify things for most R users.
-
+- Drafted new function `shape2geojson()` that converts shapefile spatial data.frame into .geojson file or text encoding that.
 
 # EJAM v2.32.5 (July 2025)
 
