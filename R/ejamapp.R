@@ -47,7 +47,7 @@
 #' They can be changed there, but also can be passed here
 #' to override those settings for the duration of the app.
 #' Some of them can also be adjusted in the web app's Advanced tab, and
-#' some (the ones that are inputs in the ui / server) 
+#' some (the ones that are inputs in the ui / server)
 #' can be bookmarked (saved in a URL) for later use.
 #'
 #' For more details, see the article on "Defaults and Custom Settings for the Web App"
@@ -89,7 +89,7 @@
 #'  #  file with latitude, longitude
 #'  ejamapp(sitepoints = system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM"),
 #'          default_upload_dropdown = "upload", default_selected_type_of_site_upload = "latlon")
-#'  
+#'
 #'  #  spatial data.frame with polygons
 #'  ejamapp(shapefile = testshapes_2,
 #'          default_upload_dropdown = "upload", default_selected_type_of_site_upload = "SHP")
@@ -236,6 +236,9 @@ ejamapp <- function(
     uiPattern = "/"
 ) {
 
+  options(shiny.autoload.r=FALSE) # instead of using the file _disable_autoload.R
+  on.exit(options(shiny.autoload.r=FALSE)) # restore normal behavior for rest of R session once app halts
+
   global_defaults_or_user_options <- get_global_defaults_or_user_options(
     user_specified_options = list(...),
     bookmarking_allowed = enableBookmarking
@@ -266,6 +269,9 @@ run_app <- function(
     uiPattern = "/"
 ) {
 
+  options(shiny.autoload.r=FALSE) # instead of using the file _disable_autoload.R
+  on.exit(options(shiny.autoload.r=FALSE)) # restore normal behavior for rest of R session once app halts
+
   global_defaults_or_user_options <- get_global_defaults_or_user_options(
     user_specified_options = list(...),
     bookmarking_allowed = enableBookmarking
@@ -295,6 +301,9 @@ app_run_EJAM <- function(
     onStart = NULL,
     uiPattern = "/"
 ) {
+
+  options(shiny.autoload.r=FALSE) # instead of using the file _disable_autoload.R
+  on.exit(options(shiny.autoload.r=FALSE)) # restore normal behavior for rest of R session once app halts
 
   global_defaults_or_user_options <- get_global_defaults_or_user_options(
     user_specified_options = list(...),

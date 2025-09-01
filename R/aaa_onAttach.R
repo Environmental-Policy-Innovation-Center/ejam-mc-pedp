@@ -23,39 +23,20 @@
 
   # These instead could be set in the golem-config.yml file
 
-  asap_download   <- TRUE  # download large datasets now?           Set to FALSE while Testing/Building often
+  asap_download   <- TRUE  # download large datasets now?      Set to FALSE while Testing/Building often
   asap_index <- TRUE  # build index those now?                 Set to FALSE while Testing/Building often
-  asap_bg    <- FALSE  # load now vs lazyload blockgroup data?  Set to FALSE while Testing/Building often
+  asap_bg    <- FALSE  # load now vs lazyload blockgroup data? Set to FALSE while Testing/Building often
 
   # startup msg shown at library(EJAM) or when reinstalling from source ####
   packageStartupMessage("Now running .onAttach(), as part of attaching the EJAM package.")
 
-  # get location of logo etc. so that ejam2report() using generate_html_header() can find logo  even without launching shiny app
-  source(system.file("global_defaults_package.R", package = "EJAM"), local = FALSE)
 
-  # packageStartupMessage(
-  #
-  #   "\n
-  #     Developers may want to modify the .onAttach() or even .onLoad() function,
-  #     to control timing of the slow steps needed to load or create EJAM data,
-  #     to have the delays occur at preferred times automatically
-  #     (or only manually when a coder initiates them interactively or via their code).
-  #
-  #     These occur as EJAM starts:
-  #
-  #     1- Download the large datasets stored online (quaddata, blockpoints, frs, etc.)
-  #        EJAM uses download_latest_arrow_data() for this. Also see dataload_dynamic()
-  #        quaddata is >150 MB on disk and >200 MB RAM, while all others are smaller on disk.
-  #        blockid2fips is roughly 600 MB in RAM because it stores 8 million block FIPS as text.
-  #
-  #     2- Build the national index of all block point locations
-  #        EJAM function indexblocks() does this, using quaddata - see ?indexblocks
-  #
-  #     3- Load into memory some datasets installed with EJAM (blockgroupstats, usastats, etc.)
-  #        EJAM function dataload_from_package() can do this - see ?dataload_from_package and ?pkg_data()
-  #        Otherwise these are only lazyloaded at the moment they are needed, making a user wait.
-  #        blockgroupstats (>60 MB on disk, >200 MB in RAM) and usastats, statestats are essential.
-  #        frs-related tables are huge and not always required - needed to look up regulated sites by ID.
+  # get location of logo etc. so that ejam2report() using generate_html_header() can find logo  even without launching shiny app
+  fname <- system.file("global_defaults_package.R", package = "EJAM")
+  # if you have just used devtools::load_all(), then this will find and use the local source version of the global_defaults_package.R
+  # if you have not done that, this will find and use the installed version
+  # source the file in the global environment by using local=FALSE
+  source(fname, local = FALSE)
 
 
   # download BLOCK (not blockgroup) data, etc ####
