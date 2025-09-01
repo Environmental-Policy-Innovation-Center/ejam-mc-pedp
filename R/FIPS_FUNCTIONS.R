@@ -1865,6 +1865,36 @@ fips2statename <- function(fips) {
 }
 ############################################################################# #
 
+#' Get PARENT COUNTY FIPS of each fips (the County that contains the fips)
+#'
+#' @param fips vector of FIPS codes where fipstype(fips) is among
+#'  block, blockgroup, tract, city, county, state
+#'  but where it is a state this will return NA
+#'
+#' @returns vector of fips as long as input
+#' @examples
+#' fips2countyfips(testinput_fips_blockgroups[1])
+#'
+#' @export
+#'
+fips2countyfips <- function(fips) {
+
+  # finds PARENT county fips not counties inside a state or region!!
+
+  fips = fips_lead_zero(fips)
+  ftype = fipstype(fips)
+  fips[is.na(ftype)] <- NA
+  fips[ftype == "state"] <- NA
+  # fips[ftype == "county"] <- fips[ftype == "county"]
+
+  easyones <- ftype %in% c("block", "blockgroup", "tract")
+  fips[easyones] <- substr(fips[easyones], 1, 5)
+
+  fips[ftype %in% "city"] <- censusplaces$countyfips[match(fips[ftype %in% "city"], censusplaces$fips)]
+  return(fips)
+}
+############################################################################# #
+
 
 #' FIPS - Get county names from county FIPS codes
 #'
