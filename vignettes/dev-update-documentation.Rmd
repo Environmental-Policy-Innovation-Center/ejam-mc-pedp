@@ -172,7 +172,7 @@ who is managing the package, as follows:
     the .yml file.
 
 -   The pkgdown-based webpages should be updated by someone who is managing the
-    package, and they should use the `update_pkgdown()` function found in
+    package, and they should use the `pkgdown_update()` function found in
     `data-raw/datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R` You have to
     `source()` that file and then use the function that it defines. Via that
     function, the pages get rebuilt by the `{pkgdown}` R package, based on the

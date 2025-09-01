@@ -48,12 +48,12 @@
 ############################################################# # ############################################################# #
 
 
-# REBUILDS PACKAGE DOCUMENTATION AND vignettes  (articles) using pkgdown
+# FUNCTION THAT REBUILDS PACKAGE DOCUMENTATION AND vignettes  (articles) using pkgdown
 
 
-# Define update_pkgdown() ####
+# Define pkgdown_update() ####
 
-update_pkgdown = function(
+pkgdown_update = function(
     doask              = FALSE,
     dotests            = FALSE,
     testinteractively  = FALSE, ## maybe we want to do this interactively even if ask=F ?
@@ -384,13 +384,13 @@ cat(
 To use this function:
 
 Maybe create a background job that runs this:
-  './data-raw/update_pkgdown_background_job.R'
+  './data-raw/pkgdown_update_background_job.R'
 
-update_pkgdown(doask = TRUE)
+pkgdown_update(doask = TRUE)
 
 or change from any of these defaults:
 
-update_pkgdown = function(
+pkgdown_update = function(
     doask              = FALSE,
     dotests            = FALSE,
     testinteractively  = FALSE, ## maybe we want to do this interactively even if ask=F ?
@@ -405,5 +405,5 @@ update_pkgdown = function(
 )
 ")
 # cat("\n  Current defaults: \n\n")
-# x = (EJAM:::args2(update_pkgdown)); rm(x)
+# x = (EJAM:::args2(pkgdown_update)); rm(x)
 ############################################################# # ############################################################# #

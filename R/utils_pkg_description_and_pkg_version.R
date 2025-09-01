@@ -9,22 +9,25 @@
 ######################################################## #
 
 
-
 ### The function below MAY NOT BE NEEDED -- THERE ARE MANY WAYS TO GET THIS INFO - SEE NOTES BELOW
 
-# one way is the EJAM:::description_file  object created by metadata_mapping.R when pkg is attached.
-# That is the same as package_description() created below, unless you need the non-installed, local source version the function below can provide.
 
-# e.g., simplest ways to get installed package version or acs version:
+## e.g., 3 simple ways to get installed package version
+# desc::desc_get("Version")
 # EJAM:::description_file$get("Version")
+# EJAM:::global_or_param("app_version")
+
+# EJAM:::description_file  object is created by metadata_mapping.R when pkg is attached.
+# That is the same as pkg_description() created below, unless you need the non-installed, local source version the function below can provide.
+
 # EJAM:::description_file$get("ACSVersion")
 
-
+# ###################################################### #
 
 ## EXAMPLE/DRAFT OF A FUNCTION THAT COULD REPLACE CODE WHERE desc::desc is used or description_file is used
 
-
-# package_description <- function() {
+# pkg_description <- function() {
+#
 #  # also see
 #  #  as.vector(desc::desc_get("Title")) or as.vector(desc::desc_get("Version"))
 #   ## also see, as alternative to desc::desc(), packageDescription("EJAM")
@@ -61,7 +64,10 @@
 # ###################################################### #
 #
 #
-# ejam_pkg_version_get = function() {
+# pkg_version = function(short = FALSE) {
+#
+##   ## compare to
+#    # EJAM:::global_or_param("app_version")
 #
 #   ## simplest way:
 #   # EJAM:::description_file$get("Version")
@@ -79,31 +85,21 @@
 #   # EJAM:::get_metadata_mapping("blockgroupstats")$ejam_package_version
 #   # EJAM:::get_metadata_mapping()$ejam_package_version
 #   # EJAM:::default_metadata$ejam_package_version
-#
-#   # > EJAM:::metadata_mapping$blockgroupstats$acs_version
-#   # ACSVersion
-#   # "2018-2022"
-#   # > EJAM:::get_metadata_mapping("blockgroupstats")$acs_version
-#   # ACSVersion
-#   # "2018-2022"
-#   # > EJAM:::get_metadata_mapping()$acs_version
-#   # ACSVersion
-#   # "2018-2022"
-#   #
-#
+
 #   ## but also see, to get just the pkg version,
 #   # as.character(utils::packageVersion("EJAM"))
 #
 #   ## also see, to get just the pkg version,
 #   # as.vector(metadata_mapping$blockgroupstats[['ejam_package_version']])
 #
-#   pkg_info <- package_description() # more complicated, looks in a few places for latest description file info
-#   ejam_app_version  <- ifelse(is.null(pkg_info), "", pkg_info$get("Version"))
+#   pkg_info <- pkg_description() # more complicated, looks in a few places for latest description file info
+#   app_version  <- ifelse(is.null(pkg_info), "", pkg_info$get("Version"))
 #
+#   ## trim version number to Major.Minor ???
+#   if (short) {
+#   app_version <- substr(ejam_app_version, start = 1, stop = gregexpr('\\.', app_version)[[1]][2] - 1)
+#   }
 #
-#   ## trim version number to Major.Minor
-#   ejam_app_version <- substr(ejam_app_version, start = 1, stop = gregexpr('\\.',ejam_app_version)[[1]][2] - 1)
-#
-#   return(ejam_app_version)
+#   return(app_version)
 # }
 # ######################################################## #
