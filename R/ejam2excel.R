@@ -66,7 +66,7 @@ ejam2excel <- function(ejamitout,
                        buffer_desc = NULL, # "Selected Locations",
                        radius_or_buffer_description = 'Miles radius of circular buffer (or distance used if buffering around polygons)',
                        # radius_or_buffer_description =   "Distance from each site (radius of each circular buffer around a point)",
-                       hyperlink_colnames = "ECHO Report",#c("EJScreen Report", "EJScreen Map","ACS Report", "ECHO Report"),
+                       hyperlink_colnames = EJAM:::global_or_param("default_hyperlink_colnames"),  # c("EJScreen Report", "EJScreen Map", "ECHO Report"),
                        site_method = "",
 
                        mapadd = FALSE, # if report is added, map is redundant

@@ -2512,6 +2512,9 @@ app_server <- function(input, output, session) {
   output$interactive_table <- DT::renderDT(server = TRUE, expr = {
     req(data_processed())
     create_interactive_table(data_processed = data_processed(),
+                             hyperlink_header = NULL, # could change to be an input$ in advanced tab possibly
+                             hyperlink_text = NULL, # could change to be an input$ in advanced tab possibly
+                             site_report_download_colname = "Download EJAM Report" # could change to be an input$ in advanced tab possibly
                              )
     # c("EJScreen Report",
     #   "EJScreen Map" ,
@@ -2568,19 +2571,8 @@ app_server <- function(input, output, session) {
         progress_xl$set(value = value, message = message_main, detail = message_detail)
       }
 
-      # remove hyperlinks from excel output if shapefile is current_upload_method() - Temporary
-      if (submitted_upload_method() == "SHP") {
-        hyperlink_columns <- NULL
-      } else {
-        ### disable ejscreen report links while the site is down
-        if ("ejscreen_is_down" == "ejscreen_is_down") {
-          hyperlink_columns <-  'ECHO Report'
-        } else {
-          hyperlink_columns <- c("EJScreen Report", "EJScreen Map" ,'ACS Report','ECHO Report')
-        }
-      }
-
-      ## ejam2report() builds report to put in an excel tab ####
+      ## ejam2report() ####
+      # builds report to put in an excel tab
 
       html_content <- isolate({
 
@@ -2630,7 +2622,7 @@ app_server <- function(input, output, session) {
         in.analysis_title = sanitized_analysis_title(),
         save_now = FALSE,
         interactive_console = FALSE,
-        hyperlink_colnames = hyperlink_columns,
+        hyperlink_colnames = EJAM:::global_or_param("default_hyperlink_colnames"),
         in.testing = input$testing,
 
         mapadd = FALSE, # redundant if getting report as a tab since report has map snapshot

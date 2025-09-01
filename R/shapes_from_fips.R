@@ -35,9 +35,11 @@
 #'  If it were used, it could be a way to quickly get the area of each block,
 #'  using the formula  area = pi * (block_radius_miles^2)
 #'
+#'  For zip code boundaries, see the [EJAM documentation](ejanalysis.org/ejamdocs) article on zipcodes.
+#'
 #' @return spatial data.frame with one row per fips (assuming any fips are valid)
 #' @examples
-#'  # shp2 = shapes_from_fips("10001", "10005")
+#'  # shp2 = shapes_from_fips("10001", "10005") # Counties not zip codes!
 #'
 #'  fipslist = list(
 #'   statefips = name2fips(c('DE', 'RI')),

@@ -228,17 +228,17 @@ ejamit <- function(sitepoints = NULL,
                    download_noncity_fips_bounds = FALSE,
                    ...
 ) {
- # note on avoidorphans parameter:
-    # What EJScreen does in that case is report NA, right?
-    # So, does EJAM really need to report stats on residents presumed to be within radius,
-    #  if no block centroid is within radius?
-    #  Best estimate might be to report indicators from nearest block centroid
-    #  which is probably almost always the one your site is sitting inside of,
-    #  but ideally would adjust total count to be a fraction of blockwt
-    #  based on what is area of circular buffer as fraction of area of block it is apparently inside of.
-    #  Setting this to TRUE can produce unexpected results, which will not match EJScreen numbers.
-    #  Note that if creating a proximity score, by contrast, you
-    #  instead want to find nearest 1 SITE if none within radius of this BLOCK.
+  # note on avoidorphans parameter:
+  # What EJScreen does in that case is report NA, right?
+  # So, does EJAM really need to report stats on residents presumed to be within radius,
+  #  if no block centroid is within radius?
+  #  Best estimate might be to report indicators from nearest block centroid
+  #  which is probably almost always the one your site is sitting inside of,
+  #  but ideally would adjust total count to be a fraction of blockwt
+  #  based on what is area of circular buffer as fraction of area of block it is apparently inside of.
+  #  Setting this to TRUE can produce unexpected results, which will not match EJScreen numbers.
+  #  Note that if creating a proximity score, by contrast, you
+  #  instead want to find nearest 1 SITE if none within radius of this BLOCK.
 
   #################### #
   # if sitepoints, fips, and shapefile are all missing or NULL,
@@ -272,7 +272,7 @@ ejamit <- function(sitepoints = NULL,
     ## . check shp ####
 
     # something like this could replace similar code in server: ***
-    shp <- shapefile_from_any(shapefile, cleanit = FALSE)
+    shp <- shapefile_from_any(shapefile, cleanit = FALSE) # this includes shapefix()
     # shp <- cbind(ejam_uniq_id = 1:nrow(shp), shp) # assign id to ALL even empty or invalid inputs
 
     # RETAIN ORIGINAL SORT ORDER OF SITES
@@ -283,8 +283,6 @@ ejamit <- function(sitepoints = NULL,
     # ***  retain  empty but not invalid rows for analysis? ***
     if (is.null(shp)) {stop('No valid shapes found in shapefile')}
     class(shp) <- c(class(shp), 'data.table')
-
-    # now it does shapefix()
 
     # Here we retain all rows, columns include ejam_uniq_id, valid, invalid_msg
     data_uploaded <- sf::st_drop_geometry(shp)#[, unique(c(1:2, which(names(shp) == "ejam_uniq_id")))] # any 1 or 2 plus id to make sure it isn't just 1 col and drop=T happens
@@ -646,8 +644,8 @@ ejamit <- function(sitepoints = NULL,
     # done
   } else {
     if (sitetype %in% "fips") {
-        areas <- area_sqmi(fips = out$results_bysite$ejam_uniq_id,
-                           download_city_fips_bounds = download_city_fips_bounds, download_noncity_fips_bounds = download_noncity_fips_bounds)
+      areas <- area_sqmi(fips = out$results_bysite$ejam_uniq_id,
+                         download_city_fips_bounds = download_city_fips_bounds, download_noncity_fips_bounds = download_noncity_fips_bounds)
     }
     if (sitetype %in% "shp") {
       areas <- area_sqmi(shp = shp_valid) # includes any BUFFER ADDED
@@ -720,93 +718,50 @@ ejamit <- function(sitepoints = NULL,
   ## see out$results_summarized$keystats
   ## see structure.of.output.list(out$results_summarized)
   ## see results_bybg_people  has only a subset so already does not match colnames
-  ################################################################ #
 
-  ## * Hyperlinks ####
+  ################################################################ #  ################################################################ #
 
-  ###  _>>> should use url_4table() ! *** in server & ejamit ####
-  # duplicated almost exactly in app_server (near line 1217) but uses reactives there. *** except this has been updated here to handle FIPS not just latlon analysis.
-  # #  Do maybe something like this:
-  # links <- url_4table(lat=out$results_bysite$lat, lon=out$results_bysite$lon, radius = radius,
-  #    regid=ifelse("REGISTRY_ID" %in% names(out$results_bysite), out$results_bysite$REGISTRY_ID, NULL))
-  # out$results_bysite[ , `:=`(links$results_bysite)] # would that work??? how to avoid big cbind step to add the new columns?
-  # out$results_overall <- cbind(out$results_overall, links$results_overall) #
-  # setcolorder(out$results_bysite, neworder = links$newcolnames)
-  # setcolorder(out$results_overall, neworder = links$newcolnames)
-  # out$longnames <- c(newcolnames, links$longnames)
+  ## * URLs/HYPERLINKS ####
 
-  if ("REGISTRY_ID" %in% names(out$results_bysite)) {
-    echolink = url_echo_facility_webpage(REGISTRY_ID, as_html = T)
-  } else {
-    echolink = rep(NA, NROW(out$results_bysite))
-  }
+  # now using url_columns_bysite() in server & ejamit - had duplicated ejamit() code in app_server but used reactives there.
 
-  ### disable ejscreen report links while the site is down
+  links <- url_columns_bysite(
+    sitepoints = {if ("latlon" %in% sitetype) {out$results_bysite[, .(lat = lat, lon = lon, ejam_uniq_id = ejam_uniq_id)]} else {NULL} },
+    fips       = {if ("fips"   %in% sitetype) {fips} else {NULL}}, # or use out$results_bysite$ejam_uniq_id if that sitetype ?
+    shapefile  = {if ("shp"    %in% sitetype) {shp}  else {NULL}}, # has only valids but also has ejam_uniq_id
+    radius = radius,
+    regid = ifelse("REGISTRY_ID" %in% names(out$results_bysite), out$results_bysite$REGISTRY_ID, NULL),
+    sitetype = sitetype,
 
-  if ("ejscreen_is_down" == "ejscreen_is_down") {
-    out$results_bysite[ , `:=`(
-      `EJScreen Report` = NA,
-      `EJScreen Map`    = NA,
-      `ACS Report`      = NA,
-      `ECHO Report` = echolink
-    )]
-  } else {
+    as_html = FALSE # ok?
+  )
+  setDT(links$results_bysite)
+  setDT(links$results_overall)
+  ############################# #
+  ##      options for how to merge/join links to results_bysite table:
+  #
+  ## via merge (inefficient to make a copy like this)
+  # if ("ejam_uniq_id" %in% names(out$results_bysite) && "ejam_uniq_id" %in% names(links$result_bysite)) {
+  #   out$results_bysite <- merge(out$results_bysite, links$results_bysite, on = "ejam_uniq_id")
+  #   ## or via join ? maybe faster but would need to fix syntax!
+  #   # out$results_bysite[links$results_bysite, newcolnames := ..newcolnames, on = "ejam_uniq_id"]
+  # } else {
+    ## via assuming rows are identical  (inefficient to make a copy like this and fails if not 1-to-1 same rows) ?
+    out$results_bysite <- cbind(links$results_bysite, out$results_bysite)
+    ## or via assuming rows are identical but using data.table to append columns by reference (fails if not 1-to-1 same rows) ?   fix syntax!
+    ### out$results_bysite[ , `:=`(links$results_bysite)] # would that work??? how to avoid big cbind step to add the new columns?
+  # }
+  ############################# #
 
-    if (sitetype == "fips") {
+    ## * URL/link cols to front ####
 
-      # analyzing by FIPS not lat lon values
-      areatype <- fipstype(fips)
-      if (!(all(areatype %in% c("blockgroup", "tract", "city", "county", 'state')))) {warning("FIPS must be one of 'blockgroup', 'tract', 'city', 'county' 'state' for the EJScreen API")}
-      out$results_bysite[ , `:=`(
-        `EJScreen Report` = NA,#url_ejscreen_report(   areaid   = fips, areatype = areatype, as_html = T), #  namestr=my text not implemented here
-        `EJScreen Map`    = NA,#url_ejscreenmap(       wherestr = fips2name(fips), as_html = T),  # this needs a name not FIPS
-        `ACS Report`      = NA,
-        `ECHO Report` = echolink
-      )]
-    } else {
-      out$results_bysite[ , `:=`(
-        `EJScreen Report` = NA,#url_ejscreen_report(    lat = out$results_bysite$lat, lon = out$results_bysite$lon, radius = radius, as_html = T),
-        `EJScreen Map`    = NA,#url_ejscreenmap(        lat = out$results_bysite$lat, lon = out$results_bysite$lon,                  as_html = T),
-        `ACS Report`      = NA,
-        `ECHO Report` = echolink
-      )]
-    }
-  }
-  if (NROW(out$results_bysite) == 1) {
-    # If we analyzed only 1 place then overall is same as 1 site per row!
-    out$results_overall[ , `:=`(
-      `EJScreen Report` = out$results_bysite$`EJScreen Report`,
-      `EJScreen Map`    = out$results_bysite$`EJScreen Map`,
-      `ACS Report`      = out$results_bysite$`ACS Report`,
-      `ECHO Report`     = out$results_bysite$`ECHO Report`
-    )]
-  } else {
-    out$results_overall[ , `:=`(
-      `EJScreen Report` = NA,
-      `EJScreen Map`    = NA,
-      `ACS Report`      = NA,
-      `ECHO Report`     = NA
-    )]
-  }
-  # placeholders just so colnames are more consistent with other tables
-  #  (but still missing pctiles, ratios, and averages)
-  out$results_bybg_people[ , `:=`(
-    `EJScreen Report` = NA,
-    `EJScreen Map`    = NA,
-    `ACS Report`      = NA,
-    `ECHO Report`     = NA
-  )]
-  newcolnames <- c(
-    "EJScreen Report",
-    "EJScreen Map",
-    "ACS Report",
-    "ECHO Report")
-  # put those up front as first columns
-  data.table::setcolorder(out$results_bysite,  neworder = newcolnames)
-  data.table::setcolorder(out$results_overall, neworder = newcolnames)
-  data.table::setcolorder(out$results_bybg_people, neworder = newcolnames)
-  out$longnames <- c(newcolnames, out$longnames)
-  ################################################################ #
+  setcolorder(out$results_bysite, neworder = colnames(links$results_bysite))
+  out$results_overall <- cbind(links$results_overall, out$results_overall)
+  out$longnames <- c(colnames(links$results_bysite), out$longnames)
+
+  ################################################################ #  ################################################################ #
+
+  ## * radius.miles ####
 
   if (sitetype == "fips") {
     # Analyzed by FIPS so reporting a radius does not make sense here.
@@ -816,12 +771,13 @@ ejamit <- function(sitepoints = NULL,
   out$results_bysite[      , radius.miles := radius]
   out$results_overall[     , radius.miles := radius]
   out$results_bybg_people[ , radius.miles := radius]
-  ################################################################ #
 
-  # sort outputs like sites were sorted in the inputs to ejamit()
+  ## * sort output (results_bysite) like input was sorted ####
+
   out$results_bysite[original_order, n := n, on = "ejam_uniq_id"]
   setorder(out$results_bysite, n)
   out$results_bysite[, n := NULL]
+  ################################################################ #
 
   ## * batch.summarize()   ####
 
@@ -849,7 +805,7 @@ ejamit <- function(sitepoints = NULL,
   out$formatted <- table_tall_from_overall(out$results_overall, fixcolnames(names(out$results_overall), 'r', 'long')) # out$longnames)
 
   ###################################### #
-  ## * report the sitetype ####
+  ## * sitetype ####
 
   out$sitetype <- sitetype
 

@@ -8,6 +8,7 @@
 #' @param longnames vector of indicator names to display in Excel table
 #' @param formatted optional table to save in one tab, from ejamit()$results_overall, EJAM analysis overall in different format
 #' @param bybg Optional large table of details of each block group that is only needed to analyze distances by group.
+#' @param sitetype normally would be like ejamit()$sitetype
 #'
 #' @param plot_distance_by_group logical, whether to try to add a plot of mean distance by group.
 #'   This requires that bybg be provided as a parameter input to this function.
@@ -68,6 +69,7 @@
 #' @keywords internal
 #'
 table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, bybg=NULL,
+                             sitetype = NULL,
                              plot_distance_by_group = FALSE,
                              summary_plot = NULL,
                              plotlatest = FALSE,
@@ -89,7 +91,7 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
                              heatmap_colnames = NULL,   heatmap_cuts = c(80, 90, 95),  heatmap_colors  = c("yellow", "orange", "red"), # percentiles
                              heatmap2_colnames = NULL, heatmap2_cuts = c(1.009, 2, 3), heatmap2_colors = c("yellow", "orange", "red"), # ratios
 
-                             hyperlink_colnames = c("EJScreen Report", "EJScreen Map", "ACS Report", "ECHO Report"),
+                             hyperlink_colnames = sapply(EJAM:::global_or_param("default_hyperlink_colnames"), function(x) x$header),
                              graycolnames = NULL, narrowcolnames = NULL, graycolor = 'gray', narrow6 = 6,
 
                              testing = FALSE, updateProgress = NULL,
@@ -108,10 +110,10 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
 
   if (isTRUE(all.equal(heatmap_cuts,  c(80, 90, 95)))  & isTRUE(all.equal(heatmap_colors,  c("yellow", "orange", "red"))) &
       isTRUE(all.equal(heatmap2_cuts, c(1.009, 2, 3))) & isTRUE(all.equal(heatmap2_colors, c("yellow", "orange", "red")))) {
-  color_legend <- paste0(
-    "PERCENTILES \n  Red: at least 95th, Orange: 90-95th, Yellow: 80-90th \n",
-    "RATIOS      \n  Red: at least 3x average, Orange: 2-3x average, Yellow: 1-2x average"
-  )
+    color_legend <- paste0(
+      "PERCENTILES \n  Red: at least 95th, Orange: 90-95th, Yellow: 80-90th \n",
+      "RATIOS      \n  Red: at least 3x average, Orange: 2-3x average, Yellow: 1-2x average"
+    )
   } else {
     if (missing(heatmap_colnames))  {h1names <- "PERCENTILES "} else {h1names <- paste0("Group 1 columns ", paste0("(", fixcolnames(heatmap_colnames[1], 'r', 'long'), ", etc.)"))}
     if (missing(heatmap2_colnames)) {h2names <- "RATIOS "}      else {h2names <- paste0("Group 2 columns ", paste0("(", fixcolnames(heatmap2_colnames[1], 'r', 'long'), ", etc.)"))}
@@ -119,14 +121,14 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
       h1names, "\n", paste0(heatmap_colors,  ": ", heatmap_cuts,  collapse = ", "),
       '\n',
       h2names, "\n", paste0(heatmap2_colors, ": ", heatmap2_cuts, collapse = ", ")
-      )
+    )
   }
   ###################  #   ###################  #   ###################  #   ###################  #
 
   # HANDLE ERRORS ETC. ####
 
   # if user passed the entire output of ejamit() or doaggregate() as the first parameter,
-  # rather than splitting it up and passing overall, eachsite, longnames, formatted, bybg separately,
+  # rather than splitting it up and passing overall, eachsite, longnames, formatted, bybg, sitetype separately,
   # notice that and try to use it and split it up for them - it makes the interface much more convenient for use in console:
   #
   if (class(overall)[1] == "list" && missing(eachsite)) {
@@ -134,12 +136,15 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
     if ("longnames"           %in% names(overall) && is.null(longnames)) {longnames <- overall$longnames} # else stays as NULL
     if ("formatted"           %in% names(overall) && is.null(formatted)) {formatted <- overall$formatted} # else stays as NULL
     if ("results_bybg_people" %in% names(overall) && is.null(bybg))      {bybg      <- overall$results_bybg_people} # else stays as NULL
+    if ("sitetype"            %in% names(overall) && is.null(sitetype))  {sitetype  <- overall$sitetype}
 
     if (!("results_bysite" %in% names(overall))) {
       eachsite <- NULL # unusual situation we will try to accommodate
     } else {
       eachsite <- overall$results_bysite
     }
+    if (is.null(sitetype)) {sitetype <- EJAM:::sitetype_from_dt(eachsite)}
+
     if (!("results_overall" %in% names(overall))) {
       overall <- NULL # unusual situation we will try to accommodate
     }  else {
@@ -270,14 +275,14 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
           summary_plot <- try(
             plot_barplot_ratios(unlist( overall[ , c(..names_d_ratio_to_avg , ..names_d_subgroups_ratio_to_avg) ]),
                                 shortlabels = fixcolnames(c(names_d_ratio_to_avg, names_d_subgroups_ratio_to_avg), oldtype = 'r', newtype = 'shortlabel')
-                                ),
+            ),
             silent = TRUE
           )
         } else {
           summary_plot <- try(
             plot_barplot_ratios(unlist(as.data.frame(overall[ , c(names_d_ratio_to_avg , names_d_subgroups_ratio_to_avg) ])),
                                 shortlabels = fixcolnames(c(names_d_ratio_to_avg, names_d_subgroups_ratio_to_avg), oldtype = 'r', newtype = 'shortlabel')
-                                ),
+            ),
             silent = TRUE
           )
         }
@@ -311,10 +316,10 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
       fname <- try(
         suppressWarnings(
           plot_distance_mean_by_group(bybg,
-                                  demogvarname = c(names_d, names_d_subgroups),
-                                  demoglabel = fixcolnames(c(names_d, names_d_subgroups),
-                                                           oldtype = 'r', newtype = 'shortlabel'),
-                                  returnwhat = "plotfilename", graph = TRUE)
+                                      demogvarname = c(names_d, names_d_subgroups),
+                                      demoglabel = fixcolnames(c(names_d, names_d_subgroups),
+                                                               oldtype = 'r', newtype = 'shortlabel'),
+                                      returnwhat = "plotfilename", graph = TRUE)
         ),
         silent = TRUE
       )
@@ -399,7 +404,9 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
     if (file.exists(png_file)) {
       tryCatch({
         # height and width are static, need to be updated if content on community report changes
-        openxlsx::insertImage(wb, sheet = 'Community Report', file = png_file, width = 10, height = 32, dpi = 500)
+        openxlsx::insertImage(wb, sheet = 'Community Report', file = png_file,
+                              width = 10, height = 50,
+                              dpi = 500)
       }, error = function(e) {
         message("Error inserting image into Excel:", e$message)
         # Handle the error (e.g., fallback mechanism, logging, etc.)
@@ -452,7 +459,7 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
   openxlsx::addStyle(     wb, sheet = 'notes', rows = 1:(usernoterows + NROW(notes_df)), cols = 2, style = openxlsx::createStyle(wrapText = TRUE), stack = TRUE) # so the long caveat wraps
   ######################################################################## #
 
-  ## custom_tab ####
+  ## CUSTOM - custom_tab ####
 
   if (!is.null(custom_tab)) {
     openxlsx::addWorksheet(wb, sheetName = custom_tab_name)
@@ -462,7 +469,7 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
   }
   ######################################################################## #
 
-  ## DATA tabs - Overall and Each Sites ####
+  ## DATA tabs - Overall and Each Site ####
 
   if (is.function(updateProgress)) {
     boldtext <- 'Writing data to sheets'
@@ -476,43 +483,39 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
                       keepNA = FALSE, # NA converted to blank or to #N/A
                       ...
   )
-
+  ######################################################################## #
   # CHANGE SO IT IS NOT data.table,
   if (data.table::is.data.table(eachsite)) {
     data.table::setDF(eachsite) # to make syntax below work since it was written assuming data.frame only not data.table
   }
+  ######################################################################## #
+  ## * latlon vs fips vs shp sitetype  ####
 
-  ### Hyperlinks ####
-
-  # REPLACE THE URLS WITH GOOD ONES
-
-  if (!("valid" %in% names(eachsite))) {
-    ok <- rep(TRUE, NROW(eachsite))
-  } else {
-    ok <- eachsite$valid
-  }
-
-  if (all(is.na(eachsite$lat)) &  all(fipstype(eachsite$ejam_uniq_id[!is.na(eachsite$ejam_uniq_id)]) %in%  c("blockgroup", "tract", "city", "county", "state"))) {
-    # fips codes EXIST so ignore lat lon -- ideally would check type of analysis done more robustly than just
-    # seeing if ids can be interpreted as FIPS since ids like 1:10 are all state fips
-    # so e.g., if 3 sites run and all 3 had invalid lat lon then it assumes 1:3 are FIPS.
+  if ("fips" %in% sitetype) {
+  # if (all(is.na(eachsite$lat)) &  all(fipstype(eachsite$ejam_uniq_id[!is.na(eachsite$ejam_uniq_id)]) %in%  c("blockgroup", "tract", "city", "county", "state"))) {
+    # fips codes EXIST so ignore lat lon
     fips = eachsite$ejam_uniq_id
     lat = NULL # rep('', NROW(eachsite))
     lon = NULL # rep('', NROW(eachsite))
-  } else {
+    sitepoints = NULL
+  }
+  if ("latlon" %in% sitetype) {
     fips <- NULL
     lat = eachsite$lat
     lon = eachsite$lon
+    sitepoints = data.frame(lat=eachsite$lat, lon=eachsite$lon, ejam_uniq_id = eachsite$ejam_uniq_id)
+  }
+  if ("shp" %in% sitetype) {
+     fips <- NULL
+     lat = NULL # rep('', NROW(eachsite))
+     lon = NULL # rep('', NROW(eachsite))
+     sitepoints = NULL
   }
   if (radius_or_buffer_in_miles == 0 | is.na(radius_or_buffer_in_miles) | !is.numeric(radius_or_buffer_in_miles)) {
     radlink <- ''
   } else {
     radlink <- radius_or_buffer_in_miles
   }
-
-  eachsite[ok , hyperlink_colnames] <-  (url_4table(fips = fips[ok], lat =  lat[ok], lon =  lon[ok],
-                                                    radius = radlink, as_html = FALSE))$results_bysite
-  eachsite[!ok , hyperlink_colnames] <-  NA
 
   openxlsx::writeData(wb,
                       sheet = 'Each Site', x = eachsite,
@@ -539,24 +542,23 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
     openxlsx::setColWidths(wb, "Overall 2", cols = 2, widths = 90)
   }
   ######################################################################## #
+  ### URL / Hyperlinks ####
 
-  # special names for the pdf and map links #
-  # ## External Hyperlink -- HOW TO DO THIS:   ***
-  #
-  # x <- c("https://www.google.com", "https://www.google.com.au")
-  # names(x) <- c("google", "google Aus")
-  # class(x) <- "hyperlink"
+  # REPLACE THE URLS WITH type that work for excel?
+
+  if (!("valid" %in% names(eachsite))) {
+    ok <- rep(TRUE, NROW(eachsite))
+  } else {
+    ok <- eachsite$valid
+  }
+
+  ## URL columns are already in eachsite table i.e., in ejamit()$results_bysite
+  #  - already confirmed the requested ones are actually there.
+
+  # Special names for the pdf and map links #
+  # ## External Hyperlink example:
+  # x <- url_xl_style(c("https://www.google.com", "https://www.google.com.au"), urltext = c("google", "google Aus"))
   # writeData(wb, sheet = 1, x = x, startCol = 10)
-
-  # recently how it ends up from e.g., doagg/ejamlite
-  # <a href="https://ejscreen.epa.gov/mapper/index.html?wherestr=40.70103,-75.12058", target="_blank" rel="noreferrer noopener">EJScreen Map</a>
-
-  # output of ejamit()$results_bysite have a  EJScreen Report  column that has values like this:
-
-  # output from app_server code, ready to get sent to table_xls_format(), is like this:
-  #   url_ejscreen_report(    lat = d_upload$lat, lon =  d_upload$lon, radius = input$radius_now, as_html = TRUE)
-
-  # ### code from ejscreenapi that was to make these columns work, somewhat generic naming possible
 
   if (is.function(updateProgress)) {
     boldtext <- 'Formatting hyperlinks'
@@ -573,12 +575,10 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
     # NOW CONVERT SIMPLE URLS INTO EXCEL HYPERLINKS
 
     for (i in 1:length(hyperlink_colnames)) {
-
-      # not sure it has to be in a loop actually but only 2 or 3 columns to loop over
       namedvector <- as.vector(eachsite[ , hyperlink_colnames[i]])
       namedvector[namedvector == 'N/A'] <- NA
-      class(namedvector) <- "hyperlink"   ## also could use the funtion namedvector <- url_xl_style(namedvector, paste(hyperlink_text[i], 1:(NROW(eachsite)))) that would just add the class and names as done here.
-      names(namedvector) <- paste(hyperlink_text[i], 1:(NROW(eachsite))) # NOT NROW + 1 HERE !  # to use e.g., "EJScreen Report 1"
+      # add "hyperlink" class and names as text  # not NROW + 1 here !  to use e.g., "EJScreen Report 1"
+      namedvector <- url_xl_style(namedvector, urltext = paste(hyperlink_text[i], 1:(NROW(eachsite))))
       ## write to the worksheet the revised URL
       openxlsx::writeData(wb, sheet = 'Each Site',
                           x = namedvector,
@@ -937,7 +937,7 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
         attempt = try(
           openxlsx::saveWorkbook(wb, file = saveas, overwrite = TRUE),
           silent = TRUE
-          )
+        )
         cat('Saving as ', saveas, '\n')
       } else {
         warning(saveas, ' does not appear to be a path and filename ending in .xls or .xlsx')
@@ -1008,10 +1008,10 @@ vartype_cat2color_ejam <- function(vartype=raw, varcategory="other") {
       'ratio_Summary Index',                "mistyrose3",  #  '#FFD700', # "gold"
       "usratio_Summary Index",                "mistyrose3",  #   '#FFD700', # "gold"
       "stateratio_Summary Index",             "mistyrose2",  #  '#FFA500', # "orange"
-# aka
-'ratio_EJ Index',                "mistyrose3",  #  '#FFD700', # "gold"
-"usratio_EJ Index",                "mistyrose3",  #   '#FFD700', # "gold"
-"stateratio_EJ Index",             "mistyrose2",  #  '#FFA500', # "orange"
+      # aka
+      'ratio_EJ Index',                "mistyrose3",  #  '#FFD700', # "gold"
+      "usratio_EJ Index",                "mistyrose3",  #   '#FFD700', # "gold"
+      "stateratio_EJ Index",             "mistyrose2",  #  '#FFA500', # "orange"
 
 
       'percentile_other',              'gray95', #
@@ -1029,10 +1029,10 @@ vartype_cat2color_ejam <- function(vartype=raw, varcategory="other") {
       ' percentile_Summary Index',              'mistyrose3', #  "lightblue"
       "uspctile_Summary Index",                'mistyrose3', #  "lightblue"
       "statepctile_Summary Index",            "mistyrose2"   , #
-# aka
-' percentile_EJ Index',              'mistyrose3', #  "lightblue"
-"uspctile_EJ Index",                'mistyrose3', #  "lightblue"
-"statepctile_EJ Index",            "mistyrose2"   , #
+      # aka
+      ' percentile_EJ Index',              'mistyrose3', #  "lightblue"
+      "uspctile_EJ Index",                'mistyrose3', #  "lightblue"
+      "statepctile_EJ Index",            "mistyrose2"   , #
 
       'raw data for indicator_other' , "gray95", # "gray90", # '#FFD700', # "orange"
       "raw_other",                    "gray95", # "gray90", # # '#FFD700', # "orange"
@@ -1053,11 +1053,11 @@ vartype_cat2color_ejam <- function(vartype=raw, varcategory="other") {
       "raw_Summary Index",                    "mistyrose4", # "gray90", # # '#FFD700', # "orange"
       "usraw_Summary Index",                   "mistyrose4", # "gray90", #  '#FFD700', # "orange"
       "stateraw_Summary Index",                "mistyrose3", # '#FFA500', # "orange"
-# aka
-'raw data for indicator_EJ Index' , "mistyrose4", # "gray90", # '#FFD700', # "orange"
-"raw_EJ Index",                    "mistyrose4", # "gray90", # # '#FFD700', # "orange"
-"usraw_EJ Index",                   "mistyrose4", # "gray90", #  '#FFD700', # "orange"
-"stateraw_EJ Index",                "mistyrose3", # '#FFA500', # "orange"
+      # aka
+      'raw data for indicator_EJ Index' , "mistyrose4", # "gray90", # '#FFD700', # "orange"
+      "raw_EJ Index",                    "mistyrose4", # "gray90", # # '#FFD700', # "orange"
+      "usraw_EJ Index",                   "mistyrose4", # "gray90", #  '#FFD700', # "orange"
+      "stateraw_EJ Index",                "mistyrose3", # '#FFA500', # "orange"
 
 
       'average_other',                 "grey70" , # '#90EE90', # "lightgreen"
@@ -1075,10 +1075,10 @@ vartype_cat2color_ejam <- function(vartype=raw, varcategory="other") {
       'average_Summary Index',                 "mistyrose4" , # '#90EE90', # "lightgreen"
       "usavg_Summary Index",                  "mistyrose4" ,  #  '#90EE90', # "lightgreen"
       "stateavg_Summary Index",              "mistyrose3" ,
-# aka
-'average_EJ Index',                 "mistyrose4" , # '#90EE90', # "lightgreen"
-"usavg_EJ Index",                  "mistyrose4" ,  #  '#90EE90', # "lightgreen"
-"stateavg_EJ Index",              "mistyrose3" ,
+      # aka
+      'average_EJ Index',                 "mistyrose4" , # '#90EE90', # "lightgreen"
+      "usavg_EJ Index",                  "mistyrose4" ,  #  '#90EE90', # "lightgreen"
+      "stateavg_EJ Index",              "mistyrose3" ,
 
 
       'count demog_other',               "white",
@@ -1092,9 +1092,9 @@ vartype_cat2color_ejam <- function(vartype=raw, varcategory="other") {
 
       'count demog_Summary Index',             'lightcyan4', #
       'misc_Summary Index',                "lightcyan4",
-# aka
-'count demog_EJ Index',             'lightcyan4', #
-'misc_EJ Index',                "lightcyan4"
+      # aka
+      'count demog_EJ Index',             'lightcyan4', #
+      'misc_EJ Index',                "lightcyan4"
 
     ),
     ncol = 2, byrow = TRUE

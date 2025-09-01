@@ -3,11 +3,21 @@
 #' @description Builds site by site table after an analysis in EJAM app. Pulls in uploaded and analyzed data to create table
 #'
 #' @param data_processed processed data from app_server
-#' @param testing variable to indicate if analysis is being tested
+#' @param hyperlink_header don't change - links to reports
+#' @param hyperlink_text don't change - text labels of links to reports
+#' @param site_report_download_colname header for column with buttons to download 1-site reports
 #'
 #' @keywords internal
 #'
-create_interactive_table <- function(data_processed, testing) {
+create_interactive_table <- function(data_processed,
+                                     hyperlink_header = NULL,
+                                     hyperlink_text = NULL,
+                                     site_report_download_colname = "Download EJAM Report") {
+
+  if (is.null(hyperlink_header)) {
+    hyperlink_header <- sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
+    hyperlink_text <- sapply(EJAM:::global_or_param("default_reports"), function(x) x$text)
+  }
 
   shinyInputmaker <- function(FUN, len, id, ...) {
     inputs <- character(len)
@@ -16,29 +26,20 @@ create_interactive_table <- function(data_processed, testing) {
     }
     inputs
   }
-
-  if (testing) {
-    cat('interactive_table - preparing (most columns of the) site by site table for DT view \n')
-  }
-
   # --------------------------------------------------- #
 
-  ### disable ejscreen report links while the site is down
-  if ("ejscreen_is_down" == "ejscreen_is_down") {
-    hyperlink_columns <- 'ECHO Report'  # 'ACS Report'
-  } else {
-    hyperlink_columns <- c('EJScreen Report', 'EJScreen Map', 'ACS Report','ECHO Report')
-  }
-
   cols_to_select <- c('ejam_uniq_id', 'invalid_msg',
-                      'pop', 'Individual Report',
-                      hyperlink_columns,
+                      'pop',
+                      site_report_download_colname,
+                      hyperlink_header,
                       names_d, names_d_subgroups,
                       names_e #,
                       # no names here corresponding to number above x threshold, state, region ??
   )
-  tableheadnames <- c('Site ID', 'Invalid Reason','Est. Population', 'Individual Report',  # should confirm that Barplot/Community Report belongs here
-                      hyperlink_columns,
+  tableheadnames <- c('Site ID',
+                      site_report_download_colname,
+                      'Est. Population', 'Individual Report',  # should confirm that Barplot/Community Report belongs here
+                      hyperlink_header,
                       fixcolnames(c(names_d, names_d_subgroups, names_e), 'r', 'shortlabel'))
   ejcols          <- c(names_ej_pctile, names_ej_state_pctile, names_ej_supp_pctile, names_ej_supp_state_pctile)
   ejcols_short <- fixcolnames(ejcols, 'r', 'shortlabel')
@@ -53,26 +54,36 @@ create_interactive_table <- function(data_processed, testing) {
   # --------------------------------------------------- #
 
   # use data_processed()
-  dt <- data_processed$results_bysite %>%
-    as.data.frame() %>%
+  dt <- data_processed$results_bysite
+
+  # here, need to create column whose name is the value of site_report_download_colname
+  dt$site_report_download_colname <- NA
+  names(dt) <- gsub("site_report_download_colname", site_report_download_colname, names(dt))
+
+  dt <- dt %>%
+    as.data.frame()  %>%
     dplyr::mutate(dplyr::across(dplyr::where(is.numeric), .fns = function(x) {round(x, digits = 2)})
-                  # *** This should not be hard coded to 2 digits - instead should follow rounding rules provided via table_round() and table_rounding_info() that use map_headernames$decimals  !
-                  #
+                  # *** This should not be hard coded to 2 digits - instead should follow rounding rules
+                  # provided via table_round() and table_rounding_info() that use map_headernames$decimals  !
     ) %>%
     dplyr::mutate(index = row_number()) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(
-      pop = ifelse(valid == TRUE, pop, NA),
-      `Individual Report` = ifelse(valid == TRUE,
-                                   shinyInputmaker(FUN = actionButton, len = 1,
-                                           id = paste0('button_', index),
-                                           label = "Generate",
-                                           onclick = paste0('Shiny.onInputChange(\"select_button', index,'\", this.id)' )
-                                ),
-                               '')
+      pop = ifelse(valid == TRUE, pop, NA)
+      ,
+      `Download EJAM Report` =
+      # site_report_download_colname =
+        ifelse(valid == TRUE, shinyInputmaker(FUN = actionButton, len = 1,
+                                             id = paste0('button_', index),
+                                             label = "Generate",
+                                             onclick = paste0('Shiny.onInputChange(\"select_button', index,'\", this.id)' )
+        ),
+        '')
     ) %>%
     dplyr::ungroup() %>%
     dplyr::select(dplyr::all_of(cols_to_select), ST)
+
+
 
   # use results_summarized that is from batch.summarize()
   batch.sum.cols <- data_processed$results_summarized$cols
@@ -80,6 +91,7 @@ create_interactive_table <- function(data_processed, testing) {
 
   dt_final <- dt %>%
     dplyr::bind_cols(batch.sum.cols) %>%
+
     ## hide summary rows from table
     #dplyr::bind_rows(dt_avg) %>%
     #dplyr::bind_rows(dt_overall) %>%
@@ -90,6 +102,7 @@ create_interactive_table <- function(data_processed, testing) {
     #   Number.of.variables.at.above.threshold.of.90 = ifelse(
     #   is.na(pop), NA,
     #   Number.of.variables.at.above.threshold.of.90)) %>%
+
     dplyr::mutate(pop = ifelse(is.na(pop), NA, pop)) %>% #prettyNum(round(pop), big.mark = ','))) %>%
     dplyr::left_join(stateinfo %>% dplyr::select(ST, statename, REGION), by = 'ST') %>%
     dplyr::mutate(
@@ -99,6 +112,7 @@ create_interactive_table <- function(data_processed, testing) {
     dplyr::select(-ST ) # , -Max.of.variables)    # should be made more flexible so column need not be Max.of.variables
 
   colnames(dt_final) <- tableheadnames
+  dt_final[ , hyperlink_header] <- sapply(dt_final[ , hyperlink_header], function(x) url_linkify(x, hyperlink_text))
 
   dt_final <- dt_final %>%
     dplyr::relocate(dplyr::all_of(c('Invalid Reason', 'State', 'EPA Region')),

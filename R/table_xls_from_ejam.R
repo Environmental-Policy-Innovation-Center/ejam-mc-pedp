@@ -103,7 +103,10 @@ table_xls_from_ejam <- function(ejamitout,
                                 buffer_desc = "Selected Locations",
                                 radius_or_buffer_description = NULL, # 'Miles radius of circular buffer (or distance used if buffering around polygons)',
                                 # radius_or_buffer_description =   "Distance from each site (radius of each circular buffer around a point)",
-                                hyperlink_colnames = "ECHO Report",#c("EJScreen Report", "EJScreen Map","ACS Report","ECHO Report"),
+
+                                hyperlink_colnames = EJAM:::global_or_param("default_hyperlink_colnames"),
+                                # could change to be an input$ in advanced tab possibly # "ECHO Report",#c("EJScreen Report", "EJScreen Map", "ECHO Report"),
+
                                 site_method = "",
 
                                 mapadd = FALSE,
@@ -123,7 +126,11 @@ table_xls_from_ejam <- function(ejamitout,
   #   Note `ejamitout$sitetype` is not quite the same as the `site_method` parameter used in building reports.
   #   sitetype    can be shp, latlon, fips
   #   site_method can be SHP, latlon, FIPS, NAICS, FRS, EPA_PROGRAM, SIC, or MACT
-  sitetype <- ejamit_sitetype_from_output(ejamitout)
+  if (!("sitetype" %in% names(ejamitout))) {
+    sitetype <- ejamit_sitetype_from_output(ejamitout)
+  } else {
+    sitetype <- ejamitout$sitetype
+  }
   if (missing(site_method) || is.null(site_method)) {
     site_method <- sitetype
     if (site_method == 'shp' ) site_method <- 'SHP'
@@ -157,7 +164,7 @@ table_xls_from_ejam <- function(ejamitout,
   # }
   # shp_for_report <- shp
   #
-# create report if requested but not provided
+# create report if requested but not provided (and that includes the map within the report)
 
   if (community_reportadd && is.null(community_html)) {
     # not provided so try to create it here, noting ejam2report() still requires shp to have FIPS or polygon map in report.
@@ -222,6 +229,8 @@ table_xls_from_ejam <- function(ejamitout,
     longnames = ejamitout$longnames,       #  1 row, but full plain English column names
     bybg      = ejamitout$results_bybg_people, # not entirely sure should provide bybg tab? it is huge and only for expert users but enables a plot
     formatted = ejamitout$formatted,
+    sitetype = sitetype,
+    # shp is not needed since now report already is here and has map, and hyperlinks are already in eachsite table.
 
     custom_tab = ejamitout$results_summarized$cols,
     custom_tab_name = "thresholds",
