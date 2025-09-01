@@ -416,12 +416,12 @@ reference:
 - title: "Utilities for finding URL or API info"
   contents:
   - url_ejamapi
-  - url_countyhealthrankings
-  - url_echo_facility_webpage
   - url_ejscreenmap
   - url_ejscreen_report
+  - url_echo_facility_webpage
   - url_enviromapper
   - url_frs_report
+  - url_countyhealthrankings
   - url_naics.com
 - title: "Utilities handling variable names"
   desc: "Utilities to handle variable names, indicator metadata, formulas, etc."
@@ -531,9 +531,10 @@ reference:
   - table_gt_format_step2
   - x_anyother
   - url_getacs_epaquery_chunked
+  - url_to_any_rest_services_ejscreen_ejquery
   - url_get_eparest_chunked_by_id
   - url_get_via_url
-  - urls_clusters_and_sort_cols
+  - url_ejscreenapi_clusters_and_sort_cols
   - create_filename
   - fixnames_aliases
   - fixcolnames_infer

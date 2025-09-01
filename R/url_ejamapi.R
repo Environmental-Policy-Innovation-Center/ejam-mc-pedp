@@ -22,6 +22,9 @@
 #'
 #' @param baseurl "https://ejamapi-84652557241.us-central1.run.app/report?"
 #'
+#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
+#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
+#'
 #' @param ... ignored
 #'
 #' @returns vector of character string URLs
@@ -93,6 +96,8 @@ url_ejamapi = function(
   # download_city_fips_bounds = TRUE,
   # download_noncity_fips_bounds = FALSE,
 
+  linktext = "EJAM Report",
+  as_html = FALSE,
   ...
 ) {
 
@@ -144,32 +149,32 @@ url_ejamapi = function(
     if (missing(radius)) {radius <- 0}
     # geojson format
     # %7B"type"%3A"FeatureCollection"%2C"features"%3A%5B%7B"type"%3A"Feature"%2C"properties"%3A%7B%7D%2C"geometry"%3A%7B"coordinates"%3A%5B%5B%5B-112.01991856401462%2C33.51124624304089%5D%2C%5B-112.01991856401462%2C33.47010908826502%5D%2C%5B-111.95488826248605%2C33.47010908826502%5D%2C%5B-111.95488826248605%2C33.51124624304089%5D%2C%5B-112.01991856401462%2C33.51124624304089%5D%5D%5D%2C"type"%3A"Polygon"%7D%7D%5D%7D
-    geotxt <- shape2geojson(shapefile, dissolve = FALSE) # dissolve would combine the rows of the spatial data.frame into one object (probably)
-    url <- paste0(
+    geotxt <- shape2geojson(shapefile, combine_in_one_string = FALSE) #
+
+    url_of_report <- paste0(
       baseurl,
       "shape=", geotxt, "&",
       "buffer=", radius
     )
-    url <- URLencode(url)
-    return(url)
-  }
+  } else {
   ###################### #
   if (!is.null(fips)) {
     if (missing(radius)) {radius <- 0}
     ftype <- fipstype(fips)
     if (!all(ftype %in% "blockgroup")) {
-      stop("fips must be blockgroup fips currently - other types not yet implemented")
+      warning("fips must be blockgroup fips currently - other types not yet implemented")
+
     }
     if (NROW(fips) > 1) {
       message("fips provided specifies more than one place. Returning 1 URL for each.")
     }
-    url <- paste0(
+    url_of_report <- paste0(
       baseurl,
       "fips=", fips, "&",
       "buffer=", radius
     )
-    return(url)
-  }
+    url_of_report[!(ftype %in% "blockgroup")] <- NA
+  } else {
   ###################### #
   if (!is.null(sitepoints)) {
     x <- latlon_from_anything(sitepoints)
@@ -178,16 +183,20 @@ url_ejamapi = function(
     buffer <- radius
     # assume it will be recycled if >1 point and length(radius) == 1
 
-    url <- paste0(
+    url_of_report <- paste0(
       baseurl,
       "lat=", lat, "&",
       "lon=", lon, "&",
       "buffer=", radius
     )
-    return(url)
+  } else {
+    url_of_report <- NA
   }
+  }}
+  if (as_html) {
+    url_of_report[!is.na(url_of_report)] = URLencode(url_of_report[!is.na(url_of_report)] )
+    url_of_report[!is.na(url_of_report)] <- url_linkify(url_of_report[!is.na(url_of_report)], text = linktext)
+  }
+  return(url_of_report)
   ###################### #
-  stop("Either sitepoints or fips or shapefile must be provided")
 }
-
-
