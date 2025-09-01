@@ -19,32 +19,28 @@
 #'
 app_server <- function(input, output, session) {
 
-  # hide it and then let reactives figure out whether to show it?
-  hideTab(inputId = 'all_tabs', target = 'Advanced Settings')
-  #############################################################################  #
-  # Key reactives  data_uploaded(), data_processed(), data_summarized() ####
+  # Key reactives include these:
   ##  data_uploaded   reactive holds selected latlon points or shapefiles. It is defined later.
   ##  data_processed  reactive holds results of analysis, like output of doaggregate(getblocksnearby(points))
   ##  data_summarized reactive holds results of batch.summarize()
 
+  # SETUP: ####
+
+  hideTab(inputId = 'all_tabs', target = 'Advanced Settings')
   data_processed <-  reactiveVal(NULL) # initialized so it can be set later in reaction to an event, using data_processed(newvalue)
 
   sanitized_standard_analysis_title <- reactive({
     EJAM:::global_or_param("sanitize_text")(input$standard_analysis_title)
   })
-
   sanitized_analysis_title <- reactive({
     EJAM:::global_or_param("sanitize_text")(input$analysis_title)
   })
-
   sanitized_an_threshgroup1 <- reactive({
     EJAM:::global_or_param("sanitize_text")(input$an_threshgroup1)
   })
-
   sanitized_an_threshgroup2 <- reactive({
     EJAM:::global_or_param("sanitize_text")(input$an_threshgroup2)
   })
-
   sanitized_radius_now <- reactive({
     req(input$radius_now)
     EJAM:::global_or_param("sanitize_numeric")(input$radius_now)
@@ -240,8 +236,7 @@ app_server <- function(input, output, session) {
   observeEvent(input$shp_help, {
     showModal(modalDialog(HTML(EJAM:::global_or_param("shp_help_msg")),    easyClose = TRUE))})
   # . --------------------------------------------------------------- ####
-
-  #. ## ##
+  #. ####
 
   # ______ SELECT SITES ________####
   #. ####
@@ -375,7 +370,7 @@ app_server <- function(input, output, session) {
   data_up_shp <- reactive({
 
     if (is.null(input$ss_upload_shp)) {
-      xshp <- global_or_param("shapefile")
+      xshp <- EJAM:::global_or_param("shapefile")
       if (is.null(xshp) || length(xshp) == 0) {
         if (input$testing) {cat("should stop here\n")}
         req(FALSE, cancelOutput = TRUE)
@@ -520,10 +515,12 @@ app_server <- function(input, output, session) {
   #############################################################################  #
   ## reactive: latlon (from table passed to ejamapp() as param) ####
 
+  # But note this approach does not allow one to bookmark sitepoints as an input$
+
   data_up_tablepassed_latlon <- reactive({
 
     sitepoints <- NULL # since never set in global_defaults_*.R, only exists if at all via  get_golem_options()
-    sitepoints <- global_or_param("sitepoints")
+    sitepoints <- EJAM:::global_or_param("sitepoints")
     req(sitepoints)
 
     ################################# #
@@ -1324,7 +1321,7 @@ app_server <- function(input, output, session) {
   })
   #############################################################################  #
   #. ####
-  # ______ VIEW SITES (uploaded; not yet processed) ####
+  # ______ PREVIEW SITES _______ ####
   #. ####
 
   output$invalid_sites_alert2 <- renderUI({
@@ -1757,7 +1754,7 @@ app_server <- function(input, output, session) {
   # . --------------------------------------------------------------- # ###
 
   #. ####
-  # ______ RUN ANALYSIS  (when button is pressed) ________####
+  # ______ RUN ANALYSIS ________####
   #. ####
 
   ## data_processed()  reactive holds results of ejamit()
@@ -2004,21 +2001,22 @@ app_server <- function(input, output, session) {
 
   # #############################################################################  #
 
-  # ________ RESULTS OVERALL -- SUMMARY REPORT  __________ ####
+  # ______ SUMMARY RESULTS, results_overall _________ ####
   #. ####
-  # HTML REPORT - FOR UI ####
-  # *** The code here builds the html report shown in the shiny app but also see code used to download it.
+  # REPORT Overall - for BROWSER ####
 
-  ## * Header ####
+  # *** The code here builds the html report shown in the shiny app but also see separate code used to download it.
 
-  ### ( Total Population count ) ####
+  ## * HEADER ####
+
+  ### ( Total Population count ) ### #
   total_pop <- reactive({
     req(data_processed())
     ## format and return total population
     round(data_processed()$results_overall$pop, table_rounding_info("pop") )
   })
 
-  ### ( Title of analysis ) ####
+  ### ( Title of analysis ) ### #
 
   # Unless user changes it here, use a standard title that has been determined by global_defaults_*.R but then optionally modified by advanced settings tab
 
@@ -2028,10 +2026,10 @@ app_server <- function(input, output, session) {
                      value = sanitized_standard_analysis_title())
   })
   #############################################################################  #
-  ## *MAP ALL SITES ####
+  ## * MAP for REPORT ####
   ############################################ #
 
-  ### report_map() ####
+  ### report_map ### #
 
   report_map <- reactive({
 
@@ -2110,14 +2108,14 @@ app_server <- function(input, output, session) {
   }) # end of report_map
   ############################################ #
 
-  ### output$quick_view_map of report_map() html ####
+  ### output$quick_view_map of report_map() html ### #
 
   output$quick_view_map <- leaflet::renderLeaflet({
     report_map()
   })
   ############################################ #
 
-  ### leafletProxy()  "an_leaf_map"  ####
+  ### leafletProxy()  "an_leaf_map"  ### #
 
   observe({
     ## This statement needed to ensure site selection map stops if too many points uploaded
@@ -2173,11 +2171,11 @@ app_server <- function(input, output, session) {
     }
   }) # end of leafletProxy()  an_leaf_map
   #############################################################################  #
-  ## *BARPLOT for short and long reports (avg person D ratios vs US avg) ####
+  ## * PLOT - for short and long reports (avg person D ratios vs US avg) ####
+  ############################################ #
 
-  # compare / merge with  ejam2barplot() / plot_barplot_ratios() / plot_barplot_ratios_ez() group of functions ***
-  # https://exts.ggplot2.tidyverse.org/gallery/
   ###################  #
+  ### v1_summary_plot_state ####
 
   v1_summary_plot_state <- reactive({
 
@@ -2213,6 +2211,7 @@ app_server <- function(input, output, session) {
     }
   })
   ###################  #
+  ### v1_summary_plot ####
 
   v1_summary_plot <- reactive({
 
@@ -2220,8 +2219,11 @@ app_server <- function(input, output, session) {
     # data_processed() needed for ridgeline or boxplot, and ratio.to.us.d() which is made from data_processed() is needed for boxplots,
 
     ################## #  BARPLOT
-
+    #### *BARPLOT ####
     if (input$plotkind_1pager == 'bar') {
+
+      # compare / merge with  ejam2barplot() / plot_barplot_ratios() / plot_barplot_ratios_ez() group of functions ***
+      # https://exts.ggplot2.tidyverse.org/gallery/
 
       if (!is.null(cur_button())) {
         # 1-site report barplot
@@ -2251,6 +2253,7 @@ app_server <- function(input, output, session) {
         }
       }
       ################## # RIDGELINE PLOT
+      ### *RIDGELINE ####
     } else if (input$plotkind_1pager == 'ridgeline') {
       req(data_processed())
       rationames = c(names_d_ratio_to_avg, names_d_subgroups_ratio_to_avg)
@@ -2260,9 +2263,9 @@ app_server <- function(input, output, session) {
       plot_ridgeline_ratios(ratio.to.us.d.bysite,
                             main = input$Custom_title_for_bar_plot_of_indicators)
       ################## # BOXPLOT
+      #### *BOXPLOTS ####
+      # for short report (all sites D ratios vs US avg)
     } else if (input$plotkind_1pager == "box") {
-
-      ## *BOXPLOTS for short report (all sites D ratios vs US avg) ####
       ejam2boxplot_ratios(ejamitout = data_processed(), radius = sanitized_radius_now(),
                           main = input$Custom_title_for_bar_plot_of_indicators)
     } # box
@@ -2295,37 +2298,32 @@ app_server <- function(input, output, session) {
   }
   #############################################################################  #
 
-  ## Render for UI via build_community_report() ####
+  ##  build_community_report() for Browser ####
 
   output$comm_report_html <- renderUI({
     req(data_processed())
 
-    sitetype <- tolower(submitted_upload_method()) #
+
+    ## *** consider replacing this with ejam2report(),
+    ## but doing map, plot, tables, footer separately in this case allows for spinners, for example in UI
+
+
     rad <- data_processed()$results_overall$radius.miles # input radius can be changed by user and would alter the report text but should just show what was run not what slider currently says
     nsites <- NROW(data_processed()$results_bysite[data_processed()$results_bysite$valid == T, ])
     popstr <- prettyNum(total_pop(), big.mark = ',') # rounded already?
 
-    if (sitetype %in% "latlon") {
-      area_in_square_miles <- nsites * area_sqmi(df = data_processed()$results_overall)
-    } else {
-      if (sitetype %in% "shp") {
-        area_in_square_miles <- data_processed()$results_overall$area_sqmi
-      } else {
-        if (sitetype %in% "fips") {
-          area_in_square_miles <-  data_processed()$results_overall$area_sqmi
-        } else {
-          area_in_square_miles <- NULL
-        }
-      }
-    }
+    sitetype <- tolower(submitted_upload_method()) #
+
+    area_in_square_miles <- data_processed()$results_overall$area_sqmi
+
     residents_within_xyz <- report_residents_within_xyz(
       sitetype = sitetype,
       radius = rad,
       nsites = nsites,
       area_in_square_miles = area_in_square_miles
+      # sitenumber not relevant for overall report
+      # ejam_uniq_id not relevant for overall report
     )
-
-    ## generate full HTML using external functions -- can this use ejam2report() instead?? ***
 
     full_page <- build_community_report(in_shiny = TRUE,
 
@@ -2342,23 +2340,26 @@ app_server <- function(input, output, session) {
                                         extratable_hide_missing_rows_for = input$extratable_hide_missing_rows_for, # c(names_d_language, names_health),
 
                                         filename = NULL,
-                                        report_title = NULL, #
-                                        logo_path = NULL,
-                                        logo_html = NULL
+                                        report_title = EJAM:::global_or_param("report_title"),
+                                        logo_path    = NULL, # EJAM:::global_or_param("report_logo"),
+                                        logo_html = NULL # NOT app_logo_html... gets defined downstream
     )
+
     ## return generated HTML
     full_page
+    # footer is added later in UI, in this case
   })
   # end of observer that send results of calculation to UI
 
   #. ####
   #############################################################################  #
 
-  # HTML REPORT - FOR DOWNLOAD ####
+  ##############################################  #
+  # REPORT Overall - for DOWNLOAD ####
 
   # community_download() and report_community_download() NO LONGER USED HERE
 
-  ### ejam2report() in downloadHandler() ####
+  ### ejam2report() in Overall downloadHandler() ####
 
   # report_fname <- reactiveVal() # never used now?
 
@@ -2403,11 +2404,16 @@ app_server <- function(input, output, session) {
   )
   #############################################################################  #
   # .  ####
-  # ______ RESULTS BY SITE -- DETAILED RESULTS ______ ####
+  # ______ DETAILED RESULTS, results_bysite _________ ####
+  #. ####
+  ##############################################  #
 
-  ## HTML 1-SITE REPORT downloadHandler() ####
+  # REPORT on 1-SITE - for DOWNLOAD ####
 
+  ### ejam2report() in 1-site downloadHandler() ####
   # downloadHandler for the modal download button - Almost identical to code above. But content uses temp_file_path
+
+  # consider using API here to generate single-site reports?  ***
 
   output$community_download_individual <- downloadHandler(
 
@@ -2427,21 +2433,19 @@ app_server <- function(input, output, session) {
       )
     },
     content = function(file) {
-
       # rather than happening here, a separate observer of the 1-site buttons does the work
-
       req(temp_file_path())
       file.copy(temp_file_path(), file)
     }
   )
-  ##############################################  #
+  ###############  #
+  ### observe 1-site-report buttons ####
+  # (1 button per site in the table of sites, to see barplot for that site)
 
   cur_button <- reactiveVal(NULL)
   temp_file_path <- reactiveVal(NULL)
   selected_location_name <- reactiveVal(NULL)
 
-  ### Observe 1-site-report buttons ####
-  # (1 button per site in the table of sites, to see barplot for that site)
   observeEvent(
     lapply(
       names(input)[grep("select_button[0-9]+", names(input))],
@@ -2502,31 +2506,38 @@ app_server <- function(input, output, session) {
         ))
       })
   #############################################################################  #
-  #. ## ##
-  ## INTERACTIVE TABLE of sites = output$interactive_table from data_processed()  ####
+  #. ####
+  ## TABLE of sites for BROWSER ####
 
   output$interactive_table <- DT::renderDT(server = TRUE, expr = {
     req(data_processed())
     create_interactive_table(data_processed = data_processed(),
-                             testing = input$testing)
+                             )
+    # c("EJScreen Report",
+    #   "EJScreen Map" ,
+    #
+    #   'ECHO Report'
+    # )
   })
   #############################################################################  #
-
+  #. ####
   #_____ALL RESULTS AS EXCEL DOWNLOAD ____ ####
+  #. ####
+  # SPREADSHEET downloadHandler() ####
 
-  # SEE FUNCTION THAT CAN DO THIS AT ?table_xls_from_ejam() or ejam2excel()
+  # *** CONSIDER USING FUNCTION THAT CAN DO THIS AT ?table_xls_from_ejam() or ejam2excel()
 
   output$report_version_date <- renderUI({
     message(paste0("shinytestmode = ", getOption("shiny.testmode")))
     p(style = "margin-bottom: 0",
-      paste("Version",
-            EJAM:::global_or_param("ejam_app_version"),
+      paste("Version", EJAM:::global_or_param("app_version"),
             "| Report created on",
             ifelse(
               isTRUE(getOption("shiny.testmode")),
               "[SHINYTEST DATE]", # so the snapshot of the report is consistent, not diff date each time tested
               format(Sys.Date(), '%B %d, %Y'))))
   })
+
   output$download_results_table <- downloadHandler(
     filename = function() {
       create_filename(file_desc = 'results table',
@@ -2700,7 +2711,7 @@ app_server <- function(input, output, session) {
     req(input$summ_bar_data)
     ##  if allowing option of median ('med'), use thiS
     if (input$allow_median_in_barplot_indicators) {
-      # if (global_or_param("default_allow_median_in_barplot_indicators")) {
+      # if (EJAM:::global_or_param("default_allow_median_in_barplot_indicators")) {
       mybarvars.stat <- input$summ_bar_stat
     } else {
       mybarvars.stat <- "avg"
@@ -2802,212 +2813,153 @@ app_server <- function(input, output, session) {
   })
 
   #############################################################################  #
-  # ~--------------------------- ###
-  # ______ FULL STATIC REPORT (Long Word doc download) _________ ####
-  # .  ## ##
+  { # code folding for long report code chunk
+    # ~--------------------------- ###
+    # ______ FULL STATIC REPORT (Long Word doc download) _________ ####
+    # .  ## ##
 
-  ## code for storing all shiny input values - not used currently
-  # observeEvent(input$all_tabs == 'Generate Report',
-  #  {
-  #    list_of_inputs <- reactiveValuesToList(input)
-  #  })
-  #############################################################################  #
-  ## *downloadHandler() ####
+    ## code for storing all shiny input values - not used currently
+    # observeEvent(input$all_tabs == 'Generate Report',
+    #  {
+    #    list_of_inputs <- reactiveValuesToList(input)
+    #  })
+    #############################################################################  #
+    ## *downloadHandler() ####
 
-  output$rg_download <- downloadHandler(
-    filename = function() {
-      create_filename(file_desc = 'full report',
-                      title = sanitized_analysis_title(),
-                      buffer_dist = submitted_radius_val(),
-                      site_method = submitted_upload_method(),
-                      with_datetime = TRUE,
-                      ext = '.doc')
-    },
-    content = function(file) {
+    output$rg_download <- downloadHandler(
+      filename = function() {
+        create_filename(file_desc = 'full report',
+                        title = sanitized_analysis_title(),
+                        buffer_dist = submitted_radius_val(),
+                        site_method = submitted_upload_method(),
+                        with_datetime = TRUE,
+                        ext = '.doc')
+      },
+      content = function(file) {
 
-      # Copy the report file to a temporary directory before processing it, in
-      # case we don't have write permissions to the current working dir (which
-      # can happen when deployed).
-      tempReport <- file.path(tempdir(), "report.Rmd")
-      ## copy Rmd from inst/report to temp folder
-      file.copy(from = app_sys('report/written_report/report.Rmd'),  # treats EJAM/inst/ as root
-                to = tempReport, overwrite = TRUE)
-      ## pass image and bib files needed for knitting to temp directory
-      for (i in list.files(app_sys('report/written_report'), pattern = '.png|.bib')) {   # treats what was in source/EJAM/inst/report/ as installed/EJAM/report/  once pkg is installed
-        file.copy(from = app_sys('report/written_report', i),    # source/EJAM/inst/report/ = installed/EJAM/report/
-                  to = file.path(tempdir(), i),
-                  overwrite = TRUE)
-      }
+        # Copy the report file to a temporary directory before processing it, in
+        # case we don't have write permissions to the current working dir (which
+        # can happen when deployed).
+        tempReport <- file.path(tempdir(), "report.Rmd")
+        ## copy Rmd from inst/report to temp folder
+        file.copy(from = app_sys('report/written_report/report.Rmd'),  # treats EJAM/inst/ as root
+                  to = tempReport, overwrite = TRUE)
+        ## pass image and bib files needed for knitting to temp directory
+        for (i in list.files(app_sys('report/written_report'), pattern = '.png|.bib')) {   # treats what was in source/EJAM/inst/report/ as installed/EJAM/report/  once pkg is installed
+          file.copy(from = app_sys('report/written_report', i),    # source/EJAM/inst/report/ = installed/EJAM/report/
+                    to = file.path(tempdir(), i),
+                    overwrite = TRUE)
+        }
 
-      # Set up parameters to pass to Rmd document -
-      #  MAKE SURE all parameter names are used (identical names, and all are there) in these 4 places:
-      #  1. input$ ids in app_ui.R, from user, to customize the long report
-      #  2. params$ list passed by app_server.R to render the Rmd doc
-      #  3. params: accepted in  .Rmd yaml info header
-      #  4. params$  as used within body of  .Rmd text inline and in r code blocks.
+        # Set up parameters to pass to Rmd document -
+        #  MAKE SURE all parameter names are used (identical names, and all are there) in these 4 places:
+        #  1. input$ ids in app_ui.R, from user, to customize the long report
+        #  2. params$ list passed by app_server.R to render the Rmd doc
+        #  3. params: accepted in  .Rmd yaml info header
+        #  4. params$  as used within body of  .Rmd text inline and in r code blocks.
 
-      isolate({
+        isolate({
 
-        # TABLE DEMOG (for long report) ####
+          # TABLE DEMOG (for long report) ####
 
-        v1_demog_table <- reactive({
-          req(data_processed())
-          table_gt_from_ejamit_overall(
-            data_processed()$results_overall,
-            type = 'demog'
+          v1_demog_table <- reactive({
+            req(data_processed())
+            table_gt_from_ejamit_overall(
+              data_processed()$results_overall,
+              type = 'demog'
+            )
+          })
+          # TABLE ENVT. (for long report) ####
+
+          v1_envt_table <- reactive({
+            req(data_processed())
+            table_gt_from_ejamit_overall(
+              data_processed()$results_overall,
+              type = "envt"
+            )
+          })
+          # LONG REPORT PARAMETERS ####
+
+          params <- list(
+            testmode = FALSE,
+
+            #------- WHERE was analyzed? (where/ what sector/zones/types of places)
+
+            analysis_title =   sanitized_analysis_title(),
+            zonetype =  input$rg_zonetype,
+            where = input$rg_enter_miles,
+            distance = paste0(sanitized_radius_now(),' miles'), #input$radius_units),
+            sectorname_short = input$rg_enter_sites,
+            ## allow for either or
+            in_the_x_zone = ifelse(nchar(input$in_the_x_zone_enter) > 0,
+                                   input$in_the_x_zone_enter,
+                                   input$in_the_x_zone),
+            facilities_studied = ifelse(nchar(input$facilities_studied_enter) > 0,
+                                        input$facilities_studied_enter,
+                                        input$facilities_studied),
+            ## see newer helper  report_residents_within_xyz()  and code used by ejam2report() ejam2excel() etc.
+            within_x_miles_of = paste0("within ", paste0(sanitized_radius_now(),' miles'), " of"), # see https://cli.r-lib.org/articles/pluralization.html
+            in_areas_where = paste0(input$in_areas_where, ' ', input$in_areas_where_enter),
+            risks_are_x = input$risks_are_x,
+            source_of_latlons = input$source_of_latlons,
+            sitecount = nrow(data_processed()$results_bysite),
+
+            #------- RESULTS (tables and map and plots)
+
+            total_pop  = prettyNum( total_pop(), big.mark = ","),
+            results =  data_processed(),  # do we need to pass the entire table? may want to use it in appendices, etc.
+            results_formatted =  table_tall_from_overall(data_processed()$results_overall, data_processed()$longnames),
+            map =  report_map(),
+            # map_placeholder_png =                 "map_placeholder.png",
+            envt_table =  v1_envt_table(),
+            # envt_table_placeholder_png =   "envt_table_placeholder.png",
+            # envt_table_placeholder_rda =   "envt_table_placeholder.rda",
+            demog_table = v1_demog_table(),
+            # demog_table_placeholder_png = "demog_table_placeholder.png",
+            # demog_table_placeholder_rda = "demog_table_placeholder.rda",
+            boxplot =     v1_summary_plot(), # actually a barplot
+            ## also note  v1_summary_plot_state()
+            # boxplot_placeholder_png =         "boxplot_placeholder.png",
+            # barplot= NA
+            # barplot_placeholder_png =         "barplot_placeholder.png",
+
+            #------- TEXT PHRASES DESCRIBING AND INTERPRETING RESULT
+
+            demog_how_elevated = input$demog_how_elevated,
+            envt_how_elevated = input$envt_how_elevated,
+            demog_high_at_what_share_of_sites = input$demog_high_at_what_share_of_sites,
+            envt_high_at_what_share_of_sites = input$envt_high_at_what_share_of_sites,
+            conclusion1 = input$conclusion1,
+            conclusion2 = input$conclusion2,
+            conclusion3 = input$conclusion3,
+
+            #------- METHODS, AUTHORS, ETC.
+
+            authorname1     = input$rg_author_name,
+            authoremail1    = input$rg_author_email,
+            coauthor_names  = input$coauthor_names,
+            coauthor_emails = input$coauthor_emails,
+            fundingsource   = input$fundingsource,   # need to add input
+            acs_version =  acs_version_global,
+            ejscreen_version =  ejscreen_version_global
           )
         })
-        # TABLE ENVT. (for long report) ####
+        # [TEMPORARILY SAVE PARAMS FOR TEST ING] ## ##
+        # if (input$testing) {saveRDS(params, file = "./inst/testparams.RDS")} ################################ TEMPORARILY SAVE PARAMS FOR TESTING# #
 
-        v1_envt_table <- reactive({
-          req(data_processed())
-          table_gt_from_ejamit_overall(
-            data_processed()$results_overall,
-            type = "envt"
-          )
-        })
-        # LONG REPORT PARAMETERS ####
+        # Knit report to Word Doc ## ##
+        # Knit the document, passing in the `params` list, and eval it in a
+        # child of the global environment (this isolates the code in the document
+        # from the code in this app).
 
-        params <- list(
-          testmode = FALSE,
-
-          #------- WHERE was analyzed? (where/ what sector/zones/types of places)
-
-          analysis_title =   sanitized_analysis_title(),
-          zonetype =  input$rg_zonetype,
-          where = input$rg_enter_miles,
-          distance = paste0(sanitized_radius_now(),' miles'), #input$radius_units),
-          sectorname_short = input$rg_enter_sites,
-          ## allow for either or
-          in_the_x_zone = ifelse(nchar(input$in_the_x_zone_enter) > 0,
-                                 input$in_the_x_zone_enter,
-                                 input$in_the_x_zone),
-          facilities_studied = ifelse(nchar(input$facilities_studied_enter) > 0,
-                                      input$facilities_studied_enter,
-                                      input$facilities_studied),
-          ## see newer helper  report_residents_within_xyz()  and code used by ejam2report() ejam2excel() etc.
-          within_x_miles_of = paste0("within ", paste0(sanitized_radius_now(),' miles'), " of"), # see https://cli.r-lib.org/articles/pluralization.html
-          in_areas_where = paste0(input$in_areas_where, ' ', input$in_areas_where_enter),
-          risks_are_x = input$risks_are_x,
-          source_of_latlons = input$source_of_latlons,
-          sitecount = nrow(data_processed()$results_bysite),
-
-          #------- RESULTS (tables and map and plots)
-
-          total_pop  = prettyNum( total_pop(), big.mark = ","),
-          results =  data_processed(),  # do we need to pass the entire table? may want to use it in appendices, etc.
-          results_formatted =  table_tall_from_overall(data_processed()$results_overall, data_processed()$longnames),
-          map =  report_map(),
-          # map_placeholder_png =                 "map_placeholder.png",
-          envt_table =  v1_envt_table(),
-          # envt_table_placeholder_png =   "envt_table_placeholder.png",
-          # envt_table_placeholder_rda =   "envt_table_placeholder.rda",
-          demog_table = v1_demog_table(),
-          # demog_table_placeholder_png = "demog_table_placeholder.png",
-          # demog_table_placeholder_rda = "demog_table_placeholder.rda",
-          boxplot =     v1_summary_plot(), # actually a barplot
-          ## also note  v1_summary_plot_state()
-          # boxplot_placeholder_png =         "boxplot_placeholder.png",
-          # barplot= NA
-          # barplot_placeholder_png =         "barplot_placeholder.png",
-
-          #------- TEXT PHRASES DESCRIBING AND INTERPRETING RESULT
-
-          demog_how_elevated = input$demog_how_elevated,
-          envt_how_elevated = input$envt_how_elevated,
-          demog_high_at_what_share_of_sites = input$demog_high_at_what_share_of_sites,
-          envt_high_at_what_share_of_sites = input$envt_high_at_what_share_of_sites,
-          conclusion1 = input$conclusion1,
-          conclusion2 = input$conclusion2,
-          conclusion3 = input$conclusion3,
-
-          #------- METHODS, AUTHORS, ETC.
-
-          authorname1     = input$rg_author_name,
-          authoremail1    = input$rg_author_email,
-          coauthor_names  = input$coauthor_names,
-          coauthor_emails = input$coauthor_emails,
-          fundingsource   = input$fundingsource,   # need to add input
-          acs_version =  acs_version_global,
-          ejscreen_version =  ejscreen_version_global
+        rmarkdown::render(tempReport, output_format = 'word_document',
+                          output_file = file,
+                          params = params,
+                          envir = new.env(parent = globalenv()),
+                          intermediates_dir = tempdir()
         )
-      })
-      # [TEMPORARILY SAVE PARAMS FOR TEST ING] ## ##
-      # if (input$testing) {saveRDS(params, file = "./inst/testparams.RDS")} ################################ TEMPORARILY SAVE PARAMS FOR TESTING# #
-
-      # Knit report to Word Doc ## ##
-      # Knit the document, passing in the `params` list, and eval it in a
-      # child of the global environment (this isolates the code in the document
-      # from the code in this app).
-
-      rmarkdown::render(tempReport, output_format = 'word_document',
-                        output_file = file,
-                        params = params,
-                        envir = new.env(parent = globalenv()),
-                        intermediates_dir = tempdir()
-      )
-    } # end of download function
-  ) # end of long report download handler
-
-  # ______ ejscreenapi MODULE _________ ####
-
-  # (to get batch via API)  see default_hide_ejscreenapi_tab in global_defaults_*.R etc.
-
-  # create UI part for main EJAM app here rather than in app_ui because we need access to input$ radius of main app to pass that to module that uses it as the initial radius shown on its slider
-  # pass from server code of app to server code of module by creating the main radius UI in server of app (cannot access the input$ in UI of app)
-  # Not sure if I can pass a reactive or need to pass reactive value so it can get updated by the module without needing to return a list of values from the module?
-  # default_radius_react_passed <- reactiveVal() # initialize/create the variable that will store the latest radius set by outer app
-  # observe(
-  #   default_radius_react_passed(sanitized_radius_now()) # update the value of this reactiveVal anytime outer app slider is adjusted
-  # )
-
-  # output$mod_ejscreenapi_ui_TO_SHOW_IN_APP_UI <- renderUI({
-  #   mod_ejscreenapi_ui("x2",
-  #                      simpleradiusdefault_for_ui = 1 # ,
-  #                      # default_radius_react = default_radius_react_passed
-  #                      ) # reactive object gets passed without parentheses. pass a reactive radius HERE to server not ui.
-  # })
-
-  # default_radius_react_passed <- reactiveVal(sanitized_radius_now()) # pass to UI of module not server code of module
-  # default_points_react_passed <- reactiveVal() # initialize it empty
-  # observe(
-  #   default_points_react_passed(  data_uploaded()  ) # update default_points_react_passed when data_uploaded() changes
-  # )
-  # table_as_displayed_reactive <- reactive(
-  #
-  #   mod_ejscreenapi_server(
-  #     "x2",
-  #     default_points_shown_at_startup_react = default_points_react_passed, #reactive(testpoints_5[1:2,]),
-  #     use_ejscreenit = T # use_ejscreenit_tf
-  #   )
-  #
-  #   # mod_ejscreenapi_server("x2",
-  #   #                        # default_points = testpoints_5[1:2,],
-  #   #                        default_radius_react = default_radius_react_passed,
-  #   #                        default_points_shown_at_startup_react = default_points_react_passed  #reactive value object gets passed without parentheses
-  #   # )
-  # )
-
-  # NOTE:
-  # If a module needs to use a reactive expression, the outer function should take the reactive expression as a parameter.
-  # If a module wants to return reactive expressions to the calling app, then return a list of reactive expressions from the function.
-  # If a module needs to access an input that isn’t part of the module, the
-  #   containing app should pass the input value wrapped in a reactive expression (i.e. reactive(...)):
-  #   myModule("myModule1", reactive(input$checkbox1))
-  #
-  # x = 0
-  # x <- reactive({
-  #   req(data_uploaded())
-  #   mod_ejscreenapi_server("x2", default_points_react = data_uploaded())
-  # }) %>%
-  #   bindCache(req(data_uploaded, ))
-  # if (is.reactive(x)) {cat("API module output is a reactive value \n")} else {cat("API module output is not reactive \n")}
-
-  # Not sure if or when control would get passed back to EJAM main app code or when x might be assigned or what***
-  #  I think x will be a reactive that is the output table?? ***
-  # try to pass (to module) the data_uploaded() points already uploaded in EJAM app points
-  # try to get output here? and do what? display or pass back to the EJAM app code that can show all the info and download it?
-
-  #. ####
+      } # end of download function
+    ) # end of long report download handler
+  } # end of code folding for long report chunk
 
 } # end of app_server
