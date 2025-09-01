@@ -14,7 +14,7 @@ app_ui  <- function(request) {
 
     fluidPage(
 
-     ## enable JavaScript, CSS   ####
+      ## enable JavaScript, CSS   ####
       #   functionality (such as resetting inputs) etc.
       shinyjs::useShinyjs(),
       ## javascript function for jumping to top of screen
@@ -40,11 +40,11 @@ app_ui  <- function(request) {
       ## html header inserted from global_defaults_*.R ####
       EJAM:::global_or_param("html_header_fmt"),
 
-     ## title is now in html in global_defaults_*.R (for app and browser tab) ####
+      ## title is now in html in global_defaults_*.R (for app and browser tab) ####
 
-     ## title, favicon, etc. ####
+      ## title, favicon, etc. ####
 
-     ############################################################# #
+      ############################################################# #
 
       # TABS:   ####
       tabsetPanel( # up to line 1101 or so
@@ -75,15 +75,15 @@ app_ui  <- function(request) {
                           br(),br(),
                    ),
                    column(4,
-                          img(id = "biglogo", src = EJAM:::global_or_param("aboutpage_logo"),
+                          img(id = "biglogo", src = EJAM:::global_or_param("app_logo_aboutpage"),
                               alt = "logo", title = "logo", width = "100px", height = "100px")
                    )
                  )
         ), # end About EJAM tab
-
         ######################################################################################################### #
         #
         ######################################################################################################### #
+        # . --------------------------------------------------------------- ####
         #. ####
         # ______ SELECT SITES ________ tabPanel(title = 'Site Selection'####
         #. ####
@@ -109,7 +109,7 @@ app_ui  <- function(request) {
                                choiceValues = c('dropdown',
                                                 'upload'),
                                selected = EJAM:::global_or_param("default_upload_dropdown")),
-                               # selected = 'upload'),   # if hard-coded default selection.
+                  # selected = 'upload'),   # if hard-coded default selection.
                   # uiOutput(outputId = 'ss_choose_method_ui'), # flexible default selection, if handled in server code.
 
                   ## > what DROPDOWN CATEGORY TYPE? (NAICS, SIC, MACT, Program, FIPS_PLACE) ####
@@ -321,7 +321,7 @@ app_ui  <- function(request) {
                                              inline = TRUE,
                                              choiceNames = c("Basic list", "Detailed list"),
                                              choiceValues = c('basic', 'detailed'),
-                                             selected = EJAM:::global_or_param('default_naics_digits_shown')), # "basic"
+                                             selected = EJAM:::global_or_param("default_naics_digits_shown")), # "basic"
                                 radioButtons(inputId = 'add_naics_subcategories', "Add all subcategories of NAICS?",
                                              inline = TRUE,
                                              choiceNames = c("Yes","No"),
@@ -345,15 +345,15 @@ app_ui  <- function(request) {
 
                             ## input: Select SIC from list
                             selectizeInput(inputId = "ss_select_sic",
-                              label = h6("Select industry of interest"),
-                              # choose from named numeric vector on server-side
-                              ## number is NAICS like 31182, names are like "31182 - Cookie, Cracker, and Pasta Manufacturing"
-                              choices = NULL,
-                              selected = NULL,
-                              width = 400,
-                              multiple = TRUE,
-                              ## add X to remove selected options from list
-                              options = list('plugins' = list('remove_button'))
+                                           label = h6("Select industry of interest"),
+                                           # choose from named numeric vector on server-side
+                                           ## number is NAICS like 31182, names are like "31182 - Cookie, Cracker, and Pasta Manufacturing"
+                                           choices = NULL,
+                                           selected = NULL,
+                                           width = 400,
+                                           multiple = TRUE,
+                                           ## add X to remove selected options from list
+                                           options = list('plugins' = list('remove_button'))
                             ),
                             br(), ## vertical space
                           ), # end SIC conditionalPanel
@@ -487,24 +487,25 @@ app_ui  <- function(request) {
         #############################################################################  #
         # . --------------------------------------------------------------- ####
         #. ####
-        # ______ SUMMARY RESULTS _________ ####
+        # ______ SUMMARY RESULTS, results_overall _________ ####
         #. ####
         # #############################################################################  #
 
         # See Results tabPanel(title = "See Results" ####
+
         tabPanel(title = "See Results",
-                 ##br(),
+
                  ##actionButton(inputId = 'back_to_site_sel', label = div(icon('play', style = 'transform: rotate(180deg);'),
                  ## HTML('&nbsp;'), 'Return to Site Selection'), class = 'usa-button'),
                  # . ### #
                  ## tabsetPanel(id = 'results_tabs'  ####
                  #tags$div( class = 'results_tabs_theme',
+
                  tabsetPanel(id = 'results_tabs',
                              #type = 'pills',
 
-
                              ######################################################################################################### #
-                             # COMMUNITY REPORT VIEW ####
+                             # REPORT Overall - for BROWSER ####
                              tabPanel(
                                title = "Community Report",
 
@@ -546,7 +547,7 @@ app_ui  <- function(request) {
 
                              ######################################################################################################### #
                              #. ####
-                             # ______ DETAILED RESULTS  _________ ####
+                             # ______ DETAILED RESULTS, results_bysite  _________ ####
                              #. ####
                              ## tabPanel(title = 'Details' ####
                              #. ## ##
@@ -632,9 +633,9 @@ app_ui  <- function(request) {
                                                        br(), br()
                                                        ######################################################################################################### #
                                                      ) # end of wellPanel
-                                                     ),  # end of tabPanel(title = 'Plot Average Scores',
+                                            ),  # end of tabPanel(title = 'Plot Average Scores',
 
-                                                     ### _HISTOPLOT (RANGE OF SCORES) - tabPanel(title = 'Plot Full Range of Scores' ####
+                                            ### _HISTOPLOT (RANGE OF SCORES) - tabPanel(title = 'Plot Full Range of Scores' ####
 
                                             tabPanel(id = "plot_range",
                                                      title = 'Plot Full Range of Scores',
@@ -685,320 +686,316 @@ app_ui  <- function(request) {
                                       ) # end div(class = 'navbar1'
                              ), # end 'Details' results tab
                              ######################################################################################################### #
-                             #. ####
+{ # code folding for full written report chunk
+                            #. ####
                              # ______ FULL REPORT (Word doc) - tabPanel(title = 'Written Report' _________ ####
                              #. ####
 
-
                              tabPanel(title = 'Written Report',
 
-                                      #  MAKE SURE all parameter names are used (identical names, and all are there) in these 4 places:
-                                      #  1. input$ ids in app_ui.R, from user, to customize the long report
-                                      #  2. params$ list passed by app_server.R to render the Rmd doc
-                                      #  3. params: accepted in  .Rmd yaml info header
-                                      #  4. params$  as used within body of  .Rmd text inline and in r code blocks.
+                                        #  MAKE SURE all parameter names are used (identical names, and all are there) in these 4 places:
+                                        #  1. input$ ids in app_ui.R, from user, to customize the long report
+                                        #  2. params$ list passed by app_server.R to render the Rmd doc
+                                        #  3. params: accepted in  .Rmd yaml info header
+                                        #  4. params$  as used within body of  .Rmd text inline and in r code blocks.
 
-                                      br(), ## vertical space
-
-                                      wellPanel(
                                         br(), ## vertical space
 
-                                        ## arrange text and buttons
-                                        fluidRow(
-                                          column(6,
-                                                 ## add text above report settings
-                                                 p('Edit report settings below to tailor the full report to your specific analysis.')
+                                        wellPanel(
+                                          br(), ## vertical space
+
+                                          ## arrange text and buttons
+                                          fluidRow(
+                                            column(6,
+                                                   ## add text above report settings
+                                                   p('Edit report settings below to tailor the full report to your specific analysis.')
+                                            ),
+                                            column(6,
+                                                   ## output: button to download static report
+                                                   shiny::downloadButton(outputId = 'rg_download',
+                                                                         label = 'Download report',
+                                                                         class = 'usa-button')
+                                            )
+                                          ), ######################################################### #
+
+                                          #------- WHERE was analyzed? (where/ what sector/zones/types of places)
+
+                                          #?  # analysis_title =  input$analysis_title,
+                                          # zonetype =  input$rg_zonetype,   ### names differ by   rg_
+                                          # where = input$rg_enter_miles,   ############# names differ
+                                          # distance = paste0(input$radius_now,' miles'), #input$radius_units),   #############  param derived from input
+                                          # sectorname_short = input$rg_enter_sites,                 ############# names differ
+                                          # ## allow for either or
+                                          # in_the_x_zone = ifelse(nchar(input$in_the_x_zone_enter) > 0,     ######  _enter  and derived from inputs
+                                          #                        input$in_the_x_zone_enter,
+                                          #                        input$in_the_x_zone),
+                                          # facilities_studied = ifelse(nchar(input$facilities_studied_enter) > 0,    ####   _enter and derived from inputs
+                                          #                             input$facilities_studied_enter,
+                                          #                             input$facilities_studied),
+                                          # within_x_miles_of = paste0("within ", paste0(input$radius_now,' miles'), " of"),   ##### param derived from input
+                                          #
+                                          # in_areas_where = paste0(input$in_areas_where, ' ', input$in_areas_where_enter),   ######   _enter
+                                          # risks_are_x = input$risks_are_x,                      ### names match
+                                          # source_of_latlons = input$source_of_latlons,          ### names match
+                                          # sitecount = nrow(data_processed()$results_bysite),      ### param derived from data
+
+                                          # put input$analysis_title   here???
+
+                                          fluidRow(          #    param is called  where
+                                            column(4,
+                                                   ## input: analysis location - uses current value of radius slider
+                                                   uiOutput('rg_enter_miles')
+                                            )),
+
+                                          # param distance is based on input$radius_now
+
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:  - which sites analyzed  #    param is called   sectorname_short
+                                                   textInput(inputId = "rg_enter_sites",
+                                                             label = "Describe sites analyzed:",
+                                                             value = "facilities in the _____ source category"),
+                                            )
                                           ),
-                                          column(6,
-                                                 ## output: button to download static report
-                                                 shiny::downloadButton(outputId = 'rg_download',
-                                                                       label = 'Download report',
-                                                                       class = 'usa-button'),
 
-                                          )
-                                        ), ######################################################### #
-
-                                        #------- WHERE was analyzed? (where/ what sector/zones/types of places)
-
-                                        #?  # analysis_title =  input$analysis_title,
-                                        # zonetype =  input$rg_zonetype,   ### names differ by   rg_
-                                        # where = input$rg_enter_miles,   ############# names differ
-                                        # distance = paste0(input$radius_now,' miles'), #input$radius_units),   #############  param derived from input
-                                        # sectorname_short = input$rg_enter_sites,                 ############# names differ
-                                        # ## allow for either or
-                                        # in_the_x_zone = ifelse(nchar(input$in_the_x_zone_enter) > 0,     ######  _enter  and derived from inputs
-                                        #                        input$in_the_x_zone_enter,
-                                        #                        input$in_the_x_zone),
-                                        # facilities_studied = ifelse(nchar(input$facilities_studied_enter) > 0,    ####   _enter and derived from inputs
-                                        #                             input$facilities_studied_enter,
-                                        #                             input$facilities_studied),
-                                        # within_x_miles_of = paste0("within ", paste0(input$radius_now,' miles'), " of"),   ##### param derived from input
-                                        #
-                                        # in_areas_where = paste0(input$in_areas_where, ' ', input$in_areas_where_enter),   ######   _enter
-                                        # risks_are_x = input$risks_are_x,                      ### names match
-                                        # source_of_latlons = input$source_of_latlons,          ### names match
-                                        # sitecount = nrow(data_processed()$results_bysite),      ### param derived from data
-
-                                        # put input$analysis_title   here???
-
-                                        fluidRow(          #    param is called  where
-                                          column(4,
-                                                 ## input: analysis location - uses current value of radius slider
-                                                 uiOutput('rg_enter_miles')
-                                          )),
-
-                                        # param distance is based on input$radius_now
-
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:  - which sites analyzed  #    param is called   sectorname_short
-                                                 textInput(inputId = "rg_enter_sites",
-                                                           label = "Describe sites analyzed:",
-                                                           value = "facilities in the _____ source category"),
-                                          )
-                                        ),
-
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:   # zonetype =  input$rg_zonetype
-                                                 selectInput(inputId = 'rg_zonetype',
-                                                             label = 'Zone Type (How are zones defined?)',
-                                                             choices = c('General' = 'zone_is_named_x','Proximity' = 'zone_is_nearby',
-                                                                         'Risk' = 'zone_is_risk_x'))
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:   # zonetype =  input$rg_zonetype
+                                                   selectInput(inputId = 'rg_zonetype',
+                                                               label = 'Zone Type (How are zones defined?)',
+                                                               choices = c('General' = 'zone_is_named_x','Proximity' = 'zone_is_nearby',
+                                                                           'Risk' = 'zone_is_risk_x'))
+                                            ),
+                                            column(4,
+                                                   ## input:   #  based on  input$radius_now
+                                                   selectInput(inputId = 'within_x_miles_of',
+                                                               label = 'Near to',
+                                                               choices = c('near the','nearby',''))
+                                            )
                                           ),
-                                          column(4,
-                                                 ## input:   #  based on  input$radius_now
-                                                 selectInput(inputId = 'within_x_miles_of',
-                                                             label = 'Near to',
-                                                             choices = c('near the','nearby',''))
-                                          )
-                                        ),
 
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:    # in_areas_where calculated from input$in_areas_where, and input$in_areas_where_enter
-                                                 selectInput(inputId = 'in_areas_where',
-                                                             label = 'Describe the surrounding area',
-                                                             choices = c('in areas with',
-                                                                         'where','in block groups where')
-                                                 )
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:    # in_areas_where calculated from input$in_areas_where, and input$in_areas_where_enter
+                                                   selectInput(inputId = 'in_areas_where',
+                                                               label = 'Describe the surrounding area',
+                                                               choices = c('in areas with',
+                                                                           'where','in block groups where')
+                                                   )
+                                            ),
+                                            column(4,
+                                                   ## input:
+                                                   textInput(inputId = 'in_areas_where_enter',
+                                                             label = 'Add area details',
+                                                             value = '')
+                                            )
                                           ),
-                                          column(4,
-                                                 ## input:
-                                                 textInput(inputId = 'in_areas_where_enter',
-                                                           label = 'Add area details',
-                                                           value = '')
-                                          )
-                                        ),
-                                        fluidRow(
-                                          column(8,
-                                                 ## input:
-                                                 selectInput(inputId = 'risks_are_x',
-                                                             label = 'Risk level',
-                                                             choices = c("risk is at or above 1 per million (lifetime individual cancer risk due to inhalation of air toxics from this source category)",
-                                                                         "risk is above 1 per million",
-                                                                         "the area is in nonattainment",
-                                                                         "PM2.5 levels are in the highest decile",
-                                                                         "ozone concentrations are at least 70 ppb")
-                                                 )
-                                          )
-                                        ),
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:
-                                                 selectInput(inputId = 'in_the_x_zone',
-                                                             label = 'General study location',
-                                                             choices = c('in the study area' = 'area', 'in the analyzed locations' = 'locs',
-                                                                         'in [State X] (specify)' = 'state',
-                                                                         'in EPA Region [XX] (specify)' = 'region')
-                                                 )
+                                          fluidRow(
+                                            column(8,
+                                                   ## input:
+                                                   selectInput(inputId = 'risks_are_x',
+                                                               label = 'Risk level',
+                                                               choices = c("risk is at or above 1 per million (lifetime individual cancer risk due to inhalation of air toxics from this source category)",
+                                                                           "risk is above 1 per million",
+                                                                           "the area is in nonattainment",
+                                                                           "PM2.5 levels are in the highest decile",
+                                                                           "ozone concentrations are at least 70 ppb")
+                                                   )
+                                            )
                                           ),
-                                          column(4,
-                                                 ## add free text box if certain values chosen from radio button
-                                                 conditionalPanel(
-                                                   condition = "input.in_the_x_zone == 'state' || input.in_the_x_zone == 'region'",
-                                                   textInput(inputId = 'in_the_x_zone_enter',
-                                                             label = 'Other - please specify',
-                                                             value = 'in ')
-                                                 )
-                                          )
-                                        ),
-
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:
-                                                 selectInput(inputId = 'facilities_studied',
-                                                             label = 'Facilities Studied',
-                                                             choices = c('facilities subject to this proposed rule' = 'rule',
-                                                                         'analyzed facilities' = 'fac','analyzed sites' = 'sites',
-                                                                         'facilities in the ___ source category' = 'cat',
-                                                                         'facilities in the ____ sector (NAICS code __)' = 'sector')
-                                                 )
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:
+                                                   selectInput(inputId = 'in_the_x_zone',
+                                                               label = 'General study location',
+                                                               choices = c('in the study area' = 'area', 'in the analyzed locations' = 'locs',
+                                                                           'in [State X] (specify)' = 'state',
+                                                                           'in EPA Region [XX] (specify)' = 'region')
+                                                   )
+                                            ),
+                                            column(4,
+                                                   ## add free text box if certain values chosen from radio button
+                                                   conditionalPanel(
+                                                     condition = "input.in_the_x_zone == 'state' || input.in_the_x_zone == 'region'",
+                                                     textInput(inputId = 'in_the_x_zone_enter',
+                                                               label = 'Other - please specify',
+                                                               value = 'in ')
+                                                   )
+                                            )
                                           ),
-                                          column(4,
-                                                 ## add free text box if certain values chosen
-                                                 conditionalPanel(
-                                                   condition = "input.facilities_studied == 'cat' || input.facilities_studied == 'sector' || input.facilities_studied == 'rule'",
-                                                   textInput(inputId = 'facilities_studied_enter',
-                                                             label = 'Other - please specify')
-                                                 )
-                                          )
-                                        ),
 
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:
-                                                 textInput(inputId = 'source_of_latlons',
-                                                           label = 'Source of Points',
-                                                           placeholder = "EPA's Facility Registry Service (FRS)"),
-                                          )
-                                        ),
-
-
-                                        #------- METHODS, AUTHORS, ETC.
-
-                                        fluidRow(
-                                          column(2,
-                                                 ## input:
-                                                 textInput(inputId = "rg_author_name",
-                                                           label = "Author Name(s):",
-                                                           value = "FirstName LastName")
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:
+                                                   selectInput(inputId = 'facilities_studied',
+                                                               label = 'Facilities Studied',
+                                                               choices = c('facilities subject to this proposed rule' = 'rule',
+                                                                           'analyzed facilities' = 'fac','analyzed sites' = 'sites',
+                                                                           'facilities in the ___ source category' = 'cat',
+                                                                           'facilities in the ____ sector (NAICS code __)' = 'sector')
+                                                   )
+                                            ),
+                                            column(4,
+                                                   ## add free text box if certain values chosen
+                                                   conditionalPanel(
+                                                     condition = "input.facilities_studied == 'cat' || input.facilities_studied == 'sector' || input.facilities_studied == 'rule'",
+                                                     textInput(inputId = 'facilities_studied_enter',
+                                                               label = 'Other - please specify')
+                                                   )
+                                            )
                                           ),
-                                          column(2,
-                                                 ## input:
-                                                 textInput(inputId = "rg_author_email",
-                                                           label = "Author Email(s):",
-                                                           value = "author@email.org")
+
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:
+                                                   textInput(inputId = 'source_of_latlons',
+                                                             label = 'Source of Points',
+                                                             placeholder = "EPA's Facility Registry Service (FRS)"),
+                                            )
                                           ),
-                                          column(2,
-                                                 ## input: checkbox to add line for coauthor information
-                                                 checkboxInput(inputId = 'rg_add_coauthors',
-                                                               label = 'Add co-authors?',
-                                                               value = FALSE)
-                                          )
-                                        ),
-                                        ## if checkbox is checked, add textinputs for co-author name and email
-                                        conditionalPanel(
-                                          condition = 'input.rg_add_coauthors == 1',
+
+                                          #------- METHODS, AUTHORS, ETC.
+
                                           fluidRow(
                                             column(2,
                                                    ## input:
-                                                   textInput(inputId = 'coauthor_names', 'Co-Author Name(s)')
+                                                   textInput(inputId = "rg_author_name",
+                                                             label = "Author Name(s):",
+                                                             value = "FirstName LastName")
                                             ),
                                             column(2,
                                                    ## input:
-                                                   textInput(inputId = 'coauthor_emails', 'Co-Author Email(s)')
+                                                   textInput(inputId = "rg_author_email",
+                                                             label = "Author Email(s):",
+                                                             value = "author@email.org")
+                                            ),
+                                            column(2,
+                                                   ## input: checkbox to add line for coauthor information
+                                                   checkboxInput(inputId = 'rg_add_coauthors',
+                                                                 label = 'Add co-authors?',
+                                                                 value = FALSE)
                                             )
-                                          )
-                                        ),
-                                        fluidRow(
-                                          ## input:
-                                          textInput(inputId = 'fundingsource',
-                                                    label = 'Funding Source',
-                                                    placeholder = "The Inflation Reduction Act (for example)"),
-                                          ## input:
-                                          textInput(inputId = 'acs_version',
-                                                    label = 'Version of ACS data (years)',
-                                                    placeholder =  as.vector(metadata_mapping$blockgroupstats[['acs_version']])),
-                                          ## input:
-                                          textInput(inputId = 'ejscreen_version',
-                                                    label = 'Version of EJScreen',
-                                                    placeholder =  as.vector(metadata_mapping$blockgroupstats[['ejam_package_version']]))
-                                        ),
-                                        ############################ #
-
-                                        #------- RESULTS (tables and map and plots)
-
-                                        # total_pop: NA
-                                        # results: NA
-                                        # results_formatted: NA
-                                        # map: NA
-                                        # map_placeholder_png:                 "map_placeholder.png"
-                                        # envt_table: NA
-                                        # envt_table_placeholder_png:   "envt_table_placeholder.png"
-                                        # envt_table_placeholder_rda:   "envt_table_placeholder.rda"
-                                        # demog_table: NA
-                                        # demog_table_placeholder_png: "demog_table_placeholder.png"
-                                        # demog_table_placeholder_rda: "demog_table_placeholder.rda"
-                                        # boxplot: NA
-                                        # boxplot_placeholder_png:         "boxplot_placeholder.png"
-                                        # barplot: NA
-                                        # barplot_placeholder_png:         "barplot_placeholder.png"
-                                        #
-
-
-                                        #------- TEXT PHRASES DESCRIBING AND INTERPRETING RESULT
-
-                                        # demog_how_elevated: NA
-                                        # envt_how_elevated: NA
-                                        # demog_high_at_what_share_of_sites: NA
-                                        # envt_high_at_what_share_of_sites: NA
-                                        # conclusion1: NA
-                                        # conclusion2: NA
-                                        # conclusion3: NA
-
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:
-                                                 textInput(inputId = 'demog_how_elevated',
-                                                           label = 'Elevation of Residential Population Indicators',
-                                                           placeholder = 'moderately elevated'),
                                           ),
-                                          column(4,
-                                                 ## input:
-                                                 textInput(inputId = 'envt_how_elevated',
-                                                           label = 'Elevation of Environmental Indicators',
-                                                           placeholder = 'moderately elevated'),
-                                          )
-                                        ),
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:
-                                                 selectInput(inputId = 'demog_high_at_what_share_of_sites',
-                                                             label = 'Residential population indicators high at what share of sites?',
-                                                             choices = c('a surprisingly large share of these sites',
-                                                                         'some of these sites, just as it varies nationwide',
-                                                                         'a relatively small share of these sites'),
-                                                             selected = 'some of these sites, just as it varies nationwide'),
+                                          ## if checkbox is checked, add textinputs for co-author name and email
+                                          conditionalPanel(
+                                            condition = 'input.rg_add_coauthors == 1',
+                                            fluidRow(
+                                              column(2,
+                                                     ## input:
+                                                     textInput(inputId = 'coauthor_names', 'Co-Author Name(s)')
+                                              ),
+                                              column(2,
+                                                     ## input:
+                                                     textInput(inputId = 'coauthor_emails', 'Co-Author Email(s)')
+                                              )
+                                            )
                                           ),
-                                          column(4,
-                                                 ## input:
-                                                 selectInput(inputId = 'envt_high_at_what_share_of_sites',
-                                                             label = 'Environmental indicators high at what share of sites?',
-                                                             choices = c('a surprisingly large share of these sites',
-                                                                         'some of these sites, just as it varies nationwide',
-                                                                         'a relatively small share of these sites'),
-                                                             selected = 'some of these sites, just as it varies nationwide'),
-                                          )
-                                        ),
-                                        fluidRow(
-                                          column(8,
-                                                 ## input: conclusion 1 -
-                                                 textAreaInput(inputId = 'conclusion1',
-                                                               label = 'Conclusion 1',
-                                                               placeholder = "The people living near these sites are 40% more likely to be in Limited-English Households than the average US resident. (for example)"
-                                                 )
-                                          )
-                                        ),
-                                        fluidRow(
-                                          column(8,
-                                                 ## input: conclusion 2-
-                                                 textAreaInput(inputId = 'conclusion2',
-                                                               label = 'Conclusion 2',
-                                                               placeholder = "The % low income among these residents is 2.4 times the rate in the US overall. (for example)")
-                                          )
-                                        ),
-                                        fluidRow(
-                                          column(8,
-                                                 ## input: conclusion 3 -
-                                                 textAreaInput(inputId = 'conclusion3',
-                                                               label = 'Conclusion 3',
-                                                               placeholder = "The average resident near these sites is 1.5 times as likely to be Hispanic as the average person in their State overall. (for example)")
-                                          )
-                                        ),
-                                      ) # end wellpanel
+                                          fluidRow(
+                                            ## input:
+                                            textInput(inputId = 'fundingsource',
+                                                      label = 'Funding Source',
+                                                      placeholder = "The Inflation Reduction Act (for example)"),
+                                            ## input:
+                                            textInput(inputId = 'acs_version',
+                                                      label = 'Version of ACS data (years)',
+                                                      placeholder =  as.vector(metadata_mapping$blockgroupstats[['acs_version']])),
+                                            ## input:
+                                            textInput(inputId = 'ejscreen_version',
+                                                      label = 'Version of EJScreen',
+                                                      placeholder =  as.vector(metadata_mapping$blockgroupstats[['ejam_package_version']]))
+                                          ),
+                                          ############################ #
+
+                                          #------- RESULTS (tables and map and plots)
+
+                                          # total_pop: NA
+                                          # results: NA
+                                          # results_formatted: NA
+                                          # map: NA
+                                          # map_placeholder_png:                 "map_placeholder.png"
+                                          # envt_table: NA
+                                          # envt_table_placeholder_png:   "envt_table_placeholder.png"
+                                          # envt_table_placeholder_rda:   "envt_table_placeholder.rda"
+                                          # demog_table: NA
+                                          # demog_table_placeholder_png: "demog_table_placeholder.png"
+                                          # demog_table_placeholder_rda: "demog_table_placeholder.rda"
+                                          # boxplot: NA
+                                          # boxplot_placeholder_png:         "boxplot_placeholder.png"
+                                          # barplot: NA
+                                          # barplot_placeholder_png:         "barplot_placeholder.png"
+
+                                          #------- TEXT PHRASES DESCRIBING AND INTERPRETING RESULT
+
+                                          # demog_how_elevated: NA
+                                          # envt_how_elevated: NA
+                                          # demog_high_at_what_share_of_sites: NA
+                                          # envt_high_at_what_share_of_sites: NA
+                                          # conclusion1: NA
+                                          # conclusion2: NA
+                                          # conclusion3: NA
+
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:
+                                                   textInput(inputId = 'demog_how_elevated',
+                                                             label = 'Elevation of Residential Population Indicators',
+                                                             placeholder = 'moderately elevated'),
+                                            ),
+                                            column(4,
+                                                   ## input:
+                                                   textInput(inputId = 'envt_how_elevated',
+                                                             label = 'Elevation of Environmental Indicators',
+                                                             placeholder = 'moderately elevated'),
+                                            )
+                                          ),
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:
+                                                   selectInput(inputId = 'demog_high_at_what_share_of_sites',
+                                                               label = 'Residential population indicators high at what share of sites?',
+                                                               choices = c('a surprisingly large share of these sites',
+                                                                           'some of these sites, just as it varies nationwide',
+                                                                           'a relatively small share of these sites'),
+                                                               selected = 'some of these sites, just as it varies nationwide'),
+                                            ),
+                                            column(4,
+                                                   ## input:
+                                                   selectInput(inputId = 'envt_high_at_what_share_of_sites',
+                                                               label = 'Environmental indicators high at what share of sites?',
+                                                               choices = c('a surprisingly large share of these sites',
+                                                                           'some of these sites, just as it varies nationwide',
+                                                                           'a relatively small share of these sites'),
+                                                               selected = 'some of these sites, just as it varies nationwide'),
+                                            )
+                                          ),
+                                          fluidRow(
+                                            column(8,
+                                                   ## input: conclusion 1 -
+                                                   textAreaInput(inputId = 'conclusion1',
+                                                                 label = 'Conclusion 1',
+                                                                 placeholder = "The people living near these sites are 40% more likely to be in Limited-English Households than the average US resident. (for example)"
+                                                   )
+                                            )
+                                          ),
+                                          fluidRow(
+                                            column(8,
+                                                   ## input: conclusion 2-
+                                                   textAreaInput(inputId = 'conclusion2',
+                                                                 label = 'Conclusion 2',
+                                                                 placeholder = "The % low income among these residents is 2.4 times the rate in the US overall. (for example)")
+                                            )
+                                          ),
+                                          fluidRow(
+                                            column(8,
+                                                   ## input: conclusion 3 -
+                                                   textAreaInput(inputId = 'conclusion3',
+                                                                 label = 'Conclusion 3',
+                                                                 placeholder = "The average resident near these sites is 1.5 times as likely to be Hispanic as the average person in their State overall. (for example)")
+                                            )
+                                          ),
+                                        ) # end wellpanel
                              )  # end written report  tab
-
+}
                  ) ## end of tabset panel results_tabs ^^^^^^^^^^  ####
 
         ),      # end of tab panel See Results ^^^^^^^^^^  ####
@@ -1023,12 +1020,12 @@ app_ui  <- function(request) {
                  ## BOOKMARKS button ####
                  h2("Bookmarking to save settings and inputs"),
 
-                 conditionalPanel(condition = "EJAM:::global_or_param('bookmarking_allowed') != 'disable'", {
+                 conditionalPanel(condition = 'EJAM:::global_or_param("bookmarking_allowed") != "disable"', {
                    bookmarkButton()  # https://mastering-shiny.org/action-bookmark.html
                  }),
                  ######################################################## #
                  ## ------------------------ app title ### #
-                 # will not be editable here.
+                 # will not be editable here. defined in global_defaults_package.R
 
                  ######################################################## ######################################################### #
                  ## SITE SELECTION Options ####
@@ -1336,6 +1333,9 @@ app_ui  <- function(request) {
                  ### Spreadsheet ####
                  h3("Spreadsheet of results"),
 
+
+                 # default_hyperlink_colnames ?
+
                  checkboxInput(inputId = "ok2plot",
                                label = "OK to try to plot graphics and include in Excel download",
                                value = EJAM:::global_or_param("default_ok2plot")),
@@ -1353,19 +1353,12 @@ app_ui  <- function(request) {
 
                  ######################################################## #
                  ### Long report  ####
-                 h3("Long report (multipage report) - Not implemented yet***"),
+                 #h3("Long report (multipage report) - Not implemented yet***"),
+                 # Relocate any settings to here from the Full Report tab if they are complicated/rarely needed
+                 # Would need to uncomment the code in server/ui, etc.
+                 #
+                 #br(), ## vertical space
 
-                 # relocate any here from the Full Report tab??
-
-
-                 br(), ## vertical space
-
-                 # shiny::radioButtons(inputId = "more3",
-                 #                     label = "placeholder for options not yet implemented",
-                 #                     choices = list(TBD = "a", etc = "b"),
-                 #                     selected = "a"),
-
-                 # ),
                  ##################################################### #
                  ## MISC OPTIONS ####
                  h2("Other Settings"),
@@ -1526,7 +1519,7 @@ golem_add_external_resources <- function() {
     golem::bundle_resources(
       path = app_sys("app/www"),   #  points to  installed/EJAM/app/www which is same as   source/EJAM/inst/app/www
 
-      app_title = EJAM:::global_or_param(".app_title") # BUT SEE ALSO THE TITLE IN HTML IN global_defaults_*.R
+      app_title = EJAM:::global_or_param("app_title")
     ),
 
     # favorites icons ####

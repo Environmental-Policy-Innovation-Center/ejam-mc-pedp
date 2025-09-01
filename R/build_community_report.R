@@ -19,9 +19,10 @@ report_setup_temp_files <- function(Rmd_name = 'community_report_template.Rmd',
     stop(paste0("Necessary files missing from ", app_sys(paste0(Rmd_folder))))
   }
   # ------------------------------------  maybe it still needs the logo file?
-  # file.copy(from = app_sys(paste0(Rmd_folder,
-  #### ???? ### EJAM:::global_or_param(".community_report_logo_file"))),
-  #           to = tempReport, overwrite = TRUE)
+  file.copy(
+    # from = EJAM:::global_or_param("report_logo"),
+    from = app_sys(paste0(Rmd_folder, EJAM:::global_or_param("report_logo_file"))),
+    to = tempReport, overwrite = TRUE)
   # ------------------------------------ .Rmd template file ----------------------------------------- -
   file.copy(from = app_sys(paste0(Rmd_folder, Rmd_name)),
             to = tempReport, overwrite = TRUE)
@@ -160,7 +161,7 @@ build_community_report <- function(output_df,
                          report_title = report_title,
                          logo_path = logo_path,
                          logo_html = logo_html
-    ), #   report_title if in shiny is .community_report_title or outside shiny is eg "EJAM Multisite Report"
+    ),
 
     ############################################################# #
 

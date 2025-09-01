@@ -611,44 +611,35 @@ generate_html_header <- function(analysis_title,
   if (is.null(logo_path)) {
 
     if (!in_shiny) {
-      full_path <- global_defaults_package$.community_report_logo_path
-      logo_path <- full_path # ok
+      logo_path <- EJAM:::global_or_param("report_logo")
       cat("TRYING TO USE logo_path = ", logo_path, "\n")
 
     } else {
-      ## maps to installed installed/EJAM/report/community_report using resource path defined in shiny app_ui.R
+      ## should map to installed pkgs library /EJAM/report/community_report using resource path defined in shiny app_ui.R
 
-      # ## fails:
-      # full_path <- EJAM:::global_or_param(".community_report_logo_path") #  "community_report/ejamhex4.png" # ***
-      # logo_path <- gsub(getwd(), ".", full_path)
-      ## hard coded but want it based on params or global !
-      ## the full path stored in the global object:  is if used load_all() .....then..EJAM/inst/report/community_report/ejamhex4.png"
-      # global_defaults_package$.community_report_logo_path
-      ## fails: (good path but fails to work in shiny)
-      # logo_path <- paste0('community_report/',
-      #                     EJAM:::global_or_param(".community_report_logo_file"))
-      #                     # global_defaults_package$.community_report_logo_file)
-      logo_path <- 'community_report/ejamhex4.png'
+      logo_path <- EJAM:::global_or_param("report_logo")
+      if (!file.exists(logo_path)) { # might not need anymore
+        logo_path <- 'community_report/ejamhex4.png'; cat("logo not found via report_logo, trying hardcoded path\n")
+        if (!file.exists(logo_path)) { # might not need anymore
+        system.file('report/community_report/ejamhex4.png', package = "EJAM"); cat("logo still not found, trying another path \n")
+        }
+      }
       cat("TRYING TO USE logo_path = ", logo_path, "\n")
     }
   }
-  # backup tried here since path was problematic:
-  # if (!file.exists(logo_path)) {
-  #   logo_path <- system.file('report/community_report/ejamhex4.png', package = "EJAM")
-  # cat("*******   using backup path to logo file \n")
-  # cat("TRYING TO USE logo_path = ", logo_path, "\n")
-  # }
 
   if (is.null(logo_html)) {
     # add padding and adjust size so that the img_html object is a bit lower on the screen and does not get shrunk
+    # note this is NOT the same as app_logo_html since it is for the report not app webpage header
     logo_html <- paste0('<img src=\"', logo_path, '\" alt=\"logo\" width=\"220\" height=\"70\">')
   }
 
   if (is.null(report_title)) {
     if (shiny::isRunning()) {
-      report_title <- EJAM:::global_or_param(".community_report_title")
+      report_title <- EJAM:::global_or_param("report_title")
     } else {
-      report_title <- global_defaults_package$.community_report_title
+      report_title <- EJAM:::global_or_param("report_title") # should work now
+      # report_title <- global_defaults_package$report_title
     }
   }
 

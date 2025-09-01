@@ -20,12 +20,11 @@ editor_options:
   markdown:
     wrap: 72
 linenumbers: true
-abstract: "Abstract - The United States Environmental Protection
-  Agency (US EPA) analyzed baseline residential populations and environmental conditions in communities
-  living `r params$where` `r params$facilities_studied`. The analysis used EPA's EJAM
-  tool version `r params$ejscreen_version` with residential population data based
+abstract: "Abstract - We analyzed baseline residential populations and environmental conditions in communities
+  living `r params$where` `r params$facilities_studied`. The analysis used EJAM
+  tool version `r params$app_version` with residential population data based
   on the Census Bureau’s `r params$acs_version` American Community Survey (ACS). The
-  analysis found that PLACEHOLDER."
+  analysis found that x PLACEHOLDER."
 params:
   testmode: TRUE
   analysis_title: Analysis of residential population and environmental conditions in selected locations
@@ -72,6 +71,8 @@ params:
   coauthor_emails: NA
   fundingsource: NA
   acs_version: NA
+  app_title: "`r EJAM:::global_or_param('app_title')`"
+  app_version: "`r EJAM:::global_or_param('app_version')`"
   ejscreen_version: NA
   bibliography: report_references.bib
 ---
@@ -215,8 +216,8 @@ or
   in communities living
 `r params$within_x_miles_of` selected sites.
 
-The analysis used the [EJAM tool](https://ejanalysis.org/ejamdocs) and EJScreen version
-`r params$ejscreen_version` with demographic data based on the Census
+The analysis used the [`r params$app_title`](https://ejanalysis.org/ejamdocs) version
+`r params$app_version` with demographic data based on the Census
 Bureau's `r params$acs_version` American Community Survey (ACS).
 
 ## Summary of Findings
@@ -426,7 +427,7 @@ if (params$testmode) {
 
 ## Estimating locations and residential population counts
 
-The `r EJAM:::global_or_param(".app_title")` was used to develop this analysis.
+The `r EJAM:::global_or_param("app_title")` was used to develop this analysis.
 The [multisite tool](https://ejanalysis.org/ejamdocs)
 is a user-friendly web app that can summarize residential population and
 environmental conditions for any list of places in the nation.

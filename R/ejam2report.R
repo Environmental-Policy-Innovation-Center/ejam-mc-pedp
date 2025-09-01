@@ -97,23 +97,29 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
                         ),
                         ## all the indicators that are in extratable_list_of_sections:
                         extratable_hide_missing_rows_for = as.vector(unlist(extratable_list_of_sections)),
-                        report_title = NULL,
-                        logo_path = NULL,
-                        logo_html = NULL
+                        report_title = NULL, # EJAM:::global_or_param("report_title"),
+                        logo_path = NULL, # EJAM:::global_or_param("report_logo"),
+                        logo_html = NULL # defined downstream
                         ## Rmd_name and Rmd_folder could be made params to pass to report_setup_temp_files()
 ) {
 
+  # title and logo ####
+  if (is.null(report_title)) {
+    report_title <- EJAM:::global_or_param("report_title")
+  }
+  if (is.null(logo_path)) {
+    logo_path <- EJAM:::global_or_param("report_logo")
+  }
   if (!interactive()) {launch_browser <- FALSE} # but that means other functions cannot override this while not interactive.
 
+  # file extension ####
   # adjust this once .pdf option is implemented/working
   fileextension <- paste0(".", gsub("^\\.", "", fileextension)) # add leading dot if not present
-  fileextensions_implemented <- ".html" # c(".html", ".pdf")
+  fileextensions_implemented <- c(".html", ".pdf")
   if (!(fileextension %in% fileextensions_implemented)) {
     warning("fileextension must be one of", fileextensions_implemented)
     fileextension <- ".html"
   }
-
-  # header info ####
 
   if (missing(submitted_upload_method)) {
     # as used in server, this could be SHP, FIPS, latlon, MACT, FRS, EPA_PROGRAM_up, etc. etc.
@@ -134,22 +140,41 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
       }
     }
   }
+  ################################################## #  ################################################## #
+  # overall vs 1-site ####
 
   sitenumber <- as.numeric(sitenumber)
+
+  ## OVERALL ###################################################
 
   if (is.null(sitenumber) || length(sitenumber) == 0) {
     ejamout1 <- ejamitout$results_overall # one row
     ejamout1$valid <- TRUE
     # but shp is all rows, remember, and popup can still be like for site by site
+
+    ### > nsites ####
     nsites <- NROW(ejamitout$results_bysite[ejamitout$results_bysite$valid %in% TRUE, ]) # might differ from ejamout1$sitecount_unique
-    # # Get the name of the selected location
+
+    ## > no name of location, just overall ####
     selected_location_name_react <- NULL
+
+    ## > fips bounds ####
     if (submitted_upload_method %in% "FIPS" && is.null(shp)) {
       shp <- shapes_from_fips(ejamitout$results_bysite$fips)
     }
   } else {
+
+    ## ONE SITE ###################################################
+
     ejamout1 <- ejamitout$results_bysite[sitenumber, ]
 
+    ### > nsites ####
+    nsites <- 1
+
+    ### > name of 1 location ####
+    selected_location_name_react <- ejamout1[sitenumber, "statename"]
+
+    ### > fips bounds ####
     if (submitted_upload_method %in% "FIPS" && is.null(shp)) {
       shp <- shapes_from_fips(ejamitout$results_bysite$fips[sitenumber])
     } else {
@@ -157,32 +182,38 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
         shp <- shp[sitenumber, ]
       }
     }
-    nsites <- 1
-    # # Get the name of the selected location
-    selected_location_name_react <- ejamout1[sitenumber, "statename"]
   }
+  ################################################## #  ################################################## #
+
   include_ejindexes <- any(names_ej_pctile %in% colnames(ejamout1))
 
   if (!("valid" %in% names(ejamout1))) {ejamout1$valid <- TRUE}
-
   if (isTRUE(ejamout1$valid)) {
 
+    #############################################################################  #
+
+    # Render via build_community_report() ####
+    #
+    # as adapted from app_server
+
+    rad <- ejamout1$radius.miles
+    # nsites
     popstr <- prettyNum(round(ejamout1$pop, table_rounding_info("pop")), big.mark = ',')
 
-    ##################### #
-    # the way adapted from app_server
+    sitetype <- ejamitout$sitetype  # sitetype <- tolower(submitted_upload_method) # did not work here
 
-    sitetype <- ejamitout$sitetype
-    # sitetype <- tolower(submitted_upload_method) # did not work here
     if (sitetype == "shp" && is.null(shp)) {
+      # this should not happen unless ejam2report() got called for shp analysis results but user did not provide the bounds
       warning("Cannot map polygons based on just output of ejamit() -- The sf class shapefile / spatial data.frame that was used should be provided as the shp parameter to ejam2report()")
     }
-    rad <- ejamout1$radius.miles
+
+    area_in_square_miles <- ejamout1$area_sqmi
 
     residents_within_xyz <- report_residents_within_xyz(
       sitetype = sitetype,
       radius = rad,
       nsites = nsites,  # but should note these are only the ones where $results_bysite$valid %in% TRUE
+      area_in_square_miles = area_in_square_miles,
       sitenumber = sitenumber,
       ejam_uniq_id = ejamout1$ejam_uniq_id
     )
@@ -220,11 +251,9 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
         ext = fileextension # in server,  ifelse(input$format1pager == 'pdf', '.pdf', '.html')
       )
       temp_comm_report <- file.path(tempdir(), filename)
-
     } else {
       temp_comm_report <- filename
     }
-
     output_file      <- temp_comm_report
 
     if (return_html) {
@@ -238,7 +267,7 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
 
     ## note build_community_report() is also used in community_report_template.Rmd and in server
 
-    x <- build_community_report(
+    community_html <- build_community_report(
 
       output_df = ejamout1,
       analysis_title = analysis_title,
@@ -265,7 +294,7 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
     ## seems like using cat() was a simpler approach tried initially: ***
     ##  that would write just the basics of it to the temp location, not needing render()
     ##  but the render() approach also add the map and plot !!
-    # cat(x, file = temp_comm_report)
+    # cat(community_html, file = temp_comm_report)
 
     rmd_template <- system.file("report/community_report/combine_after_build_community_report.Rmd", package = "EJAM")
 
@@ -290,13 +319,13 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
     }
     if (is.null(map)) {
       report_params <- list(
-        community_html = x,
+        community_html = community_html,
         plot = plot
 
       )
     } else {
       report_params <- list(
-        community_html = x,
+        community_html = community_html,
         plot = plot,
         map = map
       )

@@ -229,8 +229,8 @@ report_community_download <- function(file,
       map = map_to_use,
       summary_plot       = react_v1_summary_plot,
       summary_plot_state = react_v1_summary_plot_state,
-      report_title = NULL,
-      logo_path = NULL,
+      report_title = EJAM:::global_or_param("report_title"),
+      logo_path    = EJAM:::global_or_param("report_logo"),
       logo_html = NULL
     )
     # end of report on 1 site
@@ -294,8 +294,8 @@ report_community_download <- function(file,
       filename = NULL,
       map = map_to_use,
       summary_plot = plot_to_use,
-      report_title = NULL,
-      logo_path = NULL,
+      report_title = EJAM:::global_or_param("report_title"),
+      logo_path    = EJAM:::global_or_param("report_logo"),
       logo_html = NULL
     )
   }

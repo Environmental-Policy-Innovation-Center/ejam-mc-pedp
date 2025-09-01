@@ -140,8 +140,8 @@ or
   in communities living
 `r params$within_x_miles_of` selected sites.
 
-The analysis used the [EJAM tool](https://ejanalysis.org/ejamdocs) and EJScreen version
-`r params$ejscreen_version` with demographic data based on the Census
+The analysis used the [EJAM tool](https://ejanalysis.org/ejamdocs) 
+`r params$app_version_header_text` with demographic data based on the Census
 Bureau's `r params$acs_version` American Community Survey (ACS).
 
 ## Broad overview of findings
@@ -238,33 +238,36 @@ if (params$testmode) {
 
 ## Estimating locations and residential population counts
 
-The `r EJAM:::global_or_param(".app_title")` (EJAM) was used to develop this analysis. This tool is a user-friendly web app that can summarize residential population and environmental conditions for any list of places in the nation.
+The `r EJAM:::global_or_param("app_title")` (EJAM) `r EJAM:::global_or_param("app_version_header_text")` was used to develop this analysis. This tool is a user-friendly web app that can summarize residential population and environmental conditions for any list of places in the nation.
 
 ### Spatial resolution of data
 
-The analysis used the multisite tool version
-`r params$ejscreen_version` with residential population data based on the Census
-Bureau's `r params$acs_version` American Community Survey (ACS) 5-year
-summary file, and the corresponding version of Decennial Census
-information on geographic boundaries and FIPS codes for blocks, block
-groups, tracts, counties, and States. Demographic and environmental
-indicators were at block group resolution, while locations of
-residential populations was at block resolution (the highest resolution
-available from the Census Bureau) and then summarized by block group,
-then by location analyzed, and finally overall across the locations as a
-whole.
+The analysis used the multisite tool `r EJAM:::global_or_param("app_version_header_text")`
+with residential population data based on the Census Bureau's 
+`r params$acs_version` American Community Survey (ACS) 5-year summary file, 
+and the corresponding version of Decennial Census
+information on blocks, with recent geographic boundaries and FIPS codes for 
+block groups, tracts, counties, and States.
 
-See EJAM package documentation for methodology details.
+Demographic and environmental indicators were at block group resolution (or tract level
+for some indicators such as ambient air pollutant levels or air toxics indicators
+as noted in technical documentation).
+Locations of residential populations were based on Census block points 
+(the highest resolution available from the Census Bureau) 
+and then summarized by block group, then by 
+location analyzed, and finally overall across the locations as a whole.
+
+See [EJAM package documentation](https://ejanalysis.org/ejamdocs) for methodology details.
 
 ### Analytic method for buffering, and tools used to implement that method
 
 The basic methodology and data used for this analysis are the same as
-those originally developed for EPA's EJScreen tool, with a few exceptions described
-below. These are described in detail in EJScreen's documentation, at
-[EJScreen]https://web.archive.org/web/20250118193121/https://epa.gov/ejscreen "EPA EJScreen homepage"){.uri
+those originally developed for EPA's EJSCREEN tool, with a few exceptions described
+below. These are described in detail in EJSCREEN's documentation, at
+[EJSCREEN]https://web.archive.org/web/20250118193121/https://epa.gov/ejscreen "EPA EJSCREEN homepage"){.uri
 target="_blank" rel="noreferrer noopener"} and with more technical
-details available at [EJScreen technical documentation
-page](https://web.archive.org/web/20250118072723/https://www.epa.gov/ejscreen/technical-information-and-data-downloads "EPA EJScreen technical information"){.uri
+details available at [EJSCREEN technical documentation
+page](https://web.archive.org/web/20250118072723/https://www.epa.gov/ejscreen/technical-information-and-data-downloads "EPA EJSCREEN technical information"){.uri
 target="_blank" rel="noreferrer noopener"}.
 
 EJAM identifies residents near a given site by finding
@@ -278,15 +281,15 @@ not quite the same as the ACS population count). That block weight is a
 fraction of the parent block group, and is used to estimate how many of
 the block groups residents are nearby or in the buffer.
 
-The only notable differences between the EJScreen and EJAM calculations
+The only notable differences between the EJSCREEN and EJAM calculations
 of proximity and indicators are the following:
 
 -   EJAM may include additional demographic or environmental indicators, and 
-not all of the extra indicators in EJScreen are included in EJAM.
+not all of the extra indicators in EJSCREEN are included in EJAM.
 -   For a proximity analysis (to characterize everyone living within a
 certain certain distance from a point such as a facility), EJAM identifies which
 residents live nearby using a slight variation on how the distance to each
-Census block is measured. While EJScreen uses ESRI's ArcGIS calculations, EJAM
+Census block is measured. While EJSCREEN uses ESRI's ArcGIS calculations, EJAM
 calculates the distance using formulas implemented in the R language for
 statistical computing [@R-base]. These measurements provide almost identical
 results for estimated distance from the average person in a block to a given
@@ -294,11 +297,11 @@ site point. PLACEHOLDER MORE INFO
 -   EJAM aggregates indicator values within and across locations,
 converts them to percentiles, and does other summary calculations using the same
 formulas to the greatest extent possible, but in R rather than using ArcGIS/ESRI/Python code. There may be slight differences between raw scores and percentiles in
-EJScreen and EJAM in some cases.
+EJSCREEN and EJAM in some cases.
 
 ## Residential population and environmental indicators
 
-The residential population statistics included here are those in EJScreen and also
+The residential population statistics included here are those in EJSCREEN and also
 race/ethnicity subgroups that comprise the total count of people of
 color. POC are defined as all other than those self-identifying in ACS
 survey data as white, single race, not Hispanic or Latino - i.e.,
@@ -320,7 +323,7 @@ these stats?
 
 • Count of locations
 
-• Locations missing data There were several sites where EJScreen did not
+• Locations missing data There were several sites where EJSCREEN did not
 return any stats, typically (or always) because of low population
 density nearby (within 1 mile in this case). • Where are the sites
 (regions, states, cities?, urban/rural?)
