@@ -13,36 +13,7 @@
 library(shiny)
 EJAM::indexblocks()
 
-################################################################### #
-
-# CHECK (installed) PACKAGE VERSION ####
-
-ver <- EJAM:::description_file$get("Version") # object created in EJAM namespace by metadata_mapping.R when loaded/attached
-ejam_app_version <- substr(ver, start = 1, stop = gregexpr('\\.',ver)[[1]][2] - 1) ## trim version number to Major.Minor
-.app_version_headertext <- paste0("  (Version ", ejam_app_version, ")")
-rm(ver, ejam_app_version)
-
 ################################################################## #
-
-## ------------------------ Title of App ####
-# now defined in global_defaults_package.R
-
-## ------------------------ logo ####
-
-## logo for app header:
-app_header_logo <- "www/favicon.png" # (small wordless hex)
-app_header_logo_html <- paste0(' <img id="titleLogo" src=', app_header_logo, ' alt="logo" title="logo"
-              style="margin: 0px; padding-bottom: 4px; padding-top: 4px; padding-left: 4px; padding-right: 4px; width: 40px; height: 40px">'
-)
-## old/alt one:
-# app_header_logo_html <- '<img id="titleLogo" src="www/epa_logo_horizBlue.png" alt="EPA" title="EPA"
-#             style="margin: 0px; padding-bottom: 4px; padding-top: 4px;   padding-left: 4px; padding-right: 4px">'
-
-## logo for About page:
-aboutpage_logo <- "www/ejamhex4.png" # (small wordless hex)
-# the width and height are defined in app_ui.R not here, in this case.
-################################################################## #
-# ~ ####
 # ------------------------ ____ SET APP DEFAULTS / OPTIONS ------------------------  ####
 # ~ ####
 # NOTE DEFAULTS HERE ARE UNRELATED TO DEFAULTS IN API module that has its own namespace and is kept separate, like default radius, etc.
@@ -58,14 +29,6 @@ use_shapefile_from_any <- TRUE # used below in list in more than one place so se
 ######################################################################################################## #
 
 global_defaults_shiny <- list(
-
-  ## .app_title ####
-  # defined in global_defaults_package.R
-
-  ## logos ####
-  aboutpage_logo = aboutpage_logo,
-  ## .community_report_logo_path is not needed here since since it is defined elsewhere, in global_defaults_package.R
-  ## app_header_logo_html is not needed here since it is simply used below in the html directly, not queried by app_ui.R
 
   ## tab shown at launch ####
   # if they are visible, can be "About" or "Advanced Settings" instead of 'Site Selection'
@@ -639,10 +602,11 @@ aboutpage_texts <- list(
     p("EJAM is a tool that makes it easy to see residential population and environmental information summarized in and across any list of places in the nation. Using this tool is like getting reports for hundreds or thousands of places, all at the same time."),
     p("This provides interactive results and a formatted, ready-to-share report with tables, graphics, and a map. The report can provide information about communities near any of the industrial facilities on a list, for example."),
 
-    p(paste0("This version of the ", EJAM:::global_or_param('.app_title'), " (EJAM) is not associated with the United States Environmental Protection Agency (US EPA), but has its roots in open source code that was originally developed at EPA.")),
+    p(paste0('This version of the ', EJAM:::global_or_param("app_title"),
+             ' (EJAM) is not associated with the United States Environmental Protection Agency (US EPA), but has its roots in open source code that was originally developed at EPA.')),
 
     h4("For more information about ",
-       a(href = "https://www.ejanalysis.org/status", "the evolving status of EJSCREEN & EJAM in 2025",
+       a(href = "https://www.ejanalysis.org/status", "the evolving status of EJSCREEN & EJAM since early 2025",
          target = "_blank", rel = "noreferrer noopener"),
        ", see ",
        a(href = "https://www.ejanalysis.org", "ejanalysis.org",
@@ -859,15 +823,17 @@ AIR,	IL000031012ACJ<br>
 # ~ ####
 # ------------------------ ____ TEMPLATE ONE EPA SHINY APP WEBPAGE _______ ####
 # ~ ####
+{ #          code-folding starting point for UI template -------------------------  #
+
 html_fmts <- list(
   html_header_fmt = tagList(
 
     #################################################################################################################### #
-    # WHERE TO FIND THIS template  #
-    #  USEPA/webcms/blob/main/utilities/r/OneEPA_template.R
+    # original starting point of this template was
+    #  github.com/USEPA/webcms/blob/main/utilities/r/OneEPA_template.R
     # but also see
     # https://www.epa.gov/themes/epa_theme/pattern-lab/patterns/pages-standalone-template/pages-standalone-template.rendered.html
-    # START OF ONEEPA SHINY APP WEB UI TEMPLATE to insert within your fluid page
+    # original starting point of SHINY APP WEB UI TEMPLATE to insert within an app's UI/fluid page
     #################################################################################################################### #
 
     tags$html(class = "no-js", lang = "en"),
@@ -921,9 +887,9 @@ html_fmts <- list(
       # and below in THIN HEADER ROW
       ## but not done this way:   tags$title('EJAM | US EPA'),
 
-      tags$meta(name = "application-name", content = EJAM:::global_or_param('.app_title')),
+      tags$meta(name = "application-name", content = EJAM:::global_or_param("app_title")),
 
-      ## Favicons can be specified in (and this would conflict with) golem_add_external_resources() within app_ui.R ####
+      ## (EPA-related) Favicons can be specified in (and this would conflict with) golem_add_external_resources() within app_ui.R ####
 
       # try to let app_ui.R define the main favicon instead of using the EPA one....
       # tags$link(rel="icon",                      href="https://www.epa.gov/themes/epa_theme/images/favicon-32.png", sizes="32x32"),
@@ -941,7 +907,7 @@ html_fmts <- list(
       tags$link(rel="apple-touch-icon-precomposed", sizes="72x72",   href="https://www.epa.gov/themes/epa_theme/images/favicon-72.png"),
       tags$link(rel="apple-touch-icon-precomposed",                  href="https://www.epa.gov/themes/epa_theme/images/favicon-180.png"),
 
-      ## Fonts/ Themes ####
+      ## (EPA-related) Fonts/ Themes ####
 
       tags$link(rel="preload", href="https://www.epa.gov/themes/epa_theme/fonts/source-sans-pro/sourcesanspro-regular-webfont.woff2", as="font", crossorigin="anonymous"),
       tags$link(rel="preload", href="https://www.epa.gov/themes/epa_theme/fonts/source-sans-pro/sourcesanspro-bold-webfont.woff2", as="font", crossorigin="anonymous"),
@@ -986,11 +952,11 @@ html_fmts <- list(
     # body ####
 
     ### cloudflare script ####
+
     tags$body(
       class = "path-themes not-front has-wide-template", id = "top",
       tags$script(src = 'https://cdnjs.cloudflare.com/ajax/libs/uswds/3.0.0-beta.3/js/uswds.min.js')
     ),
-
     ######################################################################## #
     ## THIN HEADER ROW ####
 
@@ -1011,9 +977,9 @@ html_fmts <- list(
           padding-bottom: 0px; padding-top: 0px; padding-left: 0px; padding-right: 0px">
 
 ',
-                  ### >> app_header_logo_html ####
+                  ### >> app_logo_html ####
 
-                  app_header_logo_html
+                  EJAM:::global_or_param("app_logo_html") # which was built from app_logo
                   ,'
         </td>
 
@@ -1025,15 +991,15 @@ html_fmts <- list(
 
                   ### >> app_title  ####
 
-                  EJAM:::global_or_param('.app_title'),
+                  EJAM:::global_or_param("app_title"),
 
                   '</span>',
 
                   '<span style="font-size: 10pt; font-weight:700; font-family:Arial";>',  # smaller font for version info
 
-                  ### >> .app_version_headertext   ####
+                  ### >> app_version_header_text  ####
 
-                  .app_version_headertext,
+                  EJAM:::global_or_param("app_version_header_text"),
 
                   '</span>',
                   '
@@ -1414,6 +1380,7 @@ html_fmts <- list(
     }
   )# end of footer tag list
 )
+} #         # code folding ending point for UI template
 # ------------------------ ____   _______ ####
 # ~ ####
 

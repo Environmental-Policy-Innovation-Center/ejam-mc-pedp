@@ -143,6 +143,6 @@ global_defaults_shiny_public <- list(
 )
 ######################################################################################################## #
 
-print("isPublic is"); print(isPublic)
+cat("isPublic = ", isPublic, "\n")
 rm(use_fipspicker)
 rm(isPublic) # ok?
