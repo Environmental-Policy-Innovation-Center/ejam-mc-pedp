@@ -92,7 +92,7 @@
 #'       - [ejscreenRESTbroker()] gets EJ stats for one point as JSON.
 #'       
 #'   Also used are 
-#'   [ejscreenapi_plus()], [ejscreenapi()], [urls_clusters_and_sort_cols()],
+#'   [ejscreenapi_plus()], [ejscreenapi()], [url_ejscreenapi_clusters_and_sort_cols()],
 #'   [fixcolnames()], [url_linkify()], [popup_from_ejscreen()], [calc_ratios_to_avg()], [plot_boxplot_ratios()]
 #'
 #' @param x Point locations may be specified in several ways: 
@@ -301,7 +301,7 @@ ejscreenit <- function(x, y=NULL, radius = 3, maxradiusmiles=10,
                         drop_redundant_indicators = TRUE,
                         getstatefromplacename = TRUE)    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  
     ## add weblinks #### 
-    out2 <- urls_clusters_and_sort_cols(out2)
+    out2 <- url_ejscreenapi_clusters_and_sort_cols(out2)
     # and ejscreenapi_plus() now adds ratios as well
     # ...
     ## Column headers made nicer and sorted -- but does it really do that??? #### 

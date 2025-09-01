@@ -141,7 +141,7 @@ ejscreenapi_plus <- function(x, y=NULL, radius = 3, unit ='miles', wkid=4326,
   ### Flag sites near others ####
   ### Put best cols 1st #### 
   results_table <- cbind(pts, batchtableout) # needed here to allow links to be made . Since pts was a data.table, results_table here will be too!
-  results_table <- urls_clusters_and_sort_cols(results_table)
+  results_table <- url_ejscreenapi_clusters_and_sort_cols(results_table)
   
   # results_table <- results_table[, names(results_table) != 'mapurl']   # drop this column that was only useful while viewing uploaded points but is redundant in final results here
   

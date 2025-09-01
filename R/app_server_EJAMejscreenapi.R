@@ -1,7 +1,9 @@
+# obsolete at least while that API is gone
+if (FALSE) {
 
 # can the app_server_EJAMejscreenapi() be wrapped inside moduleServer() to use as a module in EJAM
 # and was that already drafted somewhere?
-# R/MODULE_ejscreenapi.R  had older approach where all of the code was in that one file?
+# R/MODULE_ejscreenapi.R  had older approach where all of the code was in that one file
 
 # mod_ejscreenapi_server <- function(id,
 #                                    # default_radius_react,
@@ -473,7 +475,7 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
         ### Flag sites near others ####
         ### Put best cols 1st ####
         results_table <- cbind(pts(), batchtableout) # this would be a problem if we did not isolate or use bindEvent
-        results_table <- urls_clusters_and_sort_cols(results_table)
+        results_table <- url_ejscreenapi_clusters_and_sort_cols(results_table)
 
         results_table <- results_table[, names(results_table) != 'mapurl']   # drop this column that was only useful while viewing uploaded points but is redundant in final results here
 
@@ -965,3 +967,4 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
 
 ## Use Alt-O in RStudio to fold code, then expand top level to see sections.
 ## Use Ctrl-Shift-O in RStudio to view the document Outline panel
+}
