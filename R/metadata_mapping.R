@@ -55,7 +55,7 @@ metadata_mapping <- list(
   ),
 
   # datacreate_blockgroupstats2.32.R
-  # rstudioapi::documentOpen("./R/datacreate_blockgroupstats2.32.R")
+  # rstudioapi::documentOpen("./data-raw/datacreate_blockgroupstats2.32.R")
   blockgroupstats =	default_metadata,
 
   # datacreate_usastats2.32.R  and others

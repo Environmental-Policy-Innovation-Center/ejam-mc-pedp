@@ -636,6 +636,13 @@ and all filenames listed there actually exist as in that folder called `test`.\n
             }))
 
             x <- as.data.frame(x)
+            if (NROW(x) == 0) {
+              # at one point it was having trouble around here
+              # browser()
+              cat("\n\n ********** FAILED TO GET ANY RESULTS TRYING TO RUN TESTS IN", file.path("./tests/testthat/", fnames[i]), '\n\n')
+              xtable[[i]] <- NULL
+              next
+              }
             x$tests <- x$nb
             x$nb <- NULL
             x$flag <- x$tests - x$passed
@@ -784,9 +791,13 @@ and all filenames listed there actually exist as in that folder called `test`.\n
             # using beepr::beep() since utils::alarm() may not work
             # using :: might create a dependency but prefer that pkg be only in Suggests in DESCRIPTION
             if (interactive() && beepr_available) {beepr::beep(10)}
-            cat(paste0("     ***      SOME UNTESTED OR WARNED OR FAILED IN ", tgroupname, ": ",
-                       paste0(unique(xtable[[i]]$file[xtable[[i]]$flagged]), collapse = ","),
-                       "\n"))
+            if (sum(xtable[[i]]$failed) > 0) {
+              cat(paste0("     ***      Some FAILED in ", tgroupname, ": ",
+                         paste0(unique(xtable[[i]]$file[xtable[[i]]$failed]), collapse = ","), "\n"))
+            } else {
+            cat(paste0("     ***      Some UNTESTED or WARNED in ", tgroupname, ": ",
+                       paste0(unique(xtable[[i]]$file[xtable[[i]]$flagged]), collapse = ","), "\n"))
+            }
           }
 
         } # looped over groups of test files
@@ -1357,7 +1368,9 @@ and all filenames listed there actually exist as in that folder called `test`.\n
         cat("KEY FILES")
 
         cat("\n\n")
-        print(as.data.frame(byfile_key)[ , !grepl("_bygroup", names(byfile_key))])
+        keyfilesprint = as.data.frame(byfile_key)[ , !grepl("_bygroup", names(byfile_key))]
+        keyfilesprint = keyfilesprint[order(keyfilesprint$flagged_byfile, decreasing = TRUE), ]
+        print(keyfilesprint)
       }
       ########################### #
 

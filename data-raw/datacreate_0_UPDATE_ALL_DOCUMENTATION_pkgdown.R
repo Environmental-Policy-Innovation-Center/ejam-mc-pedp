@@ -69,7 +69,7 @@ pkgdown_update = function(
 ) {
 
   # # MAYBE NEED TO DELETE ALL IN THE man/ FOLDER TO REMOVE OBSOLETE .Rd files like no longer documented or renamed functions ?
-  # cat("You might need to do something like  \n  file.remove(list.files('./man', full.names = TRUE)) \nto delete all of /man/*.* to be sure there is nothing obsolete like renamed or deleted or no-longer-documented functions. \n")
+  # cat("You might need to do something like  \n  file.remove(list.files('./man', full.names = TRUE, include.dirs = FALSE)) \nto delete all of /man/*.* to be sure there is nothing obsolete like renamed or deleted or no-longer-documented functions. \n")
   #
   # # MAYBE NEED TO DELETE ALL IN THE docs/ FOLDER TO REMOVE OBSOLETE .html files like no longer used vignettes ?
   # cat("You might need to do \n  pkgdown::clean_site('.') \n and/or \n  file.remove(list.files('./docs', full.names = TRUE))  \nto delete all of /docs/*.*  to be sure there is nothing obsolete like renamed or deleted or no-longer-documented functions. \n")
@@ -208,7 +208,7 @@ cat("updating version/date/title in _pkgdown.yml, for footers of help pages, etc
   if (dodocument || doinstall) {
   if (doclean_man ) {
     cat('deleting all .Rd (help) files in ./man folder \n')
-    file.remove(list.files('./man', full.names = TRUE))
+    file.remove(list.files('./man', full.names = TRUE, include.dirs = FALSE)) # leave the figures directory that has a logo in it
   }
 }
   # README & DOCUMENT ####
