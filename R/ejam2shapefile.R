@@ -237,7 +237,9 @@ To include specific columns provides those as a character vector of varnames.")
       # delete any old version of zip
       if (file.exists(zipfullpath)) {file.remove(zipfullpath)}
       # write zip to folder, using shp files in temp dir
-      zip(zipfullpath, files = file.path(tds, fnames), extras = c('-j', '-D'))
+      junk <- capture.output({
+        zip(zipfullpath, files = file.path(tds, fnames), extras = c('-j', '-D'))
+      })
       # Note:
       # -D should prevent storing Directory info,
       # -j is supposed to use no path info so files are all in root of .zip and there are not folders inside the .zip
