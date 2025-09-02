@@ -36,7 +36,8 @@
   # if you have just used devtools::load_all(), then this will find and use the local source version of the global_defaults_package.R
   # if you have not done that, this will find and use the installed version
   # source the file in the global environment by using local=FALSE
-  source(fname, local = FALSE)
+
+  source(fname, local = FALSE) # This will not work if you refer to a new or rename one of the url_xyz functions referred to in global_defaults_package$default_reports until the NAMESPACE is updated
 
 
   # download BLOCK (not blockgroup) data, etc ####
