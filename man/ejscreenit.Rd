@@ -197,7 +197,7 @@ and then prepends input table and renames columns as R variables like "traffic.s
 }
 
 Also used are
-\code{\link[=ejscreenapi_plus]{ejscreenapi_plus()}}, \code{\link[=ejscreenapi]{ejscreenapi()}}, \code{\link[=urls_clusters_and_sort_cols]{urls_clusters_and_sort_cols()}},
+\code{\link[=ejscreenapi_plus]{ejscreenapi_plus()}}, \code{\link[=ejscreenapi]{ejscreenapi()}}, \code{\link[=url_ejscreenapi_clusters_and_sort_cols]{url_ejscreenapi_clusters_and_sort_cols()}},
 \code{\link[=fixcolnames]{fixcolnames()}}, \code{\link[=url_linkify]{url_linkify()}}, \code{\link[=popup_from_ejscreen]{popup_from_ejscreen()}}, \code{\link[=calc_ratios_to_avg]{calc_ratios_to_avg()}}, \code{\link[=plot_boxplot_ratios]{plot_boxplot_ratios()}}
 }
 

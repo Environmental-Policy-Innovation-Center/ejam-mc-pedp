@@ -4,7 +4,19 @@
 \alias{url_ejamapi}
 \title{Get URL(s) of HTML summary reports for use with EJAM-API}
 \usage{
-url_ejamapi(sitepoints = NULL, radius = 3, fips = NULL, shapefile = NULL, ...)
+url_ejamapi(
+  sitepoints = NULL,
+  lat = NULL,
+  lon = NULL,
+  radius = 3,
+  fips = NULL,
+  shapefile = NULL,
+  linktext = "Report",
+  as_html = FALSE,
+  ifna = "https://ejanalysis.com",
+  baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?",
+  ...
+)
 }
 \arguments{
 \item{sitepoints}{see \code{\link[=ejamit]{ejamit()}}}
@@ -16,7 +28,15 @@ url_ejamapi(sitepoints = NULL, radius = 3, fips = NULL, shapefile = NULL, ...)
 \item{shapefile}{see \code{\link[=ejamit]{ejamit()}}, but each polygon is encoded as geojson string
 which might get too long for encoding in a URL for the API using GET}
 
-\item{...}{ignored}
+\item{linktext}{used as text for hyperlinks, if supplied and as_html=TRUE}
+
+\item{as_html}{Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example}
+
+\item{ifna}{URL shown for missing, NA, NULL, bad input values}
+
+\item{baseurl}{do not change unless endpoint actually changed}
+
+\item{...}{unused}
 }
 \value{
 vector of character string URLs
@@ -26,7 +46,10 @@ Get URL(s) of HTML summary reports for use with EJAM-API
 }
 \details{
 \itemize{
-\item Work in progress - currently relies on API from https://github.com/edgi-govdata-archiving/EJAM-API
+\item Work in progress - initial draft relied on API from
+https://github.com/edgi-govdata-archiving/EJAM-API
+
+(see parameter \code{baseurl} that used the /report endpoint)
 \item Another option in the future might be to construct a URL that is a link to the live EJAM
 app but has url-encoded parameters that are app settings, such as sitepoints, radius_default, etc.
 \item Will try to use the same input parameters as \code{\link[=ejamit]{ejamit()}} does.
@@ -45,6 +68,8 @@ app but has url-encoded parameters that are app settings, such as sitepoints, ra
  z = url_ejamapi(shapefile = testinput_shapes_2[2, c("geometry", "FIPS")])
 
  \dontrun{
+ browseURL("https://ejamapi-84652557241.us-central1.run.app/report?lat=33&lon=-112&buffer=4")
+
  browseURL(x[1])
  browseURL(y[1])
  browseURL(z[1])

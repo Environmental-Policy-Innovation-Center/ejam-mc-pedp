@@ -27,12 +27,17 @@ utility that reconciles/ consolidates user-defined params passed via ejamapp() a
 This function, called by \code{\link[=ejamapp]{ejamapp()}},
 collects the shiny-app-related default settings that are defined in these places:
 \enumerate{
-\item "user options" as parameters passed to \code{\link[=ejamapp]{ejamapp()}} by a user
-\item "global defaults" set in file \code{global_defaults_shiny_public.R}   -- and in that file, depends on value of isPublic if passed as a param to \code{\link[=ejamapp]{ejamapp()}}
-\item "global defaults" set in file \code{global_defaults_shiny.R}    -- sourced here
-\item "global defaults" set in file \code{global_defaults_package.R}  -- sourced here but also initially by \code{\link[=.onAttach]{.onAttach()}}
+\item any options a user has passed as parameters to \code{\link[=ejamapp]{ejamapp()}}. If provided, these override defaults specified in global_defaults_*.R files.
+\item "global_defaults_package" set in file \code{global_defaults_package.R}  -- sourced here but also initially by \code{\link[=.onAttach]{.onAttach()}}
+\item global defaults set in file \code{global_defaults_shiny.R} -- sourced here
+\item global defaults set in file \code{global_defaults_shiny_public.R} -- and in that file, depends on value of isPublic if passed as a param to \code{\link[=ejamapp]{ejamapp()}}
 }
 
 and consolidates them all as a list, to be available to server/ui.
+
+For more details, see the
+\href{https://ejanalysis.github.io/EJAM/articles/}{article about defaults and custom settings}.
+
+See other ideas for how to include global.R types of code/settings discussed \href{https://github.com/ThinkR-open/golem/issues/6}{here}
 }
 \keyword{internal}

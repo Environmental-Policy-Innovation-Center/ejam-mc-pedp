@@ -18,7 +18,7 @@ table_xls_from_ejam(
   radius_or_buffer_in_miles = NULL,
   buffer_desc = "Selected Locations",
   radius_or_buffer_description = NULL,
-  hyperlink_colnames = "ECHO Report",
+  hyperlink_colnames = EJAM:::global_or_param("default_hyperlink_colnames"),
   site_method = "",
   mapadd = FALSE,
   report_map = NULL,

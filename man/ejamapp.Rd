@@ -112,7 +112,7 @@ i.e., via \code{\link[=require]{require()}} or \code{\link[=library]{library()}}
  #  file with latitude, longitude
  ejamapp(sitepoints = system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM"),
          default_upload_dropdown = "upload", default_selected_type_of_site_upload = "latlon")
- 
+
  #  spatial data.frame with polygons
  ejamapp(shapefile = testshapes_2,
          default_upload_dropdown = "upload", default_selected_type_of_site_upload = "SHP")

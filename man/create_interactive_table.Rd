@@ -4,12 +4,21 @@
 \alias{create_interactive_table}
 \title{unused now? create_interactive_table - function that creates interactive html version of site by site table in app}
 \usage{
-create_interactive_table(data_processed, testing)
+create_interactive_table(
+  data_processed,
+  hyperlink_header = NULL,
+  hyperlink_text = NULL,
+  site_report_download_colname = "Download EJAM Report"
+)
 }
 \arguments{
 \item{data_processed}{processed data from app_server}
 
-\item{testing}{variable to indicate if analysis is being tested}
+\item{hyperlink_header}{don't change - links to reports}
+
+\item{hyperlink_text}{don't change - text labels of links to reports}
+
+\item{site_report_download_colname}{header for column with buttons to download 1-site reports}
 }
 \description{
 Builds site by site table after an analysis in EJAM app. Pulls in uploaded and analyzed data to create table

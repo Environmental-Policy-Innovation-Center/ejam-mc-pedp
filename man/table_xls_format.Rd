@@ -10,6 +10,7 @@ table_xls_format(
   longnames = NULL,
   formatted = NULL,
   bybg = NULL,
+  sitetype = NULL,
   plot_distance_by_group = FALSE,
   summary_plot = NULL,
   plotlatest = FALSE,
@@ -33,7 +34,8 @@ table_xls_format(
   heatmap2_colnames = NULL,
   heatmap2_cuts = c(1.009, 2, 3),
   heatmap2_colors = c("yellow", "orange", "red"),
-  hyperlink_colnames = c("EJScreen Report", "EJScreen Map", "ACS Report", "ECHO Report"),
+  hyperlink_colnames = sapply(EJAM:::global_or_param("default_hyperlink_colnames"),
+    function(x) x$header),
   graycolnames = NULL,
   narrowcolnames = NULL,
   graycolor = "gray",
@@ -57,6 +59,8 @@ but if entire output of ejamit() is passed as if it were overall, function figur
 \item{formatted}{optional table to save in one tab, from ejamit()$results_overall, EJAM analysis overall in different format}
 
 \item{bybg}{Optional large table of details of each block group that is only needed to analyze distances by group.}
+
+\item{sitetype}{normally would be like ejamit()$sitetype}
 
 \item{plot_distance_by_group}{logical, whether to try to add a plot of mean distance by group.
 This requires that bybg be provided as a parameter input to this function.}

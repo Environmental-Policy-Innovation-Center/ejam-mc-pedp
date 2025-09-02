@@ -19,7 +19,7 @@ ejam2excel(
   buffer_desc = NULL,
   radius_or_buffer_description =
     "Miles radius of circular buffer (or distance used if buffering around polygons)",
-  hyperlink_colnames = "ECHO Report",
+  hyperlink_colnames = EJAM:::global_or_param("default_hyperlink_colnames"),
   site_method = "",
   mapadd = FALSE,
   report_map = NULL,

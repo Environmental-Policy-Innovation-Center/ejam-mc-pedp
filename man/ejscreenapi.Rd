@@ -121,19 +121,18 @@ rather than the code requesting results via the API.
 See  \url{https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/ejscreen-api}
 }
 \examples{
- 
  \donttest{
  # Specify size of buffer circle and pick random points as example data
  myradius <- 1
  pts2 <- data.frame(lon = c(-111.9040233, -73.7917865), lat = c(33.5604162, 41.0613821))
  pts5 <- testpoints_5
- 
+
  out <- ejscreenapi(lon = pts2$lon, lat = pts2$lat, radius = myradius)
  head(t(out))
  outnice <- ejscreenapi(lon = pts2$lon, lat = pts2$lat, radius = myradius, nicenames = TRUE)
  head(t(outnice), 24)
  }
- 
+
 }
 \seealso{
 \code{\link[=ejscreenit]{ejscreenit()}} \code{\link[=ejscreenapi_plus]{ejscreenapi_plus()}} \code{\link[=ejscreenapi]{ejscreenapi()}}

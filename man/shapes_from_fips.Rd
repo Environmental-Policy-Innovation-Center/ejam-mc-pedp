@@ -57,9 +57,11 @@ Also note the \link{blockwts} dataset had a placeholder column block_radius_mile
 v2.32.5 was just zero values, but see notes in EJAM/data-raw/datacreate_blockwts.R on how it could be obtained.
 If it were used, it could be a way to quickly get the area of each block,
 using the formula  area = pi * (block_radius_miles^2)
+
+For zip code boundaries, see the \href{ejanalysis.org/ejamdocs}{EJAM documentation} article on zipcodes.
 }
 \examples{
- # shp2 = shapes_from_fips("10001", "10005")
+ # shp2 = shapes_from_fips("10001", "10005") # Counties not zip codes!
 
  fipslist = list(
   statefips = name2fips(c('DE', 'RI')),
