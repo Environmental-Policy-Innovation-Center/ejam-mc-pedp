@@ -517,6 +517,10 @@ map_shapes_leaflet <- function(shapes, color = "green", popup = NULL, fillOpacit
     }
   }
 
+  ## DROP EMPTY GEOMETRIES ####
+  empty = sf::st_is_empty(shapes)
+  shapes = shapes[!empty, ]
+
   if ("FIPS" %in% names(shapes) & !("pop" %in% names(shapes))) {
     # if it already has "pop" then dont bother with this sometimes slow way of getting pop counts:
     shapes$Population_ACS <- fips2pop(shapes$FIPS)
@@ -555,6 +559,11 @@ map_shapes_leaflet_proxy <- function(mymap, shapes, color = "green", popup = sha
   # *** need to confirm this default for popup is right -
   # compare to the one now in map_shapes_leaflet()
   # in RStudio console, can do  map_shapes_leaflet(shapes)
+
+  ## DROP EMPTY GEOMETRIES ####
+  empty = sf::st_is_empty(shapes)
+  shapes = shapes[!empty, ]
+
   mymap <- mymap %>%
     leaflet::addPolygons(data = shapes, color = color,  popup = popup, popupOptions = leaflet::popupOptions(maxHeight = 200)) %>%
     leaflet::addTiles()
