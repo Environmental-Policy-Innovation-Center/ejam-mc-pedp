@@ -236,12 +236,16 @@ rep_br <- function(times = 1) {
 #' @param url the URL
 #' @param text the text to display
 #'
-#' @return an a tag
-#' @noRd
+#' @return a tag, with "shiny.tag" class:  class(enurl("google.com", "click here"))
+#' @seealso [url_linkify()]
 #'
 #' @examples
 #' enurl("https://www.thinkr.fr", "ThinkR")
+#'
+#' @keywords internal
+#'
 enurl <- function(url, text) {
+  if (missing(text)) {text <- url} # compare to url_linkify though
   tags$a(href = url, text)
 }
 

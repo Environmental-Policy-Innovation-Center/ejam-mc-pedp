@@ -451,7 +451,6 @@ reference:
   - testoutput_ejscreenit_50
   - testoutput_ejscreenit_500
   - acsendyear
-  - app_run_EJAMejscreenapi
   - app_run_EJAM
   - app_server
   - app_ui
@@ -532,6 +531,8 @@ reference:
   - table_gt_format_step1
   - table_gt_format_step2
   - x_anyother
+  - url_linkify
+  - enurl
   - url_getacs_epaquery_chunked
   - url_to_any_rest_services_ejscreen_ejquery
   - url_get_eparest_chunked_by_id

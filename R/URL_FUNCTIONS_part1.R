@@ -48,20 +48,49 @@ url_online <- function(url = c("ejscreen.epa.gov",)) {
 #'
 #' @param url string that is URL
 #' @param text string that is label
-#'
+#' @param newtab unless set to FALSE, link opens in a new browser tab
+#' @param encode unless set to FALSE, it uses [utils::URLencode()] first
+#' @param reserved if encode=T, this parameter is passed to [utils::URLencode()]
 #' @return url_linkify('epa.gov','EPA') returns `"<a href=\"epa.gov\", target=\"_blank\">EPA</a>"`
+#' @seealso [enurl()]
+#' @details
+#'   Consider also the golem utility enurl() as modified in this pkg,
+#'   except that enurl()
+#'
+#'   1. does not make a link that would open in new tab,
+#'
+#'   2. skips [utils::URLencode()] and
+#'
+#'   3. returns "shiny.tag" class
+#'
+#'   4. now sets text=url, while url_linkify() uses a shorter text
+#'
+#'   `enurl("https://google.com", "click here")`
+#'   `url_linkify("https://google.com")`
+#'
+#'   `enurl("https://google.com")`
+#'
+#'   `url_linkify("https://google.com", "click here")`
 #'
 #' @keywords internal
-#' @export
 #'
-url_linkify <- function(url, text) {
+url_linkify <- function(url, text, newtab = TRUE, encode = TRUE, reserved = FALSE) {
 
   if (missing(text)) {text = gsub(pattern = "http[s]?://","",url)}
-  paste0('<a href=\"', URLencode(url), '\", target=\"_blank\">', text, '</a>')
 
-  # Consider instead using something like golem utility enurl()
-  #
-  #   enurl <- function(url, text) {tags$a(href = url, text)}
+  if (encode) {
+    url <- URLencode(url, reserved = reserved)
+  } else {
+    url <- url
+  }
+  if (newtab) {
+    paste0('<a href=\"', url, '\"',
+           ', target=\"_blank\"',
+           '>', text, '</a>')
+  } else {
+    paste0('<a href=\"', url, '\"',
+           '>', text, '</a>')
+  }
 }
 ################################################### #################################################### #
 
