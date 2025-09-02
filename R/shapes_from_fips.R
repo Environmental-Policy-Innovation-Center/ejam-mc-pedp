@@ -81,7 +81,7 @@ shapes_from_fips <- function(fips,
   ########################## #
   # validation of input fips types ####
 
-  oktypes <- c("blockgroup", "tract", "city", "county", "state") # NOT block
+  oktypes <- c("blockgroup", "tract", "city", "county", "state") # NOT block - but maybe we should return at least lat,lon of blocks?
 
   suppressWarnings({
     ftype <- fipstype(fips) # NULL or NA or one of oktypes or "block"

@@ -30,14 +30,14 @@ create_interactive_table <- function(data_processed,
 
   cols_to_select <- c('ejam_uniq_id', 'invalid_msg',
                       'pop',
-                      site_report_download_colname,
+                      'site_report_download_colname_placeholder', # #################### #
                       hyperlink_header,
                       names_d, names_d_subgroups,
                       names_e #,
                       # no names here corresponding to number above x threshold, state, region ??
   )
   tableheadnames <- c('Site ID',
-                      site_report_download_colname,
+                      'site_report_download_colname_placeholder',
                       'Est. Population', 'Individual Report',  # should confirm that Barplot/Community Report belongs here
                       hyperlink_header,
                       fixcolnames(c(names_d, names_d_subgroups, names_e), 'r', 'shortlabel'))
@@ -56,10 +56,6 @@ create_interactive_table <- function(data_processed,
   # use data_processed()
   dt <- data_processed$results_bysite
 
-  # here, need to create column whose name is the value of site_report_download_colname
-  dt$site_report_download_colname <- NA
-  names(dt) <- gsub("site_report_download_colname", site_report_download_colname, names(dt))
-
   dt <- dt %>%
     as.data.frame()  %>%
     dplyr::mutate(dplyr::across(dplyr::where(is.numeric), .fns = function(x) {round(x, digits = 2)})
@@ -69,21 +65,23 @@ create_interactive_table <- function(data_processed,
     dplyr::mutate(index = row_number()) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(
-      pop = ifelse(valid == TRUE, pop, NA)
-      ,
-      `Download EJAM Report` =
+      pop = ifelse(valid == TRUE, pop, NA),
       # site_report_download_colname =
-        ifelse(valid == TRUE, shinyInputmaker(FUN = actionButton, len = 1,
-                                             id = paste0('button_', index),
-                                             label = "Generate",
-                                             onclick = paste0('Shiny.onInputChange(\"select_button', index,'\", this.id)' )
+      # `Download EJAM Report`
+      site_report_download_colname_placeholder = ifelse(
+        valid == TRUE,
+        shinyInputmaker(
+          FUN = actionButton, len = 1,
+          id = paste0('button_', index),
+          label = "Generate",
+          onclick = paste0('Shiny.onInputChange(\"select_button', index,'\", this.id)' )
         ),
         '')
     ) %>%
     dplyr::ungroup() %>%
     dplyr::select(dplyr::all_of(cols_to_select), ST)
 
-
+  names(dt) <- gsub("site_report_download_colname_placeholder", site_report_download_colname, names(dt))
 
   # use results_summarized that is from batch.summarize()
   batch.sum.cols <- data_processed$results_summarized$cols

@@ -2512,8 +2512,8 @@ app_server <- function(input, output, session) {
   output$interactive_table <- DT::renderDT(server = TRUE, expr = {
     req(data_processed())
     create_interactive_table(data_processed = data_processed(),
-                             hyperlink_header = NULL, # could change to be an input$ in advanced tab possibly
-                             hyperlink_text = NULL, # could change to be an input$ in advanced tab possibly
+                             hyperlink_header = NULL, # could change to be an input$ in advanced tab possibly # sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
+                             hyperlink_text = NULL, # could change to be an input$ in advanced tab possibly   # sapply(EJAM:::global_or_param("default_reports"), function(x) x$text)
                              site_report_download_colname = "Download EJAM Report" # could change to be an input$ in advanced tab possibly
                              )
     # c("EJScreen Report",

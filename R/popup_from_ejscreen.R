@@ -18,9 +18,7 @@
 #'
 #' @param out like ejamit()$results_bysite, but also it can be full list from ejamit().
 #'   The table of raw data in data.frame form, with results of EJ analysis.
-#' @param linkcolname Name of one column in the table that has links to some URL
-#' @param linkcolname2 Another like linkcolname
-#' @param linkcolname3 another
+#' @param linkcolnames Vector of column names in the table that have links to URLs like reports about single sites
 #' @param verbose TRUE or FALSE, can see more details reported when function is used.
 #'
 #' @return HTML ready to be used for map popups
@@ -28,11 +26,26 @@
 #' @keywords internal
 #' @export
 #'
-popup_from_ejscreen <- function(out, linkcolname='EJScreen Report', linkcolname2='EJScreen Map', linkcolname3='EJScreenACS', verbose=FALSE) {
+popup_from_ejscreen <- function(out,
+                                linkcolnames = sapply(EJAM:::global_or_param("default_reports"), function(x) x$header),
+                                verbose = FALSE) {
+  # ornull = function(n) {
+  #   x <- try(EJAM:::global_or_param("default_reports")[[n]]$header)
+  #   if (inherits(x, "try-error")) {return(NULL)} else {return(x)}
+  # }
+  #   linkcolname1 = ornull(1)
+  #   linkcolname2 = ornull(2)
+  #   linkcolname3 = ornull(3)
+  #   linkcolname4 = ornull(4)
+  #   linkcolname5 = ornull(5)
+  #   linkcolname6 = ornull(6)
 
   if ("results_bysite" %in% names(out)) {
     # looks like not just 1 table was provided
     out <- out$results_bysite
+  }
+  if ("sf" %in% class(x)) {
+    x <- sf::st_drop_geometry(x) # or else popup is blown up by geometry points data
   }
   if (data.table::is.data.table(out)) {out <- data.table::copy(out); data.table::setDF(out)}
 
@@ -319,9 +332,29 @@ popup_from_ejscreen <- function(out, linkcolname='EJScreen Report', linkcolname2
     )
   }
 
-  if (linkcolname  %in% names(out)) {pops_link1 <- paste0(out[ , linkcolname] , '<br>')} else {pops_link1 <- paste0(rep(NA, NROW(out)), '<br>')}
-  if (linkcolname2 %in% names(out)) {pops_link2 <- paste0(out[ , linkcolname2], '<br>')} else {pops_link2 <- paste0(rep(NA, NROW(out)), '<br>')}
-  if (linkcolname3 %in% names(out)) {pops_link3 <- paste0(out[ , linkcolname3], '<br>')} else {pops_link3 <- paste0(rep(NA, NROW(out)), '<br>')}
+  make_pops_links <- function(out, linkcolnames) {
+    pops_links <- ""
+    for (i in 1:length(linkcolnames)) {
+      if (linkcolnames[i] %in% names(out)) {
+        pops_link_n = paste0(out[ , linkcolnames[i]] , '<br>')
+      } else {
+        pops_link_n = paste0(rep(NA, NROW(out)), '<br>')
+      }
+      pops_links <- paste0(
+        pops_links, pops_link_n,
+        sep = '<br>'
+      )
+    }
+    return(pops_links)
+  }
+  pops_links <- make_pops_links(out, linkcolnames)
+
+  # if (linkcolname1  %in% names(out)) {pops_link1 <- paste0(out[ , linkcolname1] , '<br>')} else {pops_link1 <- paste0(rep(NA, NROW(out)), '<br>')}
+  # if (linkcolname2 %in% names(out)) {pops_link2 <- paste0(out[ , linkcolname2], '<br>')} else {pops_link2 <- paste0(rep(NA, NROW(out)), '<br>')}
+  # if (linkcolname3 %in% names(out)) {pops_link3 <- paste0(out[ , linkcolname3], '<br>')} else {pops_link3 <- paste0(rep(NA, NROW(out)), '<br>')}
+  # if (linkcolname4  %in% names(out)) {pops_link4 <- paste0(out[ , linkcolname4] , '<br>')} else {pops_link4 <- paste0(rep(NA, NROW(out)), '<br>')}
+  # if (linkcolname5 %in% names(out)) {pops_link5 <- paste0(out[ , linkcolname5], '<br>')} else {pops_link5 <- paste0(rep(NA, NROW(out)), '<br>')}
+  # if (linkcolname6 %in% names(out)) {pops_link6 <- paste0(out[ , linkcolname6], '<br>')} else {pops_link6 <- paste0(rep(NA, NROW(out)), '<br>')}
 
   if ('ejam_uniq_id' %in% names(out)) {pops_ejam_uniq_id <- paste0('ejam_uniq_id: ', out$ejam_uniq_id, '<br>')} else {pops_ejam_uniq_id <- ''}
   if ('id'           %in% names(out)) {pops_id           <- paste0('id: ',           out$id,           '<br>')} else {pops_id           <- ''}
@@ -373,12 +406,13 @@ popup_from_ejscreen <- function(out, linkcolname='EJScreen Report', linkcolname2
     pops_e,
     pops_ej,
 
-    # LINK IN POPUP
-    pops_link1,    # out[ , linkcolname] ,           '<br>',
-    #    url_linkify(out[ , linkcolname] , 'EJScreen Report'), '<br>',
-    pops_link2,    # out[ , linkcolname2],    '<br>',
-    #    url_linkify(out[ , linkcolname2], 'EJScreen Map'),  '<br>',
-    pops_link3,
+    # LINKS IN POPUP
+    pops_links,
+    # pops_link1,    # out[ , linkcolname1] ,           '<br>',
+    # #    url_linkify(out[ , linkcolname1] , 'EJScreen Report'), '<br>',
+    # pops_link2,    # out[ , linkcolname2],    '<br>',
+    # #    url_linkify(out[ , linkcolname2], 'EJScreen Map'),  '<br>',
+    # pops_link3,
     sep = '<br>'
   )
 

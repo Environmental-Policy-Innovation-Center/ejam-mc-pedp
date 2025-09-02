@@ -80,7 +80,7 @@ unlinkify = function(x) {
   if (is.data.frame(x)) {return(data.frame(fixed))}
   return(fixed)
 }
-# test_vec = testoutput_ejamit_10pts_1miles$results_bysite$`EJScreen Report`
+# test_vec = testoutput_ejamit_10pts_1miles$results_bysite$`Report`
 # test_df1 = as.data.frame(testoutput_ejamit_10pts_1miles$results_bysite[ , 1])
 # test_df2 = as.data.frame(testoutput_ejamit_10pts_1miles$results_bysite[ , 1:2])
 # test_dt1 = testoutput_ejamit_10pts_1miles$results_bysite[ , 1]
@@ -96,7 +96,7 @@ unlinkify = function(x) {
 
 #' utility to prep URLs for being written to Excel
 #'
-#' @param urls vector of urls such as from [url_ejscreen_report()]
+#' @param urls vector of urls such as from [url_ejamapi()]
 #' @param urltext The text to appear in Excel cells instead of just the URL showing
 #'
 #' @details

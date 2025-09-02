@@ -380,6 +380,7 @@ reference:
   - testshapes_2
 - subtitle: "Examples of Inputs (Census units by FIPS)"
   contents:
+  - testinput_fips_mix
   - testinput_fips_states
   - testinput_fips_counties
   - testinput_fips_cities
@@ -417,11 +418,11 @@ reference:
   contents:
   - url_ejamapi
   - url_ejscreenmap
-  - url_ejscreen_report
-  - url_echo_facility_webpage
   - url_enviromapper
-  - url_frs_report
-  - url_countyhealthrankings
+  - url_echo_facility
+  - url_frs_facility
+  - url_countyhealth
+  - url_statehealth
   - url_naics.com
 - title: "Utilities handling variable names"
   desc: "Utilities to handle variable names, indicator metadata, formulas, etc."
@@ -468,6 +469,7 @@ reference:
   - colcounter
   - plot_st_v_us
   - plot_vs_us
+  - url_ejscreen_report
   - ejscreen_vs
   - ejscreen_vs_ejam_1var
   - ejscreen_vs_ejam

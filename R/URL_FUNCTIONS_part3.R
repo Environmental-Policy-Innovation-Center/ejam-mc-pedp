@@ -48,23 +48,39 @@
 #' @param f can be "report" or "pjson" or "json"
 #' @param interactiveprompt passed to [sitepoints_from_any()]
 #' @seealso  [url_ejscreen_report()]  [url_ejscreenmap()]
-#'   [url_echo_facility_webpage()] [url_frs_report()]  [url_enviromapper()]
+#'   [url_echo_facility()] [url_frs_facility()]  [url_enviromapper()]
 #' @return URL(s)
 #'
 #' @keywords internal
 #'
-url_ejscreen_report <- function(sitepoints = NULL, lat='', lon='', radius='', as_html = FALSE, linktext = "Summary Report", mobile = FALSE,
+url_ejscreen_report <- function(sitepoints = NULL, lat='', lon='', radius='', mobile = FALSE,
                                 areatype="", areaid = "", namestr = "",
                                 shapefile = NULL,
                                 fips = NULL,
                                 # would require POST not just a simple url-encoded GET API call?
                                 wkid = 4326, unit = 9035, f = "report",
-                                interactiveprompt = FALSE, ...) {
+                                interactiveprompt = FALSE,
+
+                                as_html = FALSE,
+                                linktext = "Report",
+                                ifna = "https://ejanalysis.com",
+                                baseurl = NULL,
+                                ...) {
+
+  message("note this is the old EJSCREEN function - it does redirect to using url_ejamapi() but consider using url_ejamapi() or url_ejscreenmap() directly")
 
   if (!is.null(sitepoints)) {
     lat = sitepoints$lat
     lon = sitepoints$lon
   }
+  ############################################################################################################################################### #
+
+  ################################################ #
+
+  # THE NEWER EJAM API REPORT (POST-JANUARY-2025)
+
+  ################################################ #
+
   # disable ejscreen report links while the old api site is down, but
   # if ejscreen api is down, try to use ejam-api
   # but params differed a bit
@@ -86,13 +102,23 @@ url_ejscreen_report <- function(sitepoints = NULL, lat='', lon='', radius='', as
         fips = fips,
         shapefile = shapefile,
         as_html = as_html,
-        linktext = linktext
+        linktext = linktext,
+        ifna = ifna,
+        baseurl = baseurl,
+        ...
       )
 
       return(url)
     }
   } else {
+    ############################################################################################################################################### #
+
     ################################################ #
+
+    # THE OLDER EJSCREEN API REPORT (PRE JANUARY 2025)
+
+    ################################################ #
+
     if (!missing(fips) && !is.null(fips)) {
       # try to add flexibility by allowing fips to be used instead of areaid/areatype/namestr now
       areatype <- fipstype(fips)
@@ -128,7 +154,7 @@ url_ejscreen_report <- function(sitepoints = NULL, lat='', lon='', radius='', as
 
       latlon_radius_validate_lengths <- function(lat, lon, radius) {
         if (!is.numeric(radius) || !is.numeric(lat) || !is.numeric(lon)) {warning("lat or lon or radius is not numeric")}
-        # but that is OK in url_ejscreen_report context where areaid can be used instead and lat default is ""
+        #
         if (length(radius) == 0 || length(lat) == 0 || length(lon) == 0) {warning("lat or lon or radius missing entirely (length of a vector is zero")}
         if (is.null(radius)     || is.null(lat)     || is.null(lon))     {warning("lat or lon or radius is NULL")}
         if (anyNA(radius)       || anyNA(lat)       || anyNA(lon))       {warning("lat or lon or radius contain NA value(s)")}
@@ -167,14 +193,17 @@ url_ejscreen_report <- function(sitepoints = NULL, lat='', lon='', radius='', as
 
                    '&f=', f
     )
-  }
+
   if (as_html) {
     if (missing(linktext)) {linktext <- paste0("EJScreen Report")}
     url <- url_linkify(url, text = linktext)
   }
 
   return(url)
+  }
 }
+############################################################################################################################################### #
+
 ################################################### #################################################### #
 
 
@@ -190,7 +219,7 @@ url_ejscreen_report <- function(sitepoints = NULL, lat='', lon='', radius='', as
 #  #' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
 #  #' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
 #  #' @seealso  [url_ejscreen_report()]  [url_ejscreenmap()]
-#  #'   [url_echo_facility_webpage()] [url_frs_report()]  [url_enviromapper()]
+#  #'   [url_echo_facility()] [url_frs_facility()]  [url_enviromapper()]
 #  #' @return URL(s)
 #  #'
 #  #' @noRd

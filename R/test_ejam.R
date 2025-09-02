@@ -187,7 +187,8 @@ x <- EJAM:::test_ejam(
         "test-FIPS_FUNCTIONS.R",
         "test-state_from_fips_bybg.R",
         "test-state_from_latlon.R",
-        "test-is.numeric.text.R"
+        "test-is.numeric.text.R",
+        "test-fips2countyfips.R"
       ),
       test_naics = c(
         "test-naics_categories.R",
@@ -227,8 +228,7 @@ x <- EJAM:::test_ejam(
         "test-shapes_from_fips.R",
         "test-ejam2shapefile.R",
         "test-shape2zip.R",
-
-        "test-shape2geoson.R"
+        "test-shape2geojson.R"
       ),
       test_getblocks = c(
         "test-radius_inferred.R",              # this is SLOW THOUGH
@@ -266,7 +266,8 @@ x <- EJAM:::test_ejam(
       ),
       test_misc = c(
         "test-acs_bybg.R",
-        "test-url_ejamapi.R"
+        "test-url_ejamapi.R",
+        "test-url_columns_bysite.R"
       ),
       ### X ejscreenapi tests do not work / get skipped WHILE EJSCREEN API IS DOWN MID 2025  ####
       test_ejscreenapi = c(

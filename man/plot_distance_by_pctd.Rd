@@ -66,16 +66,16 @@ which provides only block group resolution information about distance.
   plot_distance_by_pctd(
     getblocksnearby(pts, radius = 10, quiet = T),
     score_colname = "pctnhba")
- #browseURL(url_ejscreen_report(lat = pts$lat, lon = pts$lon, radius = 0.5))
- #browseURL(url_ejscreen_report(lat = pts$lat, lon = pts$lon, radius = 3))
- 
- # Example of area that has higher \%Hispanic as you go 
+ #browseURL(url_ejamapi(sitepoints = pts, radius = 0.5))
+ #browseURL(url_ejamapi(sitepoints = pts, radius = 3))
+
+ # Example of area that has higher \%Hispanic as you go
  # 10 to 30 miles away from this specific point
  pts = data.table(lat = 45.75464, lon = -94.36791)
  plot_distance_by_pctd(pts,
    sitenumber = 1, score_colname = "pcthisp")
- # browseURL(url_ejscreen_report(lat = pts$lat, lon = pts$lon, radius = 10))
- # browseURL(url_ejscreen_report(lat = pts$lat, lon = pts$lon, radius = 30))
- 
- 
+ # browseURL(url_ejamapi(sitepoints = pts, radius = 10))
+ # browseURL(url_ejamapi(sitepoints = pts, radius = 30))
+
+
 }

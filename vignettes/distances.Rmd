@@ -180,8 +180,14 @@ y <- plot_distance_by_pctd(
   getblocksnearby(pts, radius = 10, quiet = T),
   score_colname = "pctnhba",
   sitenumber = 1)
-#browseURL(url_ejscreen_report(lat = pts$lat, lon = pts$lon, radius = 0.5))
-#browseURL(url_ejscreen_report(lat = pts$lat, lon = pts$lon, radius = 3))
+# ejamapp(sitepoints = pts, radius_default = 0.5)
+# ejamapp(sitepoints = pts, radius_default = 3)
+
+#browseURL(url_ejscreenmap(sitepoints = pts, radius = 0.5))
+#browseURL(url_ejscreenmap(sitepoints = pts, radius = 3))
+
+#browseURL(url_ejamapi(sitepoints = pts, radius = 0.5))
+#browseURL(url_ejamapi(sitepoints = pts, radius = 3))
 ```
 
 Example of area that has higher %Hispanic as you go 10 to 30 miles away from

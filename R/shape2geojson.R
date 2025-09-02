@@ -60,7 +60,7 @@ shape2geojson = function(shp, file = file.path(tempdir(), "shp.geojson"),
       geotxt = readLines(file)
       geotxt = paste0(geotxt, collapse = "") # not relevant if given only 1 polygon. combines lines of geojson file (Q: is that the same as 1 line per 1 row of shp input?)
       geotxt = gsub(" ", "", geotxt) # is it ok to remove all spaces?
-      cat("use URLencode() to encode this string for use in a URL \n")
+      # cat("use URLencode() to encode this string for use in a URL \n")
 
       return(geotxt) # 1 text string
     } else {

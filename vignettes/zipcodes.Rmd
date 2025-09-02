@@ -98,11 +98,13 @@ shp1 <- sf::st_read(text1)
 mapview::mapview(shp1)
 ```
 
+## see EJSCREEN map at a zip code
 
+browseURL(url_ejscreenmap(wherestr =  '20019'))
 
 ## analyzing zip codes in EJAM
 
-The EJScreen API does not handle zip codes, but you can analyze them in EJAM like this:
+You can analyze zip codes in EJAM like this:
 
 ```{r, eval=FALSE, include=TRUE}
 out = ejamit(shapefile = z, radius = 0)

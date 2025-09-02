@@ -6,9 +6,7 @@
 \usage{
 popup_from_ejscreen(
   out,
-  linkcolname = "EJScreen Report",
-  linkcolname2 = "EJScreen Map",
-  linkcolname3 = "EJScreenACS",
+  linkcolnames = sapply(EJAM:::global_or_param("default_reports"), function(x) x$header),
   verbose = FALSE
 )
 }
@@ -16,11 +14,7 @@ popup_from_ejscreen(
 \item{out}{like ejamit()$results_bysite, but also it can be full list from ejamit().
 The table of raw data in data.frame form, with results of EJ analysis.}
 
-\item{linkcolname}{Name of one column in the table that has links to some URL}
-
-\item{linkcolname2}{Another like linkcolname}
-
-\item{linkcolname3}{another}
+\item{linkcolnames}{Vector of column names in the table that have links to URLs like reports about single sites}
 
 \item{verbose}{TRUE or FALSE, can see more details reported when function is used.}
 }
