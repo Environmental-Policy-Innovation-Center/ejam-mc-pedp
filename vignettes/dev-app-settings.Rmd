@@ -42,6 +42,8 @@ if (!exists("blockgroupstats")) {library(EJAM)} # use installed version only if 
 
 This document provides technical notes on how defaults and custom settings are defined for the EJAM web app.
 
+## HOW SETTINGS GET PASSED TO THE WEB APP
+
 Many defaults are defined in files like `global_defaults_*.R`. They can be changed there, but also can be passed to `ejamapp()` aka `run_app()` as parameters, to override those global default settings for the duration of the app. Using `ejamapp()` parameters allows experienced analysts to customize how the web app works without having to edit any files. For example, one can change default settings for the radius, the type of sites to analyze, name of the analysis, etc., or to override caps such as limits on file upload size or number of points:
 
 ```{r run-app1, eval=FALSE}
@@ -55,10 +57,25 @@ ejamapp(
 These custom parameters are "advanced" features for knowledgeable users, and not all the possible changes to these have been tested,
 so anyone using them should be careful to understand the details of how this work and confirm it is doing what is expected. 
 
+*For example, the radius is defined like this:* 
+
+1. if a user in RStudio launches the app with something like `ejamapp(radius_default=3.1)`, the setting `radius_default` is defined, and will override what it says in `global_defaults_shiny.R`
+
+2. the files `global_defaults_*.R` are where the settings like `radius_default` are defined and stored as appOptions.
+
+3. that option/setting is checked in the advanced tab UI, to provide the initially selected value of `input$radius_default` in a bookmarkable input control found in the advanced tab. In this case the option and input used the same exact name, "radius_default" but that is not always the case for other settings.
+
+4. in the advanced tab, `input$radius_default` can then be adjusted by a user or just left alone. It provides the initially selected value of `input$radius_now` (which is for the slider UI, but happens to be defined in the server not ui in this case).
+
+5. the radius slider bar will change the value of `input$radius_now` when a user moves the radius slider bar in the UI.
+
+6. the value of `input$radius_now` is what the app uses in calculations when the start analysis button is clicked.
+
+*A setting can be named differently in three places:*
+
 Sometimes there are two or three separate names that affect the same
 setting. You only need to know about the first one unless
 you are editing URL-encoded bookmarks or editing source code!
-But for completeness, here is how a setting can be named differently in three places:
 
 1) The global default constant that is the initial value of x,
 and is normally defined in a `global_defaults_*.R` file installed with the EJAM package, but
@@ -72,10 +89,7 @@ there is a second variable: the input$ one can adjust in that tab.
 The first of these three cannot be saved as a bookmark, but the second or third
 can be bookmarked since it is a shiny app input$ variable.
 
-
-## HOW SETTINGS GET PASSED TO THE WEB APP
-
-Steps in EJAM shiny app launch, and the use of params/ defaults/ advanced tab/ bookmarked inputs/etc.:
+*Steps in EJAM shiny app launch, and the use of params/ defaults/ advanced tab/ bookmarked inputs/etc.:*
 
 ### app.R and isPublic=T
 
@@ -90,41 +104,45 @@ and some settings depend on isPublic being T or F.
 If the app is launched directly via ejamapp() by a user in RStudio console, it skips app.R
 and a user can provide arguments as parameters in ejamapp(...). See `?ejamapp`
 
-### global_defaults_ files
+### global_defaults_*.R files
 
 Many defaults/ settings used by the web app are defined in the global_defaults_ files
-(global_defaults_package.R, global_defaults_shiny.R, global_defaults_shiny_public.R)
+(global_defaults_package.R, global_defaults_shiny.R, global_defaults_shiny_public.R).
+Some settings are needed even if the shiny app is never launched, so they are stored for the package 
+as soon as the package is attached, in a list object called `global_defaults_package` in the global environment, e.g., `global_defaults_package$report_title`. (When the app is launched, those and many other global_defaults from the files `global_defaults_*.R`, including radius_default, will be stored in the shiny app).
 Note the parameter isPublic is special because it is checked by the global_defaults_shiny_public.R file
 and some settings depend on isPublic being T or F.
 
-### ejamapp() params or global_defaults_
+### any ejamapp() parameters will override global_defaults_*.R settings
 
-`ejamapp()` calls get_global_defaults_or_user_options() which
-gets the global defaults and then overrides them with
-any user-specified options given as arguments in ejamapp().
-ejamapp() then launches the app, storing those options as app$appOptions$golem_options
+Just before launching the app, `ejamapp()` calls `get_global_defaults_or_user_options()` which
+gets the global defaults and then overrides/replaces them with
+any user-specified versions of those options given as arguments in `ejamapp()`.
+
+### app launch
+
+`ejamapp()` launches the app -- it uses a function called `golem::with_golem_options()`, 
+which defines the `app` object using `shiny::shinyApp()`, but then
+stores all the global defaults and any user-provided parameters as `app$appOptions$golem_options`, 
+just before launching the app. Those options can be retrieved in app or server later, 
+via `EJAM:::global_or_param()` which relies on `golem::get_golem_options()`.
 
 ### global env?
 
-Then app_ui() and app_server() can check for defaults/params using EJAM:::global_or_param("radius_default") e.g.
-which uses golem::get_golem_options() to check for a named option. Usually these are used as initial/default values
-for input$ variables in the app.
+Then app_ui() and app_server() can check for defaults/params using `EJAM:::global_or_param("radius_default")` 
+which uses `golem::get_golem_options()` to check for a named option stored in `app$appOptions$golem_options`.
+Usually these are used as initial/default values for input$ variables in the app.
 However, note if an expected setting is not found (ie not set by user in ejamapp() and not set in any global_defaults_ file)
-global_or_param() also looks in global env, as a last resort!! That might be a problem if ui or server looks for a
+`global_or_param()` also looks in global env, as a last resort!! That might be a problem if ui or server looks for a
 setting that we failed to provide in global_defaults files and that variable name happens to be in the global env !
 
 ### Advanced Tab
 
 Then, SOME BUT NOT ALL global_defaults_ settings are in the Advanced Tab (in app_ui)
-so that they can be modified there by someone using the app's advanced tab,
-so what ui or server ends up using could be an input$ that is adjustable in the advanced tab
-and therefore can be bookmarked (since inputs can be bookmarked unless specifically excluded from that)
-
-For example: 
-
-- in global_defaults_ or param in `ejamapp()`  default_upload_dropdown, which is the initial selected value of
-- input in advanced tab: input$default_ss_choose_method, which is the initial selected value of
-- input in server:               input$ss_choose_method
+where they typically provide the default for an input$ but that default can be overriden
+there by someone using the app's Advanced Tab,
+so what ui or server ends up using could be an input$ that is adjustable in the Advanced Tab
+and therefore can be bookmarked (since inputs can be bookmarked unless specifically excluded from that).
 
 ### web app reactives and interactive inputs
 
@@ -132,11 +150,24 @@ The shiny app uses some settings as initial values for
 parameters that can get changed by the user via sliders, radio buttons, text boxes, dropdowns, etc.
 and some selections/inputs can get changed by reactive observers, etc.
 
-### Bookmarked URL (saved input$ state)
+### Bookmarks (URL or server-based) for saved input$ state
 
 If the app is launched by a bookmark (e.g.URL-encoded bookmark),
 any inputs encoded in the URL will override the above and the app will change to
 a state where the inputs are as specified by the bookmark.
+
+Bookmarks have limitations though: 
+Notably, uploaded files can only be bookmarked
+if enableBookmarking="server" not enableBookmarking="url".
+Also, bookmarks normally just save the state
+of UI inputs, not other reactive values (unless the server code specifies otherwise by 
+using the `shiny::onBookmark()` and `shiny::onRestore()` functions to make 
+bookmarks store other information, beyond just inputs).
+Some important global defaults affect the app but not by providing
+initial values for inputs in the shiny app, so some useful information 
+including some that is controlled by global defaults or user parameters in ejamapp()
+cannot be bookmarked because it is stored in reactives
+but not as shiny app inputs. 
 
 --------------
 --------------
@@ -244,7 +275,7 @@ launching it via URL-encoded bookmark can provide it any of the input$ variables
 
 This approach cannot provide settings that are not input$ reactives, like some
 of the defaults in global_defaults_ that are not turned into inputs in the app,
-such as "aboutpage_logo" set in global_defaults_shiny.R and used in app_ui.R
+such as "app_logo_aboutpage" set in global_defaults_package.R and used in app_ui.R
 as the src parameter for img().
 
 Also note that url-encoded bookmarked inputs can launch the app
