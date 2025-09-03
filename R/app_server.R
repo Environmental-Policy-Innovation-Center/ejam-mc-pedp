@@ -2448,7 +2448,7 @@ app_server <- function(input, output, session) {
 
   observeEvent(
     lapply(
-      names(input)[grep("select_button[0-9]+", names(input))],
+      names(input)[grep("single_site_report_button[0-9]+", names(input))],
       function(name) {
         cur_button(input[[name]])
         input[[name]]
@@ -2458,7 +2458,7 @@ app_server <- function(input, output, session) {
 
         # Call ejam2report() with the sitenumber based on which site's button was clicked
         sitenumber <- as.numeric(gsub('button_','', cur_button()))
-
+cat("Clicked on site #", sitenumber, "for a 1-site report\n")
         # Get the name of the selected location
         location_name <- data_processed()$results_bysite[sitenumber, "statename"]
         selected_location_name(location_name)
@@ -2511,7 +2511,6 @@ app_server <- function(input, output, session) {
 
   output$interactive_table <- DT::renderDT(server = TRUE, expr = {
     req(data_processed())
-    create_interactive_table(data_processed = data_processed(),
                              hyperlink_header = NULL, # could change to be an input$ in advanced tab possibly # sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
                              hyperlink_text = NULL, # could change to be an input$ in advanced tab possibly   # sapply(EJAM:::global_or_param("default_reports"), function(x) x$text)
                              site_report_download_colname = "Download EJAM Report" # could change to be an input$ in advanced tab possibly
@@ -2522,6 +2521,7 @@ app_server <- function(input, output, session) {
     #   'ECHO Report'
     # )
   })
+
   #############################################################################  #
   #. ####
   #_____ALL RESULTS AS EXCEL DOWNLOAD ____ ####

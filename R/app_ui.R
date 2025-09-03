@@ -1302,6 +1302,12 @@ app_ui  <- function(request) {
                                        multiple = TRUE),
 
                  ######################################################## #
+                 ### By-site interactive table of results ####
+                 h3("By-site interactive table of results"),
+
+                 shiny::renderUI("bysite_webtable_colnames_ui"),
+
+                 ######################################################## #
                  ### Plots on webpages ####
                  h3("Plots"),
 
@@ -1334,7 +1340,7 @@ app_ui  <- function(request) {
                  h3("Spreadsheet of results"),
 
 
-                 # default_hyperlink_colnames ?
+                 # default_reports ?
 
                  checkboxInput(inputId = "ok2plot",
                                label = "OK to try to plot graphics and include in Excel download",

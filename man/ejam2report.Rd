@@ -90,8 +90,8 @@ URL of temp file or object depending on return_html,
 and has side effect of launching browser to view it depending on return_html
 }
 \description{
-Get URL for and view in browser a 2-page summary report similar to the
-EJScreen Community Report
+Get URL for and view in browser a summary report (similar to used to be called the
+EJSCREEN Community Report)
 }
 \details{
 This relies on \code{\link[=build_community_report]{build_community_report()}} as used in web app

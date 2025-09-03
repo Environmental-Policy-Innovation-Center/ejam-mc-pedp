@@ -34,8 +34,7 @@ table_xls_format(
   heatmap2_colnames = NULL,
   heatmap2_cuts = c(1.009, 2, 3),
   heatmap2_colors = c("yellow", "orange", "red"),
-  hyperlink_colnames = sapply(EJAM:::global_or_param("default_hyperlink_colnames"),
-    function(x) x$header),
+  reports = EJAM:::global_or_param("default_reports"),
   graycolnames = NULL,
   narrowcolnames = NULL,
   graycolor = "gray",
@@ -109,7 +108,8 @@ second color is for those >=2d cutpoint but <3d, etc.}
 
 \item{heatmap2_colors}{like heatmap_colors but for ratios}
 
-\item{hyperlink_colnames}{names of which to treat as URLs that should be hyperlinks}
+\item{reports}{info about which columns to treat as URLs that should be hyperlinks -
+see \link{?url_columns_bysite}}
 
 \item{graycolnames}{which columns to de-emphasize}
 

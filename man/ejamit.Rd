@@ -29,6 +29,7 @@ ejamit(
   threshnames = list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile,
     names_ej_supp_state_pctile)),
   threshgroups = list("EJ-US-or-ST", "Supp-US-or-ST"),
+  reports = EJAM:::global_or_param("default_reports"),
   updateProgress = NULL,
   updateProgress_getblocks = NULL,
   progress_all = NULL,
@@ -112,7 +113,11 @@ at each site. (see default)}
 
 \item{threshgroups}{list of text names of the groups (see default)}
 
-\item{updateProgress}{progress bar function passed to \code{\link[=doaggregate]{doaggregate()}} in shiny app}
+\item{reports}{optional list of lists specifying which report types to include --
+see the file "global_defaults_package.R" or source code for this function for how this is defined.}
+
+\item{updateProgress}{CURRENTLY UNUSED - was a progress bar function passed to \code{\link[=doaggregate]{doaggregate()}} in shiny app,
+but not actually used in ejamit().}
 
 \item{updateProgress_getblocks}{progress bar function passed to \code{\link[=getblocksnearby]{getblocksnearby()}} in shiny app}
 
@@ -127,7 +132,7 @@ which is relevant only if a user saved the output of this function.}
 passed to \code{\link[=doaggregate]{doaggregate()}} also. app server sets this to TRUE when calling \code{\link[=doaggregate]{doaggregate()}} but
 \code{\link[=ejamit]{ejamit()}} default is to set this to FALSE when calling \code{\link[=doaggregate]{doaggregate()}}.}
 
-\item{called_by_ejamit}{Set to TRUE by \code{\link[=ejamit]{ejamit()}} to suppress some outputs even if ejamit(silentinteractive=F)}
+\item{called_by_ejamit}{passed to doaggregate(). Set to TRUE by \code{\link[=ejamit]{ejamit()}} to suppress some outputs even if ejamit(silentinteractive=F)}
 
 \item{testing}{used while testing this function, passed to \code{\link[=doaggregate]{doaggregate()}}}
 

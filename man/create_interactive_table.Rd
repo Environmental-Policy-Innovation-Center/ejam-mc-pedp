@@ -2,25 +2,29 @@
 % Please edit documentation in R/create_interactive_table.R
 \name{create_interactive_table}
 \alias{create_interactive_table}
-\title{unused now? create_interactive_table - function that creates interactive html version of site by site table in app}
+\title{creates interactive html version of site by site table in app}
 \usage{
 create_interactive_table(
-  data_processed,
-  hyperlink_header = NULL,
-  hyperlink_text = NULL,
-  site_report_download_colname = "Download EJAM Report"
+  out,
+  reports = EJAM:::global_or_param("default_reports"),
+  site_report_download_colname = "Download EJAM Report",
+  columns_used = NULL
 )
 }
 \arguments{
-\item{data_processed}{processed data from app_server}
+\item{out}{list of tables like data_processed in app_server, similar to output of ejamit()}
 
-\item{hyperlink_header}{don't change - links to reports}
+\item{reports}{ignored for now - info about which URLs/links/reports columns to include among those already in out}
 
-\item{hyperlink_text}{don't change - text labels of links to reports}
+\item{site_report_download_colname}{header for column to create with buttons to download 1-site reports in shiny app}
 
-\item{site_report_download_colname}{header for column with buttons to download 1-site reports}
+\item{columns_used}{if specified in server based on defaults or inputs, these are a subset of
+colnames from ejamit()$results_bysite  to show in site-by-site interactive table}
 }
 \description{
 Builds site by site table after an analysis in EJAM app. Pulls in uploaded and analyzed data to create table
+}
+\seealso{
+\code{\link[=ejam2tableviewer]{ejam2tableviewer()}}
 }
 \keyword{internal}

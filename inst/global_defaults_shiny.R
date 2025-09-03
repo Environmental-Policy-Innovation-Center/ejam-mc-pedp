@@ -359,6 +359,22 @@ global_defaults_shiny <- list(
   ## (download as excel vs csv, for ejscreenapi module)
   # asExcel <- TRUE # WHETHER TO DOWNLOAD RESULTS AS EXCEL OR CSV
 
+  ## ------------------------ by-site interactive web table ####
+
+  default_bysite_webtable_colnames = c('ejam_uniq_id',
+                                       # site_report_download_colname will go here
+                                       sapply(EJAM:::global_or_param("default_reports"), function(x) x$header), # vector of colnames of reports
+                                       'lon', 'lat', "statename", 'invalid_msg',
+                                       'pop',
+                                       names_d_state_pctile,
+                                       names_d_subgroups_state_pctile,
+                                       names_e_state_pctile,
+                                       names_ej_state_pctile,
+
+                                       # names_d, names_d_subgroups, names_e,  # basic indicators but not percentiles, not ratios, not extra indicators, etc. !
+
+                                       "blockcount_near_site"
+  ),
 
   ## ------------------------ Excel formatting options ####
 
@@ -392,7 +408,7 @@ global_defaults_shiny <- list(
   # heatmap2_colnames            NULL            ***
   # heatmap2_cuts                expression      ***
   # heatmap2_colors              expression      ***
-  # hyperlink_colnames           expression   ***
+  # reports # not hyperlink_colnames           expression   ***
   # graycolnames                 NULL
   # narrowcolnames               NULL
   # graycolor                    "gray"
@@ -447,7 +463,7 @@ global_defaults_shiny <- list(
 
 )
 ######################################################################################################## #
-
+# . ####
 # R and Shiny Options
 ## ------------------------ autoloading of .R files ####
 options(shiny.autoload.r = FALSE)

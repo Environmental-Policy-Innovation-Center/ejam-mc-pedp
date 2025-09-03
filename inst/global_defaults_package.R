@@ -98,7 +98,7 @@ ejamapi_is_down = FALSE
 
 global_defaults_package$default_reports =  list(
 
-    list(header = "EJAM Report",     text = "Report",   FUN = url_ejamapi)      # EJAM summary report (HTML via API)
+    list(header = "EJAM Report",     text = "EJAM Site Report",   FUN = url_ejamapi)      # EJAM summary report (HTML via API)
 
     , list(header = "EJSCREEN Map",  text =  "EJSCREEN", FUN = url_ejscreenmap) # EJSCREEN site, zoomed to the location
 
@@ -108,7 +108,7 @@ global_defaults_package$default_reports =  list(
     # , list(header = "County Health Report",       text = "County",       FUN = url_countyhealth)  # if fips provided
     # , list(header = "State Health Report",       text = "State",       FUN = url_statehealth)  # if fips provided
 )
-
+# should not be needed, but just in case while shifting to this method:
 global_defaults_package$default_hyperlink_colnames <- sapply(global_defaults_package$default_reports, function(x) x$header)
 
 ############################### #

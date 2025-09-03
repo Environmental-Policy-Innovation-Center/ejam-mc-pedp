@@ -19,7 +19,7 @@ ejam2excel(
   buffer_desc = NULL,
   radius_or_buffer_description =
     "Miles radius of circular buffer (or distance used if buffering around polygons)",
-  hyperlink_colnames = EJAM:::global_or_param("default_hyperlink_colnames"),
+  reports = EJAM:::global_or_param("default_reports"),
   site_method = "",
   mapadd = FALSE,
   report_map = NULL,
@@ -58,7 +58,8 @@ prompts RStudio user interactively asking where to save the downloaded file}
 
 \item{radius_or_buffer_description}{optional text phrase describing places analyzed}
 
-\item{hyperlink_colnames}{optional names of columns with URLs}
+\item{reports}{info about which columns to treat as URLs that should be hyperlinks -
+see \link{?url_columns_bysite}}
 
 \item{site_method}{site selection method, such as SHP, latlon, FIPS, NAICS, FRS, EPA_PROGRAM, SIC, MACT
 optional site method parameter used to create a more specific title with create_filename.
