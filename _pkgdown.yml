@@ -533,7 +533,6 @@ reference:
   - x_anyother
   - url_linkify
   - enurl
-  - url_getacs_epaquery_chunked
   - url_to_any_rest_services_ejscreen_ejquery
   - url_get_eparest_chunked_by_id
   - url_get_via_url

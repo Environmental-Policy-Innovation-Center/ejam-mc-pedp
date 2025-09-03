@@ -181,7 +181,7 @@ if (0 == 1) {  # collapsable list
   ####################################### #
   {  # overall
     documentOpen('./data-raw/datacreate_0_UPDATE_ALL_DATASETS.R')
-    documentOpen('./data-raw/datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R')
+    # documentOpen('./data-raw/datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R')
 
     # with annual census fips codes or boundaries changes (when EJScreen incorporates those)
     #
@@ -914,14 +914,17 @@ loadall()
 
 # DOCUMENTATION WEBSITE UPDATE ####
 
-cat("\n\n You may want to use 'datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R' now \n\n")
+cat("\n\n You may want to use EJAM:::pkgdown_update() from EJAM/R/utils_pkgdown_update.R
+    formerly stored in 'datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R'   \n\n")
 #  rstudioapi::documentOpen("./data-raw/datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R")
+#  rstudioapi::documentOpen("./R/utils_pkgdown_update.R")
 
 ## > loadall ####
 
-source("datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R")
+## note this is an internal not exported function:
 
-pkgdown_update(
+# EJAM:::
+ pkgdown_update(
   doask              = TRUE,
   dotests            = FALSE,
   testinteractively  = FALSE, ## maybe we want to do this interactively even if ask=F ?

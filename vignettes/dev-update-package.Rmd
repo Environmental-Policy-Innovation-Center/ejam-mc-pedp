@@ -45,7 +45,7 @@ If the package were renamed -- or especially if a new name were used for the rep
 
 - The name of the github repository storing the package code should be recorded as part of the URL parameter in the DESCRIPTION file in the root folder of the source package.
 
-- The name of the repo (or other domain) where webpages of package documentation are published also should be recorded as part of the URL parameter in the DESCRIPTION file in the root folder of the source package. The website providing documentation of the R package is created via code in `EJAM/data-raw/datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R`, relying on the R package `{pkgdown}` and hosted on github pages (or other domain).
+- The name of the repo (or other domain) where webpages of package documentation are published also should be recorded as part of the URL parameter in the DESCRIPTION file in the root folder of the source package. The website providing documentation of the R package is created via `pkgdown_update()` as noted in `EJAM/data-raw/datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R`, relying on the R package `{pkgdown}` and hosted on github pages (or other domain).
 
 - The name of the repo where datasets are stored should be recorded as the ejam_data_repo parameter in the DESCRIPTION file in the root folder of the source package.
 
