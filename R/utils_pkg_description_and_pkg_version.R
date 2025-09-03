@@ -20,7 +20,7 @@
 # EJAM:::description_file  object is created by metadata_mapping.R when pkg is attached.
 # That is the same as pkg_description() created below, unless you need the non-installed, local source version the function below can provide.
 
-# EJAM:::description_file$get("ACSVersion")
+# EJAM:::description_file$get("VersionACS")
 
 # ###################################################### #
 
@@ -71,7 +71,7 @@
 #
 #   ## simplest way:
 #   # EJAM:::description_file$get("Version")
-#   # EJAM:::description_file$get("ACSVersion")
+#   # EJAM:::description_file$get("VersionACS")
 #
 #   ##   various ways to check the version number of the package (note installed and source may differ during development)
 #   ##

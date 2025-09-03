@@ -158,11 +158,11 @@ metadata_check <- function(packages = EJAM::ejampackages,
   # > dput(default_metadata)
   # list(
   #   ejam_package_version = c(Version = "2.32.0"),
-  #   ejscreen_version     = c(EJScreenVersion = "2.32"),
-  #   ejscreen_releasedate = c(EJScreenReleaseDate = "2024-08-12"),
-  #   acs_releasedate      = c(ACSReleaseDate = "2023-12-07"),
-  #   acs_version          = c(ACSVersion = "2018-2022"),
-  #   census_version       = c(CensusVersion = "2020")
+  #   ejscreen_version     = c(VersionEJSCREEN = "2.32"),
+  #   ejscreen_releasedate = c(ReleaseDateEJSCREEN = "2024-08-12"),
+  #   acs_releasedate      = c(ReleaseDateACS = "2023-12-07"),
+  #   acs_version          = c(VersionACS = "2018-2022"),
+  #   census_version       = c(VersionCensus = "2020")
   # )
 
   # utility to check if year attribute is set on each data file

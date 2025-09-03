@@ -8,9 +8,9 @@
 #'   For Summary Indexes, see [bgej]
 #'
 #' @details
-#'   - Version `r as.vector(metadata_mapping$blockgroupstats[['ejam_package_version']])` of EJAM
+#'   - Version `r as.vector(EJAM:::global_or_param("app_version"))` of EJAM
 #'   uses EPA environmental indicators and population indicators derived from
-#'   ACS data from `r as.vector(metadata_mapping$blockgroupstats[['acs_version']])`.
+#'   ACS data from `r as.vector(desc::desc_get("VersionACS"))`.
 #'
 #'   Each year this should be re-created as for the latest version.
 #'   See `attributes(blockgroupstats)`

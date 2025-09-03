@@ -123,12 +123,12 @@ if (is.na(params$sitecount)) {params$sitecount <- NROW(params$results_bysite)}
 if (is.na(params$total_pop)) {params$total_pop <- params$results_overall$pop}
 # map: NA
 if (is.na(params$acs_version)) {
-  params$acs_version <- EJAM:::description_file$get("ACSVersion")
+  params$acs_version <- EJAM:::description_file$get("VersionACS")
 }
 if (is.na(params$ejscreen_version)) {
-  # acs_version_global      <- EJAM:::description_file$get("ACSVersion")
-  # ejscreen_version_global <- EJAM:::description_file$get("EJScreenVersion")
-  version <- EJAM:::description_file$get("EJScreenVersion")
+  # acs_version_global      <- EJAM:::description_file$get("VersionACS")
+  # ejscreen_version_global <- EJAM:::description_file$get("VersionEJSCREEN")
+  version <- EJAM:::description_file$get("VersionEJSCREEN")
   params$ejscreen_version <- substr(version, start = 1, stop = gregexpr('\\.',version)[[1]][2] - 1)
   rm(version)
 }

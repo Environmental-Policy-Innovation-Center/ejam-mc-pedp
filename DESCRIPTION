@@ -18,11 +18,11 @@ Authors@R: person("Mark A.", "Corrales", , "ejam@ejanalysis.com", role = c("cre"
 Author: Mark A. Corrales <ejam@ejanalysis.com>
 Maintainer: Mark A. Corrales <ejam@ejanalysis.com>
 ejam_data_repo: ejanalysis/ejamdata
-EJScreenVersion: 2.32
-EJScreenReleaseDate: 2024-08-12
-ACSReleaseDate: 2023-12-07
-ACSVersion: 2018-2022
-CensusVersion: 2020
+VersionEJSCREEN: 2.32
+ReleaseDateEJSCREEN: 2024-08-12
+VersionACS: 2018-2022
+ReleaseDateACS: 2023-12-07
+VersionCensus: 2020
 Depends: 
     R (>= 4.1)
 Imports:
