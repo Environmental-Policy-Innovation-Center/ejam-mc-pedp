@@ -2520,6 +2520,35 @@ cat("Clicked on site #", sitenumber, "for a 1-site report\n")
     #
     #   'ECHO Report'
     # )
+    create_interactive_table(out = data_processed(),
+
+                             # reports param here controls which URL/report columns to show in this table
+                             #  (among those already created in data_processed() via ejamit() etc.)
+                             #  could change to be an input$ in advanced tab possibly:
+                             reports = EJAM:::global_or_param("default_reports"),
+                             site_report_download_colname = "Download EJAM Report", # for DOWNLOAD BUTTON in each row, to get 1-site reports. could change to be an input$ in advanced tab possibly
+
+                             columns_used = input$bysite_webtable_colnames
+                             ## if NULL, uses all available from data_processed()
+    )
+  })
+  #############################################################################  #
+  ### UI for picking columns to show in table of sites  ####
+
+  output$bysite_webtable_colnames_ui <- renderUI({
+
+    choicelist =  list(names(testoutput_ejamit_10pts_1miles$results_overall))
+    names(choicelist)  <- fixcolnames(rnames, 'r', 'short')
+
+    shiny::selectInput("bysite_webtable_colnames",
+                       label = "Columns to show in interactive table",
+                       multiple = TRUE,
+                       ### shows ALL available if this input is  NULL
+                       # choices = names(testoutput_ejamit_10pts_1miles$results_overall), # simpler
+                       choices = choicelist
+                       # comment out selected to start with none picked.
+                       , selected <- EJAM:::global_or_param("default_bysite_webtable_colnames")
+    )
   })
 
   #############################################################################  #
