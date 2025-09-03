@@ -21,7 +21,7 @@ app_server <- function(input, output, session) {
 
   # Key reactives include these:
   ##  data_uploaded   reactive holds selected latlon points or shapefiles. It is defined later.
-  ##  data_processed  reactive holds results of analysis, like output of doaggregate(getblocksnearby(points))
+  ##  data_processed  reactive holds results of analysis, like output of doaggregate(getblocksnearby(points)), or a subset of output of ejamit()
   ##  data_summarized reactive holds results of batch.summarize()
 
   # SETUP: ####
@@ -1766,6 +1766,7 @@ app_server <- function(input, output, session) {
     showNotification('Processing sites now!', type = 'message', duration = 1)
 
     ## progress bar setup overall for 3 operations  (getblocksnearby, doaggregate, batch.summarize)
+    ## and done here once for all cases: fips, shp, and latlon sitetype
     progress_all <- shiny::Progress$new(min = 0, max = 1)
     progress_all$set(value = 0, message = 'Step 1 of 3', detail = 'Getting nearby census blocks')
 
@@ -1774,34 +1775,44 @@ app_server <- function(input, output, session) {
     if (submitted_upload_method() %in% c('FIPS', 'FIPS_PLACE')) {  # if FIPS, do everything in 1 step right here.
 
       out <- ejamit(fips = data_uploaded(),              # unlike for SHP or latlon cases, this could include invalid FIPS!
+                    updateProgress_getblocks = NULL, # differs in shp vs latlon cases, unused in fips case.
+                    in_shiny = TRUE, # used only in fips case, passed to getblocksnearby_from_fips()
+
+                    download_city_fips_bounds = EJAM:::global_or_param("default_download_city_fips_bounds"),
+                    download_noncity_fips_bounds = EJAM:::global_or_param("default_download_noncity_fips_bounds"),
+
                     radius = 999, # because FIPS analysis
+
                     maxradius = input$maxradius,
                     avoidorphans = input$avoidorphans,
-                    quadtree = localtree,
+                    # quadtree = localtree,
+
                     # countcols      = NULL,
                     # wtdmeancols    = NULL,
                     # calculatedcols = NULL,
                     # calctype_maxbg = NULL,
                     # calctype_minbg = NULL,
-                    subgroups_type = input$subgroups_type,
-                    include_ejindexes   = (input$include_ejindexes == "TRUE" || input$include_ejindexes == TRUE), # it was character not logical because of how input UI done?
-                    calculate_ratios = input$calculate_ratios,
-                    extra_demog = input$extra_demog,
-                    need_proximityscore = FALSE, #input$need_proximityscore, # not relevant for FIPS
+
+                    subgroups_type      = input$subgroups_type,
+                    extra_demog         = TRUE == as.character(input$extra_demog),
+                    include_ejindexes   = TRUE == as.character(input$include_ejindexes),
+                    calculate_ratios    = TRUE == as.character(input$calculate_ratios),
+                    need_proximityscore = TRUE == as.character(input$need_proximityscore), # not relevant for FIPS
                     # infer_sitepoints = FALSE,
                     # need_blockwt = TRUE,
-                    # updateProgress = ??? , # not used here - for noncity fips at least, it is very fast to find blocks
-                    in_shiny = TRUE, # not sure this is needed or works here
-                    progress_all = progress_all,
-                    # quiet = TRUE,
-                    silentinteractive = TRUE,
-                    # called_by_ejamit = TRUE, # not sure this is needed or works here
-                    testing = input$testing,
-                    download_city_fips_bounds = EJAM:::global_or_param("default_download_city_fips_bounds"),
-                    download_noncity_fips_bounds = EJAM:::global_or_param("default_download_noncity_fips_bounds"),
+
                     thresholds   = list(input$an_thresh_comp1, input$an_thresh_comp2), # thresholds = list(90, 90), # or 80,80
                     threshnames  = list(input$an_threshnames1, input$an_threshnames2), # list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
-                    threshgroups = list(sanitized_an_threshgroup1(), sanitized_an_threshgroup2()) # list("EJ-US-or-ST", "Supp-US-or-ST")
+                    threshgroups = list(sanitized_an_threshgroup1(), sanitized_an_threshgroup2()), # list("EJ-US-or-ST", "Supp-US-or-ST")
+
+                    # "reports" param here controls which URL/report columns to create.
+                    # and could change to be an input$ in advanced tab possibly
+                    reports = EJAM:::global_or_param("default_reports"),
+
+                    progress_all = progress_all,
+                    silentinteractive = TRUE,
+                    quiet = TRUE,
+                    testing = input$testing
       )
       # sitetype is "fips" and
       # now includes area_sqmi columns as output of ejamit(), for fips case, but if download_fips_bounds_to_calc_areas=F, it is NA values
@@ -1822,7 +1833,6 @@ app_server <- function(input, output, session) {
       if (submitted_upload_method() == "SHP") {
 
         rad_buff <- sanitized_radius_now()
-
         if (!is.na(rad_buff) && rad_buff > 0) {
           # if (!silentinteractive) {
           cat('Adding buffer around each polygon.\n')
@@ -1834,6 +1844,7 @@ app_server <- function(input, output, session) {
         } else {
           shp <- data_uploaded()
         }
+
         ## progress bar to show getblocksnearby status
         progress_getblocks_shp <- shiny::Progress$new(min = 0, max = 1)
         progress_getblocks_shp$set(value = 0, message = '0% done')
@@ -1847,35 +1858,41 @@ app_server <- function(input, output, session) {
         }
 
         out <- ejamit(shapefile = shp,
+                      updateProgress_getblocks = updateProgress_getblocks_shp, # differs in shp vs latlon cases, unused in fips case.
+                      in_shiny = TRUE, # used only in fips case, passed to getblocksnearby_from_fips()
+
                       radius = sanitized_radius_now(),
+
                       maxradius = input$maxradius,
                       avoidorphans = input$avoidorphans,
-                      quadtree = localtree,
+                      # quadtree = localtree,
+
                       # countcols      = NULL,
                       # wtdmeancols    = NULL,
                       # calculatedcols = NULL,
                       # calctype_maxbg = NULL,
                       # calctype_minbg = NULL,
-                      subgroups_type = input$subgroups_type,
-                      include_ejindexes   = (input$include_ejindexes == "TRUE" || input$include_ejindexes == TRUE), # it was character not logical because of how input UI done?
-                      calculate_ratios = input$calculate_ratios,
-                      extra_demog = input$extra_demog,
-                      need_proximityscore = FALSE, #input$need_proximityscore, # not relevant for FIPS
+
+                      subgroups_type      = input$subgroups_type,
+                      extra_demog         = TRUE == as.character(input$extra_demog),
+                      include_ejindexes   = TRUE == as.character(input$include_ejindexes),
+                      calculate_ratios    = TRUE == as.character(input$calculate_ratios),
+                      need_proximityscore = TRUE == as.character(input$need_proximityscore), # not relevant for FIPS
                       # infer_sitepoints = FALSE,
                       # need_blockwt = TRUE,
-                      # updateProgress = ??? , # not sure this is needed or works here
-                      in_shiny = TRUE, # not sure this is needed or works here
-                      # quiet = TRUE,
-                      silentinteractive = TRUE,
-                      # called_by_ejamit = TRUE, # not sure this is needed or works here
-                      progress_all = progress_all,
-                      testing = input$testing,
-                      # download_city_fips_bounds = EJAM:::global_or_param("default_download_city_fips_bounds"), # not relevant in shapefile case
-                      # download_noncity_fips_bounds = EJAM:::global_or_param("default_download_noncity_fips_bounds"), # not relevant in shapefile case
+
                       thresholds   = list(input$an_thresh_comp1, input$an_thresh_comp2), # thresholds = list(90, 90), # or 80,80
                       threshnames  = list(input$an_threshnames1, input$an_threshnames2), # list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
                       threshgroups = list(sanitized_an_threshgroup1(), sanitized_an_threshgroup2()), # list("EJ-US-or-ST", "Supp-US-or-ST")
-                      updateProgress_getblocks = updateProgress_getblocks_shp
+
+                      # "reports" param here controls which URL/report columns to create.
+                      # and could change to be an input$ in advanced tab possibly
+                      reports = EJAM:::global_or_param("default_reports"),
+
+                      progress_all = progress_all,
+                      silentinteractive = TRUE,
+                      quiet = TRUE,
+                      testing = input$testing
         )
 
         ## close getblocks progress bar
@@ -1887,7 +1904,7 @@ app_server <- function(input, output, session) {
 
       if (!(submitted_upload_method() %in% c('SHP', 'FIPS', 'FIPS_PLACE'))) {  # if LATITUDE AND LONGITUDE (POINTS), find blocks nearby
 
-        ## progress bar to show getblocksnearby status
+        ## progress bar to show getblocksnearby (now all of ejamit actually) status
         progress_getblocks <- shiny::Progress$new(min = 0, max = 1)
         progress_getblocks$set(value = 0, message = '0% done')
         updateProgress_getblocks <- function(value = NULL, message_detail = NULL, message_main = '0% done') {
@@ -1899,30 +1916,43 @@ app_server <- function(input, output, session) {
           progress_getblocks$set(value = value, message = message_main, detail = message_detail)
         }
 
-        out <-  ejamit(sitepoints = data_uploaded(),#d_upload,
+        out <-  ejamit(sitepoints = data_uploaded(),
+                       updateProgress_getblocks = updateProgress_getblocks, # differs in shp vs latlon cases, unused in fips case.
+                       in_shiny = TRUE, # used only in fips case, passed to getblocksnearby_from_fips()
+
                        radius = sanitized_radius_now(),
-                       #quadtree = localtree,
+
+                       maxradius = input$maxradius,
+                       avoidorphans = input$avoidorphans,
+                       # quadtree = localtree,
+
                        # countcols      = NULL,
                        # wtdmeancols    = NULL,
                        # calculatedcols = NULL,
                        # calctype_maxbg = NULL,
                        # calctype_minbg = NULL,
-                       subgroups_type = input$subgroups_type,
-                       include_ejindexes = (input$include_ejindexes == "TRUE"),
-                       calculate_ratios = input$calculate_ratios,
-                       extra_demog = input$extra_demog,
-                       need_proximityscore = input$need_proximityscore,
-                       infer_sitepoints = FALSE,
-                       called_by_ejamit = TRUE,
-                       progress_all = progress_all,
-                       avoidorphans = input$avoidorphans,
-                       testing = input$testing,
-                       maxradius = input$maxradius,
+
+                       subgroups_type      = input$subgroups_type,
+                       extra_demog         = TRUE == as.character(input$extra_demog),
+                       include_ejindexes   = TRUE == as.character(input$include_ejindexes),
+                       calculate_ratios    = TRUE == as.character(input$calculate_ratios),
+                       need_proximityscore = TRUE == as.character(input$need_proximityscore), # not relevant for FIPS
+                       # infer_sitepoints = FALSE,
+                       # need_blockwt = TRUE,
+
                        thresholds   = list(input$an_thresh_comp1, input$an_thresh_comp2), # thresholds = list(90, 90), # or 80,80
                        threshnames  = list(input$an_threshnames1, input$an_threshnames2), # list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
                        threshgroups = list(sanitized_an_threshgroup1(), sanitized_an_threshgroup2()), # list("EJ-US-or-ST", "Supp-US-or-ST")
+
+                       # "reports" param here controls which URL/report columns to create.
+                       # and could change to be an input$ in advanced tab possibly
+                       reports = EJAM:::global_or_param("default_reports"),
+
+                       progress_all = progress_all,
+                       silentinteractive = TRUE,
                        quiet = TRUE,
-                       updateProgress_getblocks = updateProgress_getblocks)
+                       testing = input$testing
+        )
 
         ## close getblocks progress bar
         progress_getblocks$close()
@@ -2341,7 +2371,7 @@ app_server <- function(input, output, session) {
 
                                         filename = NULL,
                                         report_title = EJAM:::global_or_param("report_title"),
-                                        logo_path    = NULL, # EJAM:::global_or_param("report_logo"),
+                                        logo_path    =   EJAM:::global_or_param("report_logo"),
                                         logo_html = NULL # NOT app_logo_html... gets defined downstream
     )
 
@@ -2511,15 +2541,6 @@ cat("Clicked on site #", sitenumber, "for a 1-site report\n")
 
   output$interactive_table <- DT::renderDT(server = TRUE, expr = {
     req(data_processed())
-                             hyperlink_header = NULL, # could change to be an input$ in advanced tab possibly # sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
-                             hyperlink_text = NULL, # could change to be an input$ in advanced tab possibly   # sapply(EJAM:::global_or_param("default_reports"), function(x) x$text)
-                             site_report_download_colname = "Download EJAM Report" # could change to be an input$ in advanced tab possibly
-                             )
-    # c("EJScreen Report",
-    #   "EJScreen Map" ,
-    #
-    #   'ECHO Report'
-    # )
     create_interactive_table(out = data_processed(),
 
                              # reports param here controls which URL/report columns to show in this table
@@ -2651,8 +2672,9 @@ cat("Clicked on site #", sitenumber, "for a 1-site report\n")
         in.analysis_title = sanitized_analysis_title(),
         save_now = FALSE,
         interactive_console = FALSE,
-        hyperlink_colnames = EJAM:::global_or_param("default_hyperlink_colnames"),
         in.testing = input$testing,
+
+        reports = EJAM:::global_or_param("default_reports"), # could use here just to limit which report URL columns get saved - if not already created in data_processed() this will not create them!
 
         mapadd = FALSE, # redundant if getting report as a tab since report has map snapshot
         report_map = NULL,
