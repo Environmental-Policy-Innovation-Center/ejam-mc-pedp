@@ -12,18 +12,18 @@
 ### Summary Report and Tables of Sites: Header, Footer, and Links to 1-Site Reports
 
 -   Report footer now shows exact version number ("2.32.6" not just "2.32") (and same with web app home page header). Also, it was missing in some reports, now fixed.
--   URL hyperlinks to various types of 1-site reports for each site are being restored (but these are in progress/ may need patches).
-    -   REPORT TYPES: So far, links to 2-3 report types are provided by default:
-        -   summary report on 1 site, as a live webpage (shiny-app-generated) 
-        -   summary report on 1 site, as a downloaded html file 
-        -   link to the EJSCREEN app, zoomed to the 1 site's location
-        -   Others reports are not fully tested but are available via custom settings -- see the table below for details.
+-   Tables and Maps now have URL hyperlinks to various types of 1-site reports for each site - These were gone but now are restored and expanded (but these are in progress/ may need patches).
     -   TABLES OF SITES - these will have links to the 1-site reports:
         -   each row of webpage table of detailed results by site
         -   each row of excel table of results by site
     -   MAP POPUPS - these will have links to the 1-site reports:
         -   map popups in summary report webpage
         -   map popups in downloaded summary report html file
+    -   REPORT TYPES: So far, links to 2-3 report types are provided by default:
+        -   summary report on 1 site, as a *live* webpage (shiny-app-generated) 
+        -   summary report on 1 site, as a *downloaded* html file (API-generated)
+        -   link to the EJSCREEN app, zoomed to the 1 site's location
+        -   Others reports are available via custom settings -- see the table below for details.
 
 ### Website at [ejanalysis.org](https://www.ejanalysis.org) or [ejanalysis.org/ejam](https://www.ejanalysis.org/ejam)
 
@@ -78,7 +78,7 @@
 
 -   Weblinks / URLs for single-site reports have been missing since 1/2025, but now are being restored to the tables of sites (results_bysite table from `ejamit()`, `ejam2tableviewer()`, etc.) and map popups (in various map functions like `ejam2map()` etc.)
 
--   Several new reports can be included as extra columns of links in any site-by-site table or map popup (not fully tested)  -- These can be turned on via the `default_reports` setting found in `global_defaults_package.R`:
+-   Several new reports can be made available via extra columns of links in any site-by-site table or map popup (not fully tested)  -- The various report columns can be turned on/off via the `default_reports` setting found in `global_defaults_package.R` Then `url_columns_bysite()` can use these to provide URLs for reports or webpages:
 
 | header (column title) | text (of link) | function name | parameters |
 |---------------|--------------|-----------------|----------------------|
@@ -94,7 +94,7 @@
 
 -   New function `url_columns_bysite()` is the new overall utility that compiles columns of links, based on reports/etc. specified in `global_defaults_package.R` via new setting `default_reports`. This setting lets you provide a list of URL column names and specify what function would be used to generate each URL column, such as url_ejamapi() or url_ejscreenmap() etc.
 
--   `url_ejscreenmap()` and other functions that provide URLs for reports or webpages were revised, cleaned up, and moved among .R files.
+-   `url_ejscreenmap()` and other functions in table above were revised, cleaned up, and moved among .R files.
 
 -   New function `url_ejamapi()` provides URLs to use with EJAM-API to get html summary report on 1 site at a time. Inputs to this function are like inputs to `ejamit()` but so far mostly limited to radius, sitepoints, fips, shapefile. This will enable the map popups and excel tables of sites to include links to single-site reports, for example. It is limited to blockgroup fips only, right now, and only single-site reports right now.
 
