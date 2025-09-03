@@ -62,12 +62,6 @@ currently being used by this package (which might not be the very latest from EP
 If set FALSE, faster since avoids checking but some links might not work and not warn about bad regid values.}
 
 \item{...}{passed to each function, and can be any parameter that any of them uses}
-
-\item{hyperlink_colnames}{vector of colnames of URLs to create for results_bysite.
-Options: "EJScreen Report", "EJScreen Map",
-"ECHO Report", "FRS Report", "Enviromapper Report", "Countyhealth Report"}
-
-\item{hyperlink_text}{vector of labels to use in the links, one per report column}
 }
 \value{
 list of data.frames to append to the list of data.frames created by
