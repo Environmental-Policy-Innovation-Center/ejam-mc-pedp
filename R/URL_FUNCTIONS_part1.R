@@ -155,6 +155,8 @@ unlinkify = function(x) {
 url_xl_style <- function(urls, urltext = urls) {
 
   x <- urls
+  x <- unlinkify(x) # if it was an HTML tag, convert back to just the URL
+  if (length(urltext) == 1) {urltext <- rep(urltext, length(urls))}
   names(x) <- urltext
   class(x) <- 'hyperlink'
   return(x)

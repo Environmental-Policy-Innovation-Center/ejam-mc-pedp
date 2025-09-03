@@ -21,6 +21,8 @@ url_ejamapi(
 \arguments{
 \item{sitepoints}{see \code{\link[=ejamit]{ejamit()}}}
 
+\item{lat, lon}{can be provided as vectors of coordinates instead of providing sitepoints table}
+
 \item{radius}{see \code{\link[=ejamit]{ejamit()}}, default is 0 if fips or shapefile specified}
 
 \item{fips}{see \code{\link[=ejamit]{ejamit()}} but this initial version only works for a blockgroup FIPS!}

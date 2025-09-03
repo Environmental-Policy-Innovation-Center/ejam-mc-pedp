@@ -13,6 +13,7 @@
 #' - Will try to use the same input parameters as [ejamit()] does.
 #'
 #' @param sitepoints see [ejamit()]
+#' @param lat,lon can be provided as vectors of coordinates instead of providing sitepoints table
 #' @param radius  see [ejamit()], default is 0 if fips or shapefile specified
 #'
 #' @param fips  see [ejamit()] but this initial version only works for a blockgroup FIPS!
