@@ -104,7 +104,8 @@ table_xls_from_ejam <- function(ejamitout,
                                 radius_or_buffer_description = NULL, # 'Miles radius of circular buffer (or distance used if buffering around polygons)',
                                 # radius_or_buffer_description =   "Distance from each site (radius of each circular buffer around a point)",
 
-                                hyperlink_colnames = EJAM:::global_or_param("default_hyperlink_colnames"),
+                                # hyperlink_colnames = EJAM:::global_or_param("default_hyperlink_colnames"),
+                                reports = EJAM:::global_or_param("default_reports"),
                                 # could change to be an input$ in advanced tab possibly # "ECHO Report",#c("EJScreen Report", "EJScreen Map", "ECHO Report"),
 
                                 site_method = "",
@@ -143,7 +144,7 @@ table_xls_from_ejam <- function(ejamitout,
   #  when shp param is redundant (sitetype == "shp" AND want report or map BUT ALREADY PROVIDED report/map) but shp provided,
   ## when shp param is nonessential but useful (sitetype == "fips" AND want report or map) to avoid a redundant download of FIPS bounds
 #
-  ### TO BE CONTINUED:
+  ### TO BE CONTINUED?
   #
   # if (!is.null(shp) && !community_reportadd && !mapadd) {
   #   message("ignoring shp since mapadd and community_reportadd are both FALSE")
@@ -178,7 +179,8 @@ table_xls_from_ejam <- function(ejamitout,
 
 ### may need to pass more params here to build report just like server would have?
 ### ***
-
+   # but the excel version of the summary report is just a snapshot image without working map popups,
+  # so we do not have to pass a "reports" parameter, for example that normally would build links to reports.
 
 
       )
@@ -211,7 +213,7 @@ table_xls_from_ejam <- function(ejamitout,
     pathname <- fname
   }
 
-  # table_xls_format ####
+  # uses table_xls_format  ####
 
   # also see the defaults in ejamit() and in table_xls_format()
 
@@ -235,7 +237,9 @@ table_xls_from_ejam <- function(ejamitout,
     custom_tab = ejamitout$results_summarized$cols,
     custom_tab_name = "thresholds",
 
-    hyperlink_colnames = hyperlink_colnames,  # need to ensure these get formatted right to work as links in Excel
+    # hyperlink_colnames = hyperlink_colnames,  # need to ensure these get formatted right to work as links in Excel
+     reports = reports,
+
     # heatmap_colnames=names(table_as_displayed)[pctile_colnums], # can use defaults
     # heatmap_cuts=c(80, 90, 95), # can use defaults
     # heatmap_colors=c('yellow', 'orange', 'red') # can use defaults

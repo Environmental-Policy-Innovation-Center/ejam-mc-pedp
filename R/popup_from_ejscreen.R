@@ -44,8 +44,8 @@ popup_from_ejscreen <- function(out,
     # looks like not just 1 table was provided
     out <- out$results_bysite
   }
-  if ("sf" %in% class(x)) {
-    x <- sf::st_drop_geometry(x) # or else popup is blown up by geometry points data
+  if ("sf" %in% class(out)) {
+    out <- sf::st_drop_geometry(out) # or else popup is blown up by geometry points data
   }
   if (data.table::is.data.table(out)) {out <- data.table::copy(out); data.table::setDF(out)}
 
@@ -341,27 +341,24 @@ popup_from_ejscreen <- function(out,
         pops_link_n = paste0(rep(NA, NROW(out)), '<br>')
       }
       pops_links <- paste0(
-        pops_links, pops_link_n,
-        sep = '<br>'
+        pops_links, pops_link_n
+        # , sep = '<br>'
       )
     }
     return(pops_links)
   }
   pops_links <- make_pops_links(out, linkcolnames)
 
-  # if (linkcolname1  %in% names(out)) {pops_link1 <- paste0(out[ , linkcolname1] , '<br>')} else {pops_link1 <- paste0(rep(NA, NROW(out)), '<br>')}
-  # if (linkcolname2 %in% names(out)) {pops_link2 <- paste0(out[ , linkcolname2], '<br>')} else {pops_link2 <- paste0(rep(NA, NROW(out)), '<br>')}
-  # if (linkcolname3 %in% names(out)) {pops_link3 <- paste0(out[ , linkcolname3], '<br>')} else {pops_link3 <- paste0(rep(NA, NROW(out)), '<br>')}
-  # if (linkcolname4  %in% names(out)) {pops_link4 <- paste0(out[ , linkcolname4] , '<br>')} else {pops_link4 <- paste0(rep(NA, NROW(out)), '<br>')}
-  # if (linkcolname5 %in% names(out)) {pops_link5 <- paste0(out[ , linkcolname5], '<br>')} else {pops_link5 <- paste0(rep(NA, NROW(out)), '<br>')}
-  # if (linkcolname6 %in% names(out)) {pops_link6 <- paste0(out[ , linkcolname6], '<br>')} else {pops_link6 <- paste0(rep(NA, NROW(out)), '<br>')}
+  #  title for each Section of pop info #####
 
-  if ('ejam_uniq_id' %in% names(out)) {pops_ejam_uniq_id <- paste0('ejam_uniq_id: ', out$ejam_uniq_id, '<br>')} else {pops_ejam_uniq_id <- ''}
-  if ('id'           %in% names(out)) {pops_id           <- paste0('id: ',           out$id,           '<br>')} else {pops_id           <- ''}
-  if ('siteid'       %in% names(out)) {pops_siteid       <- paste0('siteid: ',       out$siteid,       '<br>')} else {pops_siteid       <- ''}
-  if ('sitenumber'   %in% names(out)) {pops_sitenumber   <- paste0('sitenumber: ',   out$sitenumber,   '<br>')} else {pops_sitenumber   <- ''}
-  if ('sitename'     %in% names(out)) {pops_sitename     <- paste0('sitename: ',     out$sitename,     '<br>')} else {pops_sitename     <- ''}
-  if ('radius.miles' %in% names(out)) {pops_radmile      <- paste0('Area within ',   out$radius.miles, ' miles of site', '<br>')} else {pops_radmile <- ''}
+  if (length(pops_links) > 0) {
+    pops_links <- paste0(
+      '<b>', 'Reports: ',              '</b>',               '<br>',
+      pops_links
+    )
+  } else {
+    pops_links <- ''
+  }
 
   if (length(poptext.d) > 0) {
     pops_d <- paste0(
@@ -391,28 +388,48 @@ popup_from_ejscreen <- function(out,
     pops_ej <- ''
   }
 
+  #  title for each ID or Geo info on the Site  ####
+
+  if ('ejam_uniq_id' %in% names(out)) {pops_ejam_uniq_id <- paste0('Site ID (ejam_uniq_id): ', out$ejam_uniq_id, '<br>')} else {pops_ejam_uniq_id <- ''}
+  if ('id'           %in% names(out)) {pops_id           <- paste0('id: ',           out$id,           '<br>')} else {pops_id           <- ''}
+  if ('regid'        %in% names(out)) {regid             <- paste0('regid: ',        out$regid,        '<br>')} else {regid             <- ''}
+  if ('REGISTRY_ID'  %in% names(out)) {REGISTRY_ID       <- paste0('REGISTRY_ID: ',  out$REGISTRY_ID,  '<br>')} else {REGISTRY_ID       <- ''}
+  if ('siteid'       %in% names(out)) {pops_siteid       <- paste0('siteid: ',       out$siteid,       '<br>')} else {pops_siteid       <- ''}
+  if ('sitenumber'   %in% names(out)) {pops_sitenumber   <- paste0('sitenumber: ',   out$sitenumber,   '<br>')} else {pops_sitenumber   <- ''}
+  if ('sitename'     %in% names(out)) {pops_sitename     <- paste0('sitename: ',     out$sitename,     '<br>')} else {pops_sitename     <- ''}
+  if ('radius.miles' %in% names(out)) {pops_radmile      <- paste0('Area within ',   out$radius.miles, ' miles of site', '<br>')} else {pops_radmile <- ''}
+  if ('area_sqmi' %in% names(out)) {pops_sqmi      <- paste0('Area: ',   out$area_sqmi, ' square miles', '<br>')} else {pops_sqmi <- ''}
+
+  # ASSEMBLE ALL THE INDICATORS ####
   z <- paste0(
+
+    ## > ID/GEO INFO ON EACH SITE  ####
+
+    #    BOLD these
     '<b>',
     pops_ejam_uniq_id,
     pops_id,
+    regid,
+    REGISTRY_ID,
     pops_siteid,
     pops_sitenumber,
     pops_sitename,
     '</b>',
+
     pops_radmile,
     paste0('long, lat: ',  out$lon, ', ', out$lat,             '<br>'),
+    pops_sqmi,
+
+    ## > LINKS to Reports ####
+
+    pops_links,
+
+    ## > INDICATORS (Demog/ Env/ EJ)   ####
 
     pops_d,
     pops_e,
     pops_ej,
 
-    # LINKS IN POPUP
-    pops_links,
-    # pops_link1,    # out[ , linkcolname1] ,           '<br>',
-    # #    url_linkify(out[ , linkcolname1] , 'EJScreen Report'), '<br>',
-    # pops_link2,    # out[ , linkcolname2],    '<br>',
-    # #    url_linkify(out[ , linkcolname2], 'EJScreen Map'),  '<br>',
-    # pops_link3,
     sep = '<br>'
   )
 

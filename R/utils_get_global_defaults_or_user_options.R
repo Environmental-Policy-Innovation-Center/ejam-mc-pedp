@@ -107,10 +107,6 @@ get_global_defaults_or_user_options <- function(user_specified_options = NULL, b
   # See ?ejamapp() and the article about defaults and custom settings.
 
   ############ #
-  # not needed but ok:
-  rm(global_defaults_shiny_public)
-  rm(global_defaults_shiny)
-  rm(global_defaults_package)
 
   return(global_defaults_or_user_options)
 }

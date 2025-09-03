@@ -122,25 +122,45 @@ found_in_N_files_T_times <- function(pattern_vector, path = "./R", ignorecomment
 # Number of exported functions with no matching test file names:  541
 # or  129 where the function does not even appear at all in full text of any test file:
 #
-# These dont seem to have tests but are used (or mentioned) by the most R/*.R files:
-#                       term nfiles nhits
-# 1              table_round     23    48  ***
-# 2               ejam2excel     16    29  ***
-# 3      frs_update_datasets     15    20
-# 4              ejam2report     14    41  ***
-# 5      table_rounding_info     12    25  ***
-# 6             testpoints_n     12    27
-# 7              indexblocks     11    24
-# 8         fixnames_aliases     11    32  ***
-# 9                  frs_get     11    24
-# 10     sitepoints_from_any     11    44  ***
-# 11            table_signif     11    28  ***
-# 12 table_signif_round_x100     11    23  ***
-# 13                  app_ui     10    17
-# 14                datapack      9    27
-# 15          read_csv_or_xl      9    22
-# 16               calc_ejam      8    32  ***
+#
+# newer
+# These dont seem to have tests but are
+# used (or mentioned) by the most R/*.R files
+# (excluding commented-out lines):
+#
+#   Need to add unit tests for ejam2report, ejam2excel, calc_ratios_to_avg, plot_barplot_ratios, table_signif_round_x100, popup_from_ejscreen, popup_from_df, mapfast, sitepoints_from_any
+#
+# term nfiles nhits
+#
+# 18                  ejam2report      6    15  ***  ***  SUMMARY REPORT (compares to prior but does not test header, logo, footer, table contents, map, plot)
+#
+# ####   and maybe    ejam2excel is important  ***  ***   EXCEL (Tables headers aligned, working URL links, right tabs, sorting of cols?, nrow/ncol?, etc.)
+#
+# 9           plot_barplot_ratios      8    18  *** RATIOS TO AVG
+# 15           calc_ratios_to_avg      6    10  ***
+#   and maybe calc_ejam ?
+#   2                   table_round     14    22  ***  *** TABLE ROUNDING
+# 14                 table_signif      7    10  ***  ***
+#   20      table_signif_round_x100      6     8  ***  ***
+#   7           table_rounding_info      9    15  ***  ***
+#
+#   13          popup_from_ejscreen      7     9  ***  *** POPUPS
+# 19                popup_from_df      6    13  ***  ***
+#   3                       mapfast     10    20  *** *** MAPS
+#
+# 6           sitepoints_from_any      9    13  *** SITEPOINTS INPUT
+# 10               read_csv_or_xl      8    16
+#
+# 1               global_or_param     16   196
+# 4                       varinfo      9    16
+# 5                    app_server      9    17
+# 8                        app_ui      8    16
+# 11                  indexblocks      7    13
+# 12             fixnames_aliases      7    12
+# 16              create_filename      6    10
+# 17 distance_via_surfacedistance      6    11
 
+################################ ################################# #
 
 test_coverage_check <- function(loadagain = FALSE, quiet = TRUE) {
 

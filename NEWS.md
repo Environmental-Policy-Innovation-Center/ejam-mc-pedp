@@ -13,14 +13,14 @@
 
 -   Report footer now shows exact version number ("2.32.6" not just "2.32") (and same with web app home page header). Also, it was missing in some reports, now fixed.
 -   Tables and Maps now have URL hyperlinks to various types of 1-site reports for each site - These were gone but now are restored and expanded (but these are in progress/ may need patches).
-    -   TABLES OF SITES - these will have links to the 1-site reports:
+    -   TABLES OF SITES - These will have links to the 1-site reports:
         -   each row of webpage table of detailed results by site
         -   each row of excel table of results by site
-    -   MAP POPUPS - these will have links to the 1-site reports:
+    -   MAP POPUPS - These will have links to the 1-site reports:
         -   map popups in summary report webpage
         -   map popups in downloaded summary report html file
     -   REPORT TYPES: So far, links to 2-3 report types are provided by default:
-        -   summary report on 1 site, as a *live* webpage (shiny-app-generated) 
+        -   summary report on 1 site, as a *live* webpage (shiny-app-generated)
         -   summary report on 1 site, as a *downloaded* html file (API-generated)
         -   link to the EJSCREEN app, zoomed to the 1 site's location
         -   Others reports are available via custom settings -- see the table below for details.

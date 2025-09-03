@@ -55,7 +55,6 @@ mapfast <- function(mydf, radius = 3, column_names='all', labels = column_names,
   fromejam <- FALSE
   # if the whole list from ejamit(), not a data.frame, was provided, use just the results_bysite table
   if (!is.data.frame(mydf) && is.list(mydf) && 'results_bysite' %in% names(mydf)) {
-    message("mydf seems to be a list of tables such as output from ejamit() so using just the results_bysite table here")
     sitetype <- ejamit_sitetype_from_output(mydf) # works if mydf is either output of ejamit() or ejamit()$results_bysite
     mydf <- mydf$results_bysite
     fromejam <- TRUE

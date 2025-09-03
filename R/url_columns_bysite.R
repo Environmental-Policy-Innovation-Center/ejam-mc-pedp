@@ -33,15 +33,6 @@
 #'
 #' @param sitetype optional "latlon" or "shp" or "fips" but can be inferred from other params
 #'
-#'
-#'
-#' @param hyperlink_colnames vector of colnames of URLs to create for results_bysite.
-#'  Options: "EJScreen Report", "EJScreen Map",
-#'  "ECHO Report", "FRS Report", "Enviromapper Report", "Countyhealth Report"
-#' @param hyperlink_text vector of labels to use in the links, one per report column
-#'
-#'
-#'
 #' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
 #'   passed to [url_ejamapi()], [url_ejscreenmap()], or other url_xyz report functions.
 #'

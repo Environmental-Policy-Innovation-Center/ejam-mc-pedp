@@ -52,8 +52,13 @@
 #'   at each site. (see default)
 #' @param threshnames list of groups of variable names (see default)
 #' @param threshgroups list of text names of the groups (see default)
+#'
+#' @param reports optional list of lists specifying which report types to include --
+#'   see the file "global_defaults_package.R" or source code for this function for how this is defined.
+#'
 #' @param progress_all progress bar from app in R shiny to run
-#' @param updateProgress progress bar function passed to [doaggregate()] in shiny app
+#' @param updateProgress CURRENTLY UNUSED - was a progress bar function passed to [doaggregate()] in shiny app,
+#'   but not actually used in ejamit().
 #' @param updateProgress_getblocks progress bar function passed to [getblocksnearby()] in shiny app
 #' @param in_shiny if fips parameter is used, passed to [getblocksnearby_from_fips()]
 #' @param quiet Optional. passed to [getblocksnearby()] and [batch.summarize()]. set to TRUE to avoid message about using [getblocks_diagnostics()],
@@ -61,7 +66,7 @@
 #' @param silentinteractive to prevent long output showing in console in RStudio when in interactive mode,
 #'   passed to [doaggregate()] also. app server sets this to TRUE when calling [doaggregate()] but
 #'   [ejamit()] default is to set this to FALSE when calling [doaggregate()].
-#' @param called_by_ejamit Set to TRUE by [ejamit()] to suppress some outputs even if ejamit(silentinteractive=F)
+#' @param called_by_ejamit passed to doaggregate(). Set to TRUE by [ejamit()] to suppress some outputs even if ejamit(silentinteractive=F)
 #' @param testing used while testing this function, passed to [doaggregate()]
 #' @param showdrinkingwater T/F whether to include drinking water indicator values or display as NA. Defaults to TRUE.
 #' @param showpctowned T/f whether to include percent owner-occupied units indicator values or display as NA. Defaults to TRUE.
@@ -214,7 +219,9 @@ ejamit <- function(sitepoints = NULL,
                                       c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
                    threshgroups = list("EJ-US-or-ST", "Supp-US-or-ST"),
 
-                   updateProgress = NULL,
+                   reports = EJAM:::global_or_param("default_reports"),
+
+                   updateProgress = NULL, # may be ignored now
                    updateProgress_getblocks = NULL,
                    progress_all = NULL,
                    in_shiny = FALSE,
@@ -732,8 +739,8 @@ ejamit <- function(sitepoints = NULL,
     radius = radius,
     regid = ifelse("REGISTRY_ID" %in% names(out$results_bysite), out$results_bysite$REGISTRY_ID, NULL),
     sitetype = sitetype,
-
-    as_html = FALSE # ok?
+    reports = reports, # EJAM:::global_or_param("default_reports")
+    as_html = TRUE # TRUE lets them work in a webpage view of table, in ejam2tableviewer(), and in map popups, but then for excel want to delinkify them
   )
   setDT(links$results_bysite)
   setDT(links$results_overall)

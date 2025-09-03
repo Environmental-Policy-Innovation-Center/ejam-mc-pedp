@@ -40,7 +40,9 @@
 #' @param heatmap2_cuts  like heatmap_cuts but for ratios by default
 #' @param heatmap2_colors like heatmap_colors but for ratios
 #'
-#' @param hyperlink_colnames names of which to treat as URLs that should be hyperlinks
+#' @param reports info about which columns to treat as URLs that should be hyperlinks -
+#'   see [?url_columns_bysite]
+#'
 #' @param graycolnames which columns to de-emphasize
 #' @param narrowcolnames which column numbers to make narrow
 #' @param graycolor color used to de-emphasize some columns
@@ -91,7 +93,8 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
                              heatmap_colnames = NULL,   heatmap_cuts = c(80, 90, 95),  heatmap_colors  = c("yellow", "orange", "red"), # percentiles
                              heatmap2_colnames = NULL, heatmap2_cuts = c(1.009, 2, 3), heatmap2_colors = c("yellow", "orange", "red"), # ratios
 
-                             hyperlink_colnames = sapply(EJAM:::global_or_param("default_hyperlink_colnames"), function(x) x$header),
+                             reports = EJAM:::global_or_param("default_reports"),
+
                              graycolnames = NULL, narrowcolnames = NULL, graycolor = 'gray', narrow6 = 6,
 
                              testing = FALSE, updateProgress = NULL,
@@ -199,11 +202,6 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
     }
   }
 
-  if (!is.null(hyperlink_colnames) & !all(hyperlink_colnames %in% names(eachsite)))   {
-    warning('all column names in hyperlink_colnames should be found in eachsite table')
-    hyperlink_colnames <- intersect(hyperlink_colnames, names(eachsite))
-    if (length(hyperlink_colnames) == 0) {hyperlink_colnames <- NULL}
-  }
 
   if (!is.null(narrowcolnames) & !all(narrowcolnames %in% names(eachsite)))   {
     warning('all column names in narrowcolnames should be found in eachsite table')
@@ -219,7 +217,6 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
   overall   <- overall |> dplyr::mutate(dplyr::across(dplyr::where(is.numeric), function(x) ifelse(!is.finite(x), NA, x)))
   eachsite <- eachsite |> dplyr::mutate(dplyr::across(dplyr::where(is.numeric), function(x) ifelse(!is.finite(x), NA, x)))
 
-  if (testing) {cat('\n   names of hyperlink_colnames \n\n'); print(hyperlink_colnames)}
   ############################################## #
 
   # CREATE TABS ####
@@ -544,7 +541,7 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
   ######################################################################## #
   ### URL / Hyperlinks ####
 
-  # REPLACE THE URLS WITH type that work for excel?
+  # REPLACE THE URLS WITH type that work for excel
 
   if (!("valid" %in% names(eachsite))) {
     ok <- rep(TRUE, NROW(eachsite))
@@ -552,39 +549,49 @@ table_xls_format <- function(overall, eachsite, longnames=NULL, formatted=NULL, 
     ok <- eachsite$valid
   }
 
-  ## URL columns are already in eachsite table i.e., in ejamit()$results_bysite
-  #  - already confirmed the requested ones are actually there.
-
-  # Special names for the pdf and map links #
-  # ## External Hyperlink example:
-  # x <- url_xl_style(c("https://www.google.com", "https://www.google.com.au"), urltext = c("google", "google Aus"))
-  # writeData(wb, sheet = 1, x = x, startCol = 10)
-
   if (is.function(updateProgress)) {
     boldtext <- 'Formatting hyperlinks'
     updateProgress(message_main = boldtext, value = 0.6)
   }
-  if (!is.null(hyperlink_colnames)) {
+
+  if (!is.null(reports)) {
+    hyperlink_colnames <-  sapply(reports, function(x) x$header)
+    hyperlink_text      <- sapply(reports, function(x) x$text)
+
+    if (!is.null(hyperlink_colnames) & !all(hyperlink_colnames %in% names(eachsite)))   {
+      warning('all column names in hyperlink_colnames should be found in eachsite table')
+      ok = hyperlink_colnames %in% names(eachsite)
+      hyperlink_colnames <- hyperlink_colnames[ok]
+      hyperlink_text <- hyperlink_text[ok]
+      if (length(hyperlink_colnames) == 0) {hyperlink_colnames <- NULL; hyperlink_text <- NULL}
+    }
+    if (!is.null(hyperlink_colnames)) {
+
     hypercolnums <- match(hyperlink_colnames, names(eachsite)) # returns the position of each, or NA if not found. is that what we want here??
-    if (testing) {cat("trying to apply hyperlinks to column numbers ", paste0(hypercolnums, collapse = ", "), "\n")}
-    hyperlink_text <- hyperlink_colnames
     if (data.table::is.data.table(eachsite)) {
       data.table::setDF(eachsite) # to make syntax below work since it was written assuming data.frame only not data.table
     }
+    if (data.table::is.data.table(overall)) {
+      data.table::setDF(overall) # to make syntax below work since it was written assuming data.frame only not data.table
+    }
 
     # NOW CONVERT SIMPLE URLS INTO EXCEL HYPERLINKS
-
     for (i in 1:length(hyperlink_colnames)) {
-      namedvector <- as.vector(eachsite[ , hyperlink_colnames[i]])
-      namedvector[namedvector == 'N/A'] <- NA
-      # add "hyperlink" class and names as text  # not NROW + 1 here !  to use e.g., "EJScreen Report 1"
-      namedvector <- url_xl_style(namedvector, urltext = paste(hyperlink_text[i], 1:(NROW(eachsite))))
+      namedvector <- as.vector(eachsite[ , hyperlink_colnames[i]]) # vector of length NROW()
+      namedvector_overall <- as.vector(overall[ , hyperlink_colnames[i]]) # vector of length 1
+      # add "hyperlink" class and names as text  # not NROW + 1 here !
+      # url_xl_style() ALSO CONVERTS HTML TAG URLS BACK TO JUST PLAIN URLS FIRST:
+      namedvector <- url_xl_style(namedvector, urltext = rep(  hyperlink_text[i], length(namedvector)))  # , 1:(NROW(eachsite)))) # to number them to use e.g., "EJScreen Report 1"
+      namedvector_overall <- url_xl_style(namedvector_overall, urltext = hyperlink_colnames[i]) ## use hyperlink_colnames not text here since it is the overall summary not just 1 site
       ## write to the worksheet the revised URL
       openxlsx::writeData(wb, sheet = 'Each Site',
                           x = namedvector,
                           startRow = 2, startCol = hypercolnums[i])
+      openxlsx::writeData(wb, sheet = 'Overall',
+                          x = namedvector_overall,
+                          startRow = 2, startCol = hypercolnums[i])
     }
-  }
+  }}
   ######################################################################## #
   # end of hyperlink code
   ######################################################################## #

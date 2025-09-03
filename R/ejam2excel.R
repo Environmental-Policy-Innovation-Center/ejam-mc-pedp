@@ -23,7 +23,10 @@
 #' @param in.analysis_title optional title as character string
 #' @param react.v1_summary_plot optional - a plot object
 #' @param radius_or_buffer_description optional text phrase describing places analyzed
-#' @param hyperlink_colnames optional names of columns with URLs
+#'
+#' @param reports info about which columns to treat as URLs that should be hyperlinks -
+#'   see [?url_columns_bysite]
+#'
 #' @param site_method site selection method, such as SHP, latlon, FIPS, NAICS, FRS, EPA_PROGRAM, SIC, MACT
 #'   optional site method parameter used to create a more specific title with create_filename.
 #'   Note `ejamitout$sitetype` is not quite the same as the `site_method` parameter used in building reports.
@@ -66,7 +69,9 @@ ejam2excel <- function(ejamitout,
                        buffer_desc = NULL, # "Selected Locations",
                        radius_or_buffer_description = 'Miles radius of circular buffer (or distance used if buffering around polygons)',
                        # radius_or_buffer_description =   "Distance from each site (radius of each circular buffer around a point)",
-                       hyperlink_colnames = EJAM:::global_or_param("default_hyperlink_colnames"),  # c("EJScreen Report", "EJScreen Map", "ECHO Report"),
+
+                       reports = EJAM:::global_or_param("default_reports"), # has hyperlink colnames and text to use
+
                        site_method = "",
 
                        mapadd = FALSE, # if report is added, map is redundant
@@ -102,7 +107,10 @@ ejam2excel <- function(ejamitout,
     radius_or_buffer_in_miles = radius_or_buffer_in_miles,
     buffer_desc = buffer_desc,
     radius_or_buffer_description = radius_or_buffer_description,
-    hyperlink_colnames = hyperlink_colnames,
+
+    # hyperlink_colnames = hyperlink_colnames,
+    reports = reports,
+
     site_method = site_method,
 
     mapadd = mapadd,

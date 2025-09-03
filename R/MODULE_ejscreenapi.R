@@ -1074,7 +1074,8 @@ if (FALSE) {
             } else {
               # MIGHT NOT BE WORKING:
               wb <- table_xls_format_api(df = table_as_displayed,
-                                         hyperlink_cols = c('EJScreen Map', 'EJScreen Report'),
+                                         # hyperlink_cols = c('EJScreen Map', 'EJScreen Report'),
+                                         # reports = NULL,
                                          heatmap_colnames = names(table_as_displayed)[pctile_colnums],
                                          heatmap_cuts = c(80, 90, 95),
                                          heatmap_colors = c('yellow', 'orange', 'red'))
