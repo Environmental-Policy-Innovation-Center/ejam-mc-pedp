@@ -105,8 +105,11 @@ global_defaults_package$default_reports =  list(
     # , list(header = "ECHO Report",         text = "ECHO",         FUN = url_echo_facility) # if regid provided # e.g., browseURL(url_echo_facility(110070874073))
     # , list(header = "FRS Report",          text =  "FRS",         FUN = url_frs_facility)            # if regid provided # e.g., browseURL(url_frs_facility(testinput_registry_id[1]))
     # , list(header = "Enviromapper Report", text = "Enviromapper", FUN = url_enviromapper)          # if lat,lon provided # e.g., browseURL(url_enviromapper(lat = 38.895237, lon = -77.029145, zoom = 17))
-    # , list(header = "County Health Report",       text = "County",       FUN = url_countyhealth)  # if fips provided
-    # , list(header = "State Health Report",       text = "State",       FUN = url_statehealth)  # if fips provided
+    , list(header = "County Health Report",       text = "County",       FUN = url_countyhealth)  # if fips provided
+    , list(header = "State Health Report",       text = "State",       FUN = url_statehealth)  # if fips provided
+	, list(header = "County Equity Atlas Report", text = "County (Equity Atlas)", FUN = url_equityatlas_county)
+    , list(header = "State Equity Atlas Report", text = "State (Equity Atlas)", FUN = url_equityatlas_state)
+	
 )
 # should not be needed, but just in case while shifting to this method:
 global_defaults_package$default_hyperlink_colnames <- sapply(global_defaults_package$default_reports, function(x) x$header)
@@ -126,6 +129,7 @@ global_defaults_package$default_hyperlink_colnames <- sapply(global_defaults_pac
 ## [4,] "FRS Report"          "FRS"          "regid,as_html,linktext,validate_regids,..."
 ## [5,] "Enviromapper Report" "Enviromapper" "sitepoints,lon,lat,as_html,linktext,shapefile,fips,zoom,..."
 ## [6,] "County Report"       "County"       "fips,year,as_html,..."
+
 ## etc.
 ############################### #
 # width = 10, height = 50 # in table_xls_format() controls size of excel snapshot of summary report; must adjust if rows/cols changed.
