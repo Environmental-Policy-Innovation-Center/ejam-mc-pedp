@@ -109,8 +109,8 @@ url_columns_bysite <- function(sitepoints = NULL, lat = NULL, lon = NULL,
       # , list(header = "ECHO Report",         text = "ECHO",         FUN = url_echo_facility) # if regid provided
       # , list(header = "FRS Report",          text =  "FRS",         FUN = url_frs_facility)            # if regid provided
       # , list(header = "Enviromapper Report", text = "Enviromapper", FUN = url_enviromapper)          # if lat,lon provided
-      # , list(header = "County Health Report",       text = "County",       FUN = url_countyhealth)  # if fips provided
-      # , list(header = "State Health Report",       text = "State",       FUN = url_statehealth)  # if fips provided
+      # , list(header = "County Health Report",       text = "County",       FUN = url_county_health)  # if fips provided
+      # , list(header = "State Health Report",       text = "State",       FUN = url_state_health)  # if fips provided
     )
   }
   links <- data.frame(matrix(NA, nrow = rowcount, ncol = length(reports)))

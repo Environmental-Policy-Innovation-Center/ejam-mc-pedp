@@ -105,19 +105,14 @@ url_ejscreenmap <- function(sitepoints = NULL, lat = NULL, lon = NULL,
   if (is.null(linktext)) {linktext <- paste0("EJSCREEN")}
 
   ##   linktext could also} be numbered:
-  # linktext = paste0("EJScreen Map ", 1:NROW(sitepoints))
+  # linktext = paste0("EJSCREEN Map ", 1:NROW(sitepoints))
 
+  if (!is.null(fips) && is.null(sitepoints)) {
+    ## get lat,lon from fips
+    # sitepoints <- latlon_from_fips(fips) # draft
+  }
   if (!is.null(shapefile)) {
-    if ("INTPTLAT" %in% names(shapefile) & "INTPTLON" %in% names(shapefile)) {
-      sitepoints = data.frame(lat = shapefile$INTPTLAT, lon = shapefile$INTPTLON)
-    } else {
-      # at least get points that are coordinates of centroids of polygons if cannnot open ejscreen app showing the actual polygon
-      suppressWarnings({
-        sitepoints = sf::st_coordinates(sf::st_centroid(shapefile) )
-      })
-      colnames(sitepoints) <- c("lon", "lat")
-      sitepoints = as.data.frame(sitepoints)
-    }
+    sitepoints = latlon_from_shapefile_centroids(shapefile)
   }
   if (!is.null(sitepoints)) {
     lat = sitepoints$lat
@@ -365,21 +360,12 @@ url_enviromapper <- function(sitepoints = NULL, lon = NULL, lat = NULL, shapefil
   # "https://geopub.epa.gov/myem/efmap/index.html?ve=13,38.895237,-77.029145"
 
   if (!is.null(fips) && is.null(sitepoints)) {
-    # get lat,lon from fips
-    # sitepoints <- latlon_from_fips(fips)
+    ## get lat,lon from fips
+    # sitepoints <- latlon_from_fips(fips) # draft
   }
-
   if (!is.null(shapefile) && is.null(sitepoints)) {
     # at least get points that are coordinates of centroids of polygons if cannnot open ejscreen app showing the actual polygon
-    if ("INTPTLAT" %in% names(shapefile) & "INTPTLON" %in% names(shapefile)) {
-      sitepoints = data.frame(lat = shapefile$INTPTLAT, lon = shapefile$INTPTLON)
-    } else {
-      suppressWarnings({
-        sitepoints = sf::st_coordinates(sf::st_centroid(shapefile) )
-      })
-      colnames(sitepoints) <- c("lon", "lat")
-      sitepoints = as.data.frame(sitepoints)
-    }
+    sitepoints = latlon_from_shapefile_centroids(shapefile)
   }
   if (!is.null(sitepoints)) {
     lat = sitepoints$lat
@@ -404,63 +390,12 @@ url_enviromapper <- function(sitepoints = NULL, lon = NULL, lat = NULL, shapefil
   return(urlx)
 }
 ################################################### #################################################### #
-
-#' URL functions - Get URLs of useful report(s) on States containing the given fips, from countyhealthrankings.org
-#'
-#' @inheritParams url_countyhealth
-#' @param fips vector of fips codes of States, 2 characters each, like "10",
-#'   or other fips codes like blockgroups in which case it returns info for parent States
-#' @param sitepoints if provided and fips is NULL, gets county fips from lat,lon columns of sitepoints
-#' @param shapefile if provided and fips is NULL, gets county fips from lat,lon of polygon centroid
-#'
-#' @return vector of URLs
-#' @examples
-#' x = url_statehealth(fips_state_from_state_abbrev(c("DE", "GA", "MS")))
-#' \dontrun{
-#' browseURL(x)
-#' }
-#' @export
-#'
-url_statehealth <- function(fips = NULL, year = 2025,
-                            sitepoints = NULL,
-                            shapefile = NULL,
-                            as_html = FALSE,
-                            linktext = "State", # "State Health Report",
-                            ifna = "https://www.countyhealthrankings.org",
-                            baseurl = "https://www.countyhealthrankings.org/health-data/",
-                            ...
-) {
-
-  if (is.null(fips) && !is.null(shapefile)) {
-    sitepoints = as.data.frame(sf::st_coordinates(sf::st_centroid(  shapefile )))
-    ST = state_from_latlon(lat = sitepoints$Y, lon = sitepoints$X)$ST
-    fips <- fips_state_from_state_abbrev(ST)
-  }
-  if (is.null(fips) && !is.null(sitepoints)) {
-    sitepoints = sitepoints_from_any(sitepoints)
-    ST = state_from_latlon(lat = sitepoints$lat, lon = sitepoints$lon)$ST
-    fips <- fips_state_from_state_abbrev(ST)
-  }
-
-  url_countyhealth(
-    fips = fips2state_fips(fips),
-    year = year,
-    # sitepoints = sitepoints,
-    # shapefile = shapefile,
-    as_html = as_html,
-    linktext = linktext,
-    ifna = ifna,
-    baseurl = baseurl,
-    ... = ...
-  )
-}
 ################################################### #################################################### #
 
 
 #' URL functions - Get URLs of useful report(s) on Counties containing the given fips, from countyhealthrankings.org
 #'
-#' @param fips vector of fips codes of counties, 5 characters each, like "10003",
-#'   or other fips codes like blockgroups in which case it returns info for parent counties
+#' @param fips vector of fips codes
 #' @param year e.g., 2025
 #' @param sitepoints if provided and fips is NULL, gets county fips from lat,lon columns of sitepoints
 #' @param shapefile if provided and fips is NULL, gets county fips from lat,lon of polygon centroid
@@ -469,39 +404,70 @@ url_statehealth <- function(fips = NULL, year = 2025,
 #' @param ifna URL shown for missing, NA, NULL, bad input values
 #' @param baseurl do not change unless endpoint actually changed
 #'
-#' @param statereport if TRUE, gets report on enclosing State/DC/PR, not county.
+#' @param statereport can be passed here by [url_state_health()]
 #'   if FALSE, returns NA when given a State fips, otherwise return report on enclosing county.
+#'   if TRUE, gets report on enclosing State/DC/PR (not county).
 #' @param ... unused
 #'
-#' @return vector of URLs
+#' @return vector of URLs to reports on enclosing counties (or generic link if necessary, like when input was a state fips)
 #' @examples
-#'  url_countyhealth(fips_counties_from_state_abbrev("DE"))
-#'  # browseURL(url_countyhealth(fips_counties_from_state_abbrev("DE"))[1])
+#'  url_county_health(fips_counties_from_state_abbrev("DE"))
+#'  # browseURL(url_county_health(fips_counties_from_state_abbrev("DE"))[1])
 #'
 #' @export
 #'
-url_countyhealth <- function(fips = NULL, year = 2025,
-                             sitepoints = NULL,
-                             shapefile = NULL,
-                             as_html = FALSE,
-                             linktext = "County", # "County Health Report",
-                             ifna = "https://www.countyhealthrankings.org",
-                             baseurl = "https://www.countyhealthrankings.org/health-data/",
-							 statereport = FALSE,
-                             ...) {
+url_county_health <- function(fips = NULL, year = 2025,
+                              sitepoints = NULL,
+                              shapefile = NULL,
+                              as_html = FALSE,
+                              linktext = "County",   # "County Health Report",
+                              ifna = "https://www.countyhealthrankings.org",
+                              baseurl = "https://www.countyhealthrankings.org/health-data/",
+                              statereport = FALSE,
+                              ...) {
+  if (is.null(linktext)) {linktext <- paste0("County")}
 
+
+  ################ #
+  ## convert each fips, polygon, or point
+  ## into  a statefips or countyfips or NA
+
+  # polygons
   if (is.null(fips) && !is.null(shapefile)) {
     sitepoints = as.data.frame(sf::st_coordinates(sf::st_centroid(  shapefile )))
     sitepoints$lat = sitepoints$Y
     sitepoints$lon = sitepoints$X
-    fips = fips_county_from_latlon(sitepoints = sitepoints)
+    if (statereport) {
+      fips = fips_state_from_latlon(sitepoints = sitepoints)
+    } else {
+      fips = fips_county_from_latlon(sitepoints = sitepoints)
+    }
   }
+  # points
   if (is.null(fips) && !is.null(sitepoints)) {
     sitepoints = sitepoints_from_any(sitepoints)
-    fips = fips_county_from_latlon(sitepoints = sitepoints)
+    if (statereport) {
+      fips = fips_state_from_latlon(sitepoints = sitepoints)
+    } else {
+      fips = fips_county_from_latlon(sitepoints = sitepoints)
+    }
   }
-  
- # if (is.null(linktext)) {linktext <- paste0("County")}
+  # fips (as input or now have it from latlon or shp - redundant if latlon or shp but ok)
+  if (statereport) {
+    # all will be state fips (or NA)
+    fips <- fips2state_fips(fips)
+  } else {
+    ## want only enclosing county report, so where state was submitted, we want to return NA
+    ## this will return NA if input fips was a state fips:
+    # all will be county fips (or NA)
+    fips <- fips2countyfips(fips)
+  }
+  # now all should be state (or NA); or else all are county (or NA)
+  #    county fips (or NA if state was input), if want county report
+  #    state fips (or NA if invalid ), if want state report
+  # is.state <- fipstype(fips) %in% "state" # not needed actually since they are all one or other depending on statereport param
+  ################ #
+
   if (  is.null(fips) || length(fips) == 0) {
     return(ifna)
     # return(NULL)
@@ -511,11 +477,11 @@ url_countyhealth <- function(fips = NULL, year = 2025,
   if (missing(year) && year != as.numeric(substr(Sys.Date(), 1, 4))) {
     warning("default year is ", year, " but newer data might be available")
   }
-  is.state <- fipstype(fips) %in% "state"
 
-  url_countyhealth_not_statefips = function(fips, year, as_html) {
+  ################ #
+  url_ch_county_in_county_out  = function(fips, year, as_html) {
+
     if (is.null(fips) || length(fips) == 0) {return(NULL)}
-    fips <- fips2countyfips(fips)
     statename  <- tolower(EJAM::fips2statename( fips))
     countyname <- tolower(EJAM::fips2countyname(fips, includestate = ""))
     countyname <- trimws(gsub(" county", "", countyname))
@@ -526,8 +492,9 @@ url_countyhealth <- function(fips = NULL, year = 2025,
     urlx[is.na(fips) | is.na(countyname)] <- NA
     return(urlx)
   }
-  url_countyhealth_statefips <- function(fips, year, as_html) {
-	  
+  ################ #
+  url_ch_state_in_state_out <- function(fips, year, as_html) {
+
     if (is.null(fips) || length(fips) == 0) {return(NULL)}
     statename <- tolower(fips2statename(fips))
     statename <- gsub(" ", "-", statename)
@@ -536,18 +503,14 @@ url_countyhealth <- function(fips = NULL, year = 2025,
     urlx[is.na(statename)] <- NA
     return(urlx)
   }
+  ################ #
 
   urlx <- rep(ifna, length(fips))
-  if (any(is.state)) {
-	  if (!statereport) {
-		  urlx[is.state]  <- NA
-	  }
+
+  if (statereport) {
+    urlx <- url_ch_state_in_state_out(fips, year = year, as_html = as_html)
   } else {
-    urlx[is.state]  <- url_countyhealth_statefips(    fips[is.state], year = year, as_html = as_html)
-  }
-  
-  if (any(!is.state)) {
-    urlx[!is.state] <- url_countyhealth_not_statefips(fips[!is.state], year = year, as_html = as_html)
+    urlx  <- url_ch_county_in_county_out(fips, year = year, as_html = as_html)
   }
 
   ok <- !is.na(fips)
@@ -563,24 +526,51 @@ url_countyhealth <- function(fips = NULL, year = 2025,
 }
 ######################################################################### #
 
-# report on state site is in
+#' URL functions - Get URLs of useful report(s) on STATES containing the given fips, from countyhealthrankings.org
+#'
+#' @inheritParams url_county_health
+#' @param statereport Do not use directly here. passed here by u[rl_countyhealth()]
+#' @return vector of URLs to reports on enclosing states (or generic link if fips invalid)
+#' @examples
+#' x = url_state_health(fips_state_from_state_abbrev(c("DE", "GA", "MS")))
+#' url_state_health(testinput_fips_mix)
+#' \dontrun{
+#' browseURL(x)
+#' }
+#'
+#' @export
+#'
+url_state_health = function(fips = NULL, year = 2025,
+                            sitepoints = NULL,
+                            shapefile = NULL,
+                            as_html = FALSE,
+                            linktext = "County", # "County Health Report",
+                            ifna = "https://www.countyhealthrankings.org",
+                            baseurl = "https://www.countyhealthrankings.org/health-data/",
+                            statereport = TRUE,
+                            ...) {
 
-url_countyhealth_state = function(...) {
-	
-	url_countyhealth_state(..., statereport = T)
+  url_county_health(
+    fips = fips, year = year,
+    sitepoints = sitepoints,
+    shapefile = shapefile,
+    as_html = as_html,
+    linktext = linktext,
+    ifna = ifna,
+    baseurl = baseurl,
+    statereport = statereport,
+    ...)
 }
 ######################################################################### #
-
 
 # national equity atlas - county report fips 42003
 # "https://nationalequityatlas.org/research/data_summary?geo=04000000000042003"
 # "https://nationalequityatlas.org/research/data_summary?geo=02000000000042000"
 
+
 #' URL functions - Get URLs of useful report(s) on County containing the given fips, from countyhealthrankings.org
 #'
-#' @param fips vector of fips codes of counties, 5 characters each, like "10003",
-#'   or other fips codes like blockgroups in which case it returns info for parent counties,
-#'   or state fips in which case it returns a state report
+#' @param fips vector of fips codes
 #' @param sitepoints if provided and fips is NULL, gets county fips from lat,lon columns of sitepoints
 #' @param shapefile if provided and fips is NULL, gets county fips from lat,lon of polygon centroid
 #' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
@@ -588,27 +578,35 @@ url_countyhealth_state = function(...) {
 #' @param ifna URL shown for missing, NA, NULL, bad input values
 #' @param baseurl do not change unless endpoint actually changed
 #'
-#' @param statereport if TRUE, gets report on enclosing State/DC/PR, not county.
+#' @param statereport Do not use directly. Used by [url_state_equityatlas()].
+#'   if TRUE, gets report on enclosing State/DC/PR, not county.
 #'   if FALSE, returns NA when given a State fips, otherwise return report on enclosing county.
 #'
 #' @param ... unused
 #'
-#' @return vector of URLs
+#' @return vector of URLs to reports on enclosing counties (or generic link if necessary, like when input was a state fips)
 #' @examples
-#'  url_equityatlas_county(fips_counties_from_state_abbrev("DE"))
-#'  # browseURL(url_equityatlas_county(fips_counties_from_state_abbrev("DE"))[1])
+#'  url_county_equityatlas(fips_counties_from_state_abbrev("DE"))
+#'  # browseURL(url_county_equityatlas(fips_counties_from_state_abbrev("DE"))[1])
 #'
+#' @export
 #'
-url_equityatlas_county <- function(fips = NULL, # year = 2025,
-                             sitepoints = NULL,
-                             shapefile = NULL,
-                             as_html = FALSE,
-                             linktext = "County (Equity Atlas)", 
-                             ifna    = "https://nationalequityatlas.org",
-                             baseurl = "https://nationalequityatlas.org/research/data_summary/",
-                             statereport = FALSE,
-                             ...) {
-  
+url_county_equityatlas <- function(fips = NULL, # year = 2025,
+                                   sitepoints = NULL,
+                                   shapefile = NULL,
+                                   as_html = FALSE,
+                                   linktext = "County (Equity Atlas)",
+                                   ifna    = "https://nationalequityatlas.org",
+                                   baseurl = "https://nationalequityatlas.org/research/data_summary/",
+                                   statereport = FALSE,
+                                   ...) {
+  if (is.null(linktext)) {linktext <- paste0("County (Equity Atlas)")}
+
+  ################ #
+  ## convert each fips, polygon, or point
+  ## into  a statefips or countyfips or NA
+
+  # polygons
   if (is.null(fips) && !is.null(shapefile)) {
     sitepoints = as.data.frame(sf::st_coordinates(sf::st_centroid(  shapefile )))
     sitepoints$lat = sitepoints$Y
@@ -619,6 +617,7 @@ url_equityatlas_county <- function(fips = NULL, # year = 2025,
       fips = fips_county_from_latlon(sitepoints = sitepoints)
     }
   }
+  # points
   if (is.null(fips) && !is.null(sitepoints)) {
     sitepoints = sitepoints_from_any(sitepoints)
     if (statereport) {
@@ -627,64 +626,64 @@ url_equityatlas_county <- function(fips = NULL, # year = 2025,
       fips = fips_county_from_latlon(sitepoints = sitepoints)
     }
   }
-  
-  # or change type later, below?
+  # fips (as input or now have it from latlon or shp - redundant if latlon or shp but ok)
   if (statereport) {
-    fips <- fips_state_from_fips(fips)
+    fips <- fips2state_fips(fips)
   } else {
-    fips <- fips_county_from_fips(fips)
+    ## want only enclosing county report, so where state was submitted, we want to return NA
+    ## this will return NA if input fips was a state fips:
+    fips <- fips2countyfips(fips)
   }
+  # now all should be state (or NA); or else all are county (or NA)
+  #    county fips (or NA if state was input), if want county report
+  #    state fips (or NA if invalid ), if want state report
+  # is.state <- fipstype(fips) %in% "state" # not needed actually since they are all one or other depending on statereport param
+  ################ #
 
-  if (is.null(linktext)) {linktext <- paste0("County (Equity Atlas)")}
   if (  is.null(fips) || length(fips) == 0) {
     return(ifna)
     # return(NULL)
   }
   # Could check if site or API is available?
 
- # if (missing(year) && year != as.numeric(substr(Sys.Date(), 1, 4))) {
- #   warning("default year is ", year, " but newer data might be available")
- # }
- 
- # 
- 
-  is.state <- fipstype(fips) %in% "state"
+  # if (missing(year) && year != as.numeric(substr(Sys.Date(), 1, 4))) {
+  #   warning("default year is ", year, " but newer data might be available")
+  # }
+  ################ #
 
-  url_equityatlas_not_statefips = function(fips,  as_html) {
+  url_eq_county_in_county_out = function(fips,  as_html) {
     if (is.null(fips) || length(fips) == 0) {return(NULL)}
-    
-    fips <- fips2countyfips(fips)
-    
+
     #statename  <- tolower(EJAM::fips2statename( fips))
     #countyname <- tolower(EJAM::fips2countyname(fips, includestate = ""))
-   # countyname <- trimws(gsub(" county", "", countyname))
-   #  countyname <- gsub(" ", "-", countyname)
-   
-	urlx <- paste0(baseurl, "/geo=040000000000", fips) #, "?year=", year)
+    # countyname <- trimws(gsub(" county", "", countyname))
+    #  countyname <- gsub(" ", "-", countyname)
+
+    urlx <- paste0(baseurl, "/geo=040000000000", fips) #, "?year=", year)
     urlx[is.na(fips)  ] <- NA
     return(urlx)
   }
-  url_equityatlas_statefips <- function(fips, as_html) {
+  ################ #
+  url_eq_state_in_state_out <- function(fips, as_html) {
     if (is.null(fips) || length(fips) == 0) {return(NULL)}
     #statename <- tolower(fips2statename(fips))
-   # statename <- gsub(" ", "-", statename)
+    # statename <- gsub(" ", "-", statename)
 
-	urlx <- paste0(baseurl, "/geo=040000000000", fips, "000") #, "?year=", year)
-    urlx[is.na(statename)] <- NA
+    urlx <- paste0(baseurl, "/geo=040000000000", fips, "000") #, "?year=", year)
+    urlx[is.na(fips)] <- NA
     return(urlx)
   }
+  ################ #
 
   urlx <- rep(ifna, length(fips))
-  if (any(is.state)) {
-    if (!statereport) {
- 	 urlx[is.state]  <- NA
-    } else {
-      urlx[is.state]  <- url_equityatlas_statefips(    fips[is.state], as_html = as_html)
-	}
+  # now all should be state (or NA); or else all are county (or NA)
+
+  if (statereport) {
+    urlx <- url_eq_state_in_state_out(fips, as_html = as_html)
+  } else {
+    urlx <- url_eq_county_in_county_out(fips, as_html = as_html)
   }
-  if (any(!is.state)) {
-    urlx[!is.state] <- url_equityatlas_not_statefips(fips[!is.state], as_html = as_html)
-  }
+  #################### #
 
   ok <- !is.na(fips)
 
@@ -700,37 +699,50 @@ url_equityatlas_county <- function(fips = NULL, # year = 2025,
 ######################################################################### #
 
 
-url_equityatlas_state <- function(fips = NULL, 
-                             sitepoints = NULL,
-                             shapefile = NULL,
-                             as_html = FALSE,
-                             linktext = "State (Equity Atlas)", 
-                             ifna    = "https://nationalequityatlas.org",
-                             baseurl = "https://nationalequityatlas.org/research/data_summary/",
-							 
-                            # statereport = TRUE,
-                             ...) {
-	url_equityatlas_county(
-			fips = fips, 
-                             sitepoints = sitepoints,
-                             shapefile = shapefile,
-                             as_html =  as_html,
-                             linktext = link,
-                             ifna    = ifna,
-                             baseurl = baseurl,
-							 
-                             statereport = TRUE,
-                             ...)
-							 }
+#' URL functions - Get URLs of useful report(s) on STATE containing the given fips, from equity atlas
+#'
+#' @inheritParams url_county_equityatlas
+#' @param statereport Do not use directly. passed to [url_county_equityatlas()].
+#'
+#' @param ... unused
+#'
+#' @return vector of URLs to reports on enclosing states (or generic link if fips invalid)
+#' @examples
+#'  url_county_equityatlas(fips_counties_from_state_abbrev("DE"))
+#'  # browseURL(url_county_equityatlas(fips_counties_from_state_abbrev("DE"))[1])
+#'
+#' @export
+#'
+url_state_equityatlas <- function(fips = NULL,
+                                  sitepoints = NULL,
+                                  shapefile = NULL,
+                                  as_html = FALSE,
+                                  linktext = "State (Equity Atlas)",
+                                  ifna    = "https://nationalequityatlas.org",
+                                  baseurl = "https://nationalequityatlas.org/research/data_summary/",
 
-#########################################################################
+                                  statereport = TRUE,
+                                  ...) {
+  url_county_equityatlas(
+    fips = fips,
+    sitepoints = sitepoints,
+    shapefile = shapefile,
+    as_html =  as_html,
+    linktext = linktext,
+    ifna    = ifna,
+    baseurl = baseurl,
+
+    statereport = statereport,
+    ...)
+}
+################################################################################################################################################# #
+
+# . -------------------------- ####
 
 
 ######################################################################### #
 ## not site-specific ####
 ######################################################################### #
-
-# . -------------------------- ####
 
 
 #' URL functions - url_naics.com - Get URL for page with info about industry sectors by text query term
@@ -775,7 +787,7 @@ url_naics.com <- function(query,
   return(urlx)
 }
 ######################################################################### #
-# . ####
+
 
 #' utility to view rendered .html file stored in a github repo
 #'

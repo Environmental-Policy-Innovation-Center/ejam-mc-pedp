@@ -267,6 +267,7 @@ x <- EJAM:::test_ejam(
       test_misc = c(
         "test-acs_bybg.R",
         "test-url_ejamapi.R",
+        "test-URL_FUNCTIONS_part2.R",
         "test-url_columns_bysite.R"
       ),
       ### X ejscreenapi tests do not work / get skipped WHILE EJSCREEN API IS DOWN MID 2025  ####

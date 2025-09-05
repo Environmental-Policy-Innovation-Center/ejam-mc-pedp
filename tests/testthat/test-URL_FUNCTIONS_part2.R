@@ -1,13 +1,9 @@
 
-# test-url_ejamapi.R
+# test-URL_FUNCTIONS_part2.R
 
 ############### test all the other url_xyz functions in a loop:
 
 do_url_tests = function(funcname, FUN) {
-
-  test_that("Site responds with 200", {
-    expect_true(url_online(FUN(sitepoints = testpoints_10[1,])))
-  })
 
   # fipsmix = testinput_fips_mix
   fipsmix =  c(
@@ -65,4 +61,17 @@ do_url_tests = function(funcname, FUN) {
 }
 ###############
 
-do_url_tests("url_ejamapi", url_ejamapi)   # fips must be blockgroup fips currently - other types not yet implemented 9/2025
+do_url_tests("url_ejscreenmap", url_ejscreenmap)
+do_url_tests("url_echo_facility", url_echo_facility)
+do_url_tests("url_frs_facility", url_frs_facility)
+do_url_tests("url_enviromapper", url_enviromapper)
+
+do_url_tests("url_county_health", url_county_health)
+do_url_tests("url_state_health", url_state_health)
+
+do_url_tests("url_county_health", url_county_equityatlas)
+do_url_tests("url_state_health", url_state_equityatlas)
+
+# url_naics.com()
+
+# url_github_preview()
