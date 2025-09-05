@@ -1,9 +1,9 @@
 ---
-title: "Using the EJScreen API via EJAM"
-description: "Using the EJScreen API via EJAM"
+title: "Using the EJSCREEN API via EJAM"
+description: "Using the EJSCREEN API via EJAM"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Using the EJScreen API via EJAM}
+  %\VignetteIndexEntry{Using the EJSCREEN API via EJAM}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -37,19 +37,19 @@ indexblocks()
 ```
 
 
-## **NOTE: These features are not be available as of mid-2025 since the EJScreen API was taken down in early 2025.**
+## **NOTE: These features are not be available as of mid-2025 since the EJSCREEN API was taken down in early 2025.**
 
 
-EJAM includes the EJAMejscreen package, a set of functions and data that facilitate access to EJScreen data and reports, using the API provided by EJScreen. It does a few things:
+EJAM includes the EJAMejscreen package, a set of functions and data that facilitate access to EJSCREEN data and reports, using the API provided by EJSCREEN. It does a few things:
 
--   **API wrapper:** Makes it easier to use the EJScreen API from R
--   **Batch processor:** Includes a function that lets you obtain a batch of EJScreen results via API, assembled in a table.
--   **Web App:** Provides a shiny R web app interface that helps you use the batch tool. This provides access to the EJScreen API in a loop or batch mode. It uses EJScreen to run reports on multiple places one at a time, so it is somewhat slow for more than a handful of places, but exactly replicates EJScreen results.
+-   **API wrapper:** Makes it easier to use the EJSCREEN API from R
+-   **Batch processor:** Includes a function that lets you obtain a batch of EJSCREEN results via API, assembled in a table.
+-   **Web App:** Provides a shiny R web app interface that helps you use the batch tool. This provides access to the EJSCREEN API in a loop or batch mode. It uses EJSCREEN to run reports on multiple places one at a time, so it is somewhat slow for more than a handful of places, but exactly replicates EJSCREEN results.
 -   **Web Module:** EJAM will include a shiny module within EJAM's web app UI, that provides access to both in one place.
 
-### Get one EJScreen report in your web browser
+### Get one EJSCREEN report in your web browser
 
-This works best for one site at a time, and does not provide results in a table, just a formatted web page EJScreen Community Report directly from EJScreen.
+This works best for one site at a time, and does not provide results in a table, just a formatted web page EJSCREEN Community Report directly from EJSCREEN.
 
 ```{r browseURL, eval=FALSE}
 
@@ -78,9 +78,9 @@ for (i in 1:2) {
 }
 ```
 
-### Get EJScreen results tables in RStudio (in tables, for a list of sites)
+### Get EJSCREEN results tables in RStudio (in tables, for a list of sites)
 
-In RStudio, you can use EJAM's EJScreen API code like this:
+In RStudio, you can use EJAM's EJSCREEN API code like this:
 
 ```{r ejscreenit-interactive, eval = FALSE}
 
@@ -98,7 +98,7 @@ x$table
 # ejscreenit_see_table(x) 
 ```
 
-### Get EJScreen results tables in a local web app \*\*\*not tested
+### Get EJSCREEN results tables in a local web app \*\*\*not tested
 
 ```{r app_run_EJAMejscreenapi, eval = FALSE}
 ### *** NOT TESTED - MAY NO LONGER WORK AS SHIFT TO USING MODULE VERSION and update to v2.32
@@ -107,7 +107,7 @@ EJAM::app_run_EJAMejscreenapi()
 
 ```
 
-### Get EJScreen results tables in a local web app module \*\*\*not tested
+### Get EJSCREEN results tables in a local web app module \*\*\*not tested
 
 ```{r api_module, eval = FALSE}
 
@@ -119,7 +119,7 @@ TEST_UI <- function(request) {
     tabsetPanel(
       tabPanel(
         title = "api app",
-        shiny::h2('EJScreen API batch tool packaged with EJAM'), 
+        shiny::h2('EJSCREEN API batch tool packaged with EJAM'), 
         # EJAM:::mod_ejscreenapi_ui("TESTID", simpleradiusdefault_for_ui = 2),
         mod_ejscreenapi_ui("TESTID", simpleradiusdefault_for_ui = 2),
         br()
@@ -157,12 +157,12 @@ TEST_SERVER <- function(input, output, session) {
 shinyApp(ui = TEST_UI, server = TEST_SERVER) # Try module in mini/test app
 ```
 
-# Compare numbers provided by EJAM and EJScreen API (comparing estimated population, indicator scores, etc.)
+# Compare numbers provided by EJAM and EJSCREEN API (comparing estimated population, indicator scores, etc.)
 
 ```{r ejamit-testpoints_1000, eval = FALSE}
 
 ################# # 
-# Run (potentially long) analysis in EJScreen, 
+# Run (potentially long) analysis in EJSCREEN, 
 # Pick sample of randomly selected EPA-regulated facilities in the FRS:
 # n <- 30 # or 1,000 sites, e.g.
 # pts <- testpoints_n(n, weighting = 'frs')
@@ -213,9 +213,9 @@ out1 <- out1[!(1:NROW(out1) %in% missingdatarows), ]
 
 ```
 
-# Compare Speeds for EJAM and EJScreen API
+# Compare Speeds for EJAM and EJSCREEN API
 
-EJAM is designed to provide results for large numbers of sites very quickly, so it can analyze well over 100,000 sites per hour, and can analyze 1,000 sites in something like 10 to 20 seconds (assuming it has already been initialized with loaded data and indexing, which needs to be done once up front and can take a minute). Using the EJScreen API by contrast as of mid 2024 took well over 100 times as long.
+EJAM is designed to provide results for large numbers of sites very quickly, so it can analyze well over 100,000 sites per hour, and can analyze 1,000 sites in something like 10 to 20 seconds (assuming it has already been initialized with loaded data and indexing, which needs to be done once up front and can take a minute). Using the EJSCREEN API by contrast as of mid 2024 took well over 100 times as long.
 
 There are some (internal / not necessarily all exported) EJAM functions that are relevant:
 

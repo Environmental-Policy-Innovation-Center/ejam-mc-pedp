@@ -6,8 +6,8 @@
 # They are created as follows:
 
 # for version 2.32 (in July/August 2024)
-# they can be created from the .gdb.zip file that was obtained from the EJScreen team
-message("The 'datacreate_blockwts.R' script does not include Island Areas GU VI MP AS, since they lack almost all indicator data in EJScreen v2.32")
+# they can be created from the .gdb.zip file that was obtained from the EJSCREEN team
+message("The 'datacreate_blockwts.R' script does not include Island Areas GU VI MP AS, since they lack almost all indicator data in EJSCREEN v2.32")
 
 # for version 2.2 (through July/August 2024)
 # they were created from Census 2020 data
@@ -55,10 +55,10 @@ if (interactive() && askquestions) {
 # tryinstall = FALSE
 
 ################################## #
-warning("Note that the file from EJScreen team lacks area info for blocks, while Census Bureau downloads would have that.
-            Relying only on the file from EJScreen team, we cannot calculate block_radius_miles
+warning("Note that the file from EJSCREEN team lacks area info for blocks, while Census Bureau downloads would have that.
+            Relying only on the file from EJSCREEN team, we cannot calculate block_radius_miles
             as would be need to create custom nationwide proximity scores like proxistat() does.
-            Also, it seems clear that EJScreen does not do small-distance adjustments with that in buffer analysis.")
+            Also, it seems clear that EJSCREEN does not do small-distance adjustments with that in buffer analysis.")
 cat("
 The dataset used by EJAM called blockwts has a column called block_radius_miles
 that is what the radius would be if the block were circular, and it is based on
@@ -74,7 +74,7 @@ in EJAM/data-raw/datacreate_blockwts.R if this is needed.
 ###
 ### POSSIBLE LIMITATION OF relying on manually obtained weights table from ejscreen team
 ### is that calculating custom proximity scores like proxistat() does require area of blocks
-### to do small distance adjustments, but the file from EJScreen team lacks that info.
+### to do small distance adjustments, but the file from EJSCREEN team lacks that info.
 ### Weight Table below, does NOT have info on size (square meters) of blocks.
 ### FILE LACKS area, SO CANNOT CALCULATE block_radius_miles that EJAM 2.2 used.
 ### So custom proximity scores like proxistat() will not be possible without the full info from Census Bureau.
@@ -83,16 +83,16 @@ in EJAM/data-raw/datacreate_blockwts.R if this is needed.
 ### via the census2020download package, as above.
 
 ### At least for buffer aggregation (as in ejamit() or shiny app) reports,
-### EJScreen/EJAM v2.32 will not actually use that in buffer analysis -
-### CONFIRMED EJScreen does NOT do the small distance adjustment for buffer aggregation,
-### even though it was doing that adjustment in the calculation of blockgroup proximity scores once a year in EJScreen.
+### EJSCREEN or EJAM v2.32 will not actually use that in buffer analysis -
+### CONFIRMED EJSCREEN does NOT do the small distance adjustment for buffer aggregation,
+### even though it was doing that adjustment in the calculation of blockgroup proximity scores once a year in EJSCREEN.
 ### We can now put in placeholder like NA values for now as long as doaggregate() is prevented
 ### from using block_radius_miles in its calculations, via
 ###   use_adjusted_distance = FALSE
 ################################## #
 
 if (interactive() && askquestions) {
-  do_download_from_census <- askYesNo("Download block data from Census using package census2020download? (say no if you have a local copy of the weights file as gdb.zip from EJScreen)")
+  do_download_from_census <- askYesNo("Download block data from Census using package census2020download? (say no if you have a local copy of the weights file as gdb.zip from EJSCREEN )")
   if (is.na(do_download_from_census)) {stop('Cancel - halting script')} # {do_download_from_census <- FALSE}
 } else {
   do_download_from_census <- FALSE
@@ -150,9 +150,9 @@ if (!do_update) {
     ################################################ #
   } else {
 
-    # B) use file from EJScreen team, not Census Bureau ####
+    # B) use file from EJSCREEN team, not Census Bureau ####
 
-    # WeightTables_2020_CT2022_fix.gdb.zip file was provided directly by the EJScreen team for use here.
+    # WeightTables_2020_CT2022_fix.gdb.zip file was provided directly by the EJSCREEN team for use here.
     # WeightTables_2020_CT2022_09032024.gdb.zip file was provided directly as an update on 9/4/24
     # (corrected for missing 19 blockgroups)
     # From	xxxxxxxxxx@epa.gov
@@ -160,9 +160,9 @@ if (!do_update) {
     # Subject	 Updated Weight Table
     # Message	 Those “missing” 19 BGs came out the ID misassignment for about 50,000 blocks for CT. Their IDs were incorrectly assigned. Census doesn't have 2022 block IDs for CT. They were generated based on 2022 BG IDs. Thanks for reporting them! The update was made to the block weight table. Let us know if you have any questions.
     #
-    # importing the downloaded gdb.zip file of block weights used by EJScreen version 2.32
+    # importing the downloaded gdb.zip file of block weights used by EJSCREEN version 2.32
     message("Not downloading block data from Census using package census2020download")
-    message("Trying to use a local file that had been manually obtained from EJScreen team as gdb.zip")
+    message("Trying to use a local file that had been manually obtained from EJSCREEN team as gdb.zip")
 
     mydir = "~/../Downloads"
     # fname = "WeightTables_2020_CT2022_fix.gdb.zip" # had 19 problems

@@ -4,7 +4,7 @@ select_valid_file <- function(silentinteractive = FALSE) {
   # helper utility - select a file
   # interactively non in shiny, let user select a file (full path and filename) by browsing to it
   # that is a valid type of file for use as an input to ejamit()
-  
+
   #  see  shapefile_from_any()
   #  c("zip", "gdb", "geojson", "json", "kml", "shp", "shx", "dbf", "prj")
   # *.zip, *.gdb, *.geojson, *.json, *.kml, *.shp, *.shx, *.dbf, *.prj
@@ -15,7 +15,7 @@ select_valid_file <- function(silentinteractive = FALSE) {
         path = testdata(quiet = TRUE),
         # filter = "", # allow anything to be picked and validate allowed formats later?
         #   or else list all the shp and latlon types allowed like
-        filter = paste0("Excel/csv/Shapefiles (*.xlsx, *.xls, *.csv, *.zip, *.gdb, *.geojson, *.json, *.kml, *.shp)"), 
+        filter = paste0("Excel/csv/Shapefiles (*.xlsx, *.xls, *.csv, *.zip, *.gdb, *.geojson, *.json, *.kml, *.shp)"),
           #  *.shx, *.dbf, *.prj, *.cpg, ## not relevant since selectFile doese not let you select multiple files ? but if filter allows .shp, these others do appear just not .cpg ?
         existing = TRUE
       )
@@ -256,7 +256,14 @@ latlon_from_anything <- function(anything, lon_if_used, interactiveprompt = TRUE
     }
   } else {
     # x is now a data.frame
+
+    if ("sf" %in% class(x)) {
+      message("estimating centroid of each polygon")
+      pts <- latlon_from_shapefile_centroids(x)
+    } else {
+
     pts <- x
+    }
   }
 # This will try to geocode any street addresses to create lat lon if no latlon found but addresses are found
   pts <- latlon_df_clean(pts, invalid_msg_table = invalid_msg_table, set_invalid_to_na = set_invalid_to_na) # This does latlon_infer() and latlon_as.numeric() and latlon_is.valid()

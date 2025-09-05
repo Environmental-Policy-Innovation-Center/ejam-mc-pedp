@@ -604,7 +604,7 @@ app_ui  <- function(request) {
                                             tabPanel(id = "plot_average",
                                                      title = 'Plot Average Scores',
                                                      h4('About this Chart'),
-                                                     helpText('These charts show how each residential population group and environmental stressor, in the analyzed locations, compares to its US average. A Summary/ EJ Index combines an environmental indicator with the Demog. Index (The Summary Index is what EJScreen called an EJ Index).'),
+                                                     helpText('These charts show how each residential population group and environmental stressor, in the analyzed locations, compares to its US average. A Summary/ EJ Index combines an environmental indicator with the Demog. Index (The Summary Index is what EJSCREEN called an EJ Index).'),
 
                                                      wellPanel(
                                                        style = 'width: 100%;',
@@ -901,7 +901,7 @@ app_ui  <- function(request) {
                                                       placeholder =  as.vector(metadata_mapping$blockgroupstats[['acs_version']])),
                                             ## input:
                                             textInput(inputId = 'ejscreen_version',
-                                                      label = 'Version of EJScreen',
+                                                      label = 'Version of EJSCREEN',
                                                       placeholder =  as.vector(metadata_mapping$blockgroupstats[['ejam_package_version']]))
                                           ),
                                           ############################ #
@@ -1161,7 +1161,7 @@ app_ui  <- function(request) {
 
                  shiny::selectInput(inputId = 'subgroups_type',
                                     #    "nh" for non-hispanic race subgroups as in Non-Hispanic White Alone, nhwa and others in names_d_subgroups_nh;
-                                    #    "alone" for EJScreen v2.2 style race subgroups as in    White Alone, wa and others in names_d_subgroups_alone;
+                                    #    "alone" for EJSCREEN v2.2 style race subgroups as in    White Alone, wa and others in names_d_subgroups_alone;
                                     #    "both" for both versions.
                                     label = "Which definition of Residential Populations subgroups to include?",
                                     choices = list(NonHispanicAlone = 'nh', Alone = 'alone', Both = 'both'),
@@ -1427,14 +1427,14 @@ app_ui  <- function(request) {
         #
         # . ----------------------------------------------- ####
         ## . ####
-        # EJScreen API MODULE -  tabPanel   ####
+        # EJSCREEN API MODULE -  tabPanel   ####
         ## may move to another tab. or in a conditional UI panel.
         ## see default_hide_ejscreenapi_tab in global_defaults_*.R
 
-        #  , tabPanel(title = 'EJScreen Batch Tool',
+        #  , tabPanel(title = 'EJSCREEN Batch Tool',
         #
-        #          h3("Access to EJScreen results via the API"),
-        #          h4("(slow, fewer features, and cannot aggregate overall, but exactly replicates EJScreen web app)"),
+        #          h3("Access to EJSCREEN results via the API"),
+        #          h4("(slow, fewer features, and cannot aggregate overall, but exactly replicates EJSCREEN web app)"),
         #          br(),
         #
         #          # notes  ## ##
@@ -1460,16 +1460,16 @@ app_ui  <- function(request) {
 
         # ejscreenapi mini-webapp link ####
         ### obsolete
-        # span('tool for batch use of the EJScreen API: ',
+        # span('tool for batch use of the EJSCREEN API: ',
         #
         # a('ejscreenapi tool for expert use',
         # href = 'https://',                                 ## offline
         # target = '_blank', rel = 'noreferrer noopener'))
         ######################################################## #
 
-        # EJScreen single-site-report widget ####
+        # EJSCREEN single-site-report widget ####
         ### obsolete while API down
-        # span('widget for querying EJScreen by place name',
+        # span('widget for querying EJSCREEN by place name',
         # div(HTML('
         #   <iframe
         #   src="https://www.epa.gov/sites/production/files/widgets/ejscreenwidget.html"  ## offline

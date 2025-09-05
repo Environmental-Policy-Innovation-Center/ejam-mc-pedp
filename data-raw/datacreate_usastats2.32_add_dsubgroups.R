@@ -9,7 +9,7 @@
 # and maybe other indicators like lowlifex 
 #   by using pctiles_lookup_create() etc.
 # since basic ftp site lookup tables for v2.2 lacked demog subgroups and other variables like lowlifex 
-# That is because community report in EJScreen does not report others as percentiles, just raw.
+# That is because community report in EJSCREEN does not report others as percentiles, just raw.
 #   but we want to be able to analyze ratio to mean and percentiles for 
 # demog subgroups and possibly various other indicators that are extra ones on ejscreen community report.
 # All those extra columns and demog subgroups have been added to blockgroupstats via acs22
@@ -24,7 +24,7 @@
 # [1] "AS" "GU" "MP" "VI"
 
 # ideally would create  pctile lookup info for demog subgroups, in us, states, island areas; 
-# except that EJScreen community report does not actually report those as percentiles, only as raw percentages,
+# except that EJSCREEN community report does not actually report those as percentiles, only as raw percentages,
 # even though EJAM was reporting them as percentiles, so either redo EJAM calc of pctiles table for subgroups
 # OR just stop reporting those as percentiles.
 # Not sure which is easier to do quickly. 
@@ -254,7 +254,7 @@ if (all(usastats[,intersect(names_d_subgroups_both, names(usastats))] == 0)  |
 #'   for a set of indicators such as percent low income.
 #'   Each column is one indicator (or specifies the percentile).
 #'   
-#'   This should be similar to the lookup tables in the gdb on the FTP site of EJScreen,
+#'   This should be similar to the lookup tables in the gdb on the FTP site of EJSCREEN,
 #'   except it also has data for additional population subgroups.
 #'   
 #'   For details on how the table was made, see source package files
@@ -271,7 +271,7 @@ if (all(usastats[,intersect(names_d_subgroups_both, names(usastats))] == 0)  |
 #'   for a set of indicators such as percent low income.
 #'   Each column is one indicator (or specifies the percentile).
 #'   
-#'   This should be similar to the lookup tables in the gdb on the FTP site of EJScreen,
+#'   This should be similar to the lookup tables in the gdb on the FTP site of EJSCREEN,
 #'   except it also has data for additional population subgroups.
 #'   See also [usastats] for more details.")
   

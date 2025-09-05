@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreenapi1.R
 \name{ejscreenapi1}
 \alias{ejscreenapi1}
-\title{Use EJScreen API to get stats on ONLY ONE circular buffer}
+\title{Use EJSCREEN API to get stats on ONLY ONE circular buffer}
 \usage{
 ejscreenapi1(
   lon,
@@ -45,13 +45,13 @@ TRUE if you want to try to extract ST abbrev and statename from the placename fi
 which is more likely to be correct than the stateAbbr and stateName fields in the API output.}
 }
 \description{
-Get EJScreen report results for one circular buffer, as a data.frame
+Get EJSCREEN report results for one circular buffer, as a data.frame
 }
 \details{
 Specify a radius and vector of latitude longitude points,
 and get for a buffer the population weighted mean value of each raw indicator
 like percent low-income, and total population count, and percentiles for those
-raw indicator scores, all from EJScreen, as in an EJScreen standard report.
+raw indicator scores, all from EJSCREEN, as in an EJSCREEN standard report.
 
 Note that this API is fairly slow, so it is fine for 10 sites, but not large numbers.
 

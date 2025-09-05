@@ -119,7 +119,7 @@ plot_distance_by_pctd <- function(s2b = NULL, sitenumber = 1, #  NULL,
   if (!("ejam_uniq_id" %in% colnames(s2b)) || !(sitenumber %in% s2b$ejam_uniq_id)) {stop("sitenumber of ", sitenumber, " not found among s2b$ejam_uniq_id values")}
   # limit analysis to this one site and limited radius to view and drop unpopulated blocks
   s2b <- data.table::copy(s2b[ejam_uniq_id == sitenumber & blockwt > 0 & distance <= radius, ])
-  # get the relevant EJScreen demog or envt indicator scores, by block group
+  # get the relevant EJSCREEN demog or envt indicator scores, by block group
   s2b <- merge(s2b, blockgroupstats[pop > 0, c(..allvarnames)], all.x = TRUE, all.y = FALSE, by = "bgid")
   # sort by increasing distance
   data.table::setorder(s2b, distance)

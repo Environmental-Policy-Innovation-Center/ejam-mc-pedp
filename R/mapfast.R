@@ -32,7 +32,7 @@ mapfastej <- function(mydf, radius = 3, column_names = 'ej', labels = column_nam
 #'   e.g., as from \code{names2fips('DE')} or \code{ejamit(fips='01')$results_bysite}.
 #'
 #' @param radius in miles, converted to meters and passed to leaflet::addCircles() if appropriate
-#' @param column_names If "ej" then nice popup made based on just key EJScreen
+#' @param column_names If "ej" then nice popup made based on just key EJSCREEN
 #'   indicators. If "all" then every column in the entire mydf table is shown
 #'   in the popup. If a vector of colnames, only those are shown in popups.
 #' @param labels The labels used before the column_names, for map popups,

@@ -3,7 +3,7 @@
 
 # NOTE on refactoring this code:
 #
-# if/when EJScreen API provided 1-site report, EJAM used that via that API,
+# if/when EJSCREEN API provided 1-site report, EJAM used that via that API,
 # (instead of using the very similar EJAM version of 1-site report),
 # AND provided in a separate button, this pair of barplots on 1 site,
 # via this function.

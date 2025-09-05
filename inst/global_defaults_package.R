@@ -105,11 +105,11 @@ global_defaults_package$default_reports =  list(
     # , list(header = "ECHO Report",         text = "ECHO",         FUN = url_echo_facility) # if regid provided # e.g., browseURL(url_echo_facility(110070874073))
     # , list(header = "FRS Report",          text =  "FRS",         FUN = url_frs_facility)            # if regid provided # e.g., browseURL(url_frs_facility(testinput_registry_id[1]))
     # , list(header = "Enviromapper Report", text = "Enviromapper", FUN = url_enviromapper)          # if lat,lon provided # e.g., browseURL(url_enviromapper(lat = 38.895237, lon = -77.029145, zoom = 17))
-    , list(header = "County Health Report",       text = "County",       FUN = url_countyhealth)  # if fips provided
-    , list(header = "State Health Report",       text = "State",       FUN = url_statehealth)  # if fips provided
-	, list(header = "County Equity Atlas Report", text = "County (Equity Atlas)", FUN = url_equityatlas_county)
-    , list(header = "State Equity Atlas Report", text = "State (Equity Atlas)", FUN = url_equityatlas_state)
-	
+#     , list(header = "County Health Report",       text = "County",       FUN = url_county_health)  # if fips provided
+#     , list(header = "State Health Report",       text = "State",       FUN = url_state_health)  # if fips provided
+# 	, list(header = "County Equity Atlas Report", text = "County (Equity Atlas)", FUN = url_county_equityatlas)
+#     , list(header = "State Equity Atlas Report", text = "State (Equity Atlas)", FUN = url_state_equityatlas)
+
 )
 # should not be needed, but just in case while shifting to this method:
 global_defaults_package$default_hyperlink_colnames <- sapply(global_defaults_package$default_reports, function(x) x$header)

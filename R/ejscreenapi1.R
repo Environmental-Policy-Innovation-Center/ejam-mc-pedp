@@ -1,13 +1,13 @@
 
-#' Use EJScreen API to get stats on ONLY ONE circular buffer
+#' Use EJSCREEN API to get stats on ONLY ONE circular buffer
 #' 
-#' Get EJScreen report results for one circular buffer, as a data.frame
+#' Get EJSCREEN report results for one circular buffer, as a data.frame
 #' 
 #' @details
 #' Specify a radius and vector of latitude longitude points,
 #' and get for a buffer the population weighted mean value of each raw indicator
 #' like percent low-income, and total population count, and percentiles for those
-#' raw indicator scores, all from EJScreen, as in an EJScreen standard report. 
+#' raw indicator scores, all from EJSCREEN, as in an EJSCREEN standard report. 
 #' 
 #' Note that this API is fairly slow, so it is fine for 10 sites, but not large numbers.
 #' 

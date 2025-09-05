@@ -11,7 +11,7 @@
 #'   Results are the sites2blocks table that would be used by doaggregate(),
 #'   with distance in miles as one output column of data.table.
 #'   Adjusts distance to avg resident in block when it is very small relative to block size,
-#'   the same way EJScreen adjusts distances in creating proximity scores.
+#'   the same way EJSCREEN adjusts distances in creating proximity scores.
 #'
 #'   Each point can be the location of a regulated facility or other type of site, and
 #'   the blocks are a high-resolution source of information about where
@@ -27,14 +27,14 @@
 #' @param maxradius miles distance (max distance to check if not even 1 block point is within radius)
 #' @param avoidorphans logical If TRUE, then where not even 1 BLOCK internal point is within radius of a SITE,
 #'   it keeps looking past radius, up to maxradius, to find nearest 1 BLOCK.
-#'   What EJScreen does in that case is report NA, right? So,
+#'   What EJSCREEN does in that case is report NA, right? So,
 #'   does EJAM really need to report stats on residents presumed to be within radius,
 #'    if no block centroid is within radius?
 #'   Best estimate might be to report indicators from nearest block centroid which is
 #'   probably almost always the one your site is sitting inside of,
 #'   but ideally would adjust total count to be a fraction of blockwt based on
 #'   what is area of circular buffer as fraction of area of block it is apparently inside of.
-#'   Setting this to TRUE can produce unexpected results, which will not match EJScreen numbers.
+#'   Setting this to TRUE can produce unexpected results, which will not match EJSCREEN numbers.
 #'
 #'   Note that if creating a proximity score, by contrast, you instead want to find nearest 1 SITE if none within radius of this BLOCK.
 #' @param quadtree (a pointer to the large quadtree object)
@@ -185,7 +185,7 @@ getblocksnearbyviaQuadTree2 <- function(sitepoints, radius = 3, maxradius = 31.0
     #
     #### If avoidorphans TRUE, and no blockpt within radius of site, look past radius to maxradius   ############## #
     #
-    # But note looking past radius is NOT how EJScreen works, for buffer reports - it just fails to provide any result if no blockpoint is inside circle. (For proximity scores, which are different than circular buffer reports, EJScreen does look beyond radius, but not for circular zone report). Also, you would rarely get here even if avoidorphans set TRUE.
+    # But note looking past radius is NOT how EJSCREEN works, for buffer reports - it just fails to provide any result if no blockpoint is inside circle. (For proximity scores, which are different than circular buffer reports, EJSCREEN does look beyond radius, but not for circular zone report). Also, you would rarely get here even if avoidorphans set TRUE.
 
     if ( avoidorphans && (nrow(res[[i]]))      == 0) {
       if (!quiet) {cat("avoidorphans is TRUE, so avoiding reporting zero blocks nearby at site ", i, " by searching past radius of ", radius, " to maxradius of ", maxradius, "\n")}
@@ -235,7 +235,7 @@ getblocksnearbyviaQuadTree2 <- function(sitepoints, radius = 3, maxradius = 31.0
   }
   # ADJUST THE VERY SHORT DISTANCES ####
 
-  # distance gets adjusted to be the minimum possible value,  0.9 * effective radius of block_radius_miles (see EJScreen Technical Documentation discussion of proximity analysis for rationale)
+  # distance gets adjusted to be the minimum possible value,  0.9 * effective radius of block_radius_miles (see EJSCREEN Technical Documentation discussion of proximity analysis for rationale)
 
   if (!("block_radius_miles" %in% names(blockwts))) {
     # if missing because not added to dataset yet then use placeholder of 100 / meters_per_mile, or 100 meters
@@ -244,7 +244,7 @@ getblocksnearbyviaQuadTree2 <- function(sitepoints, radius = 3, maxradius = 31.0
     blockwts[ , block_radius_miles := block_radius_miles_round_temp] # lazy load this and add it into blockwts
   }
   # Add block_radius_miles here, now to be able to correct the distances that are small relative to a block size.
-  # This adjusts distance the way EJScreen does for proximity scores - so distance reflects distance of sitepoint to avg resident in block
+  # This adjusts distance the way EJSCREEN does for proximity scores - so distance reflects distance of sitepoint to avg resident in block
   # (rather than sitepoint's distance to the block internal point),
   # including e.g., where distance to block internal point is so small the site is inside the block.
   # This also avoids infinitely small or zero distances.

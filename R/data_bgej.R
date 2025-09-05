@@ -10,7 +10,7 @@
 #' @details This file is not stored in the package.
 #'
 #'   For documentation on the residential population and environmental data and indicators,
-#'   see [EJScreen documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/understanding-ejscreen-results).
+#'   see [EJSCREEN documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/understanding-ejscreen-results).
 #'
 #'   The column names are these:
 #'

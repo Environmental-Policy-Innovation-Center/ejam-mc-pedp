@@ -132,12 +132,12 @@ url_ejscreen_report <- function(sitepoints = NULL, lat='', lon='', radius='', mo
       if (missing(areatype)) {
         areatype <- fipstype(fips)
       }
-      if (!(all(areatype %in% c("blockgroup", "tract", "city", "county", 'state')))) {warning("FIPS must be one of 'blockgroup', 'tract', 'city', 'county', 'state' for the EJScreen API")}
+      if (!(all(areatype %in% c("blockgroup", "tract", "city", "county", 'state')))) {warning("FIPS must be one of 'blockgroup', 'tract', 'city', 'county', 'state' for the EJSCREEN API")}
       if (!(length(areatype) %in% c(1, length(areaid)))) {warning("must provide either 1 areatype value for all or exactly one per areaid")}
 
       # namestr <- fips   # user could specify something else here
       if (is.null(namestr)) {namestr <- ''}
-      # The FIPS can be displayed as the name of the place on the EJScreen report since it already looks up and displays the actual name of a county or city
+      # The FIPS can be displayed as the name of the place on the EJSCREEN report since it already looks up and displays the actual name of a county or city
       # namestr <- rep("", length(areatype))
       # namestr[namestr == "county"] <- fips2countyname(fips[namestr == "county"])
       # # namestr[namestr == "state"] <- fips2statename(fips[namestr == "state"])
@@ -195,7 +195,7 @@ url_ejscreen_report <- function(sitepoints = NULL, lat='', lon='', radius='', mo
     )
 
   if (as_html) {
-    if (missing(linktext)) {linktext <- paste0("EJScreen Report")}
+    if (missing(linktext)) {linktext <- paste0("EJSCREEN Report")}
     url <- url_linkify(url, text = linktext)
   }
 
@@ -207,9 +207,9 @@ url_ejscreen_report <- function(sitepoints = NULL, lat='', lon='', radius='', mo
 ################################################### #################################################### #
 
 
-#  #' URL functions - API WENT DOWN? Get URLs of EJScreen ACS reports - OBSOLETE
+#  #' URL functions - API WENT DOWN? Get URLs of EJSCREEN ACS reports - OBSOLETE
 #  #'
-#  #' Get URL(s) for EJScreen ACS report on residents near given point(s)
+#  #' Get URL(s) for EJSCREEN ACS report on residents near given point(s)
 #  #'
 #  #' @details  NOT USED BY APP NOW THAT COMMUNITY REPORT EXISTS and API went down
 #  #'
@@ -250,7 +250,7 @@ url_ejscreen_report <- function(sitepoints = NULL, lat='', lon='', radius='', mo
 
 #' URL functions - API WENT DOWN? url_get_via_url - helper function work in progress: GET json via url of ejscreen ejquery map services
 #'
-#' @param url the url for an EJScreen ejquery request
+#' @param url the url for an EJSCREEN ejquery request
 #'
 #' @return json
 #'
@@ -788,12 +788,12 @@ url_to_get_nearby_blocks_rest_services_ejscreen_ejquery_MapServer_71 <- function
 
 #' URL functions - DRAFT FRAGMENTS OF CODE - url_bookmark_save
 #'
-#' save bookmarked EJScreen session (map location and indicator)
+#' save bookmarked EJSCREEN session (map location and indicator)
 #' @details
 #' WORK IN PROGRESS - NOT USED AS OF EARLY 2023.
 #' You can use this function to create and save a json file that is a bookmark
-#' for a specific place/ map view/ data layer in EJScreen.
-#' You can later pull up that exact map in EJScreen by launching EJScreen,
+#' for a specific place/ map view/ data layer in EJSCREEN.
+#' You can later pull up that exact map in EJSCREEN by launching EJSCREEN,
 #' clicking Tools, Save Session, Load from File.
 #'
 #' ***Units are not lat lon: "spatialReference":{"latestWkid":3857,"wkid":102100}
@@ -806,7 +806,7 @@ url_to_get_nearby_blocks_rest_services_ejscreen_ejquery_MapServer_71 <- function
 #' @param ... passed to [url_bookmark_text()]
 #' @param file path and name of .json file you want to save locally
 #'
-#' @return URL for 1 bookmarked EJScreen map location and variable displayed on map
+#' @return URL for 1 bookmarked EJSCREEN map location and variable displayed on map
 #'
 #' @noRd
 #' @keywords internal
@@ -850,12 +850,12 @@ url_bookmark_save <- function(..., file="ejscreenbookmark.json") {
 
 #' URL functions - DRAFT FRAGMENTS OF CODE - url_bookmark_text
 #'
-#' URL for 1 bookmarked EJScreen session (map location and indicator)
+#' URL for 1 bookmarked EJSCREEN session (map location and indicator)
 #' @details
 #' WORK IN PROGRESS - NOT USED AS OF EARLY 2023.
 #' You can use this function to create and save a json file that is a bookmark
-#' for a specific place/ map view/ data layer in EJScreen.
-#' You can later pull up that exact map in EJScreen by launching EJScreen,
+#' for a specific place/ map view/ data layer in EJSCREEN.
+#' You can later pull up that exact map in EJSCREEN by launching EJSCREEN,
 #' clicking Tools, Save Session, Load from File.
 #'
 #' Note:
@@ -863,9 +863,9 @@ url_bookmark_save <- function(..., file="ejscreenbookmark.json") {
 #' (2) Session files, if saved, are available from the default Downloads folder on your computer.
 #' (3) Users should exercise caution when saving sessions that may contain sensitive or confidential data.
 #'
-#' @param x vector of approx topleft, bottomright longitudes in some units EJScreen uses?
+#' @param x vector of approx topleft, bottomright longitudes in some units EJSCREEN uses?
 #'    Units are not lat lon: "spatialReference":{"latestWkid":3857,"wkid":102100}
-#' @param y vector of approx topleft, bottomright latitudes in some units EJScreen uses?
+#' @param y vector of approx topleft, bottomright latitudes in some units EJSCREEN uses?
 #'    Units are not lat lon: "spatialReference":{"latestWkid":3857,"wkid":102100}
 #' @param name Your name for the map bookmark
 #' @param title Your name for the map like Socioeconomic Indicators  or  Pollution and Sources
@@ -878,7 +878,7 @@ url_bookmark_save <- function(..., file="ejscreenbookmark.json") {
 #' @param ymax  calculated bounding box for map view
 #' @param urlrest Just use the default but it changes each year
 #' @seealso [url_bookmark_save()]
-#' @return URL for 1 bookmarked EJScreen map location and variable displayed on map
+#' @return URL for 1 bookmarked EJSCREEN map location and variable displayed on map
 #'
 #' @examples \donttest{
 #'   url_bookmark_text()
@@ -897,7 +897,7 @@ url_bookmark_text <- function(
   y=c(3970069.245971938, 4067373.5829790044),
   # x=c(-172.305626, -59.454062),  # if longitude, zoomed way out to corners of USA plus some
   # y=c(63.774548, 16.955558), # if latitude, zoomed way out to corners of USA plus some
-  name="BookmarkedEJScreenMap",
+  name="Bookmarked_EJSCREEN_view",
   title="Socioeconomic Indicators", # Pollution and Sources
   renderField="B_UNEMPPCT",   # B_PTRAF
   pctlevel="nation",
@@ -914,7 +914,7 @@ url_bookmark_text <- function(
 
   yrinurl <- gsub(".*v20(..).*", "20\\1", urlrest)
   yrnow <- substr(Sys.time(),1,4)
-  if (yrnow > yrinurl + 1) {warning("Check that URL in url_bookmark_text() is updated to the latest dataset of EJScreen.")}
+  if (yrnow > yrinurl + 1) {warning("Check that URL in url_bookmark_text() is updated to the latest dataset of EJSCREEN.")}
   # example, at EJAM/inst/testdata/Sessions_Traffic in LA area.json
   # [{"extent":{"spatialReference":{"latestWkid":3857,"wkid":102100},"xmin":-13232599.178424664,"ymin":3970069.245971938,"xmax":-13085305.024919074,"ymax":4067373.5829790044},"basemap":"Streets","layers":[{"id":"digitizelayer","type":"graphics","title":"digitize graphics","visible":true,"graphics":[]},{"id":"ejindex_map","title":"Pollution and Sources","isDynamic":true,"layerType":"ejscreen","pctlevel":"nation","renderField":"B_PTRAF","renderIndex":4,"type":"map-image","url":"https://geopub.epa.gov/arcgis/rest/services/ejscreen/ejscreen_v2022_with_AS_CNMI_GU_VI/MapServer","visible":true,"opacity":0.5}],"graphics":[],"name":"Traffic in LA area"}]
   #

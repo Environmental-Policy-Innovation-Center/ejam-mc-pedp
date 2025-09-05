@@ -60,7 +60,7 @@
 # EJScreen's Environmental Justice Analysis Multisite Tool (EJAM)
 # The Environmental and Residential Population Analysis Multisite tool (multisite tool)
 
-# EJScreen Multisite Tool
+# EJSCREEN Multisite Tool
 # # Multisite Tool
 #
 # EJ-related information
@@ -72,10 +72,10 @@
 # is a resource provided by the United States Environmental Protection Agency (US EPA)
 # xxx
 
-# an EJScreen report
+# an EJSCREEN report
 # a community environmental/census data report
 #
-# See EJScreen methodology for details.
+# See EJSCREEN methodology for details.
 # ???
 #
 #   EPA staff

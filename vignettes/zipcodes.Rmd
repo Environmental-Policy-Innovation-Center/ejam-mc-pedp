@@ -49,7 +49,7 @@ Note a zip can be the same as a county fips in many cases, as with 10001!
 
 ![many county fips are also a zipcode](images/many_county_fips_are_also_a_zipcode.png){width="75%"}
 
-EJScreen's API does not handle zip codes. It can show where the center of the zip code is but will not map its bounds or provide a report easily via the API.
+The original (pre-2025) EJSCREEN API did not handle zip codes. It can show where the center of the zip code is but will not map its bounds or provide a report easily via the API.
 
 ```{r, eval=FALSE, include=TRUE}
 # Just see where the zipcode is, not its boundaries

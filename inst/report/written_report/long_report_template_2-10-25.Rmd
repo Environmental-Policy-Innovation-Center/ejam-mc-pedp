@@ -447,19 +447,18 @@ site locations are input to EJAM, the residential populations are
 then analyzed by location, and then summarized as percentiles and averages
 across all sites input to EJAM. 
 
-See [EJScreen
-methodology](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/technical-information-and-data-downloads)
+See [EJSCREEN methodology](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/technical-information-and-data-downloads)
 for details.
 
 ### Analytic method for buffering, and tools used to implement that method
 
 The basic methodology and data used for this analysis are the same as
-those used in EPA's EJScreen tool, with a few exceptions described
-below, and are described in detail in EJScreen's documentation, at
-[EJScreen](https://epa.gov/ejscreen "EPA EJScreen homepage"){.uri
+those used in EPA's EJSCREEN tool, with a few exceptions described
+below, and are described in detail in the EJSCREEN documentation, at
+[EJSCREEN](https://epa.gov/ejscreen "EPA EJSCREEN homepage"){.uri
 target="_blank" rel="noreferrer noopener"} and with more technical
-details available at [EJScreen technical documentation
-page](https://web.archive.org/web/20250118072723/https://www.epa.gov/ejscreen/technical-information-and-data-downloads "EPA EJScreen technical information"){.uri
+details available at [EJSCREEN technical documentation
+page](https://web.archive.org/web/20250118072723/https://www.epa.gov/ejscreen/technical-information-and-data-downloads "EPA EJSCREEN technical information"){.uri
 target="_blank" rel="noreferrer noopener"}.
 
 EJAM identifies residents near a given site by finding
@@ -473,29 +472,29 @@ not quite the same as the ACS population count). That block weight is a
 fraction of the parent block group and is used to estimate how many of
 the block groups residents are nearby or in the buffer.
 
-The only notable differences between the EJScreen and EJAM calculations
+The only notable differences between the EJSCREEN and EJAM calculations
 of proximity and indicators are the following:
 
 -   EJAM may include additional residential population or environmental indicators.
 -   For a proximity analysis (to characterize everyone living within a
 certain certain distance from a point such as a facility), EJAM
 identifies which residents live nearby using a slight variation on
-how the distance to each Census block is measured. While EJScreen
-uses ESRI's ArcGIS calculations, EJAM calculates the distance using
+how the distance to each Census block is measured. While EJSCREEN uses
+ESRI's ArcGIS calculations, EJAM calculates the distance using
 formulas implemented in the R language for statistical computing
 [@R-base]. These measurements provide almost identical results for
 estimated distance from the average person in a block to a given
 site point.
 -   EJAM aggregates indicator values within and across locations,
 converts them to percentiles, and performs other summary calculations
-using the same formulas as EJScreen to the greatest extent possible, but in R
-rather than within EJScreen itself. There may be slight differences
-between raw scores and percentiles in EJScreen and EJAM in some
+using the same formulas as EJSCREEN to the greatest extent possible, but in R
+rather than within EJSCREEN itself. There may be slight differences
+between raw scores and percentiles in EJSCREEN and EJAM in some
 cases.
 
 ## Demographic and environmental indicators
 
-The residential population indicators included in EJAM are the same as those in EJScreen.
+The residential population indicators included in EJAM are the same as those in EJSCREEN.
 People of Color (POC) are defined as all other than those
 self-identifying in ACS survey data as white, single race, not Hispanic
 or Latino - i.e., non-Hispanic white alone ("NHWA"). The subgroups include
@@ -504,11 +503,9 @@ but of only single race (e.g., Asian, or more specifically non-Hispanic
 Asian alone), non-Hispanic other single race, and non-Hispanic
 multiracial.
 
-The environmental indicators included in EJAM are the same as those in EJScreen. 
+The environmental indicators included in EJAM are the same as those in EJSCREEN. 
 
-See [EJScreen
-methodology](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/technical-information-and-data-downloads)
-for details.
+See [EJSCREEN methodology](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/technical-information-and-data-downloads) for details.
 
 # Findings
 

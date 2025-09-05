@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs_ejam}
 \alias{ejscreen_vs_ejam}
-\title{EJAM/EJSCREEN comparisons - compare EJScreen API vs EJAM stats at tested sites}
+\title{EJAM / EJSCREEN comparisons - compare EJSCREEN API vs EJAM stats at tested sites}
 \usage{
 ejscreen_vs_ejam(
   latlon,

@@ -1,11 +1,11 @@
 
-#' Given a set of points (lat lon), get table of EJScreen API results near each
+#' Given a set of points (lat lon), get table of EJSCREEN API results near each
 #' 
-#' @description Using EJScreen API without Shiny app interface 
+#' @description Using EJSCREEN API without Shiny app interface 
 #' @details See [ejscreenit()] for more details on this.
 #'    [ejscreenit()] uses functions below, but returns a list with table, map, plot, etc.
 #'      [ejscreenapi_plus()] accepts file or table or vectors of point data, 
-#'        uses [ejscreenapi()] to get EJScreen stats,
+#'        uses [ejscreenapi()] to get EJSCREEN stats,
 #'        and then prepends input table and renames columns, to return a table.
 #'        [ejscreenapi()]    gets EJ stats for many points as a data.table of many rows.
 #'          [ejscreenapi1()] gets EJ stats for 1 point via API, as data.frame of 1 row.
@@ -29,7 +29,7 @@
 #' @param save_when_report default is FALSE but if TRUE it saves work in progress every so often
 #' @param format_report_or_json do not use
 #' @param on_server_so_dont_save_files default is FALSE, but set to TRUE if this is run on a server
-#' @param ipurl change only if different URL has to be used for the EJScreen API
+#' @param ipurl change only if different URL has to be used for the EJSCREEN API
 #' @param mapping_for_names a table that translates between original (as on FTP site), 
 #'   short friendly (useful in coding or analysis), 
 #'   and long complete variable names (for clearer Excel headers).
@@ -113,7 +113,7 @@ ejscreenapi_plus <- function(x, y=NULL, radius = 3, unit ='miles', wkid=4326,
   }
   lon <- pts$lon; lat <- pts$lat
   }
-  # ***use EJScreen API*** ####
+  # ***use EJSCREEN API*** ####
   
   batchtableout <- ejscreenapi(
     lon = lon, lat = lat,
@@ -137,7 +137,7 @@ ejscreenapi_plus <- function(x, y=NULL, radius = 3, unit ='miles', wkid=4326,
   ### Combine input (from user) + output (from EJ stat buffering) ####
   #      (e.g., that user input uploaded may have site name, address, etc.) 
   #      & return combined table: 1 row per site (buffer), 1 col per indicator (variable).
-  ### Add links to EJScreen ####
+  ### Add links to EJSCREEN ####
   ### Flag sites near others ####
   ### Put best cols 1st #### 
   results_table <- cbind(pts, batchtableout) # needed here to allow links to be made . Since pts was a data.table, results_table here will be too!

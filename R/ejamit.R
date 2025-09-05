@@ -236,14 +236,14 @@ ejamit <- function(sitepoints = NULL,
                    ...
 ) {
   # note on avoidorphans parameter:
-  # What EJScreen does in that case is report NA, right?
+  # What EJSCREEN does in that case is report NA, right?
   # So, does EJAM really need to report stats on residents presumed to be within radius,
   #  if no block centroid is within radius?
   #  Best estimate might be to report indicators from nearest block centroid
   #  which is probably almost always the one your site is sitting inside of,
   #  but ideally would adjust total count to be a fraction of blockwt
   #  based on what is area of circular buffer as fraction of area of block it is apparently inside of.
-  #  Setting this to TRUE can produce unexpected results, which will not match EJScreen numbers.
+  #  Setting this to TRUE can produce unexpected results, which will not match EJSCREEN numbers.
   #  Note that if creating a proximity score, by contrast, you
   #  instead want to find nearest 1 SITE if none within radius of this BLOCK.
 

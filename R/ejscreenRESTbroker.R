@@ -1,7 +1,7 @@
 
-#' Low-level utility to query EJScreen API for one circular buffer - API may or may not be available
+#' Low-level utility to query EJSCREEN API for one circular buffer - API may or may not be available
 #'
-#' @description Use EJScreen API to get raw json-format response, ready to be
+#' @description Use EJSCREEN API to get raw json-format response, ready to be
 #' parsed by [ejscreenRESTbroker2table()]. This function underlies higher level
 #' functions like [ejscreenapi()] and overall [ejscreenit()]
 #'
@@ -125,7 +125,7 @@ ejscreenRESTbroker <- function(lon = NULL, lat = NULL, radius = 3,
 
   # shapefile ####
 
-  # Example of how theEJScreen API could be used to analyze a polygon, which must use POST not GET:
+  # Example of how the EJSCREEN API could be used to analyze a polygon, which must use POST not GET:
   # HTTP POST URL: https://ejscreen.epa.gov/mapper/ejscreenRESTbroker.aspx
   # HTTP POST Body:
   #   namestr=

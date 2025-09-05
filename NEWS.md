@@ -87,8 +87,8 @@
 | ECHO Report | ECHO | `url_echo_facility()` | regid, validate_regids, etc. |
 | FRS Report | FRS | `url_frs_facility()` | regid, validate_regids, etc. |
 | Enviromapper Report | Enviromapper | `url_enviromapper()` | sitepoints, lon, lat, shapefile, fips, zoom, etc. |
-| County Health Report | County | `url_countyhealth()` | fips, year, etc. |
-| State Health Report | State | `url_statehealth()` | fips, year, etc. |
+| County Health Report | County | `url_county_health()` | fips, year, etc. |
+| State Health Report | State | `url_state_health()` | fips, year, etc. |
 
 -   The choice of what URL/link columns to include is now controlled by settings within global_defaults_package.R
 
@@ -231,7 +231,7 @@ Note the URLs, emails, and notes about repository locations/owners were edited t
 -   fixed `ejam2means()`
 -   `ejam2report()` gets new params, and in `build_community_report()` added report_title = NULL, logo_path = NULL, logo_html = NULL.
 -   `plot_barplot_ratios()` gets new ylab and caption params
--   added warning in `url_countyhealth()` if default year seems outdated
+-   added warning in `url_county_health()` if default year seems outdated
 -   unexported draft `read_and_clean_points()`
 -   unexported draft `ejam2quantiles()`
 -   removed reference to obsolete testids_registry_id, replaced by `?testinput_regid`
@@ -243,7 +243,7 @@ Note the URLs, emails, and notes about repository locations/owners were edited t
 -   changed `.onAttach()` to do source(global_defaults_package) with local = FALSE not TRUE, but this might need to be revisited -- note both local = F and local = T are used in `.onAttach()` versus `get_global_defaults_or_user_options()`
 -   in server, `ejam2excel()` now figures out value of radius_or_buffer_description, `ejam2excel()` gets new parameters table_xls_from_ejam() uses improved buffer_desc_from_sitetype() and now uses `ejam2report()` to add a report in one tab.
 -   reorganized server code by moving v1_demog_table() and v1_envt_table to long report section of server file
--   cleaned up server code (eg, remove obsolete input\$disconnect, remove obsolete community_download() and report_community_download(), and remove repetitive `ejam2repor()`, remove old EJScreen Batch Tool tab, used session = session as param in server calls to updateXYZINPUT, etc.)
+-   cleaned up server code (eg, remove obsolete input\$disconnect, remove obsolete community_download() and report_community_download(), and remove repetitive `ejam2repor()`, remove old EJSCREEN Batch Tool tab, used session = session as param in server calls to updateXYZINPUT, etc.)
 -   allow shiny.testmode to be TRUE even if not set in options
 -   used silent=TRUE in more cases of `try()`
 -   added validate("problem with `map_shapes_leaflet()` function")
@@ -297,8 +297,8 @@ Note the URLs, emails, and notes about repository locations/owners were edited t
 
 # EJAM v2.32.2 (February 2025)
 
--   Revised all language based on executive orders, to refer to environmental and residential population data analysis, rather than EJ/EJScreen/etc.
--   Revised web links based on EJScreen website being offline
+-   Revised all language based on executive orders, to refer to environmental and residential population data analysis, rather than EJ / EJSCREEN / etc.
+-   Revised web links based on EJSCREEN website being offline
 -   Some edits made considering github repositories and gh pages may change location or go offline
 -   Updated FRS datasets, pulled on 2/12/25
 -   Remove screenshots from user guide document

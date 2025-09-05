@@ -15,7 +15,7 @@
 #'   Results are the sites2blocks table that would be used by doaggregate(),
 #'   with distance in miles as one output column of data.table.
 #'   Adjusts distance to avg resident in block when it is very small relative to block size,
-#'   the same way EJScreen adjusts distances in creating proximity scores.
+#'   the same way EJSCREEN adjusts distances in creating proximity scores.
 #'
 #'   Each point can be the location of a regulated facility or other type of site, and
 #'   the blocks are a high-resolution source of information about where
@@ -32,14 +32,14 @@
 #' @param maxradius miles distance (max distance to check if not even 1 block point is within radius)
 #' @param avoidorphans logical If TRUE, then where not even 1 BLOCK internal point is within radius of a SITE,
 #'   it keeps looking past radius, up to maxradius, to find nearest 1 BLOCK.
-#'   What EJScreen does in that case is report NA, right? So,
+#'   What EJSCREEN does in that case is report NA, right? So,
 #'   does EJAM really need to report stats on residents presumed to be within radius,
 #'    if no block centroid is within radius?
 #'   Best estimate might be to report indicators from nearest block centroid which is
 #'   probably almost always the one your site is sitting inside of,
 #'   but ideally would adjust total count to be a fraction of blockwt based on
 #'   what is area of circular buffer as fraction of area of block it is apparently inside of.
-#'   Setting this to TRUE can produce unexpected results, which will not match EJScreen numbers.
+#'   Setting this to TRUE can produce unexpected results, which will not match EJSCREEN numbers.
 #'
 #'   Note that if creating a proximity score, by contrast, you instead want to find nearest 1 SITE if none within radius of this BLOCK.
 #' @param quadtree (a pointer to the large quadtree object)
@@ -57,7 +57,7 @@
 #'   -- the distance column always represents distance to average resident in the block, which is
 #'   estimated by adjusting the site to block distance in cases where it is small relative to the
 #'   size of the block, to put a lower limit on it, which can result in a large estimate of distance
-#'   if the block is very large. See EJScreen documentation.
+#'   if the block is very large. See EJSCREEN documentation.
 #' @param updateProgress, optional function to update Shiny progress bar
 #'
 #' @examples
@@ -201,10 +201,10 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
     #getblocks_diagnostics(sites2blocks) # returns NA if no blocks nearby
   }
 
-  # distance can get adjusted to a minimum possible value,  0.9 * effective radius of block_radius_miles (see EJScreen Technical Documentation discussion of proximity analysis for rationale)
+  # distance can get adjusted to a minimum possible value,  0.9 * effective radius of block_radius_miles (see EJSCREEN Technical Documentation discussion of proximity analysis for rationale)
   # See notes in the file EJAM/data-raw/datacreate_blockwts.R
   # use block_radius_miles here, to correct the distances that are small relative to a block size.
-  # This adjusts distance the way EJScreen does for proximity scores - so distance reflects distance of sitepoint to avg resident in block
+  # This adjusts distance the way EJSCREEN does for proximity scores - so distance reflects distance of sitepoint to avg resident in block
   # (rather than sitepoint's distance to the block internal point),
   # including e.g., where distance to block internal point is so small the site is inside the block.
   # This also avoids infinitely small or zero distances.
@@ -219,7 +219,7 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
     if (!quiet) {  cat("\n\nAdjusting upwards the very short distances now...\n ")}
     # 2 ways considered here for how exactly to make the adjustment:
     sites2blocks[distance < block_radius_miles, distance := 0.9 * block_radius_miles]  # assumes distance is in miles
-    # or a more continuous but slower (and nonEJScreen way?) adjustment for when dist is between 0.9 and 1.0 times block_radius_miles:
+    # or a more continuous but slower (and non EJSCREEN way?) adjustment for when dist is between 0.9 and 1.0 times block_radius_miles:
     # sites2blocks_dt[ , distance  := pmax(block_radius_miles, distance, na.rm = TRUE)] # assumes distance is in miles
   }
   # now drop that info about area or size of block to save memory. do not need it later in sites2blocks

@@ -237,10 +237,10 @@ pkg_update_testpoints_testoutputs <- function(
 
     ## save as EXCEL  ####
     if (resaving_testpoints_excel) {
-      # testpoints_data$EJScreenMap = url_ejscreenmap(lat = testpoints_data$lat, lon = testpoints_data$lon, as_html = FALSE) # NOT CLICKABLE IN EXCEL THIS WAY BUT OK
+      # testpoints_data$EJSCREEN_MAP = url_ejscreenmap(lat = testpoints_data$lat, lon = testpoints_data$lon, as_html = FALSE) # NOT CLICKABLE IN EXCEL THIS WAY BUT OK
       # testpoints_data$REGISTRY_ID <- as.character(testpoints_data$REGISTRY_ID)  # for excel just save as character not number, or could write as special zip code format in excel
       # Note the old links work on popup map but not in excel, if as_html=T
-      # testpoints_data$EJScreenMap = url_ejscreenmap(lat = testpoints_data$lat, lon = testpoints_data$lon, as_html = T)
+      # testpoints_data$EJSCREEN_MAP = url_ejscreenmap(lat = testpoints_data$lat, lon = testpoints_data$lon, as_html = T)
       #
       writexl::write_xlsx(list(testpoints = testpoints_data),
                           path = paste0("./inst/testdata/latlon/", testpoints_name, ".xlsx"))    ############# #
@@ -449,7 +449,7 @@ pkg_update_testpoints_testoutputs <- function(
 
   ## save as DATA IN PACKAGE ####
   if (redoing_ejscreenit_10_for_ejam_to_have) {  ## NO LONGER USED IN MID-2025 VERSION OF EJAM
-    # using the API that EJScreen provides, for comparison, to have available as data saved in EJAM pkg:
+    # using the API that EJSCREEN provides, for comparison, to have available as data saved in EJAM pkg:
     testpoints_name <- "testpoints_10"
     myrad = 1
     testoutput_ejscreenit_10pts_1miles <- ejscreenit(
@@ -466,7 +466,7 @@ pkg_update_testpoints_testoutputs <- function(
     ## save as DOCUMENTATION ####
 
     dataset_documenter("testoutput_ejscreenit_10pts_1miles",
-                       title = "test output of ejscreenit(), using the EJScreen API",
+                       title = "test output of ejscreenit(), using the EJSCREEN API",
                        details = "This is the output of
 #'
 #'  ejscreenit(

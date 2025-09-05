@@ -282,12 +282,12 @@ app_ui_EJAMejscreenapi <- function(request) {
 	shiny::uiOutput('debugbutton_ui'),
 
 	tabsetPanel(
-	  id = 'ejscreenapi_tabset', selected = 'EJScreenAPI' ,
+	  id = 'ejscreenapi_tabset', selected = 'OLD_EJSCREEN_API_APP' ,
 	  # ____________________________ ####
 
 	  #--------------------- MAIN TAB --------------------- ##########
 	  tabPanel(
-	    "EJScreenAPI",
+	    "OLD_EJSCREEN_API_APP",
 
 	    fluidRow(
 	      # _____ INPUTS _____ (LH column) ####

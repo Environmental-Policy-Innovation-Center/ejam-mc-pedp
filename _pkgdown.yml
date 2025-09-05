@@ -16,7 +16,7 @@ footer:
     left: [datefooter]
     right: [package, versionmsg]
   components:
-    datefooter: August 2025
+    datefooter: September 2025
     versionmsg: Version 2.32.6
 development:
   mode: release
@@ -423,8 +423,8 @@ reference:
   - url_enviromapper
   - url_echo_facility
   - url_frs_facility
-  - url_countyhealth
-  - url_statehealth
+  - url_county_health
+  - url_state_health
   - url_naics.com
 - title: "Utilities handling variable names"
   desc: "Utilities to handle variable names, indicator metadata, formulas, etc."
@@ -433,8 +433,8 @@ reference:
   - names_d
   - names_e
   - map_headernames
-- title: "EJScreen API"
-  desc: "EJAM-EJScreen and using the EJScreen API"
+- title: "EJSCREEN API"
+  desc: "EJAM-EJSCREEN and using the EJSCREEN API"
   contents:
   - ejscreenit_for_ejam
   - ejscreenit

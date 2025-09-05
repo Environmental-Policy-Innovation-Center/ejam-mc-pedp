@@ -1,7 +1,7 @@
 
 
-#' utility - check if EJScreen API seems to be online or offline (went down 1/2025)
-#' @param url DEFAULT is the 2024 base url of the EJScreen API
+#' utility - check if EJSCREEN API seems to be online or offline (went down 1/2025)
+#' @param url DEFAULT is the 2024 base url of the EJSCREEN API
 #' @returns TRUE or FALSE (but NA if no internet connection seems to be available at all)
 #'
 #' @keywords internal
@@ -63,9 +63,9 @@ url_ejscreenapi_clusters_and_sort_cols <- function(results_table) {
   }
   pdfurl <- url_ejscreen_report(lon = lon, lat = lat, radius = results_table$distance,
                                 areaid = areaid, areatype = areatype, namestr = namestr,
-                                as_html = FALSE, linktext = "EJScreen Report")
+                                as_html = FALSE, linktext = "EJSCREEN Report")
   encodedlink <- URLencode( pdfurl)
-  pdfurl <- paste0('<a href=\"', encodedlink, '\", target=\"_blank\">EJScreen Report ', rownames(results_table), '</a>')
+  pdfurl <- paste0('<a href=\"', encodedlink, '\", target=\"_blank\">EJSCREEN Report ', rownames(results_table), '</a>')
   # (but does not work like that for csv/excel download)
   if ("pdfurl" %in% names(results_table) ) results_table$pdfurl <- NULL # gets recreated later below
 
@@ -76,7 +76,7 @@ url_ejscreenapi_clusters_and_sort_cols <- function(results_table) {
     mapurl <- url_ejscreenmap(lat = lat, lon = lon  )  # e.g.,  "https://ejscreen.epa.gov/mapper/index.html?wherestr=35.3827475,-86.2464592"
   }
 
-  mapurl  <- paste0('<a href=\"', mapurl, '\", target=\"_blank\">EJScreen Map ', rownames(results_table), '</a>')
+  mapurl  <- paste0('<a href=\"', mapurl, '\", target=\"_blank\">EJSCREEN Map ', rownames(results_table), '</a>')
   # (but does not work like that for csv/excel download)
 
 
@@ -107,8 +107,8 @@ url_ejscreenapi_clusters_and_sort_cols <- function(results_table) {
     results_table[ , firstcols],
     results_table[, !(names(results_table) %in% firstcols)],
     stringsAsFactors = FALSE)
-  names(results_table) <- gsub("^a$", "EJScreen Report", names(results_table))
-  names(results_table) <- gsub("^b$", "EJScreen Map", names(results_table))
+  names(results_table) <- gsub("^a$", "EJSCREEN Report", names(results_table))
+  names(results_table) <- gsub("^b$", "EJSCREEN Map", names(results_table))
 
   ########################################### #
 

@@ -12,7 +12,7 @@ table_signif(dat, digits = NULL)
 \item{digits}{vector as long as number of columns in dat,
 or use default which is to get the number of significant digits from
 varinfo(colnames(dat), 'sigfigs')$sigfigs which gets it from
-map_headernames dataset of metadata on EJAM/EJScreen indicators.}
+map_headernames dataset of metadata on EJAM / EJSCREEN indicators.}
 }
 \value{
 table same size as dat

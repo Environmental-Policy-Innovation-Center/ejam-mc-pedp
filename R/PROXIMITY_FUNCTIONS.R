@@ -750,9 +750,9 @@ if (1 == 0) {
 #' @param pts data.table with lat lon column names
 #' @param countradius distance within in which nearby sites are counted to create proximity score.
 #'   In miles, and default is 5 km (5000 / meters_per_mile = 3.106856 miles)
-#'   which is the EJScreen zone for proximity scores based on counts.
+#'   which is the EJSCREEN zone for proximity scores based on counts.
 #' @param maxradius max distance in miles to search for nearest single facility,
-#'   if none found within countradius. EJScreen seems to use 1,000 km as the max to search,
+#'   if none found within countradius. EJSCREEN seems to use 1,000 km as the max to search,
 #'   since the lowest scores for proximity scores of RMP, TSDF, or NPL are ROUGHLY 0.001,
 #'   (exactly 0.000747782)
 #'   meaning approx. 1/1000 km and km_per_mile = 1.609344 = meters_per_mile / 1000
@@ -876,7 +876,7 @@ proxistat_via_getblocks <- function(pts, countradius=5, maxradius=31) {
 #'   The formula for this proximity score is the sum of (1/d)
 #'   where each d is distance of a given site in kilometers,
 #'   summed over all sites that are within 5 km (or the single
-#'   closest site if none are within 5 km), just as in EJScreen proximity scores
+#'   closest site if none are within 5 km), just as in EJSCREEN proximity scores
 #'   like the TSDF or RMP scores.
 #'
 #'   Any custom user-provided set of points can be turned into a proximity score,
@@ -886,7 +886,7 @@ proxistat_via_getblocks <- function(pts, countradius=5, maxradius=31) {
 #'   Then the proximity scores can be analyzed in a tool like EJAM, just as the
 #'   existing pre-calculated proximity scores are analyzed to represent the
 #'   number of nearby hazardous waste treatment storage and disposal facilities,
-#'   weighted by how far away each one is, as provided in the EJScreen proximity
+#'   weighted by how far away each one is, as provided in the EJSCREEN proximity
 #'   score for TSDFs.
 #'
 #'   A custom user-specified proximity score might focus on schools, for example.
@@ -895,7 +895,7 @@ proxistat_via_getblocks <- function(pts, countradius=5, maxradius=31) {
 #'   That would provide statistics demonstrating which places have more schools
 #'   closer to them (or inside the areas defined by polygons or FIPS codes, for example).
 #'
-#'   To create the proximity score, EJAM uses the same method EJScreen used
+#'   To create the proximity score, EJAM uses the same method EJSCREEN used
 #'   to create proximity scores. The specified points first get indexed
 #'   by a utility function called indexpoints() and are searched for and counted near
 #'   every block and blockgroup in the US via a function called getpointsnearby().
@@ -916,9 +916,9 @@ proxistat_via_getblocks <- function(pts, countradius=5, maxradius=31) {
 #'
 #' @param countradius distance within in which nearby sites are counted to create proximity score.
 #'   In miles, and default is 5 km (5000 / meters_per_mile = 3.106856 miles)
-#'   which is the EJScreen zone for proximity scores based on counts.
+#'   which is the EJSCREEN zone for proximity scores based on counts.
 #' @param maxradius max distance in miles to search for nearest single facility,
-#'   if none found within countradius. EJScreen seems to use 1,000 km as the max to search,
+#'   if none found within countradius. EJSCREEN seems to use 1,000 km as the max to search,
 #'   since the lowest scores for proximity scores of RMP, TSDF, or NPL are ROUGHLY 0.001,
 #'   (exactly 0.000747782)
 #'   meaning approx. 1/1000 km and km_per_mile = 1.609344 = meters_per_mile / 1000
@@ -1040,7 +1040,7 @@ proxistat <- function(topoints, bpoints = NULL,
     ## MUST  HANDLE THOSE CASES HERE, SINCE THIS IS FINDING THE NEAREST topoint WHEN A GIVEN block found no topoint (site) so far (in search radius).
     ##
 
-    # *** and do we want min distance for each block and later for each bg? per EJScreen possible new approach
+    # *** and do we want min distance for each block and later for each bg? per EJSCREEN possible new approach
 
     ######################################## #
   }
@@ -1142,7 +1142,7 @@ proxistat <- function(topoints, bpoints = NULL,
 # ################################################################# #
 
 
-#' proximity.score.in.miles - convert EJScreen proximity scores to miles per site instead of sites per kilometer
+#' proximity.score.in.miles - convert EJSCREEN proximity scores to miles per site instead of sites per kilometer
 #' Shows US percentiles if no arguments used
 #' @param scoresdf data.frame of simple proximity scores like for tsdf, rmp, npl
 #'   but not traffic.score or npdes one since those are weighted and not just count per km

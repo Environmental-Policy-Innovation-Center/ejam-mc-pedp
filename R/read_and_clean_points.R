@@ -72,7 +72,7 @@ read_and_clean_points <- function(filepath, default_points=NULL) {
     } else {
       if ('FacLong' %in% names(pts_filecontents) & 'FacLat' %in% names(pts_filecontents)) {
         #  ECHO column names  - but latlon_infer() has already renamed them anyway, actually so we can't get here probably
-        names(pts_filecontents) <- gsub('FacLat', 'lat', names(pts_filecontents)); names(pts_filecontents) <- gsub('FacLong', 'lon', names(pts_filecontents)) # as used by leaflet, and so names are unique even when uploaded table is merged with EJScreen results
+        names(pts_filecontents) <- gsub('FacLat', 'lat', names(pts_filecontents)); names(pts_filecontents) <- gsub('FacLong', 'lon', names(pts_filecontents)) # as used by leaflet, and so names are unique even when uploaded table is merged with EJSCREEN results
         # the variable names latitude and longitude are compatible with leaflet() but we will not rename them except for that one purpose right when mapping
         # ALL SET - using FacLat/FacLong
         if (('registry_id' %in% names(pts_filecontents) ) | ('pgm_sys_id' %in% names(pts_filecontents))) {

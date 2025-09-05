@@ -1,7 +1,7 @@
 #' @name blockwts
 #' @title blockwts (DATA) population weights of Census blocks
 #' @details
-#'   For documentation on EJScreen, see [EJScreen documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen)
+#'   For documentation on EJSCREEN, see [EJSCREEN documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen)
 #'   
 #'   blockwts is a table of all census blocks, with the weights reflecting
 #'   what fraction of the parent block group census 2020 population lived in

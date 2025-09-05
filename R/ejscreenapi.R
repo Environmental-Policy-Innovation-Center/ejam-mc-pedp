@@ -1,17 +1,17 @@
 
-#' Use EJScreen API to get stats on one or more circular buffers
+#' Use EJSCREEN API to get stats on one or more circular buffers
 #'
-#' Get a data.table of EJScreen report results for one or multiple circular buffers.
+#' Get a data.table of EJSCREEN report results for one or multiple circular buffers.
 #'
 #' @details
 #' Specify a radius and vector of latitude longitude points,
 #' and get for a buffer the population weighted mean value of each raw indicator
 #' like percent low-income, and total population count, and percentiles for those
-#' raw indicator scores, all from EJScreen, as in an EJScreen standard report.
+#' raw indicator scores, all from EJSCREEN, as in an EJSCREEN standard report.
 #'
 #' The functions [ejscreenapi_plus()] and [ejscreenit()] are higher-level functions
 #' that provide renamed variables in their outputs.
-#' Column names returned by ejscreenapi() are those provided by the EJScreen API,
+#' Column names returned by ejscreenapi() are those provided by the EJSCREEN API,
 #' e.g., RAW_D_INCOME, not the renamed variables like pctlowinc etc. or Percent Low Income
 #'
 #'   [ejscreenRESTbroker()] is the lowest level function here for access to the API.
@@ -209,7 +209,7 @@ ejscreenapi <- function(lon, lat, radius = 3, unit = 'miles', wkid = 4326 ,
     if (NROW(shapefile) == 0) {shaperow <- NULL} else {shaperow <- shapefile[i, ]}
 
     ############################################################################### #
-    ## use API to get buffer result from EJScreen server ** ####
+    ## use API to get buffer result from EJSCREEN server ** ####
 
     ej.data <- try(ejscreenRESTbroker(
       lon = pts$lon[i],
@@ -490,7 +490,7 @@ ejscreenapi <- function(lon, lat, radius = 3, unit = 'miles', wkid = 4326 ,
 
 
 
-  ##  # note: below was the version 2.1 sort order returned by the API as of 6/15/2023, just before the EJScreen July update to v2.2:  ####
+  ##  # note: below was the version 2.1 sort order returned by the API as of 6/15/2023, just before the EJSCREEN July update to v2.2:  ####
   #
   # latestnames <- c(
   # "RAW_D_MINOR", "RAW_D_INCOME", "RAW_D_LESSHS", "RAW_D_LING", "RAW_D_UNDER5", "RAW_D_OVER64", "RAW_D_UNEMPLOYED", "RAW_D_INDEX",

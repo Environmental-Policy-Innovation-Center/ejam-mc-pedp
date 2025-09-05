@@ -39,22 +39,22 @@ Used to create input to\code{\link[= plot_boxplot_ratios]{ plot_boxplot_ratios()
 }
 \details{
 Note that colnames returned are same as input, not renamed to say "ratio"
-If names_d_subgroups are included, those means are not in API output from EJScreen
+If names_d_subgroups are included, those means are not in API output from EJSCREEN
 so it gets the means from usastats or statestats
 }
 \examples{
  out <- testoutput_ejscreenit_5$table # has long names
  names(out) <- fixcolnames(names(out1),'long','r')
  out2 <- testoutput_ejscreenapi_plus_5 # has r names already
- 
+
  # these are data.frames, but the colnames are different:
  #   names like "Demog.Index" but they are ratios
  calc_ratios_to_avg(out)$ratios_d
  #   names like "ratio.to.avg.Demog.Index"
  out[ , names_d_ratio_to_avg] # needs EJAM for names_d_ratio_to_avg
- 
- plot_boxplot_ratios(calc_ratios_to_avg(out)$ratios_d,"pctlowinc","\% low income", 
+
+ plot_boxplot_ratios(calc_ratios_to_avg(out)$ratios_d,"pctlowinc","\% low income",
      wheretext="Within a mile of")
-  
+
 }
 \keyword{internal}

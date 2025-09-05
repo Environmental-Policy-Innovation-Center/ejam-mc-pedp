@@ -114,5 +114,5 @@ Be aware of whether the tests are using the last-installed version of the
 package or the latest, possibly recently-edited, local source package version
 that `devtools::load_all()` may be have loaded.
 
-Some functions relied on the EJScreen API and if the API is not available, those
+Some functions relied on the EJSCREEN API and if the API is not available, those
 tests will be skipped or would fail.

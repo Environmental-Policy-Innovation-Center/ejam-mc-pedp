@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreenRESTbroker.R
 \name{ejscreenRESTbroker}
 \alias{ejscreenRESTbroker}
-\title{Low-level utility to query EJScreen API for one circular buffer - API may or may not be available}
+\title{Low-level utility to query EJSCREEN API for one circular buffer - API may or may not be available}
 \usage{
 ejscreenRESTbroker(
   lon = NULL,
@@ -56,7 +56,7 @@ Returns JSON by default. See source code of this function for notes on format.
 status_code
 }
 \description{
-Use EJScreen API to get raw json-format response, ready to be
+Use EJSCREEN API to get raw json-format response, ready to be
 parsed by \code{\link[=ejscreenRESTbroker2table]{ejscreenRESTbroker2table()}}. This function underlies higher level
 functions like \code{\link[=ejscreenapi]{ejscreenapi()}} and overall \code{\link[=ejscreenit]{ejscreenit()}}
 }

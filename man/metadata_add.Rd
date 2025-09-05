@@ -8,7 +8,7 @@ metadata_add(x, update_date_saved_in_package = TRUE)
 }
 \arguments{
 \item{x}{dataset (or any object) whose metadata (stored as attributes) you want to update or create
-EJAM, EJScreen, and other dataset versions and release dates are tracked in DESCRIPTION
+EJAM, EJSCREEN, and other dataset versions and release dates are tracked in DESCRIPTION
 @param update_date_saved_in_package set to FALSE to avoid changing this attribute}
 }
 \value{

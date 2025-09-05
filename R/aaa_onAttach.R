@@ -32,13 +32,40 @@
 
 
   # get location of logo etc. so that ejam2report() using generate_html_header() can find logo  even without launching shiny app
-  fname <- system.file("global_defaults_package.R", package = "EJAM")
-  # if you have just used devtools::load_all(), then this will find and use the local source version of the global_defaults_package.R
-  # if you have not done that, this will find and use the installed version
-  # source the file in the global environment by using local=FALSE
+  localpath <- system.file("global_defaults_package.R", package = "EJAM")
+  # if you have just used devtools::load_all(), then this will find and try to the local source version of the global_defaults_package.R
+  # if you have not done that, this will find and use the installed version.
+  # It will source the file in the global environment by using local=FALSE
+  # BUT, when this tries to source that .R file during .onAttach(), R has not yet attached all the .R files ?
+  junk1 = try({
+    source(localpath, local = FALSE)
+    }, silent = TRUE)
+  if (inherits(junk1, "try-error")) {
+    cat("in .onAttach() -- Unable to do
+    source(system.file('global_defaults_package.R', package = 'EJAM')
+    ")
+    cat("Trying to source a local source code copy from inst/global_defaults_package.R \n")
+    # localpath <- system.file('inst/global_defaults_package.R', package = 'EJAM') # system.file() does not like starting with inst/
+    localpath <- file.path(dirname(system.file(package = "EJAM")), "inst", "global_defaults_package.R")
+    junk2 = try(source(localpath), silent = TRUE)
+    if (inherits(junk2, "try-error")) {
+      warning(paste0("
+    Error in .onAttach() -- Unable to do
+       source(system.file('global_defaults_package.R', package = 'EJAM'))
+       or
+       source(system.file('inst/global_defaults_package.R', package = 'EJAM')
 
-  source(fname, local = FALSE) # This will not work if you refer to a new or rename one of the url_xyz functions referred to in global_defaults_package$default_reports until the NAMESPACE is updated
-
+    ", junk2, "
+    You may need to reinstall the package by building from source.
+    Some functions are referred to in the file global_defaults_package.R
+    while the package is loaded as with devtools::load_all(),
+    but if those functions are new or got renamed to a new name
+    then they may not be recognized while first trying to attach the package.
+    Some functions can be used to generate URLs for reports like url_echo_facility() and
+    if they are listed in the default_reports setting defined in global_defaults_package.R,
+    they cause .onAttach() to fail if those functions are not yet recognized."))
+    }
+  }
 
   # download BLOCK (not blockgroup) data, etc ####
 
@@ -83,7 +110,7 @@
       dataload_from_package() # EJAM function works only AFTER shiny does load all/source .R files or package attached
     }
 
-    # load BLOCKGROUP (not block) data (EJScreen data), etc. from package
+    # load BLOCKGROUP (not block) data (EJSCREEN data), etc. from package
     # see ?dataload_from_package()
     # This loads some key data, while others get lazy loaded if/when needed.
     # data(list=c("blockgroupstats", "usastats", "statestats"), package="EJAM")

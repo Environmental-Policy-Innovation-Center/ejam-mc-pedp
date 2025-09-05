@@ -7,7 +7,7 @@
 blockwts (DATA) population weights of Census blocks
 }
 \details{
-For documentation on EJScreen, see \href{https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen}{EJScreen documentation}
+For documentation on EJSCREEN, see \href{https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen}{EJSCREEN documentation}
 
 blockwts is a table of all census blocks, with the weights reflecting
 what fraction of the parent block group census 2020 population lived in

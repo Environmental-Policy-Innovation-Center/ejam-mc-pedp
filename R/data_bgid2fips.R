@@ -2,7 +2,7 @@
 #' @name bgid2fips
 #' @title bgid2fips (DATA) Census FIPS codes of block groups
 #' @details
-#'   For documentation on EJScreen, see [EJScreen documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen)
+#'   For documentation on EJSCREEN, see [EJSCREEN documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen)
 #'   
 #'   bgid2fips is a table of all census block groups, with their FIPS codes.
 #'   

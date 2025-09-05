@@ -36,7 +36,7 @@ NA or outside expected numeric ranges
 (based on approx ranges of lat lon seen among block internal points dataset)
 
 But note Guam, American Samoa, Northern Mariana Islands, and U.S. Virgin Islands ranges are approximated!
-EJScreen has not had residential population data in those locations anyway, but can map sites there.
+EJSCREEN has not had residential population data in those locations anyway, but can map sites there.
 see latlon_is.islandareas()
 and note details at https://www.britannica.com/place/Trust-Territory-of-the-Pacific-Islands
 on areas no longer part of the US but still with some sites in FRS,

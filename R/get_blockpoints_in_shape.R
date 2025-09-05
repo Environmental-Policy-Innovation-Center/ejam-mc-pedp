@@ -69,7 +69,7 @@ get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby =
                                      updateProgress = NULL) {
 
   ############################################################################################################### #
-  # NOTE: For comparison or validation one could get the results from the EJScreen API, for a polygon:
+  # NOTE: For comparison or validation one could get the results from the EJSCREEN API, for a polygon:
   #      Example of how the API could be used to analyze a polygon, which must use POST not GET:
   # HTTP POST URL: https://ejscreen.epa.gov/mapper/ejscreenRESTbroker.aspx
   # HTTP POST Body:

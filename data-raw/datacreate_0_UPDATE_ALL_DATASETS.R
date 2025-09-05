@@ -1,6 +1,6 @@
 ############################################################### #
 ## Scripts to update / create latest versions of datasets
-# - ANNUAL blockgroup data from ACS and EJScreen
+# - ANNUAL blockgroup data from ACS and EJSCREEN
 # - NON-ANNUAL (frequent, episodic, etc.) other datasets
 # also see EJAM pkg github issues about this.
 ############################################################### #
@@ -94,7 +94,7 @@ if (y) {
 #   metadata_mapping() uses DESCRIPTION info and gets done via devtools::load_all() or library(EJAM)
 # see also EJAM:::metadata_update_attr()
 
-## use simple metadata for data not related to EJScreen or Census, like just frs-related, naics-related, etc.
+## use simple metadata for data not related to EJSCREEN or Census, like just frs-related, naics-related, etc.
 # attr(x, "date_downloaded")       <- as.character(Sys.Date()) # if relevant
 # attr(x, "date_saved_in_package") <- as.character(Sys.Date())
 
@@ -113,9 +113,9 @@ if (y) {
 # 6         bgid2fips                      bgid2fips data for EJAM arrow     2.98M 2024-08-22 18:34:28             2.32     TRUE
 # 7      blockid2fips                   blockid2fips data for EJAM arrow    98.17M 2024-08-22 18:34:34             2.32     TRUE
 # 8       blockpoints                    blockpoints data for EJAM arrow   155.97M 2024-08-22 18:34:56             2.32     TRUE
-# 9          blockwts         blockwts data from EJScreen for EJAM arrow    68.64M 2024-08-22 18:35:34             2.32     TRUE
+# 9          blockwts         blockwts data from EJ Screen for EJAM arrow    68.64M 2024-08-22 18:35:34             2.32     TRUE
 # 10         quaddata                       quaddata data for EJAM arrow   218.36M 2024-08-22 18:35:52             2.32     TRUE
-# 11             bgej             bgej data from EJScreen for EJAM arrow    84.94M 2024-08-22 18:54:56             2.32     TRUE
+# 11             bgej             bgej data from EJ Screen for EJAM arrow    84.94M 2024-08-22 18:54:56             2.32     TRUE
 
 ########################################## #
 
@@ -183,7 +183,7 @@ if (0 == 1) {  # collapsable list
     documentOpen('./data-raw/datacreate_0_UPDATE_ALL_DATASETS.R')
     # documentOpen('./data-raw/datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R')
 
-    # with annual census fips codes or boundaries changes (when EJScreen incorporates those)
+    # with annual census fips codes or boundaries changes (when EJSCREEN incorporates those)
     #
     # To create and save the datasets from within the EJAM source package root folder,
     #
@@ -335,7 +335,7 @@ loadall()
 
 ######################################### ########################################## #
 # ~------------------------------------------- ####
-# ** FIPS CODES/ Census Boundaries - ANNUAL UPDATES (if EJScreen incorporates those) ####
+# ** FIPS CODES/ Census Boundaries - ANNUAL UPDATES (if EJSCREEN incorporates those) ####
 # . ####
 ######################################### #
 ## * BLOCKS  ####

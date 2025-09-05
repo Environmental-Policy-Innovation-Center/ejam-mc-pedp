@@ -10,7 +10,7 @@
 #'   for a set of indicators such as percent low income.
 #'   Each column is one indicator (or specifies the percentile).
 #'   
-#'   This should be similar to the lookup tables in the gdb on the FTP site of EJScreen,
+#'   This should be similar to the lookup tables in the gdb on the FTP site of EJSCREEN,
 #'   except it also has data for additional population subgroups.
 #'   
 #'   For details on how the table was made, see source package files

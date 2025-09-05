@@ -31,7 +31,7 @@ if (FALSE) {
         tabsetPanel(
           tabPanel(
             title = "api app",
-            shiny::h2('EJScreen API batch tool packaged with EJAM'),
+            shiny::h2('EJSCREEN API batch tool packaged with EJAM'),
             # verbatimTextOutput("testinfo1"),
             # verbatimTextOutput("testinfo_radius"),
             # shiny::textOutput("testinfo2"),
@@ -120,7 +120,7 @@ if (FALSE) {
 
 #  #' mod_ejscreenapi_ui - ejscreenapi UI Function
 #  #'
-#  #' @description A shiny Module to get EJScreen results via the EJScreen API
+#  #' @description A shiny Module to get EJSCREEN results via the EJSCREEN API
 #  #'
 #  #' @param id,input,output,session Internal parameters for {shiny}.
 #  #' @param simpleradiusdefault_for_ui miles radius to show as initial default selection - not used if reactive version used now
@@ -145,11 +145,11 @@ if (FALSE) {
     tagList(
       #  from here on within the brackets is directly copied from ejscreenapi pkg app_ui.R code
       shiny::tabsetPanel(
-        id = ns( 'ejscreenapi_tabset'), selected = 'EJScreen API' ,
+        id = ns( 'ejscreenapi_tabset'), selected = 'EJSCREEN API' ,
         # ____________________________ ## ##
 
         #--------------------- main tab ------------------ #
-        shiny::tabPanel(title = "EJScreen API",
+        shiny::tabPanel(title = "EJSCREEN API",
 
                         shiny::fluidRow(
                           # SITE SELECTION  _____ (LH column) ####
@@ -261,7 +261,7 @@ if (FALSE) {
 
         shiny::tabPanel(title =  " ", # semi-hidden tab - if you click on the empty space you can open this tab
 
-                        h3("Advanced settings & experimental features for EJScreen API tool - Not all of these are implemented or tested!"),
+                        h3("Advanced settings & experimental features for EJSCREEN API tool - Not all of these are implemented or tested!"),
 
                         # SET DEFAULTS / OPTIONS
 
@@ -550,7 +550,7 @@ if (FALSE) {
               } else {
                 if ('FacLong' %in% names(pts_filecontents) & 'FacLat' %in% names(pts_filecontents)) {
                   #  ECHO column names  - but latlon_infer() has already renamed them anyway, actually so we can't get here probably
-                  names(pts_filecontents) <- gsub('FacLat', 'lat', names(pts_filecontents)); names(pts_filecontents) <- gsub('FacLong', 'lon', names(pts_filecontents)) # as used by leaflet, and so names are unique even when uploaded table is merged with EJScreen results
+                  names(pts_filecontents) <- gsub('FacLat', 'lat', names(pts_filecontents)); names(pts_filecontents) <- gsub('FacLong', 'lon', names(pts_filecontents)) # as used by leaflet, and so names are unique even when uploaded table is merged with EJSCREEN results
                   # the variable names latitude and longitude are compatible with leaflet() but we will not rename them except for that one purpose right when mapping
                   # ALL SET - using FacLat/FacLong
                   if (('registry_id' %in% names(pts_filecontents) ) | ('pgm_sys_id' %in% names(pts_filecontents))) {
@@ -640,7 +640,7 @@ if (FALSE) {
         } else {
           mapurl <- url_ejscreenmap(lat = pts_filecontents$lat, lon = pts_filecontents$lon)  # e.g.,  "https://ejscreen.epa.gov/mapper/index.html?wherestr=35.3827475,-86.2464592"
         }
-        pts_filecontents$mapurl  <- paste0('<a href=\"', mapurl, '\", target=\"_blank\" rel=\"noreferrer noopener\">EJScreen Map ', rownames(pts_filecontents), '</a>')
+        pts_filecontents$mapurl  <- paste0('<a href=\"', mapurl, '\", target=\"_blank\" rel=\"noreferrer noopener\">EJSCREEN Map ', rownames(pts_filecontents), '</a>')
 
         pts_filecontents
       }) # END OF pts() reactive
@@ -810,7 +810,7 @@ if (FALSE) {
             # NOTE MAY REPLACE THIS SECTION OF CODE WITH ejscreenapi_plus() which does this itself  :
             #   or maybe even use  ejscreenit() or ejscreenit_for_ejam()
 
-            # *_EJScreen API Get Results*  ####
+            # *_EJSCREEN API Get Results*  ####
             # BUT IT DOES NOT SUPPORT updateProgress like ejscreenapi() does, so far.
             if (use_ejscreenit) {
               allout <- ejscreenit(
@@ -848,7 +848,7 @@ if (FALSE) {
               ### Combine input (from user) + output (from analysis of residential populations and environmental indicators) ####
               #      (e.g., that user input uploaded may have site name, address, etc.)
               #      & return combined table: 1 row per site (buffer), 1 col per indicator (variable).
-              ### Add links to EJScreen ####
+              ### Add links to EJSCREEN ####
               ### Flag sites near others ####
               ### Put best cols 1st ####
               results_table <- cbind(pts(), results_table) # this would be a problem if we did not isolate or use bindEvent
@@ -1061,12 +1061,12 @@ if (FALSE) {
             pctile_colnums <-  which('pctile' ==  fixcolnames(names(table_as_displayed), oldtype = currentnametype, newtype = 'jsondoc_shortvartype') ) # this should get what type each is.
 
             # fix URLs to work in csv pulled into Excel or in Excel files (as opposed to datatable shown in web brwsr)
-            table_as_displayed$`EJScreen Report` <- gsub('.*(http.*)\", target=.*', '\\1', table_as_displayed$`EJScreen Report`)
-            table_as_displayed$`EJScreen Map` <- gsub('.*(http.*)\", target=.*', '\\1', table_as_displayed$`EJScreen Map`)
+            table_as_displayed$`EJSCREEN Report` <- gsub('.*(http.*)\", target=.*', '\\1', table_as_displayed$`EJSCREEN Report`)
+            table_as_displayed$`EJSCREEN Map` <- gsub('.*(http.*)\", target=.*', '\\1', table_as_displayed$`EJSCREEN Map`)
 
             if (!asExcel) {
-              table_as_displayed$`EJScreen Report` <- paste0('=HYPERLINK("', table_as_displayed$`EJScreen Report`,'", "EJScreen Report ', rownames(table_as_displayed), '")')
-              table_as_displayed$`EJScreen Map`    <- paste0('=HYPERLINK("', table_as_displayed$`EJScreen Map`,'", "EJScreen Map ',    rownames(table_as_displayed), '")')
+              table_as_displayed$`EJSCREEN Report` <- paste0('=HYPERLINK("', table_as_displayed$`EJSCREEN Report`,'", "EJSCREEN Report ', rownames(table_as_displayed), '")')
+              table_as_displayed$`EJSCREEN Map`    <- paste0('=HYPERLINK("', table_as_displayed$`EJSCREEN Map`,'", "EJSCREEN Map ',    rownames(table_as_displayed), '")')
               readr::write_excel_csv(table_as_displayed, file)
               # write.csv(table_as_displayed, file, row.names = FALSE) # simplest
               # note despite name of function, write_excel_csv() saves it as a csv, NOT ACTUALLY excel,
@@ -1074,7 +1074,7 @@ if (FALSE) {
             } else {
               # MIGHT NOT BE WORKING:
               wb <- table_xls_format_api(df = table_as_displayed,
-                                         # hyperlink_cols = c('EJScreen Map', 'EJScreen Report'),
+                                         # hyperlink_cols = c('EJSCREEN Map', 'EJSCREEN Report'),
                                          # reports = NULL,
                                          heatmap_colnames = names(table_as_displayed)[pctile_colnums],
                                          heatmap_cuts = c(80, 90, 95),

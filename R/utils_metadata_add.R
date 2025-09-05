@@ -70,7 +70,7 @@ metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_pa
 #'   so that is.vector() will no longer be true!
 #'
 #' @param x dataset (or any object) whose metadata (stored as attributes) you want to update or create
-#'  EJAM, EJScreen, and other dataset versions and release dates are tracked in DESCRIPTION
+#'  EJAM, EJSCREEN, and other dataset versions and release dates are tracked in DESCRIPTION
 #'  @param update_date_saved_in_package set to FALSE to avoid changing this attribute
 #' @seealso metadata_check()
 #'

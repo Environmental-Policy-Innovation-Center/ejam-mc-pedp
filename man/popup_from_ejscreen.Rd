@@ -29,7 +29,7 @@ Popup shows up in a window when you
 click on a site on the map, when viewing the results of EJ analysis of
 each site.
 
-THIS IS CURRENTLY HARD CODED TO USE EJScreen VARIABLE NAMES.
+THIS IS CURRENTLY HARD CODED TO USE EJSCREEN VARIABLE NAMES.
 
 It provides raw scores (but not for summary indexes) and US and State percentiles if available:
 \itemize{

@@ -32,7 +32,7 @@ While the EPA servers hosting the EJAM web application are no longer up and runn
 
 1. development work on an internal/private repo called EJAM that had been used to deploy an internal/expert version of the web app for staff, and
 
-2. a public repo called EJAM-open that had been used to share the latest version and publish it to host a public version of the web app for use in EJScreen (until early 2025).
+2. a public repo called EJAM-open that had been used to share the latest version and publish it to host a public version of the web app for use in EJSCREEN (until early 2025).
 
 ## Update EJAM Application
 

@@ -1,6 +1,6 @@
 
 
-#' export EJAM results as geojson/zipped shapefile/kml for use in ArcPro, EJScreen, etc.
+#' export EJAM results as geojson/zipped shapefile/kml for use in ArcPro, EJSCREEN, etc.
 #'
 #' @param ejamitout output of EJAM such as from [ejamit()]
 #' @param file optional filename with no path, with extension one of "geojson"/"json", "shp", "zip", "kml"
@@ -69,7 +69,7 @@ ejam2shapefile <- function(ejamitout,
   } else {
     if (all(varnames[1] == "basic250")) {
       # because shapefiles have a cap on number of fields in some implementations
-      # omits averages, ratios, and raw EJ scores, which are not essential or are not in typical EJScreen outputs
+      # omits averages, ratios, and raw EJ scores, which are not essential or are not in typical EJSCREEN outputs
       names_basic250 <- sort(grep("^avg|^state.avg|^ratio|^EJ.D|^state.EJ", names(df), invert = T, value = T))
       ok <- names_basic250 %in% names(df)
       if (any(!ok)) {warning("Some of basic250 varnames not found in ejamitout$results_bysite")}

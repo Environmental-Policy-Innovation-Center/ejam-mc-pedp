@@ -105,6 +105,11 @@ fipstype_from_nchar <- function(n) {
   # see  [fips_lead_zero()]  and  [fipstype()]   for details
 
   # for the ones that are 11, would need to confirm it was not a bg missing its leading zero!
+  # > x = (unique(substr(blockgroupstats$bgfips,1,2)))
+  # > x[substr(x,1,1) == 0]
+  # [1] "01" "02" "04" "05" "06" "08" "09"
+  # unclear_digit_if_1st_of_11 = c( 1,2,  4,5,6,  8,9 )  # an 11-character string starting in 3, 7, or 0 cannot be a bg, so could only be a tract (if valid).
+
   if (any(11 %in% n)) {message("Note FIPS of 11 digits is probably a tract, but might be a blockgroup fips with a missing leading zero.")}
 
   n2f <- data.frame(
@@ -215,10 +220,17 @@ fipstype2nchar = function(ftype) {
 
 
 #' FIPS - Identify what type of Census geography each FIPS code seems to be (block, county, etc.)
-#' @details NOTE: Does NOT check if fips is a real fips. For that, use [fips_valid()]
+#'
+#' @details
+#'
+#'  NOTE: Does NOT check if fips is a real fips. For that, use [fips_valid()]
 #'
 #' Note a number of length 11 is an ambiguous case this is able to resolve as
 #'   either a complete tract fips or a blockgroup fips with a missing leading zero.
+#'   An 11-character string starting in 3, 7, or 0 cannot be a bg missing a leading zero, so could only be a tract (if valid).
+#'   Since a 12-character bg fips never starts with 03, 07, or 00.
+#'
+#'
 #' @param fips vector of one or more Census FIPS with or without leading zeroes, as strings or numeric
 #'
 #' @return vector of types: "block", "blockgroup", "tract", "city", "county", or "state"
@@ -1553,7 +1565,7 @@ fips_counties_from_countynamefull <- function(fullname, exact = TRUE) {
 ############################################################################# #
 ################################################## #
 
-#' Get population counts (ACS EJScreen) by FIPS
+#' Get population counts (ACS EJSCREEN) by FIPS
 #' Utility to aggregate just population count for each FIPS Census unit
 #'
 #' @param fips vector of fips (can be state, county, tract, blockgroup, block).
@@ -1581,7 +1593,7 @@ fips2pop <- function(fips) {
 ################################################## #
 
 
-# helper function to get population counts (ACS EJScreen) by FIPS, for just 1 type of fips at a time
+# helper function to get population counts (ACS EJSCREEN) by FIPS, for just 1 type of fips at a time
 
 f2p = function(fips, onetype) {
 

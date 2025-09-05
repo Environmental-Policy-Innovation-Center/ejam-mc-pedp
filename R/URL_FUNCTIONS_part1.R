@@ -20,12 +20,20 @@
 #' @keywords internal
 #'
 url_online <- function(url = c("ejscreen.epa.gov",)) {
+
   if (missing(url)) {stop("must specify a URL")}
   if (length(url) > 1) {stop("can only check one URL at a time using url_online()")}
   if (offline()) {
     warning("Cannot check URL when offline -- internet connection does not seem to be available")
     return(NA)
   }
+
+  ############## #
+  ## simpler would be:
+  # url_200 <- function(urlx) {200 %in% (httr::HEAD(urlx))$status_code}
+  # url_200(url)
+  ############## #
+  ## more careful
   x <- httr2::request(url)
   junk <- capture.output({x <- try(httr2::req_perform(x), silent = TRUE)})
   if (inherits(x, "try-error")) {
@@ -39,6 +47,7 @@ url_online <- function(url = c("ejscreen.epa.gov",)) {
   } else {
     return(TRUE)
   }
+  ############## #
 }
 ################################################### #################################################### #
 

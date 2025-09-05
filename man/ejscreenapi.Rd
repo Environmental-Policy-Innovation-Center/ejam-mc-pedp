@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreenapi.R
 \name{ejscreenapi}
 \alias{ejscreenapi}
-\title{Use EJScreen API to get stats on one or more circular buffers}
+\title{Use EJSCREEN API to get stats on one or more circular buffers}
 \usage{
 ejscreenapi(
   lon,
@@ -71,17 +71,17 @@ TRUE if you want to try to extract ST abbrev and statename from the placename fi
 which is more likely to be correct than the stateAbbr and stateName fields in the API output.}
 }
 \description{
-Get a data.table of EJScreen report results for one or multiple circular buffers.
+Get a data.table of EJSCREEN report results for one or multiple circular buffers.
 }
 \details{
 Specify a radius and vector of latitude longitude points,
 and get for a buffer the population weighted mean value of each raw indicator
 like percent low-income, and total population count, and percentiles for those
-raw indicator scores, all from EJScreen, as in an EJScreen standard report.
+raw indicator scores, all from EJSCREEN, as in an EJSCREEN standard report.
 
 The functions \code{\link[=ejscreenapi_plus]{ejscreenapi_plus()}} and \code{\link[=ejscreenit]{ejscreenit()}} are higher-level functions
 that provide renamed variables in their outputs.
-Column names returned by ejscreenapi() are those provided by the EJScreen API,
+Column names returned by ejscreenapi() are those provided by the EJSCREEN API,
 e.g., RAW_D_INCOME, not the renamed variables like pctlowinc etc. or Percent Low Income
 
 \code{\link[=ejscreenRESTbroker]{ejscreenRESTbroker()}} is the lowest level function here for access to the API.

@@ -16,7 +16,7 @@
 #'    estimated as 90 percent of the effective radius, which is what the radius of the block
 #'    would be if it were the same area in square meters or miles but circular in shape.
 #'
-#'    This is the approach used in EJScreen to estimate average proximity of a block resident in
+#'    This is the approach used in EJSCREEN to estimate average proximity of a block resident in
 #'    cases where the block is extremely close to the site or the site may actually be inside the block,
 #'    or exactly on top of the internal point of the block, in which case zero would not be an
 #'    appropriate estimate of the distance, hence this adjustment is made in EJAM [getblocksnearby()]

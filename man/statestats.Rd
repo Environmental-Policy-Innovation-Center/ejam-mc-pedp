@@ -17,7 +17,7 @@ for all the block groups in that zone (e.g., block groups in \link{blockgroupsta
 for a set of indicators such as percent low income.
 Each column is one indicator (or specifies the percentile).
 
-This should be similar to the lookup tables in the gdb on the FTP site of EJScreen,
+This should be similar to the lookup tables in the gdb on the FTP site of EJSCREEN,
 except it also has data for additional population subgroups.
 See also \link{usastats} for more details.
 }

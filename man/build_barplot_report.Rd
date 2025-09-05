@@ -38,7 +38,7 @@ If specified, it overrides logo_path. If omitted, gets created based on logo_pat
 can return HTML if filename not specified, but otherwise NULL
 }
 \description{
-Creates header and footer of 1 page report to include a barplot on results for one site (to supplement the EJScreen Community Report)
+Creates header and footer of 1 page report to include a barplot on results for one site (to supplement the EJSCREEN Community Report)
 }
 \details{
 For a related function for use in RStudio,

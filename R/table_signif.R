@@ -6,7 +6,7 @@
 #' @param digits vector as long as number of columns in dat,
 #'   or use default which is to get the number of significant digits from
 #'   varinfo(colnames(dat), 'sigfigs')$sigfigs which gets it from
-#'   map_headernames dataset of metadata on EJAM/EJScreen indicators.
+#'   map_headernames dataset of metadata on EJAM / EJSCREEN indicators.
 #' @seealso [table_signif_round_x100()] [table_signif()] [table_round()] [table_x100()]
 #' @return table same size as dat
 #' @examples

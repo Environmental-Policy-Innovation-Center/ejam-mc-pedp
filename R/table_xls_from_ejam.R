@@ -106,7 +106,7 @@ table_xls_from_ejam <- function(ejamitout,
 
                                 # hyperlink_colnames = EJAM:::global_or_param("default_hyperlink_colnames"),
                                 reports = EJAM:::global_or_param("default_reports"),
-                                # could change to be an input$ in advanced tab possibly # "ECHO Report",#c("EJScreen Report", "EJScreen Map", "ECHO Report"),
+                                # could change to be an input$ in advanced tab possibly # "ECHO Report",#c("EJSCREEN Report", "EJSCREEN Map", "ECHO Report"),
 
                                 site_method = "",
 

@@ -111,7 +111,7 @@ app_server <- function(input, output, session) {
   #          tabPanel(title = 'Plot Average Scores',
   #          tabPanel(title = 'Plot Full Range of Scores',
   #       tabPanel(title = 'Written Report',
-  #   tabPanel(title = 'EJScreen Batch Tool',
+  #   tabPanel(title = 'EJSCREEN Batch Tool',
   #   tabPanel(title = 'Advanced Settings',
 
   ##     -------------------------- BUTTONS to switch tabs ---------------------- #

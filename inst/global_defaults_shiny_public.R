@@ -52,7 +52,7 @@ global_defaults_shiny_public <- list(
 
   # Histograms tab
   default_hide_plot_histo_tab = isTRUE(isPublic),  # hidden because complicated and public may not want it anyway
-  # EJScreen API tab
+  # EJSCREEN API tab
   default_hide_ejscreenapi_tab = isTRUE(isPublic),  # not used by UI unless ejscreenapi module/tab is re-enabled
 
   ############################################################################## #

@@ -1,5 +1,5 @@
 # script to read the ACS 2018-2022 data
-# that will be used by EJScreen 2.32 starting August 12 2024
+# that will be used by EJSCREEN 2.32 starting August 12 2024
 ################################################## #
 
 if (!exists("askquestions")) {askquestions <- FALSE}
@@ -12,7 +12,7 @@ if (!dir.exists(localfolder)) {stop(paste0("need valid localfolder - ", localfol
 
 # 1. GOT "ACS2022_Transfer.gdb.zip" FROM EJSCREEN TEAM ####
 
-# EJScreen team (VZ) provided the data file 6/5/2024
+# EJSCREEN team (VZ) provided the data file 6/5/2024
 # via GoAnywhere Services <noreply@epa.gov>
 # ACS2022_Transfer.gdb.zip	688.32 MB
 # M downloaded it locally and saved it here:

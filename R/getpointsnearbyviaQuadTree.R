@@ -217,8 +217,8 @@ getpointsnearbyviaQuadTree  <- function(frompoints, radius = 3, maxradius = 31.0
 
     ################################# #
     #### If avoidorphans TRUE, and no topoint within radius of site, look past radius to maxradius   ############## #
-    # But note looking past radius is NOT how EJScreen works, for buffer reports - it just fails to provide any result if no blockpoint is inside circle.
-    # (For proximity scores, which are different than circular buffer reports, EJScreen does look beyond radius, but not for circular zone report).
+    # But note looking past radius is NOT how EJSCREEN works, for buffer reports - it just fails to provide any result if no blockpoint is inside circle.
+    # (For proximity scores, which are different than circular buffer reports, EJSCREEN does look beyond radius, but not for circular zone report).
     # Also, you would rarely get here even if avoidorphans set TRUE.
     # cat('about to check avoidorphans\n')
     # if ( 1 == 0 ) {

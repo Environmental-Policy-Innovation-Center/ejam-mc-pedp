@@ -5,7 +5,7 @@
 \alias{blockgroupstats}
 \title{blockgroupstats (DATA) residential population and environmental indicators for Census block groups}
 \description{
-The dataset of residential population data and environmental indicators originally from EJScreen.
+The dataset of residential population data and environmental indicators originally from EJSCREEN.
 
 For Summary Indexes, see \link{bgej}
 }

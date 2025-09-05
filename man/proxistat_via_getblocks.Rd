@@ -12,10 +12,10 @@ proxistat_via_getblocks(pts, countradius = 5, maxradius = 31)
 
 \item{countradius}{distance within in which nearby sites are counted to create proximity score.
 In miles, and default is 5 km (5000 / meters_per_mile = 3.106856 miles)
-which is the EJScreen zone for proximity scores based on counts.}
+which is the EJSCREEN zone for proximity scores based on counts.}
 
 \item{maxradius}{max distance in miles to search for nearest single facility,
-if none found within countradius. EJScreen seems to use 1,000 km as the max to search,
+if none found within countradius. EJSCREEN seems to use 1,000 km as the max to search,
 since the lowest scores for proximity scores of RMP, TSDF, or NPL are ROUGHLY 0.001,
 (exactly 0.000747782)
 meaning approx. 1/1000 km and km_per_mile = 1.609344 = meters_per_mile / 1000
