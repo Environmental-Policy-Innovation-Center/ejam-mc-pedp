@@ -37,7 +37,12 @@ latlon_from_fips <- function(fips) {
     setnames(dtf_bg, 'fips', 'bgfips')
     dtf_bg[bgpts, `:=`(lat = lat, lon = lon), on = "bgfips"]
     setnames(dtf_bg, 'bgfips', 'fips')
-    dtf[ftype == "blockgroup", ] <- dtf_bg
+
+    if (!("lat" %in% names(dtf)) || !("lat" %in% names(dtf))) {
+      dtf$lat = 0
+      dtf$lon = 0
+    }
+    dtf[ftype == "blockgroup", ] <- dtf_bg[, .(ftype,fips,lat,lon)]
 
     # latlon_from_bgfips = function(fips) {
     #
@@ -52,15 +57,22 @@ latlon_from_fips <- function(fips) {
   ####################################### #
   # tracts:
   if ("tract" %in% ftype) {
+
     # maybe just take average of lat and average of lon of the blockgroups in a tract?
 
 
 
   }
   ####################################### #
-  # cities ?
+  # cities
   if ("city" %in% ftype) {
 
+    require(AOI)
+    placename <-  fips_place2placename(fips["city" %in% ftype])
+    if (NROW(placename) > 0 && !is.null(placename) && "lat" %in% names(placename)) {
+      newrows <- data.table(ftype = ftype["city" %in% ftype], fips = fips["city" %in% ftype], lat = placename$lat, lon = placename$lon)
+      dtf[ftype == "city", ] <- newrows
+    }
 
   }
 
@@ -76,12 +88,17 @@ latlon_from_fips <- function(fips) {
     # get latlon pts
     latlon_join_on_bgid(x)
     # take averages within each county
-    x <- x[, .(lat = mean(lat), lon = mean(lon)), by = "countyfips"]
+    x <- x[, .(ftype = "county", lat = mean(lat), lon = mean(lon)), by = "countyfips"]
     setnames(x, "countyfips", "fips")
     # for the subset of the original fips that were county fips,
-    y = dtf["county" == ftype, .(ftype, fips)]
+    y = dtf["county" == ftype, .(  fips)]
     # add latlon columns via merge
     y = merge(x, y, by = "fips", all.x = TRUE)
+
+    if (!("lat" %in% names(dtf)) || !("lat" %in% names(dtf))) {
+      dtf$lat = 0
+      dtf$lon = 0
+    }
     # same sort order?
     dtf["county" == ftype, ] <- y[, .(ftype,fips,lat,lon)]
   }
@@ -95,10 +112,13 @@ latlon_from_fips <- function(fips) {
     setnames(x, "FIPS.ST", 'fips')
     # add latlon columns via merge
     y = merge(x, y, by = "fips", all.y = TRUE)
-
+    if (!("lat" %in% names(dtf)) || !("lat" %in% names(dtf))) {
+      dtf$lat = 0
+      dtf$lon = 0
+    }
     dtf["state" == ftype, ] <- y[, .(ftype, fips, lat, lon)]
   }
 
-return(dtf[])
+  return(dtf[])
 
 }

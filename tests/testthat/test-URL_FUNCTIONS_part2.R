@@ -62,9 +62,10 @@ do_url_tests = function(funcname, FUN) {
 ###############
 
 do_url_tests("url_ejscreenmap", url_ejscreenmap)
+do_url_tests("url_enviromapper", url_enviromapper)    ###
+
 do_url_tests("url_echo_facility", url_echo_facility)
 do_url_tests("url_frs_facility", url_frs_facility)
-do_url_tests("url_enviromapper", url_enviromapper)
 
 do_url_tests("url_county_health", url_county_health)
 do_url_tests("url_state_health", url_state_health)

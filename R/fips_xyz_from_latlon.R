@@ -1,20 +1,5 @@
 
-# latlon_from_fips <- function(fips) {
-
-# ***
-
-#   # for blocks, use blockpoints[, .(lat,lon)]  join on blockid via blockid2fips
-#
-#
-#   # for blockgroups,   bgpts[, .(lat,lon)]   join on bgid via bgid2fips
-#
-#
-#        # otherwise approx average of bg lat and average of bg lon?
-#   # for tract,  could use its bgs from substr(blockgroupstats$bgfips, 1, 11)
-#   # for county,  could use its bgs from substr(blockgroupstats$bgfips, 1, 5)
-#   # for state,  could use its bgs from substr(blockgroupstats$bgfips, 1, 2)
-#
-# }
+# see also latlon_from_fips
 
 ####################################################### ######################################################## #
 

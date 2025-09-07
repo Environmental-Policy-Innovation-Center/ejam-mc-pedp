@@ -206,7 +206,8 @@ x <- EJAM:::test_ejam(
         "test-frs_from_programid.R",
         "test-frs_from_regid.R",
         "test-frs_from_sic.R",
-        "test-frs_is_valid.R"
+        "test-frs_is_valid.R",
+        "test-latlon_from_fips.R"
       ),
       test_latlon = c(
         "test-latlon_infer.R",
