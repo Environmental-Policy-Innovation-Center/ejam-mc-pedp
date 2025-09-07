@@ -1,37 +1,32 @@
-# EJAM v2.32.6 (August 2025)
+
+# 2.32.6 - 2025-09-07
 
 ## Web App
 
-### Language related to "Environmental Justice"
+### Restored language related to "Environmental Justice"
 
 -   Changed name of tool back to "Environmental Justice Analysis Multisite" tool (from "Environmental and Residential Population Analysis Multisite" tool, the name used in early 2025 through July 2025)
 -   Restored some text: "EJ Indexes" now once again refers to what were called "Summary Indexes" in early 2025 through July 2025. "Supplementary EJ Indexes" is similarly used once again.
--   Other language related to "environmental justice" was edited in early 2025 at EPA in response to an Executive Order, but has not been changed back to its original language even in this non-EPA version of the package. For anyone interested, notes listing those changes were archived in a file saved as "EJAM/data-raw/0_generic_terms_notes.R".
--   Also edited descriptions of some language-related indicators (to be shorter and more consistent; unrelated to EJ terminology).
+-   Did not restore all old text, at least not yet: Other language related to "environmental justice" was edited in early 2025 at EPA in response to an Executive Order, but has not been changed back to its original language even in this non-EPA version of the package. For anyone interested, notes listing those changes were archived in a file saved as "EJAM/data-raw/0_generic_terms_notes.R".
+-   Made "EJSCREEN" all-caps everywhere (not "EJScreen")
+-   Edited descriptions of some language-related indicators (to be shorter and more consistent).
 
 ### Summary Report and Tables of Sites: Header, Footer, and Links to 1-Site Reports
 
--   Report footer now shows exact version number ("2.32.6" not just "2.32") (and same with web app home page header). Also, it was missing in some reports, now fixed.
--   Tables and Maps now have URL hyperlinks to various types of 1-site reports for each site - These were gone but now are restored and expanded (but these are in progress/ may need patches).
-    -   TABLES OF SITES - These will have links to the 1-site reports:
-        -   each row of webpage table of detailed results by site
-        -   each row of excel table of results by site
-    -   MAP POPUPS - These will have links to the 1-site reports:
-        -   map popups in summary report webpage
-        -   map popups in downloaded summary report html file
-    -   REPORT TYPES: So far, links to 2-3 report types are provided by default:
+-   Report footer now shows exact version number ("2.32.6" not just "2.32"). Same in web app home page header. Fixed missing footer in some reports.
+-   Tables of sites (web and downloaded excel) and Map popups (web and downloaded html) now have web links to various kinds of 1-site reports, for each site. These were gone, but now are restored and expanded. Links to 2-3 report types are included by default:
         -   summary report on 1 site, as a *live* webpage (shiny-app-generated)
         -   summary report on 1 site, as a *downloaded* html file (API-generated)
-        -   link to the EJSCREEN app, zoomed to the 1 site's location
-        -   Others reports are available via custom settings -- see the table below for details.
+        -   link to the EJSCREEN app (zoomed to that 1 site)
+        -   Others reports can be shown via settings -- see table below.
 
-### Website at [ejanalysis.org](https://www.ejanalysis.org) or [ejanalysis.org/ejam](https://www.ejanalysis.org/ejam)
+### Website now at [ejanalysis.org](https://www.ejanalysis.org) (or [ejanalysis.com](https://www.ejanalysis.com))
 
--   [ejanalysis.org](https://www.ejanalysis.org) is an easy URL to remember, with info on and links to EJAM and EJSCREEN.
+-   [ejanalysis.org](https://www.ejanalysis.org) is an easy URL to remember, with info about -- and links to -- EJAM and EJSCREEN.
 -   [ejanalysis.org/about](https://www.ejanalysis.org/about) has [a new emailing list you can join](https://www.ejanalysis.org/about)
--   [ejanalysis.org/ejamapp](https://www.ejanalysis.org/ejamapp) will launch a live version of the EJAM web app
--   [ejanalysis.org/ejscreenapp](https://www.ejanalysis.org/ejscreenapp) will launch a live version of the EJSCREEN web app
--   [ejanalysis.org/ejscreen](https://ejanalysis.org/ejscreen) will have info on EJSCREEN
+-   [ejanalysis.org/ejamapp](https://www.ejanalysis.org/ejamapp) will go to a live version of the EJAM web app
+-   [ejanalysis.org/ejscreenapp](https://www.ejanalysis.org/ejscreenapp) will go to a live version of the EJSCREEN web app
+-   [ejanalysis.org/ejscreen](https://ejanalysis.org/ejscreen) has info on EJSCREEN
 -   [ejanalysis.org/ejam](https://ejanalysis.org/ejam) has info on EJAM
 -   [ejanalysis.org/status](https://ejanalysis.org/status) has info about the 2025 status and history of transition from EPA to non-EPA versions of EJSCREEN and EJAM
 -   [ejanalysis.org/ejamdocs](https://www.ejanalysis.org/ejamdocs) directs you to the documentation:
@@ -40,107 +35,113 @@
 
 ### Web App Documentation
 
--   Improved the `About page` (added links to ejanalysis.org, etc.).
--   Collected copies of old user guides to inform a new one that could be developed
+-   Improved the `About page`
+-   Collected copies of old user guides to inform a new one that could be developed. [See User Guide examples](https://github.com/ejanalysis/EJAM/tree/EJAM-v2.32.6/data-raw/user-guides) that [will be here](https://github.com/ejanalysis/EJAM/tree/main/data-raw/user-guides)
 
 ### Web App Customization
 
--   Made a number of changes to allow web app default settings to be changed and other inputs to be specified. This allows the following:
-    -   Anyone using the EJAM web app online can go to the app using a URL that encodes customized input settings, and therefore launches a somewhat customized app. This is because bookmarking in the app saves the state of inputs, which control more settings now. Not all settings are available this way, but many are.
+-   Added ability to configure web app (change settings), and added ability to pass inputs to the web app at launch. This allows the following:
+    -   Anyone using the EJAM web app online can go to the app using a URL that encodes customized input settings, and therefore launches a somewhat customized app. This is because bookmarking in the app saves the state of inputs, which control more settings now. Not all settings are available this way, but many are. These features may continue to change.
     -   Anyone using R/RStudio can now launch the web app locally with many more custom settings and inputs (providing sites as a parameter, using a custom default radius, overriding caps, etc.). See `ejamapp()` for examples.
-    -   Anyone hosting a version of the EJAM web app can customize it more easily, e.g., to use a different logo, different default radius, different options for how to select sites, etc.
--   Reorganized the Advanced settings tab, which now has more options and settings that can be changed. That tab is hidden by default in most cases because it is complicated, and some parts are experimental/untested.
+    -   Anyone hosting a version of the EJAM web app can customize it, e.g., to use a different logo, different default radius, different options for how to select sites, etc.
+-   Reorganized the "Advanced" settings tab, which now has more options and settings that can be changed. That tab is hidden by default in most cases because it is complicated, and some parts are experimental/untested.
+
 
 ## R/RStudio Users (Analysts and Developers)
 
-### Language related to "Environmental Justice"
+### Shortcuts are provided via [ejanalysis.org](https://www.ejanalysis.org) (or [ejanalysis.com](https://www.ejanalysis.com))
 
--   See web app notes above.
--   The app is now once again called the "Environmental Justice Analysis Multisite tool" and that title is stored in the DESCRIPTION file, and is available for vignettes, functions, etc. directly via `as.vector(desc::desc_get("Title"))`. After the package is attached, the name as potentially modified via global_defaults_package.R or parameters to `ejamapp()` is available as `EJAM:::global_or_param("app_title")` (and note app_title previously was called .app_title)
-
-### Website now at [ejanalysis.org](https://www.ejanalysis.org) or [ejanalysis.org/ejam](https://www.ejanalysis.org/ejam)
-
--   [ejanalysis.org](https://www.ejanalysis.org) is an easy-to-remember alias with links to documentation, code, and live apps. The .org and .com versions of the URL are synonymous, and these shortcuts/redirects are mostly case-insensitive.
--   [ejanalysis.org/about](https://www.ejanalysis.org/about) has [a new emailing list you can join](https://www.ejanalysis.org/about)
--   [ejanalysis.org/ejamapp](https://www.ejanalysis.org/ejamapp) will launch a live version of the EJAM web app
--   [ejanalysis.org/ejscreenapp](https://www.ejanalysis.org/ejscreenapp) will launch a live version of the EJSCREEN web app
--   [ejanalysis.org/ejscreen](https://ejanalysis.org/ejscreen) will have info on EJSCREEN
--   [ejanalysis.org/ejam](https://ejanalysis.org/ejam) has info on EJAM
--   [ejanalysis.org/status](https://ejanalysis.org/status) has info about the 2025 status and history of transition from EPA to non-EPA versions of EJSCREEN and EJAM
--   [ejanalysis.org/docs](https://www.ejanalysis.org/docs) or [ejanalysis.org/ejamdocs](https://www.ejanalysis.org/ejamdocs) directs you to the documentation for the EJAM package, including articles and vignettes:
-    -   [What is EJAM?](../articles/whatis.html) is an overview of what EJAM can do.
-    -   [Accessing the Web App](../articles/webapp.html) is about the web app.
-    -   The rest of the [documentation](https://www.ejanalysis.org/ejamdocs) is technical, explaining how to install and use the R package to work directly with the more powerful tools EJAM offers beyond the web app.
 -   [ejanalysis.org/repo](https://www.ejanalysis.org/repo) or [ejanalysis.org/ejamrepo](https://www.ejanalysis.org/ejamrepo) directs you to the GitHub page for the EJAM package open source software.
 -   [GitHub issues now can be submitted here](https://github.com/ejanalysis/EJAM/issues)
+-   [ejanalysis.org/docs](https://www.ejanalysis.org/docs) or [ejanalysis.org/ejamdocs](https://www.ejanalysis.org/ejamdocs) directs you to the documentation for the EJAM package, including technical reference docs (how to install and use the R package to work directly with the more powerful tools EJAM offers beyond the web app).
 
-### Weblinks / URLs for API and other single-site reports
 
--   Weblinks / URLs for single-site reports have been missing since 1/2025, but now are being restored to the tables of sites (results_bysite table from `ejamit()`, `ejam2tableviewer()`, etc.) and map popups (in various map functions like `ejam2map()` etc.)
+### Weblinks / URLs (API, reports, etc.)
 
--   Several new reports can be made available via extra columns of links in any site-by-site table or map popup (not fully tested)  -- The various report columns can be turned on/off via the `default_reports` setting found in `global_defaults_package.R` Then `url_columns_bysite()` can use these to provide URLs for reports or webpages:
+-   Restored columns of weblinks in single-site reports - they had been missing since 1/2025. Added back to the tables of sites (results_bysite table from `ejamit()`, `ejam2tableviewer()`, etc.) and map popups (in various map functions like `ejam2map()` etc.)
+
+-   Added several new functions that can provide these kinds of reports:
 
 | header (column title) | text (of link) | function name | parameters |
 |---------------|--------------|-----------------|----------------------|
 | EJAM Report | Report | `url_ejamapi()` | sitepoints, lat, lon, radius, fips, shapefile, etc. |
 | EJSCREEN Map | EJSCREEN | `url_ejscreenmap()` | sitepoints, lat, lon, shapefile, fips, wherestr, etc. |
+| Enviromapper Report | Enviromapper | `url_enviromapper()` | sitepoints, lon, lat, shapefile, fips, zoom, etc. |
 | ECHO Report | ECHO | `url_echo_facility()` | regid, validate_regids, etc. |
 | FRS Report | FRS | `url_frs_facility()` | regid, validate_regids, etc. |
-| Enviromapper Report | Enviromapper | `url_enviromapper()` | sitepoints, lon, lat, shapefile, fips, zoom, etc. |
 | County Health Report | County | `url_county_health()` | fips, year, etc. |
 | State Health Report | State | `url_state_health()` | fips, year, etc. |
+| County Equity Atlas Report | County | `url_county_equityatlas()` | fips |
+| State Equity Atlas Report | State | `url_state_equityatlas()` | fips |
 
--   The choice of what URL/link columns to include is now controlled by settings within global_defaults_package.R
-
--   New function `url_columns_bysite()` is the new overall utility that compiles columns of links, based on reports/etc. specified in `global_defaults_package.R` via new setting `default_reports`. This setting lets you provide a list of URL column names and specify what function would be used to generate each URL column, such as url_ejamapi() or url_ejscreenmap() etc.
+-   `url_ejamapi()` provides URLs to use with EJAM-API to get an html summary report on 1 site at a time. Inputs to this function are like inputs to `ejamit()` but so far mostly limited to radius, sitepoints, fips, shapefile. This will enable the map popups and excel tables of sites to include links to single-site reports, for example. It is limited to blockgroup fips only, right now, and only single-site reports right now.
 
 -   `url_ejscreenmap()` and other functions in table above were revised, cleaned up, and moved among .R files.
 
--   New function `url_ejamapi()` provides URLs to use with EJAM-API to get html summary report on 1 site at a time. Inputs to this function are like inputs to `ejamit()` but so far mostly limited to radius, sitepoints, fips, shapefile. This will enable the map popups and excel tables of sites to include links to single-site reports, for example. It is limited to blockgroup fips only, right now, and only single-site reports right now.
+-   `url_enviromapper()` and `url_ejscreenmap()` can now accept a fips code and get the approx centroid of each block, blockgroup, tract, city, county, or state - that lets it craft a link to send you to EJSCREEN or EnviroMapper zoomed to one fips unit
 
--   New function `shape2geojson()` is a helper that converts a spatial data.frame to text string geojson, the format needed by the 8/2025 version of the EJAM-API
+-    `url_frs_facility()` and `url_echo_facility()` are the new names of functions giving links to EPA FRS and ECHO reports on regulated facilities.
+
+-   `url_county_health()` and `url_state_health()` are new or renamed and provide links to reports that used to be called county health rankings
+
+-   `url_county_equityatlas()` and `url_state_equityatlas()` provide links to "Equity Atlas" reports
+
+
+### Added documentation
+
+-   Simplified the [README](https://github.com/ejanalysis/EJAM/#readme)
+-   Improved the [article on how to install the package](../articles/installing.html), but it does need some additional testing/fixes.
+-   Renamed fields in the DESCRIPTION file, for VERSION and DATE info!
+-   Redid sample report, etc. outputs in `testdata/examples_of_outputs` folder to reflect changes in version numbers shown in report footer and app header, etc.
+-   Renamed various \*.R files and relocated some source code among those, to make some filenames more consistent.
+-   Made some functions internal that until now had been exported, to simplify things for most R users.
+-   Updated {roxygen2} help file docs and pkgdown documentation webpages
+-   New function `url_github_preview()` makes it a bit easier to view rendered HTML reports that each package release or branch stores in the testdata/examples_of_outputs folder, to compare how they look in different versions. 
+
+
+### Added or Changed
 
 -   `ejam2report()` now downloads FIPS bounds if missing.
 
 -   `mapfast()` and some others now drop sites with empty geometry before trying to map, avoid an error
 
--   `popup_from_any()` and other popup functions now have different parameters that can handle more columns of URLs/links of any type
+-   `popup_from_any()` and other map popup functions now have different parameters that can handle more columns of URLs/links of any type
 
--   `popup_from_any()` and other popup functions now drop the geometry column from spatial data.frames to avoid including a mess in the popup
+-   `popup_from_any()` and other map popup functions now drop the geometry column from spatial data.frames to avoid including a mess in the popup
+
+-   `shape2geojson()` is a new helper function that tries to convert a spatial data.frame to text string geojson, the format needed by the 8/2025 version of the EJAM-API
+
+-   `testinput_fips_mix` is a new dataset with fips of each type: block, blockgroup, tract, city, county, state
+
+-   `fips_county_from_latlon()` and `fips_state_from_latlon()` are new internal functions - for each point, they identify the county or state its in
+
+-   `fips2countyfips()` reports what US County contains each fips-based Census unit, such as the Counties in which some blockgroups are located.
 
 -   `fips2name()` now handles block fips instead of warning
 
-fips_county_from_latlon() and fips_state_from_latlon
+-   `sites_from_input()` new internal function that helps other functions flexibly accept sites in various formats of input parameters: table of points, vectors of lat,lon, spatial data.frame, or fips code vector 
+
+-   `sitepoints_from_latlon_or_sitepoints()` supports sites_from_input() - it flexibly accepts input as either lat and lon vectors or just a table of point with lat,lon columns - it figures out which to use.
 
 -   `regids_valid()` is a new internal function 
 
--   testinput_fips_mix is a new dataset with fips of each type: block, blockgroup, tract, city, county, state
-
-### Package documentation etc.
-
--   Simplified the [README](https://github.com/ejanalysis/EJAM/#readme)
--   Improved the [article on how to install the package](../articles/installing.html).
--   Redid sample report, etc. outputs in `testdata/examples_of_outputs` folder to reflect changes in version numbers shown in report footer and app header, etc.
--   Renamed various \*.R files and relocated some source code among those, to make some filenames more consistent.
--   Made some functions internal that until now had been exported, to simplify things for most R users.
--   Updated roxygen2 help file docs and pkgdown documentation webpages
--   New function `url_github_preview()` makes it a bit easier to view rendered HTML reports from each package release or branch, to compare how they look in different versions. See ?
--   New function `fips2countyfips()` reports what US County contains each fips-based Census unit, such as the Counties in which some blockgroups are located.
+-  `url_linkify()` improved and made internal
 
 
-### Web App Customization
+### Web app customization details
 
--   `ejamapp()` is the new name (alias) for `run_app()`
--   Improved web app ui/server code, allowing many options and defaults to be provided as parameters to `ejamapp()`.
+-   Added `ejamapp()` as the new name (alias) for `run_app()`
+-   Added ability to set many options and defaults as parameters passed to `ejamapp()`.
 -   Added many examples to `ejamapp()` documention showing how to change defaults and options. You can now
     -   Use a preferred default way to pick sites (e.g., to have the app launch with the Counties option selected by default)
-    -   Provide preselected industry NAICS codes, or a set of specific Counties
-    -   Provide a table of lat/lon coordinates to preload at launch
+    -   Provide pre-selected industry NAICS codes, or a set of specific Counties
+    -   Provide a table of lat/lon coordinates to preload at launch e.g., `ejamapp(sitepoints=testpoints_10)`
     -   Provide a shapefile to preload upon launch
     -   etc.
+-   Drafted a new article with technical details: [Defaults and Custom Settings for the Web App](../articles/dev-app-settings.html)
+-   Changed where the app title is stored. It is stored in the DESCRIPTION file as a field. (The app title also can be modified by editing `global_defaults_package.R` or by passing parameters to `ejamapp()`).
 -   Fixed a bug where `isPublic` parameter in `ejamapp()` was being ignored.
 -   Fixed a bug where threshold-related parameters passed to `ejamapp()` were being ignored in the latlon case.
--   Drafted new article with technical details: [Defaults and Custom Settings for the Web App](../articles/dev-app-settings.html)
 -   Changed how Advanced tab visibility is controlled ("default_can_show_advanced_settings" and "default_show_advanced_settings" set initial values of shiny inputs of the same names)
 -   Renamed some global_defaults\_ variables and shiny app input variables and related variables so they are easier to use as parameters in ejamapp().
     -   For example, radius is now settable by `ejamapp(radius_default=3.1)` -- the old `input$default_miles` is now called `input$radius_default`, and the old `input$bt_rad_buff` is now called `input$radius_now`
@@ -149,6 +150,8 @@ fips_county_from_latlon() and fips_state_from_latlon
     -   the old global_defaults\_ variable "intro_text" is now called "aboutpage_text"
     -   the old global_defaults\_ variable "default_default_miles_shapefile" is now called "radius_default_shapefile" (to buffer polygons)
     -   the old reactive sanitized_bt_rad_buff() is now called sanitized_radius_now()
+
+
 
 # EJAM v2.32.5 (July 2025)
 
