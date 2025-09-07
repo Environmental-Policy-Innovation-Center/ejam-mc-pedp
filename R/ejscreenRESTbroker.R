@@ -188,18 +188,6 @@ ejscreenRESTbroker <- function(lon = NULL, lat = NULL, radius = 3,
                           '&f=', f
   )
 
-  ## Alternative method of crafting the request:
-  #
-  # url <- urltools  ::  param_set(url, key = "areatype", value = areatype)
-  # url <- urltools  ::  param_set(url, key = "areaid",   value = fips)
-  # url <- urltools  ::  param_set(url, key = "namestr",  value = namestr)
-  # url <- urltools  ::  param_set(url, key = "geometry", value = geometry)
-  # url <- urltools  ::  param_set(url, key = "distance", value = radius)
-  # url <- urltools  ::  param_set(url, key = "unit",     value = unit)
-  # url <- urltools  ::  param_set(url, key = "f",        value = f)
-  # this_request <- url
-
-
   if (f == 'report') {
 
     # cat("see url_ejscreen_report() for obtaining a vector of URLs, with more options and error-handling\n")
