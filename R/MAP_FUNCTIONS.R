@@ -70,7 +70,7 @@ map_ejam_plus_shp <- function(shp, out, radius_buffer = NULL, circle_color = '#0
   shp <- shp[, c("ejam_uniq_id", "geometry")] # the "valid" column is in out$results_bysite, not in shp, and shp should have even invalid rows.
   # in FIPS case, ejam_uniq_id is fips not 1:N, so merge() here would fail.
   # but if we assume same NROW and same sort for shp and out#results_bysite, then we can just use the row number to match them up, or use cbind(shp, out$results_bysite)
-  if (sitetype == "fips") {
+  if (sitetype %in% "fips") {
     shpout <- cbind(shp, out$results_bysite)
   } else {
     shpout <- merge(shp, out$results_bysite,
@@ -631,7 +631,7 @@ map_shapes_mapview <- function(shapes, col.regions = "green", map.types = "OpenS
 #' @return a ggplot() object
 #'
 #' @examples \donttest{
-#'   mapfast_gg(EJAM::testpoints_10)
+#'   mapfast_gg(testpoints_10)
 #'
 #'   pts <- read.table(textConnection(
 #'   "lat lon

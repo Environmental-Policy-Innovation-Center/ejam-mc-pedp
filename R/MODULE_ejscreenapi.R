@@ -565,7 +565,7 @@ if (FALSE) {
                     # THIS COULD BE REPLACED WITH EJAM CODE THAT USES FRS FILE ON SERVER TO DO THIS QUERY, NOT AN API ***
                     showModal(modalDialog(title = "Please Wait", paste0("querying the EPA FRS, using facility registry_id to get lat and lon (ignores pgm_sys_id column since registry_id is present)", ''), easyClose = TRUE))
                     cat(paste0("querying the EPA FRS, using facility registry_id, to get lat and lon (ignores pgm_sys_id column since registry_id is present)", '\n'), file = stdout())
-                    x <- try(locate_by_id(id = pts_filecontents$registry_id, type = 'frs'), silent = TRUE)
+                    x <- try(locate_by_id(idx = pts_filecontents$registry_id, type = 'frs'), silent = TRUE)
                     # error handling could go here
                     pts_filecontents$lat <- as.numeric(x$Latitude83)
                     pts_filecontents$lon <- as.numeric(x$Longitude83)
@@ -580,7 +580,7 @@ if (FALSE) {
 
                       showModal(modalDialog(title = "Please Wait", paste0("querying the EPA FRS, using facility pgm_sys_id to get lat and lon", ''), easyClose = TRUE))
                       cat(paste0("querying the EPA FRS, using facility pgm_sys_id, to get lat and lon", ''), file = stdout())
-                      x <- try(locate_by_id(id = pts_filecontents$pgm_sys_id, type = 'program'))
+                      x <- try(locate_by_id(idx = pts_filecontents$pgm_sys_id, type = 'program'))
                       # error handling could go here
                       pts_filecontents$lat <- as.numeric(x$Latitude83)
                       pts_filecontents$lon <- as.numeric(x$Longitude83)

@@ -219,10 +219,10 @@ create_quaddata <- function(pts,
     }
   }
   if (!is.null(idcolname)) {
-    if (idcolname == "blockid") {
+    if (idcolname %in% "blockid") {
       cols_kept <-  c("lat", "lon", "blockid")
     }
-    if (idcolname == "id") {
+    if (idcolname %in% "id") {
       cols_kept <-  c("lat", "lon", "id")
     }
   }
@@ -1414,7 +1414,7 @@ custom_doaggregate <- function(sites2blocks,
   ##            *** the code below should be made available on its own without the part above here.
   #
   # for example, if you had done this:
-  # x = EJAM::counties_as_sites(fips_counties_from_state_abbrev("DE"))
+  # x =  counties_as_sites(fips_counties_from_state_abbrev("DE"))
   # > x
   # ejam_uniq_id countyfips  bgid
   # <int>     <char> <int>

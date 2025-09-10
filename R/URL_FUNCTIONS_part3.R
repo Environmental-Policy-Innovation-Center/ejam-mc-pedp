@@ -139,8 +139,8 @@ url_ejscreen_report <- function(sitepoints = NULL, lat='', lon='', radius='', mo
       if (is.null(namestr)) {namestr <- ''}
       # The FIPS can be displayed as the name of the place on the EJSCREEN report since it already looks up and displays the actual name of a county or city
       # namestr <- rep("", length(areatype))
-      # namestr[namestr == "county"] <- fips2countyname(fips[namestr == "county"])
-      # # namestr[namestr == "state"] <- fips2statename(fips[namestr == "state"])
+      # namestr[namestr %in% "county"] <- fips2countyname(fips[namestr %in% "county"])
+      # # namestr[namestr %in% "state"] <- fips2statename(fips[namestr %in% "state"])
 
     } else {
 

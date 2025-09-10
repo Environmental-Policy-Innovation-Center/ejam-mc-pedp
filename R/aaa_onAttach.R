@@ -118,6 +118,7 @@
     # data(list=c("frs", "frs_by_programid ", "frs_by_naics"),  package="EJAM")
     # # would be to preload some very large ones not always needed.
   }
+  options(tigris_use_cache = TRUE)
 
   packageStartupMessage('For help using the EJAM package in RStudio:
                           ?EJAM

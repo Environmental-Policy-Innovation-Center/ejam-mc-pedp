@@ -19,7 +19,7 @@
 #'
 #' @keywords internal
 #'
-url_online <- function(url = c("ejscreen.epa.gov",)) {
+url_online <- function(url = "ejscreen.epa.gov") {
 
   if (missing(url)) {stop("must specify a URL")}
   if (length(url) > 1) {stop("can only check one URL at a time using url_online()")}

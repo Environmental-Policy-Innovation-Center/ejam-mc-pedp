@@ -146,7 +146,9 @@ sites_from_file <- function(file) {
 #'    will prompt user for file if "anything" is missing.
 #' @param invalid_msg_table Set to TRUE to add columns "valid" and "invalid_msg" to output
 #' @param set_invalid_to_na used by latlon_df_clean()
-#' @seealso [sitepoints_from_any()] which is like this but also adds ejam_uniq_id column,
+#' @seealso
+#'   [sitepoints_from_any()] which is like this but also adds ejam_uniq_id column,
+#'   [latlon_from_fips()] and [latlon_from_shapefile()] that find centroids,
 #'   and see [read_csv_or_xl()] and [latlon_df_clean()]
 #' @return A data.frame that has at least columns lon and lat (and others if they were in anything),
 #'   and a logical column called "valid"
@@ -173,6 +175,10 @@ sites_from_file <- function(file) {
 #'
 latlon_from_anything <- function(anything, lon_if_used, interactiveprompt = TRUE, invalid_msg_table = FALSE, set_invalid_to_na = TRUE) {
 
+
+  # refactor this to accept maybe sitepoints,lat,lon inputs, as with   sitepoints_from_latlon_or_sitepoints()
+  # except this is more flexible in sense that input can be a file while
+  # other is more flexible in sense that input can be lat=1,lon=2 or sitepoints=3 etc. ***
 
   if (missing(anything) || is.null(anything) || all(length(anything) == 0) || all(is.na(anything)) || all("" == anything)) {
     if (interactive() && !shiny::isRunning() && interactiveprompt) {

@@ -31,24 +31,11 @@ regids_valid = function(regid) {
 }
 ################################################### #################################################### #
 
-#' Use registry ID to see FRS Facility Registry Service data on those EPA-regulated sites
-#'
-#' @param regid vector of one or more EPA Registry ID codes used by FRS
-#' @return relevant rows of the data.table called frs, which has column names that are
-#'   "lat" "lon" "REGISTRY_ID" "PRIMARY_NAME" "NAICS" "PGM_SYS_ACRNMS"
-#'
-#' @examples
-#'   frs_from_regid(testinput_registry_id)
-#'   frs_from_regid(110000307695)
-#'   frs_from_regid("110000307695")
-#'
 #' @export
 #'
-frs_from_regid <- function(regid) {
-
-  if (!exists("frs")) dataload_dynamic("frs")
-  frs[match(regid, frs$REGISTRY_ID, nomatch=0), ] # to return results in same order as search terms were provided
-  # frs[REGISTRY_ID %in% regid, ]
+frs_from_regid <- function(regid = NULL) {
+  # alias for
+  latlon_from_regid(regid = regid)
 }
 ########################################## #
 

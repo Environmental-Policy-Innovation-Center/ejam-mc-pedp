@@ -104,8 +104,10 @@ fips_bg_from_latlon <- function(df = testpoints_10[1:2, ], nblocks = 50, nbg = 3
   }
   # sites as spatial data.frame
   shp_sites <- shapefile_from_sitepoints(df)
+  suppressWarnings({
   sf::st_crs(shp_bgs) <- sf::st_crs(shp_sites)
-
+  # cat("st_crs<- : replacing crs does not reproject data; use st_transform for that\n")
+  })
   # which blockgroups polygons contain/intersect with which sitepoints?
   fips_out <- rep(NA, NROW(df))
   contained <- sf::st_intersects(shp_bgs, shp_sites, sparse=FALSE)
@@ -120,7 +122,10 @@ fips_bg_from_latlon <- function(df = testpoints_10[1:2, ], nblocks = 50, nbg = 3
     }
   }
   # report one FIPS per site
-  fips_out[bg_per_site == 1] <- shp_bgs$FIPS[as.vector(unlist(apply(contained[, bg_per_site == 1], MARGIN = 2, which )))]
+  x <- apply(contained[, bg_per_site == 1, drop=FALSE], MARGIN = 2, which )
+  fips_out[bg_per_site == 1] <- shp_bgs$FIPS[as.vector(unlist(
+    x
+    ))]
   return(fips_out)
 }
 ########################################### #
@@ -137,9 +142,7 @@ fips_bg_from_latlon <- function(df = testpoints_10[1:2, ], nblocks = 50, nbg = 3
 #'
 fips_county_from_latlon <- function(sitepoints = NULL, lat = NULL, lon = NULL) {
 
-  if (is.null(sitepoints)  && !is.null(lat) && !is.null(lon)) {
-    sitepoints = data.frame(lat = lat, lon = lon)
-  }
+  sitepoints <- sitepoints_from_latlon_or_sitepoints(sitepoints = sitepoints, lat = lat, lon = lon)
   bgfips = fips_bg_from_latlon(df = sitepoints )
   fips = substr(bgfips, 1, 5)
   return(fips)

@@ -27,7 +27,6 @@
 #' When using tigris package ("tiger" as service-related parameter here),
 #' it uses the year that is the default in the version of the tigris package that is installed.
 #' You can use options(tigris_year = 2022) for example to specify it explicitly.
-#' This function also sets options(tigris_use_cache = TRUE), but each individual shapes_xyz_from_ function may not specify.
 #'
 #'  Blocks are not implemented yet here. For info on blocks bounds, see  [tigris::block_groups()]
 #'  Also note the [blockwts] dataset had a placeholder column block_radius_miles that as of
@@ -126,7 +125,7 @@ shapes_from_fips <- function(fips,
   }
   ########################## #
 
-  options(tigris_use_cache = TRUE) # But it seems to use cache anyway?
+  options(tigris_use_cache = TRUE) # done in .onAttach() now
   # options(tigris_year = 2022) # uses default of the tigris package version installed
 
   error_downloading <- function(shp) {
@@ -396,7 +395,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     if (myservice[1] == 'cartographic') {usecb = TRUE}
     if (myservice[1] == 'tiger') {usecb = FALSE}
 
-    options(tigris_use_cache = TRUE) # But it seems to use cache anyway?
+    options(tigris_use_cache = TRUE) # done in .onAttach() now
 
     # get_acs() can get all counties for a list of states, or selected counties from 1 state,
     #  but is not able to get just selected counties from more than 1 state in a single function call,
@@ -492,7 +491,6 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     #            ## using tidycensus pkg
     # library(tidycensus)
     # library(tidyverse)
-    # options(tigris_use_cache = TRUE) # But it seems to use cache anyway?
     # mystates = stateinfo$ST # 50+DC+PR
     # ## checked speeds:
     ## About 1-4 seconds for all counties faster cartographic bounds
@@ -1059,7 +1057,7 @@ shapefile_addcols <- function(shp, addthese = c('fipstype', 'pop', 'NAME', 'STAT
   }
   if ('SQMI' %in% addthese) {
     shp$SQMI <- area_sqmi_from_fips(fipsvector, download_city_fips_bounds = FALSE, download_noncity_fips_bounds = FALSE)
-    shp$SQMI[ftype == "city" & !is.na(ftype)] <- area_sqmi_from_shp(shp[ftype == "city" & !is.na(ftype), ]) # *** check the numbers
+    shp$SQMI[ftype %in% "city" & !is.na(ftype)] <- area_sqmi_from_shp(shp[ftype %in% "city" & !is.na(ftype), ]) # *** check the numbers
     shp$SQMI <- round(shp$SQMI, 2)
   }
 

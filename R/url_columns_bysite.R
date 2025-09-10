@@ -55,7 +55,7 @@
 url_columns_bysite <- function(sitepoints = NULL, lat = NULL, lon = NULL,
                                shapefile = NULL,
                                fips = NULL, wherestr = "", namestr = NULL,
-                               regid = NULL,
+                               regid = NULL, # see details
                                radius = NULL,
 
                                reports = EJAM:::global_or_param("default_reports"),
@@ -70,40 +70,49 @@ url_columns_bysite <- function(sitepoints = NULL, lat = NULL, lon = NULL,
 
   # clean/check inputs and sitetype
 
-  if (missing(lat) && missing(lon) && missing(shapefile) && missing(fips) && !missing(wherestr)) {
+  if (is.null(lat) && is.null(lon) && is.null(shapefile) && is.null(fips) && !("" %in% wherestr) && !is.null(wherestr)) {
     fips <- fips_from_name(wherestr) # old ejscreenapi used wherestr not fips so this is in case that is the only thing provided here
   }
-  if (is.null(sitepoints)) {
-    if (!is.null(lat) && !is.null(lon)) {
-      sitepoints = data.frame(lat = lat, lon = lon, ejam_uniq_id = seq_along(lat))
+
+  sites <- sites_from_input(sitepoints = sitepoints, lat = lat, lon = lon, shapefile = shapefile, fips = fips)
+  sitespoints <- sites$sitepoints
+  sitetype <- sites$sitetype
+
+  # get regid
+  #    -  uses regid in some functions but I don't think only regid would ever  be the sole input
+  if (!missing(regid) && !is.null(regid)) {
+    # regid <- regid
+  } else {
+    if ("REGISTRY_ID" %in% names(sitespoints)) {
+      regid <- sitespoints$REGISTRY_ID
+    } else {
+      regid <- NULL
     }
   }
-  if (is.null(sitetype)) {
-    # infer if it is points, fips, or polygons
-    sitetype <- EJAM:::ejamit_sitetype_from_input(
-      sitepoints = sitepoints,
-      fips = fips,
-      shapefile = shapefile
-    )
-  }
-  if (is.null(sitetype) || length(sitetype) != 1 || !(sitetype %in% c("latlon", "fips", "shp"))) {
-    # also uses regid in some functions
+
+  if (is.null(sitepoints)
+      # && is.null(regid)
+  ) {
     warning("cannot infer sitetype, must be one of 'latlon', 'fips', or 'shp'")
-    # return all NA values?   but unclear how many rows worth.  # return(NA) # ???? ***
-    return(NULL)
+    # return all NA values?   but unclear how many rows worth.  # return(NA)   ***
+    return(list(
+      results_bysite  = NA, # this may not work, actually but should not arise ***
+      results_overall = NA # this may not work, actually but should not arise ***
+    ))
   }
 
   ######################################################################################### #
   # handle any list of functions that provide report URLs from this set of input params
   ######################################################################################### #
 
-  if ("fips" %in% sitetype)   {rowcount = NROW(fips)}
-  if ("shp" %in% sitetype)    {rowcount = NROW(shapefile)}
-  if ("latlon" %in% sitetype) {rowcount = NROW(sitepoints)}
+  # I don't think only regid would ever  be the sole input
+  if ("fips" %in% sitetype)   {rowcount <- NROW(fips)}
+  if ("shp" %in% sitetype)    {rowcount <- NROW(shapefile)}
+  if ("latlon" %in% sitetype) {rowcount <- NROW(sitepoints)}
 
-  # reports = EJAM:::global_or_param("default_reports") # list of reports, each a named lists of info like header, text, & FUN.
+  # reports <- EJAM:::global_or_param("default_reports") # list of reports, each a named lists of info like header, text, & FUN.
   if (is.null(reports)) {
-    reports =  list(
+    reports <-  list(
       list(header = "EJAM Report",     text = "Report",   FUN = url_ejamapi)      # EJAM summary report (HTML via API)
       , list(header = "EJSCREEN Map",  text =  "EJSCREEN", FUN = url_ejscreenmap) # EJSCREEN site, zoomed to the location
       # , list(header = "ECHO Report",         text = "ECHO",         FUN = url_echo_facility) # if regid provided
@@ -114,7 +123,7 @@ url_columns_bysite <- function(sitepoints = NULL, lat = NULL, lon = NULL,
     )
   }
   links <- data.frame(matrix(NA, nrow = rowcount, ncol = length(reports)))
-  url_functions = lapply(reports, function(x) (x$FUN))
+  url_functions <- lapply(reports, function(x) (x$FUN))
   ## The input parameter defaults of url_columns_bysite() ensure all possible parameter names listed below exist and can be passed from here, and are NULL if not specified by the analysis calling url_columns_bysite().
   ## The ... parameter(s) in every report-generating FUN ensures any params not needed by a given FUN can be passed to it from here and just get ignored for that type of report.
 
@@ -131,11 +140,11 @@ url_columns_bysite <- function(sitepoints = NULL, lat = NULL, lon = NULL,
       as_html = as_html, linktext = reports[[i]]$text,
       validate_regids = validate_regids,
       ... = ...
-      )
+    )
   }
   colnames(links) <- sapply(reports, function(x) (x$header))
 
-  results_overall = links[1, , drop=FALSE]
+  results_overall <- links[1, , drop=FALSE]
   if (NROW(links) == 1) {
     # ok, it was for one site so leave overall the same as that one site instead of providing the generic URLs?
   } else {

@@ -163,7 +163,7 @@ build_community_report <- function(output_df,
 
     ############################################################# #
 
-    # 1. Report/analysis overall header ####
+    # 1. Report / analysis overall header ####
 
     generate_html_header(analysis_title = analysis_title,
                          totalpop = totalpop, locationstr = locationstr,

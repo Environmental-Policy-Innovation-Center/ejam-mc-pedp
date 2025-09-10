@@ -1,11 +1,3 @@
-################################################################################## #
-
-
-# sitepoints_from_latlon_or_sitepoints() is a helper used by sites_from_input()
-
-
-
-
 
 #' helps other functions have flexible input parameters - can provide points in a table, points as lat,lon vectors, polygons in a spatial data.frame, or Census units as a fips code vector
 #' figures out which type of inputs were provided, and returns them
@@ -39,8 +31,10 @@ sites_from_input <- function(sitepoints = NULL,
   have_fips = (!is.null(fips) & NROW(fips) > 0)
 
   # warn and NULL if 0 provided
-  if (sum(have_latlon, have_shp, have_fips) == 0) {
-    warning("no sites were provided")
+  if (sum(have_latlon, have_shp, have_fips) == 0
+      # && (is.null(regid) || length(regid) == 0)
+  ) {
+    # warning("no sites were provided")
     sitepoints=NULL; shapefile=NULL;fips <- NULL
   }
 

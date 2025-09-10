@@ -106,7 +106,8 @@ ejscreenapi <- function(lon, lat, radius = 3, unit = 'miles', wkid = 4326 ,
 ) {
 
   offline_warning(); offline_cat()
-  if (!ejscreenapi_online(ipurl)) {stop("API URL does not seem to be accessible")}
+  eee = ejscreenapi_online(ipurl)
+  if (is.na(eee) || !eee) {stop("API URL does not seem to be accessible")}
 
   if (!is.null(shapefile)) {warning('shapefile not implemented yet for ejscreenapi()')}
 

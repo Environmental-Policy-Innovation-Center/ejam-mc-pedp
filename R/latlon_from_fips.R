@@ -33,7 +33,7 @@ latlon_from_fips <- function(fips) {
 
   if ("blockgroup" %in% ftype) {
 
-    dtf_bg = dtf[ftype == "blockgroup", .(ftype, fips)]
+    dtf_bg = dtf[ftype %in% "blockgroup", .(ftype, fips)]
     setnames(dtf_bg, 'fips', 'bgfips')
     dtf_bg[bgpts, `:=`(lat = lat, lon = lon), on = "bgfips"]
     setnames(dtf_bg, 'bgfips', 'fips')
@@ -42,7 +42,7 @@ latlon_from_fips <- function(fips) {
       dtf$lat = 0
       dtf$lon = 0
     }
-    dtf[ftype == "blockgroup", ] <- dtf_bg[, .(ftype,fips,lat,lon)]
+    dtf[ftype %in% "blockgroup", ] <- dtf_bg[, .(ftype,fips,lat,lon)]
 
     # latlon_from_bgfips = function(fips) {
     #
@@ -50,7 +50,7 @@ latlon_from_fips <- function(fips) {
     # return(dtf)
     # }
     #
-    # x <-  latlon_from_bgfips(fips["blockgroup" %in% ftype])
+    # x <-  latlon_from_bgfips(fips[ftype %in% "blockgroup"])
 
 
   }
@@ -68,10 +68,10 @@ latlon_from_fips <- function(fips) {
   if ("city" %in% ftype) {
 
     require(AOI)
-    placename <-  fips_place2placename(fips["city" %in% ftype])
+    placename <-  fips_place2placename(fips[ftype %in% "city"])
     if (NROW(placename) > 0 && !is.null(placename) && "lat" %in% names(placename)) {
-      newrows <- data.table(ftype = ftype["city" %in% ftype], fips = fips["city" %in% ftype], lat = placename$lat, lon = placename$lon)
-      dtf[ftype == "city", ] <- newrows
+      newrows <- data.table(ftype = ftype[ftype %in% "city"], fips = fips[ftype %in% "city"], lat = placename$lat, lon = placename$lon)
+      dtf[ftype %in% "city", ] <- newrows
     }
 
   }
@@ -82,7 +82,7 @@ latlon_from_fips <- function(fips) {
     # use tidycensus:: to get this info??  or shapes_from_fips() ?
     # or just the average lat and lon among blocks in the county
 
-    cfips = fips["county" %in% ftype]
+    cfips = fips[ftype %in% "county"]
     # get all blocks in county
     x = counties_as_sites(cfips)
     # get latlon pts
