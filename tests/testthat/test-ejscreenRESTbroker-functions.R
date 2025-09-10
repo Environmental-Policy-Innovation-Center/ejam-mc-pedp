@@ -3,7 +3,7 @@
 #   test_local()  to manually run all tests on local source pkg
 
 apiok = EJAM:::ejscreenapi_online() # for   skip_if_not(apiok, message = "ejscreen API not available")
-
+if (is.na(apiok)) {apiok <- FALSE}
 
 ################################ # ########################## # ejscreenRESTbroker ####
 
@@ -59,7 +59,7 @@ testthat::test_that("ejscreenRESTbroker() returns ok status code 200 and an elem
   expect(ok =  'content' %in% names(outrest), failure_message = 'names(outrest) fails to contain "content"')
   # same as expect_in()
 })
-  
+
 test_that("ejscreenRESTbroker() output class() is still identical to that of saved testoutput_ejscreenRESTbroker_1pts_1miles" , {
   skip_if_not(apiok, message = "ejscreen API not available")
   testradius = 1
