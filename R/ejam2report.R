@@ -98,7 +98,7 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
                         ## all the indicators that are in extratable_list_of_sections:
                         extratable_hide_missing_rows_for = as.vector(unlist(extratable_list_of_sections)),
                         report_title = NULL, # EJAM:::global_or_param("report_title"),
-                        logo_path = NULL, # EJAM:::global_or_param("report_logo"),
+                        logo_path = EJAM:::global_or_param("report_logo"),
                         logo_html = NULL # defined downstream
                         ## Rmd_name and Rmd_folder could be made params to pass to report_setup_temp_files()
 ) {
@@ -227,7 +227,7 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
 
     # > copy .Rmd (template), .png (logo), .css from Rmd_folder to a temp dir subfolder for rendering
     # report_setup_temp_files() copies files to where they need to be for rendering ####
-    ## returns path to .Rmd template copied to a temp folder:
+    ## returns path to .Rmd template copied to a temp folder, but tempReport is not used - report_setup_temp_files() is used for side efx
 
     tempReport <- report_setup_temp_files(
       # Rmd_name = 'community_report_template.Rmd', # default, for summary report

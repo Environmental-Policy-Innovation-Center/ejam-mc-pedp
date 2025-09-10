@@ -9,14 +9,15 @@
 #' @param columns_used if specified in server based on defaults or inputs, these are a subset of
 #'   colnames from ejamit()$results_bysite  to show in site-by-site interactive table
 #' @param site_report_download_colname header for column to create with buttons to download 1-site reports in shiny app
-#'
+#' @param show_1site_download_buttons if TRUE, add column near first with buttons to allow download of 1-site html summary report
 #' @keywords internal
 #'
 create_interactive_table <- function(out,
                                      reports = EJAM:::global_or_param("default_reports"),
                                      site_report_download_colname = "Download EJAM Report",
                                      # can limit columns to just some important subset:
-                                     columns_used = NULL
+                                     columns_used = NULL,
+                                     show_1site_download_buttons = TRUE
 ) {
 
   ################################################################################################### #
@@ -55,6 +56,7 @@ create_interactive_table <- function(out,
 
   ## BUTTONS for 1-site reports ####
 
+  if (show_1site_download_buttons) {
   # function to create shiny UI buttons, one per row (site), to download 1-site report for given site
   shinyInputmaker <- function(FUN, len, id, ...) {
     inputs <- character(len)
@@ -68,14 +70,14 @@ create_interactive_table <- function(out,
     FUN = actionButton,
     len = length(index),
     id = paste0('button_', index),
-    label = "Generate",
+    label = "Download",
     onclick = paste0('Shiny.onInputChange(\"single_site_report_button', index,'\", this.id)' )
   )
   x$buttoncolumn <- buttoncolumn
   x <- dplyr::relocate(x, buttoncolumn)  # will be second column
   names(x) <- gsub("buttoncolumn", site_report_download_colname, names(x))
   # x <- dplyr::relocate(x, ejam_uniq_id) # done in ejam2tableviewer()
-
+}
   ################################################################################################### #
 
   ## MAKE DATATABLE, DT::datatable object ####
@@ -173,12 +175,14 @@ create_interactive_table <- function(out,
 #       # `Download EJAM Report`
 #       site_report_download_colname_placeholder = ifelse(
 #         valid == TRUE,
+    #
 #         shinyInputmaker(
 #           FUN = actionButton, len = 1,
 #           id = paste0('button_', index),
-#           label = "Generate",
+#           label = "Download",
 #           onclick = paste0('Shiny.onInputChange(\"single_site_report_button', index,'\", this.id)' )
 #         ),
+    #
 #         '')
 #     ) %>%
 #     dplyr::ungroup() %>%

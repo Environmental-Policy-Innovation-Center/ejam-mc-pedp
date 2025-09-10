@@ -361,6 +361,8 @@ global_defaults_shiny <- list(
 
   ## ------------------------ by-site interactive web table ####
 
+  show_1site_download_buttons = TRUE,
+
   default_bysite_webtable_colnames = c('ejam_uniq_id',
                                        # site_report_download_colname will go here
                                        sapply(EJAM:::global_or_param("default_reports"), function(x) x$header), # vector of colnames of reports

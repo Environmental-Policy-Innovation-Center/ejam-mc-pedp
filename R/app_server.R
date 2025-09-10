@@ -658,17 +658,18 @@ app_server <- function(input, output, session) {
 
     if (frs_is_valid(read_frs)) {
 
-      if ("regid" %in% colnames(read_frs) & !("REGISTRY_ID" %in% colnames(read_frs))) {
+      if ("regid" %in% colnames(read_frs) && !("REGISTRY_ID" %in% colnames(read_frs))) {
         colnames(read_frs) <- gsub("regid", "REGISTRY_ID", colnames(read_frs))
       }
       #converts registry id to character if not already in that class ( frs registry ids are character)
-      if (('REGISTRY_ID' %in% colnames(read_frs)) & (class(read_frs$REGISTRY_ID) != "character")) {
+      if (('REGISTRY_ID' %in% colnames(read_frs)) && (class(read_frs$REGISTRY_ID) != "character")) {
         read_frs$REGISTRY_ID = as.character(read_frs$REGISTRY_ID)
       }
 
       ## this part could be replaced each time it happens, by the function sitepoints_from_any
 
       # convert registry ids to latlon coordinates
+      # latlon_from_regid()  could be used instead?
       sitepoints <- dplyr::left_join(read_frs, frs_from_regid(read_frs$REGISTRY_ID))
 
       ##  >this part could be replaced each time it happens, by the function sitepoints_from_any
@@ -2037,7 +2038,7 @@ app_server <- function(input, output, session) {
 
   # *** The code here builds the html report shown in the shiny app but also see separate code used to download it.
 
-  ## * HEADER ####
+  ##  Pop Count rounded ####
 
   ### ( Total Population count ) ### #
   total_pop <- reactive({
@@ -2046,7 +2047,7 @@ app_server <- function(input, output, session) {
     round(data_processed()$results_overall$pop, table_rounding_info("pop") )
   })
 
-  ### ( Title of analysis ) ### #
+  ## Title of Analysis  - UI box  ####
 
   # Unless user changes it here, use a standard title that has been determined by global_defaults_*.R but then optionally modified by advanced settings tab
 
@@ -2056,9 +2057,64 @@ app_server <- function(input, output, session) {
                      value = sanitized_standard_analysis_title())
   })
   #############################################################################  #
+
+  ## * TABLES - comm_report_html for UI   ####
+  #  note the UI is where the header and
+  ###  . build_community_report() for Browser ####
+
+  output$comm_report_html <- renderUI({
+    req(data_processed())
+
+
+    ## *** consider replacing this with ejam2report(),
+    ## but doing map, plot, tables, footer separately in app_UI() allows for spinners, for example in UI
+
+
+    rad <- data_processed()$results_overall$radius.miles # input radius can be changed by user and would alter the report text but should just show what was run not what slider currently says
+    nsites <- NROW(data_processed()$results_bysite[data_processed()$results_bysite$valid == T, ])
+    popstr <- prettyNum(total_pop(), big.mark = ',') # rounded already
+
+    sitetype <- tolower(submitted_upload_method()) #
+
+    area_in_square_miles <- data_processed()$results_overall$area_sqmi
+
+    residents_within_xyz <- report_residents_within_xyz(
+      sitetype = sitetype,
+      radius = rad,
+      nsites = nsites,
+      area_in_square_miles = area_in_square_miles
+      # sitenumber not relevant for overall report
+      # ejam_uniq_id not relevant for overall report
+    )
+
+    full_page <- build_community_report(in_shiny = TRUE,
+
+                                        output_df = data_processed()$results_overall,
+                                        analysis_title =  sanitized_analysis_title(),
+                                        totalpop = popstr,
+                                        locationstr = residents_within_xyz,
+                                        include_ejindexes = (input$include_ejindexes == 'TRUE'),
+                                        show_ratios_in_report = (input$show_ratios_in_report == 'TRUE'),
+                                        extratable_show_ratios_in_report = (input$extratable_show_ratios_in_report == 'TRUE'),
+                                        extratable_title = input$extratable_title, # above the table, not in the upper left cell
+                                        extratable_title_top_row = input$extratable_title_top_row,
+                                        extratable_list_of_sections = EJAM:::global_or_param("default_extratable_list_of_sections"),
+                                        extratable_hide_missing_rows_for = input$extratable_hide_missing_rows_for, # c(names_d_language, names_health),
+
+                                        filename = NULL,
+                                        report_title = EJAM:::global_or_param("report_title"),
+                                        logo_path    = EJAM:::global_or_param("report_logo"),
+                                        logo_html = NULL # NOT app_logo_html... gets defined downstream
+    )
+
+    ## return generated HTML
+    full_page
+    # footer is added later in UI, in this case
+  })
+  # end of comm_report_html sent to UI
+  #############################################################################  #
   ## * MAP for REPORT ####
   ############################################ #
-
   ### report_map ### #
 
   report_map <- reactive({
@@ -2137,7 +2193,6 @@ app_server <- function(input, output, session) {
     }
   }) # end of report_map
   ############################################ #
-
   ### output$quick_view_map of report_map() html ### #
 
   output$quick_view_map <- leaflet::renderLeaflet({
@@ -2205,7 +2260,7 @@ app_server <- function(input, output, session) {
   ############################################ #
 
   ###################  #
-  ### v1_summary_plot_state ####
+  ### . v1_summary_plot_state ####
 
   v1_summary_plot_state <- reactive({
 
@@ -2241,7 +2296,7 @@ app_server <- function(input, output, session) {
     }
   })
   ###################  #
-  ### v1_summary_plot ####
+  ### . v1_summary_plot ####
 
   v1_summary_plot <- reactive({
 
@@ -2321,65 +2376,13 @@ app_server <- function(input, output, session) {
       })
     }
   })
+
   ####################################################### #
   if (isTRUE(getOption("shiny.testmode"))) {
     htmlwidgets::setWidgetIdSeed(12345) # ensures consistent element IDs across runs
     set.seed(12345)
   }
   #############################################################################  #
-
-  ##  build_community_report() for Browser ####
-
-  output$comm_report_html <- renderUI({
-    req(data_processed())
-
-
-    ## *** consider replacing this with ejam2report(),
-    ## but doing map, plot, tables, footer separately in this case allows for spinners, for example in UI
-
-
-    rad <- data_processed()$results_overall$radius.miles # input radius can be changed by user and would alter the report text but should just show what was run not what slider currently says
-    nsites <- NROW(data_processed()$results_bysite[data_processed()$results_bysite$valid == T, ])
-    popstr <- prettyNum(total_pop(), big.mark = ',') # rounded already?
-
-    sitetype <- tolower(submitted_upload_method()) #
-
-    area_in_square_miles <- data_processed()$results_overall$area_sqmi
-
-    residents_within_xyz <- report_residents_within_xyz(
-      sitetype = sitetype,
-      radius = rad,
-      nsites = nsites,
-      area_in_square_miles = area_in_square_miles
-      # sitenumber not relevant for overall report
-      # ejam_uniq_id not relevant for overall report
-    )
-
-    full_page <- build_community_report(in_shiny = TRUE,
-
-                                        output_df = data_processed()$results_overall,
-                                        analysis_title =  sanitized_analysis_title(),
-                                        totalpop = popstr,
-                                        locationstr = residents_within_xyz,
-                                        include_ejindexes = (input$include_ejindexes == 'TRUE'),
-                                        show_ratios_in_report = (input$show_ratios_in_report == 'TRUE'),
-                                        extratable_show_ratios_in_report = (input$extratable_show_ratios_in_report == 'TRUE'),
-                                        extratable_title = input$extratable_title, # above the table, not in the upper left cell
-                                        extratable_title_top_row = input$extratable_title_top_row,
-                                        extratable_list_of_sections = EJAM:::global_or_param("default_extratable_list_of_sections"),
-                                        extratable_hide_missing_rows_for = input$extratable_hide_missing_rows_for, # c(names_d_language, names_health),
-
-                                        filename = NULL,
-                                        report_title = EJAM:::global_or_param("report_title"),
-                                        logo_path    =   EJAM:::global_or_param("report_logo"),
-                                        logo_html = NULL # NOT app_logo_html... gets defined downstream
-    )
-
-    ## return generated HTML
-    full_page
-    # footer is added later in UI, in this case
-  })
-  # end of observer that send results of calculation to UI
 
   #. ####
   #############################################################################  #
@@ -2428,7 +2431,9 @@ app_server <- function(input, output, session) {
         extratable_title = input$extratable_title,
         extratable_title_top_row = input$extratable_title_top_row,
         extratable_list_of_sections = EJAM:::global_or_param("default_extratable_list_of_sections"),
-        extratable_hide_missing_rows_for = input$extratable_hide_missing_rows_for
+        extratable_hide_missing_rows_for = input$extratable_hide_missing_rows_for,
+        logo_path = EJAM:::global_or_param("report_logo"),
+        logo_html = NULL
       )
     }
   )
@@ -2547,6 +2552,7 @@ cat("Clicked on site #", sitenumber, "for a 1-site report\n")
                              #  (among those already created in data_processed() via ejamit() etc.)
                              #  could change to be an input$ in advanced tab possibly:
                              reports = EJAM:::global_or_param("default_reports"),
+                             show_1site_download_buttons = input$show_1site_download_buttons,
                              site_report_download_colname = "Download EJAM Report", # for DOWNLOAD BUTTON in each row, to get 1-site reports. could change to be an input$ in advanced tab possibly
 
                              columns_used = input$bysite_webtable_colnames

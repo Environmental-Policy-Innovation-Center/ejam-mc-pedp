@@ -12,9 +12,9 @@
 #  . community _ report _ title was renamed as report _ title
 #  . community _ report _ logo _ path  was renamed  as   report _ logo
 # etc
-############################### #
+############################### ################################ ################################ #
 
-# APP VERSION NUMBER ####
+# APP VERSION info ####
 
 # app_version <- desc::desc_get("Version") # should be same as this:
 app_version <- EJAM:::description_file$get("Version")  # based on Version field in DESCRIPTION file, description_file is an object created in EJAM namespace by metadata_mapping.R when loaded/attached
@@ -34,20 +34,18 @@ rm(app_version,
 
 # APP TITLE ####
 
-global_defaults_package <- c(
-  global_defaults_package,
+# app_title is used in shiny app headers, documentation pages, etc., e.g.
+#   "Environmental Justice Analysis Multisite tool"  or    "Environmental and Residential Population Analysis Multisite tool"
 
-  # app_title is used in shiny app headers, documentation pages, etc., e.g.
-  #   "Environmental Justice Analysis Multisite tool"  or    "Environmental and Residential Population Analysis Multisite tool"
+global_defaults_package$app_title = as.vector(desc::desc_get("Title"))
 
-  app_title = as.vector(desc::desc_get("Title")),
+# REPORT TITLE ####
 
-  # report_title is used in header of summary /community report page.
-  # "Summary Report"  or  "EJAM Multisite Report" is not right in case it is a single site (or barplots version via build_barplot_report.R)
+# report_title is used in header of summary /community report page.
+# "Summary Report"  or  "EJAM Multisite Report" is not right in case it is a single site (or barplots version via build_barplot_report.R)
 
-  report_title = "EJAM Summary Report"
+global_defaults_package$report_title = "EJAM Summary Report"
 
-)
 ############################### #
 
 # APP LOGO ####
@@ -60,6 +58,9 @@ global_defaults_package <- c(
 #   or   build_community_report() as called from server and .Rmd template and ejam2report()
 
 app_logo <- "www/favicon.png"  # (small wordless hex)
+
+# REPORT LOGO ####
+
 report_logo <- system.file('report/community_report/ejamhex4.png', package = "EJAM")  #  'www/EPA_logo_white_2.png'  #  was used in the EPA version until 1/2025
 
 global_defaults_package <- c(
@@ -89,28 +90,32 @@ rm(report_logo, app_logo)
 global_defaults_package <- c(
   global_defaults_package,
 
-ejscreen_is_down = TRUE,  #
-ejamapi_is_down = FALSE
+  ejscreen_is_down = TRUE,  #
+  ejamapi_is_down = FALSE
 )
 ############################### #
 
-# URLs to reports, for bysite tables ####
+# LINKS / URLs to show in bysite tables columns ####
 
 global_defaults_package$default_reports =  list(
 
-    list(header = "EJAM Report",     text = "EJAM Site Report",   FUN = url_ejamapi)      # EJAM summary report (HTML via API)
+  list(header = "EJAM Report",     text = "EJAM Site Report",   FUN = url_ejamapi)   # EJAM summary report (HTML via API)
 
-    , list(header = "EJSCREEN Map",  text =  "EJSCREEN", FUN = url_ejscreenmap) # EJSCREEN site, zoomed to the location
+  , list(header = "EJSCREEN Map",  text =  "EJSCREEN", FUN = url_ejscreenmap)        # EJSCREEN site, zoomed to the location
 
-    # , list(header = "ECHO Report",         text = "ECHO",         FUN = url_echo_facility) # if regid provided # e.g., browseURL(url_echo_facility(110070874073))
-    # , list(header = "FRS Report",          text =  "FRS",         FUN = url_frs_facility)            # if regid provided # e.g., browseURL(url_frs_facility(testinput_registry_id[1]))
-    # , list(header = "Enviromapper Report", text = "Enviromapper", FUN = url_enviromapper)          # if lat,lon provided # e.g., browseURL(url_enviromapper(lat = 38.895237, lon = -77.029145, zoom = 17))
-#     , list(header = "County Health Report",       text = "County",       FUN = url_county_health)  # if fips provided
-#     , list(header = "State Health Report",       text = "State",       FUN = url_state_health)  # if fips provided
-# 	, list(header = "County Equity Atlas Report", text = "County (Equity Atlas)", FUN = url_county_equityatlas)
-#     , list(header = "State Equity Atlas Report", text = "State (Equity Atlas)", FUN = url_state_equityatlas)
+  # , list(header = "ECHO Report",          text = "ECHO",          FUN = url_echo_facility) # if regid provided # e.g., browseURL(url_echo_facility(regid = 110070874073))
+  # , list(header = "FRS Report",           text =  "FRS",          FUN = url_frs_facility)  # if regid provided # e.g., browseURL(url_frs_facility(regid = testinput_registry_id[1]))
+  #
+  # , list(header = "Enviromapper Report",  text = "Enviromapper", FUN = url_enviromapper)   # if lat,lon provided or can be approximated # e.g., browseURL(url_enviromapper(lat = 38.895237, lon = -77.029145, zoom = 17))
+  #
+  # , list(header = "County Health Report", text = "County",       FUN = url_county_health)  # if fips provided
+  # , list(header = "State Health Report",  text = "State",        FUN = url_state_health)   # if fips provided
+  #
+  # , list(header = "County Equity Atlas Report", text = "County (Equity Atlas)", FUN = url_county_equityatlas)
+  # , list(header = "State Equity Atlas Report",  text = "State (Equity Atlas)", FUN = url_state_equityatlas)
 
 )
+
 # should not be needed, but just in case while shifting to this method:
 global_defaults_package$default_hyperlink_colnames <- sapply(global_defaults_package$default_reports, function(x) x$header)
 

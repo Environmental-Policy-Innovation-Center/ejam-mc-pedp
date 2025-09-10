@@ -732,12 +732,14 @@ ejamit <- function(sitepoints = NULL,
 
   # now using url_columns_bysite() in server & ejamit - had duplicated ejamit() code in app_server but used reactives there.
 
+  if ("REGISTRY_ID" %in% names(out$results_bysite)) {regid <- out$results_bysite$REGISTRY_ID} else {regid <- NULL}
+
   links <- url_columns_bysite(
     sitepoints = {if ("latlon" %in% sitetype) {out$results_bysite[, .(lat = lat, lon = lon, ejam_uniq_id = ejam_uniq_id)]} else {NULL} },
     fips       = {if ("fips"   %in% sitetype) {fips} else {NULL}}, # or use out$results_bysite$ejam_uniq_id if that sitetype ?
     shapefile  = {if ("shp"    %in% sitetype) {shp}  else {NULL}}, # has only valids but also has ejam_uniq_id
     radius = radius,
-    regid = ifelse("REGISTRY_ID" %in% names(out$results_bysite), out$results_bysite$REGISTRY_ID, NULL),
+    regid = regid,
     sitetype = sitetype,
     reports = reports, # EJAM:::global_or_param("default_reports")
     as_html = TRUE # TRUE lets them work in a webpage view of table, in ejam2tableviewer(), and in map popups, but then for excel want to delinkify them

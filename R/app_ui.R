@@ -513,17 +513,19 @@ app_ui  <- function(request) {
                                includeCSS(app_sys('report/community_report/main.css')),
                                #includeCSS('inst/report/community_report/communityreport.css'),
                                #includeCSS('inst/report/community_report/main.css'),
-
-                               ## build HTML for community report
+                               ############################## #
+                               ###               > TABLES       ####
                                uiOutput('comm_report_html'),
-
                                br(),
-
-                               #### quick_view_map (results, in summary report) ####
+                               ############################## #
+                               ###                > MAP    ####
+                               #### quick_view_map (results, in summary report) ### #
                                shinycssloaders::withSpinner(
                                  leaflet::leafletOutput('quick_view_map')#, width = '1170px', height = '627px')
                                ),
                                br(),
+                               ############################## #
+                               ###                > BARPLOT    ####
                                fluidRow(
                                  column(
                                    12, align = 'center',
@@ -533,6 +535,8 @@ app_ui  <- function(request) {
                                    )
                                  )
                                ),
+                               ############################## #
+                               ###              > FOOTER  (version, date)    ####
                                div(
                                  style = "background-color: #edeff0; color: black; width: 100%; padding: 10px 20px; text-align: right; margin: 10px 0;",
                                  uiOutput("report_version_date")
@@ -686,12 +690,12 @@ app_ui  <- function(request) {
                                       ) # end div(class = 'navbar1'
                              ), # end 'Details' results tab
                              ######################################################################################################### #
-{ # code folding for full written report chunk
-                            #. ####
-                             # ______ FULL REPORT (Word doc) - tabPanel(title = 'Written Report' _________ ####
-                             #. ####
+                             { # code folding for full written report chunk
+                               #. ####
+                               # ______ FULL REPORT (Word doc) - tabPanel(title = 'Written Report' _________ ####
+                               #. ####
 
-                             tabPanel(title = 'Written Report',
+                               tabPanel(title = 'Written Report',
 
                                         #  MAKE SURE all parameter names are used (identical names, and all are there) in these 4 places:
                                         #  1. input$ ids in app_ui.R, from user, to customize the long report
@@ -994,8 +998,8 @@ app_ui  <- function(request) {
                                             )
                                           ),
                                         ) # end wellpanel
-                             )  # end written report  tab
-}
+                               )  # end written report  tab
+                             }
                  ) ## end of tabset panel results_tabs ^^^^^^^^^^  ####
 
         ),      # end of tab panel See Results ^^^^^^^^^^  ####
@@ -1306,6 +1310,10 @@ app_ui  <- function(request) {
                  h3("By-site interactive table of results"),
 
                  shiny::renderUI("bysite_webtable_colnames_ui"),
+
+                 checkboxInput("show_1site_download_buttons",
+                               label = "Show column of buttons that download 1-site report per row",
+                               value = isTRUE(EJAM:::global_or_param("show_1site_download_buttons"))),
 
                  ######################################################## #
                  ### Plots on webpages ####

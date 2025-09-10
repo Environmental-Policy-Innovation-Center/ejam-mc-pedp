@@ -354,7 +354,7 @@ industryword <- "chemical manuf"
   mysites <- frs_from_naics(industryword, children = FALSE)[,1:5]
   
   regids <- mysites$REGISTRY_ID
-  link1 <- url_echo_facility(regids, as_html = T)
+  link1 <- url_echo_facility(regid = regids, as_html = T)
   link2 <- url_ejamapi(sitepoints = mysites, radius = 3, as_html = T)
   link3 <- url_ejscreenmap(lat = mysites$lat, lon = mysites$lon,  as_html = T)
   # # same:

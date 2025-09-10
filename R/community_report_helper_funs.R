@@ -608,32 +608,36 @@ generate_html_header <- function(analysis_title,
                                  logo_html = NULL
 ) {
 
-  if (is.null(logo_path) || !file.exists(logo_path)) {
-
-    if (!in_shiny) {
-      logo_path <- EJAM:::global_or_param("report_logo")
-      cat("TRYING TO USE logo_path = ", logo_path, "\n")
-
-    } else {
-      ## should map to installed pkgs library /EJAM/report/community_report using resource path defined in shiny app_ui.R
-
-      logo_path <- EJAM:::global_or_param("report_logo")
-      if (!file.exists(logo_path)) { # might not need anymore
-        logo_path <- 'community_report/ejamhex4.png'; cat("logo not found via report_logo, trying hardcoded path\n")
-        if (!file.exists(logo_path)) { # might not need anymore
-        system.file('report/community_report/ejamhex4.png', package = "EJAM"); cat("logo still not found, trying another path \n")
-        }
-      }
-      cat("TRYING TO USE logo_path = ", logo_path, "\n")
-    }
-  }
+  # if (is.null(logo_path) || !file.exists(logo_path)) {
+  #
+  #   if (!in_shiny) {
+  #     logo_path <- EJAM:::global_or_param("report_logo")
+  #     cat("TRYING TO USE logo_path = ", logo_path, "\n")
+  #
+  #   } else {
+  #     ## should map to installed pkgs library /EJAM/report/community_report using resource path defined in shiny app_ui.R
+  #
+  #     logo_path <- EJAM:::global_or_param("report_logo")
+  #     if (!file.exists(logo_path)) { # might not need anymore
+  #       logo_path <- 'community_report/ejamhex4.png'; cat("logo not found via report_logo, trying hardcoded path\n")
+  #       if (!file.exists(logo_path)) { # might not need anymore
+  #         system.file('report/community_report/ejamhex4.png', package = "EJAM"); cat("logo still not found, trying another path \n")
+  #       }
+  #     }
+  #     cat("TRYING TO USE logo_path = ", logo_path, "\n")
+  #   }
+  # }
 
   if (is.null(logo_html)) {
-    # add padding and adjust size so that the img_html object is a bit lower on the screen and does not get shrunk
-    # note this is NOT the same as app_logo_html since it is for the report not app webpage header
-    logo_html <- paste0('<img src=\"', logo_path, '\" alt=\"logo\" width=\"220\" height=\"70\">')
+    if (is.null(logo_path) || !file.exists(logo_path) ) {
+      # truly want nothing as logo or cant find and should omit logi without it looking like a problem
+      logo_html <- ""
+    } else {
+      # add padding and adjust size so that the img_html object is a bit lower on the screen and does not get shrunk
+      # note this is NOT the same as app_logo_html since it is for the report not app webpage header
+      logo_html <- paste0('<img src=\"', logo_path, '\" alt=\"logo\" width=\"220\" height=\"70\">')
+    }
   }
-
   if (is.null(report_title)) {
     if (shiny::isRunning()) {
       report_title <- EJAM:::global_or_param("report_title")
@@ -668,19 +672,21 @@ generate_html_header <- function(analysis_title,
     '<p>This report summarizes environmental and residential population information for user-defined areas,',
     '<br>and combines that data into indexes.</p>',
     '</div>',
+
     '<div id="header-primary-background-img-container">',  logo_html,
     '</div>',
     '</div>',
+
     '<div class="header">
-    <div>
+       <div>
         <h2 id="placename">',                analysis_title,
     '</h2>
-    </div>
-  <div>
-  <h5>',                                     locationstr,
+      </div>
+    <div>
+     <h5>',                                     locationstr,
     '<br>Population: <span id="TOTALPOP">',    totalpop,
     '</span><br></h5>
- </div>
+    </div>
 </div>',
     sep = '', collapse = '')
   # Population: <span id=\"TOTALPOP\">',totalpop,'</span><br>',
