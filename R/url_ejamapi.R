@@ -25,7 +25,13 @@
 #' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
 #' @param ifna URL shown for missing, NA, NULL, bad input values
 #' @param baseurl do not change unless endpoint actually changed
-#' @param ... unused
+#' @param sitenumber same as in [ejam2report()], so NULL or "" means an overall
+#'   summary report (assuming >1 sites were provided)
+#'   while a number like 3 means a report based on the third site
+#'   found in the inputs (third point or third fips or third polygon).
+#'   Not specifying sitenumber and only providing 1 site will create a 1-site report.
+#' @param ... a named list of other query parameters passed to the API,
+#'   to allow for expansion of allowed parameters
 #'
 #' @returns vector of character string URLs
 #'
@@ -39,7 +45,7 @@
 #'  x = url_ejamapi(system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM"))
 #'
 #'  y = url_ejamapi(fips = c("050014801001", "050014802001"))
-#'  y = url_ejamapi(fips = testinput_fips_blockgroups)
+#'  y = url_ejamapi(fips = testinput_fips_mix)
 #'
 #'  z = url_ejamapi(shapefile = testinput_shapes_2[2, c("geometry", "FIPS")])
 #'
@@ -100,6 +106,9 @@ url_ejamapi = function(
   as_html = FALSE,
   ifna = "https://ejanalysis.com",
   baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?",
+
+  sitenumber = "",
+
   ...
 ) {
 
@@ -140,83 +149,125 @@ url_ejamapi = function(
   @param download_noncity_fips_bounds
   "
   }
-
   if (is.null(linktext)) {linktext <- paste0("Report")}
 
+  and_other_query_terms = paste0("&", urls_from_keylists(keylist_bysite = ...))
+  ################################################## #  ################################################## #
   if (is.null(baseurl)) {
     baseurl <- "https://ejamapi-84652557241.us-central1.run.app/report?"
   }
   if (is.null(ifna)) {
     ifna <- "https://ejanalysis.com"
   }
-
   # see https://github.com/edgi-govdata-archiving/EJAM-API/tree/main
   # baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?"
   # e.g.,
   # https://ejamapi-84652557241.us-central1.run.app/report?lat=33&lon=-112&buffer=4
+  ################################################## #  ################################################## #
+  # overall vs 1-site ####
+  sitenumber <- as.numeric(sitenumber)
+  # Important: default is a summary report not 1-site report
+  # so if unspecified but only 1 site provided, probably should treat it like a 1-site report
+  if (all(is.na(sitenumber)) || is.null(sitenumber) || length(sitenumber) == 0 || all(sitenumber %in% "") || all(sitenumber) %in% 0 || all(sitenumber) < 0) {
+    sitenumber <- 0  # overall summary multisite report except Not specifying sitenumber and only providing 1 site will create a 1-site report.
+  }
+  ################################################## #  sitetype ? --------------------- -
+  # determine sitetype ####
+  # and convert any lat,lon to sitepoints
+  sites <- sites_from_input(sitepoints = sitepoints, lat = lat, lon = lon, fips = fips, shapefile = shapefile)
+  sitepoints <- sites$sitepoints
+  shapefile <- sites$shapefile
+  fips <- sites$fips
+  sitetype <- sites$sitetype
+  ###################################### #  shapefile
+  if (sitetype %in% "shp") {
 
-  ###################################### #  shapefile ?
-  if (!is.null(shapefile)) {
-    if (missing(radius)) {radius <- 0}
+    if (missing(radius) || is.null(radius) || all(radius %in% c(0, "", NA))) {radius <- 0}
     # geojson format
     # %7B"type"%3A"FeatureCollection"%2C"features"%3A%5B%7B"type"%3A"Feature"%2C"properties"%3A%7B%7D%2C"geometry"%3A%7B"coordinates"%3A%5B%5B%5B-112.01991856401462%2C33.51124624304089%5D%2C%5B-112.01991856401462%2C33.47010908826502%5D%2C%5B-111.95488826248605%2C33.47010908826502%5D%2C%5B-111.95488826248605%2C33.51124624304089%5D%2C%5B-112.01991856401462%2C33.51124624304089%5D%5D%5D%2C"type"%3A"Polygon"%7D%7D%5D%7D
-    geotxt <- shape2geojson(shapefile, combine_in_one_string = FALSE) #
-
+    if (NROW(shapefile) ==  1) {sitenumber <- 1}
+    if (sitenumber == 0) {
+      geotxt <- shape2geojson(shapefile, combine_in_one_string = TRUE) # overall summary multisite report
+    } else {
+      geotxt <- shape2geojson(shapefile, combine_in_one_string = FALSE) # 1-site report
+      geotxt <- geotxt[sitenumber]
+    }
     url_of_report <- paste0(
       baseurl,
       "shape=", geotxt, "&",
-      "buffer=", radius
+      "buffer=", radius, "&",
+      "sitenumber=", sitenumber,
+      and_other_query_terms
+
     )
-    url_of_report[is.na(geotxt)] <- NA
+    url_of_report[is.na(geotxt)] <- NA # later will convert to ifna
   } else {
-    ###################################### # fips ?
-    if (!is.null(fips)) {
-      if (missing(radius)) {radius <- 0}
+    ###################################### # fips
+    if (sitetype %in% "fips") {
+      if (missing(radius) || is.null(radius) || all(radius %in% c(0, "", NA))) {radius <- 0}
+      if (NROW(fips) == 1) {sitenumber <- 1}
+      fips <- paste0(fips, collapse = ",") ## *** check this is the expected format in the API
       ftype <- fipstype(fips)
       if (!all(ftype %in% "blockgroup")) {
-        warning("fips must be blockgroup fips currently - other types not yet implemented")
+        warning("fips other than blockgroup may be work in progress")
       }
       url_of_report <- paste0(
         baseurl,
         "fips=", fips, "&",
-        "buffer=", radius
+        "buffer=", radius, "&",
+        "sitenumber=", sitenumber,
+        and_other_query_terms
+
       )
-      url_of_report[is.na(fips)] <- NA
-      url_of_report[!(ftype %in% "blockgroup")] <- NA
+      url_of_report[is.na(fips)] <- NA # later will convert to ifna
+      # url_of_report[!(ftype %in% "blockgroup")] <- NA
     } else {
-      ###################################### # sitepoints ?
-      if (!is.null(sitepoints)) {
-        if (!is.null(lat) | !is.null(lon)) {warning("should specify lat & lon, or only sitepoints, not both")}
-        x <- latlon_from_anything(sitepoints)
+      ###################################### # sitepoints
+      if (sitetype %in% "latlon") {
+        x <- latlon_from_anything(sitepoints) # do we want this actually ?? see notes in sites_from_input() and related
         lat <- x$lat
         lon <- x$lon
-      }
-      if (!is.null(lat) && !is.null(lon)) {
-        url_of_report <- paste0(
-          baseurl,
-          "lat=", lat, "&",
-          "lon=", lon, "&",
-          "buffer=", radius
-        )
-        url_of_report[is.na(lat) | is.na(lon)] <- NA
+        lat <- paste0(lat, collapse = ",") ## *** check this is the expected format in the API
+        lon <- paste0(lon, collapse = ",")
+        if (NROW(x) ==  1) {sitenumber <- 1}
+        if (!is.null(lat) && !is.null(lon)) {
+          url_of_report <- paste0(
+            baseurl,
+            "lat=", lat, "&",
+            "lon=", lon, "&",
+            "buffer=", radius, "&",
+            "sitenumber=", sitenumber,
+            and_other_query_terms
+
+          )
+          url_of_report[is.na(lat) | is.na(lon)] <- NA # later will convert to ifna
+        } else {
+          url_of_report <- NA # later will convert to ifna
+        }
       } else {
         ###################################### # none of the above
-        url_of_report <- ifna
+        url_of_report <- NA # later will convert to ifna
       }
     }
   }
   ###################### #
+  # add other parameters from ...
+
+  other_query_terms <- url_from_keylist(baseurl = "", ...)
   urlx <- url_of_report
+  ok <- !(is.na(urlx)) # so !ok means bad/NA
+  urlx[ok] <- paste0(urlx[ok], "&", other_query_terms)
 
-  ok <- !(is.na(urlx))
+  # use a default URL if bad input, and only linkify when not NA
 
-  urlx[!ok] <- ifna
-  ok <- !is.na(urlx)  # now !ok mean it was a bad input and also  ifna=NA
+  urlx[!ok] <- ifna  # possibly user set ifna to NA or else it is a default url
+  ok <- !is.na(urlx)  # now ok means it was a good  input or bad input, except if ifna was set to NA, that is not ok so we can avoid urlencoding that type of NA !
   if (as_html) {
-    urlx[ok] <- URLencode(urlx[ok]) # consider if we want  reserved = TRUE
+    urlx[ok] <- URLencode(urlx[ok]) # consider if we want  reserved = TRUE ***
     urlx[ok] <- url_linkify(urlx[ok], text = linktext)
   }
   urlx[!ok] <- ifna # only use non-linkified ifna for the ones where user set ifna=NA and it had to use ifna
+
   return(urlx)
 }
 ################################################### #################################################### #

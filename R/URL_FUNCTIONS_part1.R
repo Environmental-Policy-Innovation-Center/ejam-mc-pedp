@@ -170,15 +170,224 @@ url_xl_style <- function(urls, urltext = urls) {
   class(x) <- 'hyperlink'
   return(x)
 }
-################################################### #################################################### #
+################## #  ################## #  ################## #  ################## #
 
-# simplify by removing unused / empty parameters
+########################################################### #
+# helpers to construct URL(s) based on parameters in a key list of query terms
+# ## for a more full featured approach, see  ?httr2::url_modify_query()
+########################################################### #
 
-url_drop_empty_parameters = function(quer) {
+# url_and_other_query_terms <- function(..., baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?") {
+#
+#   # etc will look something like "&x=1,a=hello,y=3"
+#
+#   etc <- unlist(rlang::list2(...))
+#   qterms <- names(etc)
+#   qvalues <- as.vector(etc)
+#   if (length(etc) == 0) {
+#     etc <- ""
+#   } else {
+#     etc <- URLencode(
+#       paste0("&",
+#              paste0(
+#                paste0(qterms, "=", qvalues),
+#                collapse = "&"
+#              )
+#       )
+#     )
+#   }
+#   return(paste0(baseurl, etc))
+# }
+########################################################### #
 
+
+url_from_keylist <- function(..., keylist = NULL,
+                             baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?"
+) {
+  # klist <- rlang::list2(...) # error if empty key like  (a=1, , b=2)  - so use .ignore_empty = "all"
+  klist <- rlang::dots_list(..., .ignore_empty = "all", .homonyms = "error")
+
+  # if ("keylist" %in% names(klist)) {
+  if (!missing(keylist) && !is.null(keylist)) {
+    # but note # unlist(list(a=2,b=3:4)) # turns b into b1, b2
+stopifnot(is.list(keylist), !is.data.frame(keylist))
+    #etc checks
+
+    klist <- c(klist, keylist) # but how to do .ignore_empty = "all"
+  }
+  klist <- drop_empty_keys_from_list(klist)
+  klist <- collapse_each_vector_keyval(klist)
+
+  klist_string <- collapse_keylist(klist)
+
+  urlx <- paste0(baseurl, klist_string)
+  return(urlx)
+}
+# ########################################################### #
+# urls_from_keylists <- function(..., keylist_bysite, keylist_4all) {
+#   ## redo this
+#   urlx=vector(length = length(keylist_bysite))
+#   for (i in seq_along(keylist_bysite)) {
+#     urlx[i] <- url_from_keylist(keylist = c(keylist_bysite[[i]], keylist_4all))
+#   }
+#   urlx
+# }
+########################################################### #
+if (FALSE ) {
+
+  # examples or tests
+
+  url_from_keylist(lat = 35, lon = -100, radius = 3.2)
+  url_from_keylist(lat = c(35,36), lon = c(-100,-99), radius = 3.14)
+
+  lat = c(35,36)
+  lon = c(-100,-99)
+  radius = 3.14
+  url_from_keylist(lat = lat, lon = lon, radius = radius)
+
+  keys = list(lat = c(35,36), lon = c(-100,-99), radius = 3.14)
+  url_from_keylist(keylist = keys)
+
+
+
+  # might want NULL to be encoded as empty parameter but that gets removed anyway
+  url_from_keylist(lat = c(35,36), lon = c(-100,-99), radius = 3.14, xyz = NULL, abc = NULL)
+
+  url_from_keylist(sitepoints=testpoints_10)
+
+
+  # bad:
+
+  url_from_keylist(keylist = list(a = 1, ))
+  url_from_keylist(a=, b=1)
+  url_from_keylist(keylist = list(a=, b=1 ))
+
+}
+# ########################################################### #
+drop_empty_keys_from_list <- function(klist) {
+  # simplify by removing unused / empty parameters
+  emptykeys <- sapply(klist, length) == 0
+  klist <- klist[!emptykeys]
+  return(klist)
+}
+#################################################### #
+drop_empty_keys_from_url = function(quer) {
   # simplify by removing unused / empty parameters
   quer =  gsub("[^=&]*=&", "", x = quer) # drop any empty one except first or last param
   quer = gsub("?[^&=]*=&", "?", x = quer) # drop any empty one at start
   quer = gsub("&[^&=]*=$", "", x = quer) # drop any empty one at end
   return(quer)
 }
+# ########################################################### #
+collapse_each_vector_keyval <- function(klist) {
+  # like the .multi="comma" parameter in ?httr2::url_modify_query()
+  klist <- lapply(klist, function(z) {
+    if (is.vector(z)) {
+      paste0(z, collapse = ",")
+    } else {
+      z
+    }
+  })
+  return(klist)
+}
+# ########################################################### #
+collapse_keylist <- function(klist, urlenc=TRUE) {
+  if (any(sapply(klist, length) > 1)) {stop("any vector value must be already collapsed")}
+  knames <- names(klist)
+  kvals <- as.vector(klist)
+  if (urlenc) {
+    kvals <- URLencode(kvals)
+  }
+  paste0( paste0(knames, "=", kvals), collapse = "&")
+}
+# ########################################################### #
+
+# notes on vector of urls vs 1 url with query values that are vectors ####
+#
+# Question:
+## some url_xyz() functions try to create a vector of URLs, 1 per key value, like   "d.com?q=1", "d.com?q=2"
+## but in other cases you want to pass a vector within 1 URL, like    "d.com?q=1,2"
+## question is how to best distinguish those?
+# how to vectorize so a parameter that is a vector creates a query string that is a CSV list:   d.com?q=1,2
+# versus
+# how to vectorize so a parameter that is a vector creates multiple URLs:  d.com?q=1, d.com?q=2
+# or both of those options.
+
+# keylist that is list of vectors works in url_from_keylist()
+
+# list of vectors that are all same length or length 1 would work for making vector of urls.
+#  but what if some keys should be vectors within each url?
+#    then a list of lists makes sense?
+#  pick an approp data structure.
+#  and write a function
+## or just use loop over url_from_keylist()
+## where keylist[[i]] <- list(lat = lats[i, lon = lon[i], radius = 3.1, xyz=7:8])
+
+########################################################### #
+
+#   has flexible input, so input can be
+## 1) a list of settings defined earlier:
+##   keys = list(key=value, key=value)  ## but not list(a=1:2,b=0)
+##  url_from_arglist(keylist=keys)
+## or
+## 2) explicit:
+##   url_from_keylist(key=value, key=value)
+
+## other tools
+# klist <- c(klist,
+#            .url = baseurl,
+#            .multi = "comma") # breaks vector key value into csv key value like d.com?q=1,2
+# ## see  ?httr2::url_modify_query()
+# rlang::exec("url_modify_query", !!!klist)  # note the url_modify_query function here cannot be prefixed with, say, httr2::
+# ########################################################## #
+
+##   linktext could also} be numbered:
+# linktext = paste0("EJSCREEN Map ", 1:NROW(sitepoints))
+
+########################################################### #
+
+# flexible in what is the named vector of query values,
+# BUT only returns 1 URL... non vectorized, via loop
+#  cannot flexibly create one parameter based on other  parameters
+
+# url1 = function(
+    #     keyvector = c(
+#       baseurl="https://example.com",
+#       areatype = "county",
+#       areaid = "10001",
+#       # v=1 # v = 1:2 # not possible as vector
+#       namestr = "here",
+#
+#       geometry = paste0('{"spatialReference":{"wkid":', 0, '},','"x":', -100, ',"y":', 34, '}'),
+#       ## cannot flexibly create one parameter based on other  parameters:
+#       # paste0('{"spatialReference":{"wkid":',wkid, '},','"x":', lon, ',"y":', lat, '}'),
+#
+#       radius = 3.1,
+#       unit = "",
+#       f = "report"
+#     )
+# ) {
+#   url1 <- baseurl
+#   for (i in seq_along(keyvector)) {
+#     url1 <- urltools::param_set(urls = url1, key = names(keyvector)[ i], value = keyvector[i])  # ????
+#   }
+#   url1
+# }
+########################################################### #
+#
+# ### how ejscreenRESTbroker.R  used to do it
+# areatype <- ''
+# fips     <- ''
+# geometry <- paste0('{"spatialReference":{"wkid":',wkid, '},','"x":', lon, ',"y":', lat, '}')
+# geotext <- paste0(
+#   '&geometry=', geometry,
+#   '&distance=', radius
+# )
+# this_request <-  paste0(url,
+#                         '&areatype=', areatype,
+#                         '&areaid=',   fips,
+#                         '&namestr=',  namestr,
+#                         geotext,
+#                         '&unit=', unit,
+#                         '&f=', f
+# )

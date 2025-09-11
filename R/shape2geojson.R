@@ -40,9 +40,11 @@ shape2geojson = function(shp, file = file.path(tempdir(), "shp.geojson"),
 
   # see https://github.com/r-spatial/sf/issues/2422 to clarify what we might need and how to do various kinds of "dissolve"-like actions
 
-  stopifnot( length(txt) == 1, is.logical(combine_in_one_string), is.logical(combine_in_one_file), is.logical(txt),
-             inherits(shp, "sf"), all(grepl("\\.geojson$", file)))
-
+  stopifnot( length(txt) == 1, is.logical(txt),
+             is.logical(combine_in_one_string), is.logical(combine_in_one_file),
+             is.data.frame(shp), inherits(shp, "sf"),
+             all(grepl("\\.geojson$", file))
+  )
   ############################################# #
   # treat entire input shp as a single object saved in a single geojson file and read back as a single geojson txt string
   s2g1 = function(shp, file = file.path(tempdir(), "shp.geojson"), txt = TRUE) {

@@ -5,6 +5,14 @@
 
 sitepoints_from_latlon_or_sitepoints = function(sitepoints = NULL, lat = NULL, lon = NULL) {
 
+  ##*** but compare this / reconcile with the even more flexible
+  ##    latlon_from_anything() where input could be a filepath to xlsx, and it does validation of latlon
+  # if (is.null(lon)) {
+  #   sitepoints = latlon_from_anything(sitepoints); lat = NULL; lon = NULL
+  # } else {
+  #   sitepoints = latlon_from_anything(lat, lon); lat = NULL; lon = NULL
+  # }
+
   if (!is.vector(lat) || !is.vector(lon)) {lat <- NULL; lon <- NULL}
   if (!is.data.frame(sitepoints)) {sitepoints <- NULL}
   # if length or NROW is zero but not NULL, treat like it was NULL

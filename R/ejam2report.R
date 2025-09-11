@@ -11,7 +11,7 @@
 #' @param ejamitout output as from [ejamit()], list with a data.table called `results_bysite`
 #'   if sitenumber parameter is used, or a data.table called `results_overall` otherwise
 #' @param sitenumber If a number is provided, the report is about
-#'   `ejamitout$results_bysite[sitenumber, ]` and if no number is provided (param is NULL)
+#'   `ejamitout$results_bysite[sitenumber, ]` and if no number is provided (param is NULL or "")
 #'   then the report is about `ejamitout$results_overall`
 #' @param analysis_title optional title of analysis
 #' @param submitted_upload_method something like "latlon", "SHP", "FIPS", etc. (just used as-is as part of the filename)
@@ -144,10 +144,12 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
   # overall vs 1-site ####
 
   sitenumber <- as.numeric(sitenumber)
-
+  if (all(is.na(sitenumber)) || is.null(sitenumber) || length(sitenumber) == 0 || all(sitenumber %in% "") || all(sitenumber) %in% 0 || all(sitenumber) < 0) {
+    sitenumber <- 0
+  }
   ## OVERALL ###################################################
 
-  if (is.null(sitenumber) || length(sitenumber) == 0) {
+   if (sitenumber %in% 0) {
     ejamout1 <- ejamitout$results_overall # one row
     ejamout1$valid <- TRUE
     # but shp is all rows, remember, and popup can still be like for site by site
@@ -227,8 +229,8 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
 
     # > copy .Rmd (template), .png (logo), .css from Rmd_folder to a temp dir subfolder for rendering
     # report_setup_temp_files() copies files to where they need to be for rendering ####
-    ## returns path to .Rmd template copied to a temp folder, but tempReport is not used - report_setup_temp_files() is used for side efx
-
+    ## returns path to .Rmd template copied to a temp folder, but
+    ## tempReport is not used - report_setup_temp_files() is used for side efx
     tempReport <- report_setup_temp_files(
       # Rmd_name = 'community_report_template.Rmd', # default, for summary report
       # # Rmd_name = 'barplot_report_template.Rmd' # for single site barplot report
