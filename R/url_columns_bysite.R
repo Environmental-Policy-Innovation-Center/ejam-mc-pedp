@@ -90,7 +90,7 @@ url_columns_bysite <- function(sitepoints = NULL, lat = NULL, lon = NULL,
     }
   }
 
-  if (is.null(sitepoints)
+  if (is.null(sitetype)
       # && is.null(regid)
   ) {
     warning("cannot infer sitetype, must be one of 'latlon', 'fips', or 'shp'")

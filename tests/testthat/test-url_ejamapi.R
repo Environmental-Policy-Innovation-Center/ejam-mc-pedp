@@ -5,6 +5,11 @@
 
 do_url_tests = function(funcname, FUN) {
 
+  ## e.g.,
+  #   funcname <- "url_ejamapi"; FUN <- NULL
+
+  if (is.null(FUN)) {FUN <- get(funcname)}
+
   test_that("Site responds with 200", {
     expect_true(url_online(FUN(sitepoints = testpoints_10[1,])))
   })

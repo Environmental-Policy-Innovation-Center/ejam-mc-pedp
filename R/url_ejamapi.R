@@ -150,8 +150,8 @@ url_ejamapi = function(
   "
   }
   if (is.null(linktext)) {linktext <- paste0("Report")}
-
-  and_other_query_terms = paste0("&", urls_from_keylists(keylist_bysite = ...))
+  # print( rlang::list2(...) )
+  and_other_query_terms = paste0("&", urls_from_keylists(keylist_bysite = ..., baseurl = ""))
   ################################################## #  ################################################## #
   if (is.null(baseurl)) {
     baseurl <- "https://ejamapi-84652557241.us-central1.run.app/report?"
@@ -179,8 +179,27 @@ url_ejamapi = function(
   shapefile <- sites$shapefile
   fips <- sites$fips
   sitetype <- sites$sitetype
+
+  # regid_from_input ####
+  # handle case where only regid is provided, not the actual sitepoints,
+  # so use regid as a last resort way to get latlon
+  if (is.null(sites$sitetype)) {
+    dotsargs = rlang::list2(...)
+    if ("regid" %in% names(dotsargs)) {regid <- dotsargs$regid} else {regid = NULL}
+    if  ("sitepoints" %in% names(dotsargs)) {sitepoints <- dotsargs$sitepoints} else {sitepoints = NULL}
+    regid <- regid_from_input(regid=regid, sitepoints=sitepoints) # here we only want it as a way to get lat,lon not to use the regid as in echo or frs report
+    # latlon_from_regid ####
+    if (!is.null(regid)) {
+      sites <- list(
+        sitepoints =  latlon_from_regid(regid),
+        sitetype = "latlon"
+      )
+      sitetype <- "latlon"
+    }
+  }
+
   ###################################### #  shapefile
-  if (sitetype %in% "shp") {
+  if ("shp" %in% sitetype) {
 
     if (missing(radius) || is.null(radius) || all(radius %in% c(0, "", NA))) {radius <- 0}
     # geojson format
@@ -203,13 +222,15 @@ url_ejamapi = function(
     url_of_report[is.na(geotxt)] <- NA # later will convert to ifna
   } else {
     ###################################### # fips
-    if (sitetype %in% "fips") {
+    if ("fips" %in% sitetype) {
       if (missing(radius) || is.null(radius) || all(radius %in% c(0, "", NA))) {radius <- 0}
       if (NROW(fips) == 1) {sitenumber <- 1}
       fips <- paste0(fips, collapse = ",") ## *** check this is the expected format in the API
-      ftype <- fipstype(fips)
+      suppressWarnings({
+        ftype <- fipstype(fips)
+      })
       if (!all(ftype %in% "blockgroup")) {
-        warning("fips other than blockgroup may be work in progress")
+        # warning("fips other than blockgroup may be work in progress")
       }
       url_of_report <- paste0(
         baseurl,
@@ -223,8 +244,9 @@ url_ejamapi = function(
       # url_of_report[!(ftype %in% "blockgroup")] <- NA
     } else {
       ###################################### # sitepoints
-      if (sitetype %in% "latlon") {
-        x <- latlon_from_anything(sitepoints) # do we want this actually ?? see notes in sites_from_input() and related
+      if ("latlon" %in% sitetype) {
+        x <- sitepoints
+        # x <- latlon_from_anything(sitepoints, interactiveprompt = F) # do we want this actually ?? see notes in sites_from_input() and related
         lat <- x$lat
         lon <- x$lon
         lat <- paste0(lat, collapse = ",") ## *** check this is the expected format in the API

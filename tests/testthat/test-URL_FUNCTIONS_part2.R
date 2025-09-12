@@ -12,6 +12,10 @@ do_url_tests = function(funcname = "url_ejscreenmap", FUN = NULL) {
 
   if (is.null(FUN)) {FUN <- get(funcname)}
 
+  test_that("Site responds with 200", {
+    expect_true(url_online(FUN(sitepoints = testpoints_10[1,])))
+  })
+
   # fipsmix = testinput_fips_mix
   fipsmix =  c(
     "091701844002024", # block
@@ -123,20 +127,34 @@ do_url_tests = function(funcname = "url_ejscreenmap", FUN = NULL) {
 ############## ############### ############### ############### ############### #
 ############## ############### ############### ############### ############### #
 
-# url_xyz functions   ####
+# functions being tested  ####
 
-do_url_tests("url_ejscreenmap", url_ejscreenmap)
-do_url_tests("url_enviromapper", url_enviromapper)
+funcnames = c(
+  'url_ejscreenmap',
+  'url_enviromapper',
+  'url_echo_facility',
+  'url_frs_facility',
+  'url_county_health',
+  'url_state_health',
+  'url_county_equityatlas',
+  'url_state_equityatlas'
+)
+for (func in funcnames) {
+  do_url_tests(funcname = func)
+}
 
-do_url_tests("url_echo_facility", url_echo_facility)
-do_url_tests("url_frs_facility", url_frs_facility)
-
-do_url_tests("url_county_health", url_county_health)
-do_url_tests("url_state_health", url_state_health)
-
-do_url_tests("url_county_equityatlas", url_county_equityatlas)
-# browseURL( "https://nationalequityatlas.org/research/data_summary?geo=04000000000024003" )
-do_url_tests("url_state_equityatlas", url_state_equityatlas)
+# do_url_tests("url_ejscreenmap", url_ejscreenmap)
+# do_url_tests("url_enviromapper", url_enviromapper)
+#
+# do_url_tests("url_echo_facility", url_echo_facility)
+# do_url_tests("url_frs_facility", url_frs_facility)
+#
+# do_url_tests("url_county_health", url_county_health)
+# do_url_tests("url_state_health", url_state_health)
+#
+# do_url_tests("url_county_equityatlas", url_county_equityatlas)
+# # browseURL( "https://nationalequityatlas.org/research/data_summary?geo=04000000000024003" )
+# do_url_tests("url_state_equityatlas", url_state_equityatlas)
 
 # url_naics.com()
 

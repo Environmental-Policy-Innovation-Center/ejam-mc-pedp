@@ -202,36 +202,89 @@ url_xl_style <- function(urls, urltext = urls) {
 
 
 url_from_keylist <- function(..., keylist = NULL,
-                             baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?"
+                             baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?",
+                             ifna = "https://ejamapi-84652557241.us-central1.run.app",
+                             encode = TRUE
 ) {
-  # klist <- rlang::list2(...) # error if empty key like  (a=1, , b=2)  - so use .ignore_empty = "all"
+  # klist <- rlang::list2(...) # error if empty key like  (a=1, , b=2)  - so use .ignore_empty = "all" (but still errors on  b=,c=3)
   klist <- rlang::dots_list(..., .ignore_empty = "all", .homonyms = "error")
+  if (length(klist) == 0) {klist <- NULL}
 
   # if ("keylist" %in% names(klist)) {
-  if (!missing(keylist) && !is.null(keylist)) {
-    # but note # unlist(list(a=2,b=3:4)) # turns b into b1, b2
-stopifnot(is.list(keylist), !is.data.frame(keylist))
-    #etc checks
+  # }
 
-    klist <- c(klist, keylist) # but how to do .ignore_empty = "all"
+  if (!is.null(keylist)) {
+    # but note # unlist(list(a=2,b=3:4)) # turns b into b1, b2
+    stopifnot(is.list(keylist), !is.data.frame(keylist))
+    #etc checks
   }
+
+  klist <- c(klist, keylist) # but how to do .ignore_empty = "all"
+
   klist <- drop_empty_keys_from_list(klist)
   klist <- collapse_each_vector_keyval(klist)
-
-  klist_string <- collapse_keylist(klist)
-
+  klist_string <- collapse_keylist(klist, encode = encode)
+  if (is.null(klist_string)) {
+    baseurl <- ifna
+  }
   urlx <- paste0(baseurl, klist_string)
   return(urlx)
 }
 # ########################################################### #
-# urls_from_keylists <- function(..., keylist_bysite, keylist_4all) {
-#   ## redo this
-#   urlx=vector(length = length(keylist_bysite))
-#   for (i in seq_along(keylist_bysite)) {
-#     urlx[i] <- url_from_keylist(keylist = c(keylist_bysite[[i]], keylist_4all))
-#   }
-#   urlx
-# }
+# vector length 1 applies to every site
+# vectors length N are vectorized over N sites and should all be N long!!
+# the ... param lets you provide vectors over sites and single values that apply to all sites
+# without putting those all in keylist_bysite = list(...)
+# keylist_4all is not really needed - could just use parameters of length 1 for those
+
+
+urls_from_keylists <- function(..., keylist_bysite=NULL, keylist_4all=NULL,
+                               baseurl = "https://example.com/q?", encode = TRUE,
+                               pass_null_as = "" # or null ?
+                               ) {
+
+  if (is.null(keylist_4all) || length(keylist_4all) == 0 || !is.list(keylist_4all)) {
+    keylist_4all <- NULL
+  }
+  if (is.null(keylist_bysite) || length(keylist_bysite) == 0 || !is.list(keylist_bysite)) {
+    keylist_bysite <- NULL
+  }
+  # ...
+  klist <- rlang::dots_list(..., .ignore_empty = "all", .homonyms = "error")
+  if (length(klist) == 0) {klist <- NULL}
+  keylist_bysite <- c(keylist_bysite, klist)
+
+  if (is.null(keylist_bysite)) {
+    keylist_bysite <- ""
+  } else {
+    # assemble these so each url has one of each parameter
+
+    # NULL will cause error in as.data.frame
+    ## so how pass a parameter value of NULL ??
+    keylist_bysite[sapply(keylist_bysite, is.null)] <- pass_null_as
+
+    keylist_bysite <- paste0(
+      # "&",
+      apply(as.data.frame(keylist_bysite) , 1,
+            # function(z) {paste0(names(z) , "=", z, collapse = "&")}
+            function(z) {
+              url_from_keylist(keylist = as.list(z), baseurl = "", encode = encode)
+            }
+      ))
+  }
+
+  forallpart <- url_from_keylist(keylist = keylist_4all, baseurl = "", encode = encode, ifna = "")
+  if (length(forallpart) > 0 &&  !(all(forallpart %in% "")) &&
+      length(keylist_bysite) > 0 && !(all(keylist_bysite %in% ""))) {
+    forallpart <- paste0("&", forallpart)
+  }
+
+  urlx <- paste0(baseurl,
+                 keylist_bysite,
+                 forallpart
+  )
+  return(urlx)
+}
 ########################################################### #
 if (FALSE ) {
 
@@ -288,17 +341,23 @@ collapse_each_vector_keyval <- function(klist) {
       z
     }
   })
+  if (length(klist) == 0) {klist <- NULL}
   return(klist)
 }
 # ########################################################### #
-collapse_keylist <- function(klist, urlenc=TRUE) {
+collapse_keylist <- function(klist, encode=TRUE) {
+  if (is.null(klist)) {return(NULL)}
   if (any(sapply(klist, length) > 1)) {stop("any vector value must be already collapsed")}
   knames <- names(klist)
   kvals <- as.vector(klist)
-  if (urlenc) {
-    kvals <- URLencode(kvals)
+  if (encode) {
+    if (!is.null(kvals)) {
+      kvals <- URLencode(kvals)
+    }
   }
-  paste0( paste0(knames, "=", kvals), collapse = "&")
+  return(
+    paste0( paste0(knames, "=", kvals), collapse = "&")
+  )
 }
 # ########################################################### #
 
