@@ -4,7 +4,7 @@
 \alias{url_online}
 \title{utility - check if URL available, such as if an API is online or offline}
 \usage{
-url_online(url = c("ejscreen.epa.gov", ))
+url_online(url = "ejscreen.epa.gov")
 }
 \arguments{
 \item{url}{the URL to check}

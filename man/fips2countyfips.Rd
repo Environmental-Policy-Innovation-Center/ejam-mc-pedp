@@ -2,7 +2,7 @@
 % Please edit documentation in R/FIPS_FUNCTIONS.R
 \name{fips2countyfips}
 \alias{fips2countyfips}
-\title{Get PARENT COUNTY FIPS of each fips (the County that contains the fips)}
+\title{FIPS - Get FIPS codes of the Counties CONTAINING the given census units (of any type)}
 \usage{
 fips2countyfips(fips)
 }
@@ -15,7 +15,7 @@ but where it is a state this will return NA}
 vector of fips as long as input
 }
 \description{
-Get PARENT COUNTY FIPS of each fips (the County that contains the fips)
+FIPS - Get FIPS codes of the Counties CONTAINING the given census units (of any type)
 }
 \examples{
 fips2countyfips(testinput_fips_blockgroups[1])

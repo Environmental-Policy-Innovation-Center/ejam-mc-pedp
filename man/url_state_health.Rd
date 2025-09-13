@@ -8,6 +8,8 @@ url_state_health(
   fips = NULL,
   year = 2025,
   sitepoints = NULL,
+  lat = NULL,
+  lon = NULL,
   shapefile = NULL,
   as_html = FALSE,
   linktext = "County",
@@ -23,6 +25,8 @@ url_state_health(
 \item{year}{e.g., 2025}
 
 \item{sitepoints}{if provided and fips is NULL, gets county fips from lat,lon columns of sitepoints}
+
+\item{lat, lon}{ignored if sitespoints provided, can be used otherwise, if shapefile and fips not used}
 
 \item{shapefile}{if provided and fips is NULL, gets county fips from lat,lon of polygon centroid}
 

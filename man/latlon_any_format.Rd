@@ -77,6 +77,7 @@ single wrapper function at some point.
 }
 \seealso{
 \code{\link[=sitepoints_from_any]{sitepoints_from_any()}} which is like this but also adds ejam_uniq_id column,
+\code{\link[=latlon_from_fips]{latlon_from_fips()}} and \code{\link[=latlon_from_shapefile]{latlon_from_shapefile()}} that find centroids,
 and see \code{\link[=read_csv_or_xl]{read_csv_or_xl()}} and \code{\link[=latlon_df_clean]{latlon_df_clean()}}
 }
 \keyword{internal}

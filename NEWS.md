@@ -1,9 +1,9 @@
 
-# 2.32.6 - 2025-09-07
+# EJAM 2.32.6 (September 2025)
 
-## Web App
+## **WEB APP CHANGES**
 
-### Restored language related to "Environmental Justice"
+### * Restored language related to "Environmental Justice"
 
 -   Changed name of tool back to "Environmental Justice Analysis Multisite" tool (from "Environmental and Residential Population Analysis Multisite" tool, the name used in early 2025 through July 2025)
 -   Restored some text: "EJ Indexes" now once again refers to what were called "Summary Indexes" in early 2025 through July 2025. "Supplementary EJ Indexes" is similarly used once again.
@@ -47,7 +47,7 @@
 -   Reorganized the "Advanced" settings tab, which now has more options and settings that can be changed. That tab is hidden by default in most cases because it is complicated, and some parts are experimental/untested.
 
 
-## R/RStudio Users (Analysts and Developers)
+## **NON-WEB-APP CHANGES (FOR USING EJAM IN R/RSTUDIO)**
 
 ### Shortcuts are provided via [ejanalysis.org](https://www.ejanalysis.org) (or [ejanalysis.com](https://www.ejanalysis.com))
 
@@ -55,11 +55,9 @@
 -   [GitHub issues now can be submitted here](https://github.com/ejanalysis/EJAM/issues)
 -   [ejanalysis.org/docs](https://www.ejanalysis.org/docs) or [ejanalysis.org/ejamdocs](https://www.ejanalysis.org/ejamdocs) directs you to the documentation for the EJAM package, including technical reference docs (how to install and use the R package to work directly with the more powerful tools EJAM offers beyond the web app).
 
-
 ### Weblinks / URLs (API, reports, etc.)
 
 -   Restored columns of weblinks in single-site reports - they had been missing since 1/2025. Added back to the tables of sites (results_bysite table from `ejamit()`, `ejam2tableviewer()`, etc.) and map popups (in various map functions like `ejam2map()` etc.)
-
 -   Added several new functions that can provide these kinds of reports:
 
 | header (column title) | text (of link) | function name | parameters |
@@ -75,17 +73,11 @@
 | State Equity Atlas Report | State | `url_state_equityatlas()` | fips |
 
 -   `url_ejamapi()` provides URLs to use with EJAM-API to get an html summary report on 1 site at a time. Inputs to this function are like inputs to `ejamit()` but so far mostly limited to radius, sitepoints, fips, shapefile. This will enable the map popups and excel tables of sites to include links to single-site reports, for example. It is limited to blockgroup fips only, right now, and only single-site reports right now.
-
 -   `url_ejscreenmap()` and other functions in table above were revised, cleaned up, and moved among .R files.
-
 -   `url_enviromapper()` and `url_ejscreenmap()` can now accept a fips code and get the approx centroid of each block, blockgroup, tract, city, county, or state - that lets it craft a link to send you to EJSCREEN or EnviroMapper zoomed to one fips unit
-
 -    `url_frs_facility()` and `url_echo_facility()` are the new names of functions giving links to EPA FRS and ECHO reports on regulated facilities.
-
 -   `url_county_health()` and `url_state_health()` are new or renamed and provide links to reports that used to be called county health rankings
-
 -   `url_county_equityatlas()` and `url_state_equityatlas()` provide links to "Equity Atlas" reports
-
 
 ### Added documentation
 
@@ -98,35 +90,21 @@
 -   Updated {roxygen2} help file docs and pkgdown documentation webpages
 -   New function `url_github_preview()` makes it a bit easier to view rendered HTML reports that each package release or branch stores in the testdata/examples_of_outputs folder, to compare how they look in different versions. 
 
-
 ### Added or Changed
 
 -   `ejam2report()` now downloads FIPS bounds if missing.
-
 -   `mapfast()` and some others now drop sites with empty geometry before trying to map, avoid an error
-
 -   `popup_from_any()` and other map popup functions now have different parameters that can handle more columns of URLs/links of any type
-
 -   `popup_from_any()` and other map popup functions now drop the geometry column from spatial data.frames to avoid including a mess in the popup
-
 -   `shape2geojson()` is a new helper function that tries to convert a spatial data.frame to text string geojson, the format needed by the 8/2025 version of the EJAM-API
-
 -   `testinput_fips_mix` is a new dataset with fips of each type: block, blockgroup, tract, city, county, state
-
--   `fips_county_from_latlon()` and `fips_state_from_latlon()` are new internal functions - for each point, they identify the county or state its in
-
+-   `fips_county_from_latlon()` and `fips_state_from_latlon()` are new internal functions - for each point, they identify the county or state it is in
 -   `fips2countyfips()` reports what US County contains each fips-based Census unit, such as the Counties in which some blockgroups are located.
-
 -   `fips2name()` now handles block fips instead of warning
-
 -   `sites_from_input()` new internal function that helps other functions flexibly accept sites in various formats of input parameters: table of points, vectors of lat,lon, spatial data.frame, or fips code vector 
-
 -   `sitepoints_from_latlon_or_sitepoints()` supports sites_from_input() - it flexibly accepts input as either lat and lon vectors or just a table of point with lat,lon columns - it figures out which to use.
-
--   `regids_valid()` is a new internal function 
-
+-   `regids_valid()` is a new internal function
 -  `url_linkify()` improved and made internal
-
 
 ### Web app customization details
 
@@ -137,7 +115,6 @@
     -   Provide pre-selected industry NAICS codes, or a set of specific Counties
     -   Provide a table of lat/lon coordinates to preload at launch e.g., `ejamapp(sitepoints=testpoints_10)`
     -   Provide a shapefile to preload upon launch
-    -   etc.
 -   Drafted a new article with technical details: [Defaults and Custom Settings for the Web App](../articles/dev-app-settings.html)
 -   Changed where the app title is stored. It is stored in the DESCRIPTION file as a field. (The app title also can be modified by editing `global_defaults_package.R` or by passing parameters to `ejamapp()`).
 -   Fixed a bug where `isPublic` parameter in `ejamapp()` was being ignored.
@@ -155,7 +132,7 @@
 
 # EJAM v2.32.5 (July 2025)
 
-## Web app
+## Web App
 
 -   **Cities, Counties, States:** Census units like States, Counties, and Cities/Towns/CDPs can be selected from a menu or searched by typing part of the name. Clicking "Done" will check online for the boundaries of those places, at which point the "Start Analysis" button will be enabled. Then clicking the "Start Analysis" button analyzes the sites for which bounds were found.
 -   **Area in square miles**: The app now gets or calculates the area of each site more consistently and efficiently. (The function `ejamit()` has new params related to how `area_sqmi()` now can get square mileage info from `?blockgroupstats` table without needing to download boundaries. There are new parameters called `download_fips_bounds_ok`, `download_noncity_fips_bounds`, and `includewater`. The new params are also driven by two new defaults in `global_defaults_shiny.R` The old parameter default_download_fips_bounds_to_calc_areas is no longer a param in `ejamit()`).

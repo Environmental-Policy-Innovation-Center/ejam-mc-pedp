@@ -7,11 +7,13 @@
 url_state_equityatlas(
   fips = NULL,
   sitepoints = NULL,
+  lat = NULL,
+  lon = NULL,
   shapefile = NULL,
   as_html = FALSE,
   linktext = "State (Equity Atlas)",
   ifna = "https://nationalequityatlas.org",
-  baseurl = "https://nationalequityatlas.org/research/data_summary/",
+  baseurl = "https://nationalequityatlas.org/research/data_summary",
   statereport = TRUE,
   ...
 )
@@ -20,6 +22,8 @@ url_state_equityatlas(
 \item{fips}{vector of fips codes}
 
 \item{sitepoints}{if provided and fips is NULL, gets county fips from lat,lon columns of sitepoints}
+
+\item{lat, lon}{ignored if sitespoints provided, can be used otherwise, if shapefile and fips not used}
 
 \item{shapefile}{if provided and fips is NULL, gets county fips from lat,lon of polygon centroid}
 

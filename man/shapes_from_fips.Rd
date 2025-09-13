@@ -50,7 +50,6 @@ So the output table might not have the same number of rows as the input fips vec
 When using tigris package ("tiger" as service-related parameter here),
 it uses the year that is the default in the version of the tigris package that is installed.
 You can use options(tigris_year = 2022) for example to specify it explicitly.
-This function also sets options(tigris_use_cache = TRUE), but each individual shapes_xyz_from_ function may not specify.
 
 Blocks are not implemented yet here. For info on blocks bounds, see  \code{\link[tigris:block_groups]{tigris::block_groups()}}
 Also note the \link{blockwts} dataset had a placeholder column block_radius_miles that as of

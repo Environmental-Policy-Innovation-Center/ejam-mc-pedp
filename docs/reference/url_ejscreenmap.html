@@ -138,6 +138,10 @@ but using the fips parameter is probably a better idea.</p></dd>
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>unused</p></dd>
 
+
+<dt id="arg-lat-lon">lat, lon<a class="anchor" aria-label="anchor" href="#arg-lat-lon"></a></dt>
+<dd><p>ignored if sitespoints provided, can be used otherwise, if shapefile and fips not used</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -149,12 +153,22 @@ but using the fips parameter is probably a better idea.</p></dd>
 <code><a href="url_echo_facility.html">url_echo_facility()</a></code> <code><a href="url_frs_facility.html">url_frs_facility()</a></code>  <code><a href="url_enviromapper.html">url_enviromapper()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># browseURL(url_ejscreenmap(fips = '10001'))</span></span>
+<span><span class="co"># browseURL(url_ejscreenmap(sitepoints = testpoints_10[1,]))</span></span>
+<span><span class="co"># shp = shapefile_from_any(  testdata("portland.*zip")[1])[1, ]</span></span>
+<span><span class="va">shp</span> <span class="op">=</span> <span class="va">testinput_shapes_2</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span></span>
+<span> <span class="fu">url_ejscreenmap</span><span class="op">(</span>shapefile <span class="op">=</span> <span class="va">shp</span><span class="op">)</span></span>
+<span></span>
+<span></span></code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>August 2025</p>
+  <p>September 2025</p>
 </div>
 
 <div class="pkgdown-footer-right">

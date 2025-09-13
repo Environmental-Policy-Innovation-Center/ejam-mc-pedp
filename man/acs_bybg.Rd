@@ -112,7 +112,7 @@ x[substr(x$name,1,7) \%in\% "B18101_", ] |> print(n=50)
  # disability is by tract only:
 
  cbind(unique(grep("disab", x$concept, value = T, ignore.case = T) ))
- # x[substr(x$name,1,6) \%in\% "B18101" & x$geography == "block group", ] |> print(n=50) # none
+ # x[substr(x$name,1,6) \%in\% "B18101" & x$geography \%in\% "block group", ] |> print(n=50) # none
  x[substr(x$name,1,7) \%in\% "B18101_"  , ] |> print(n=50)
 }\if{html}{\out{</div>}}
 }

@@ -15,6 +15,7 @@ url_ejamapi(
   as_html = FALSE,
   ifna = "https://ejanalysis.com",
   baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?",
+  sitenumber = "",
   ...
 )
 }
@@ -38,7 +39,14 @@ which might get too long for encoding in a URL for the API using GET}
 
 \item{baseurl}{do not change unless endpoint actually changed}
 
-\item{...}{unused}
+\item{sitenumber}{same as in \code{\link[=ejam2report]{ejam2report()}}, so NULL or "" means an overall
+summary report (assuming >1 sites were provided)
+while a number like 3 means a report based on the third site
+found in the inputs (third point or third fips or third polygon).
+Not specifying sitenumber and only providing 1 site will create a 1-site report.}
+
+\item{...}{a named list of other query parameters passed to the API,
+to allow for expansion of allowed parameters}
 }
 \value{
 vector of character string URLs
@@ -65,7 +73,7 @@ app but has url-encoded parameters that are app settings, such as sitepoints, ra
  x = url_ejamapi(system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM"))
 
  y = url_ejamapi(fips = c("050014801001", "050014802001"))
- y = url_ejamapi(fips = testinput_fips_blockgroups)
+ y = url_ejamapi(fips = testinput_fips_mix)
 
  z = url_ejamapi(shapefile = testinput_shapes_2[2, c("geometry", "FIPS")])
 

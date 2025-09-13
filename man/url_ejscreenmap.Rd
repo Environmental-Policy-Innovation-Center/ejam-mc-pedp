@@ -57,12 +57,23 @@ but using the fips parameter is probably a better idea.}
 \item{baseurl}{do not change unless endpoint actually changed}
 
 \item{...}{unused}
+
+\item{lat, lon}{ignored if sitespoints provided, can be used otherwise, if shapefile and fips not used}
 }
 \value{
 URL(s)
 }
 \description{
 Get URL(s) for (new) EJSCREEN app with map centered at given point(s)
+}
+\examples{
+# browseURL(url_ejscreenmap(fips = '10001'))
+# browseURL(url_ejscreenmap(sitepoints = testpoints_10[1,]))
+# shp = shapefile_from_any(  testdata("portland.*zip")[1])[1, ]
+shp = testinput_shapes_2[1,]
+ url_ejscreenmap(shapefile = shp)
+
+
 }
 \seealso{
 \code{\link[=url_ejamapi]{url_ejamapi()}}  \code{\link[=url_ejscreenmap]{url_ejscreenmap()}}

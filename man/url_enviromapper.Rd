@@ -21,9 +21,7 @@ url_enviromapper(
 \arguments{
 \item{sitepoints}{data.frame with colnames lat, lon (or lat, lon parameters can be provided separately)}
 
-\item{lon}{one longitude}
-
-\item{lat}{one latitude}
+\item{lat, lon}{ignored if sitespoints provided, can be used otherwise, if shapefile and fips not used}
 
 \item{shapefile}{if provided function uses centroids of polygons for lat lon}
 

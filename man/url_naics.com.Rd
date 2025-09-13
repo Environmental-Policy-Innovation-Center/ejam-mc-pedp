@@ -5,7 +5,7 @@
 \title{URL functions - url_naics.com - Get URL for page with info about industry sectors by text query term}
 \usage{
 url_naics.com(
-  query,
+  query = "",
   as_html = FALSE,
   linktext = query,
   ifna = "https://www.naics.com",

@@ -27,6 +27,12 @@ where county names optionally have comma and 2-character abbreviation or full st
 \description{
 FIPS - Get county or state names from county or state FIPS codes
 }
+\details{
+This reports the name of the census unit specified by the FIPS code.
+
+Other functions can instead report the name or code of the enclosing (parent, surrounding) unit,
+such as the State or County that each fips is located within.
+}
 \examples{
 fips2name(fips_counties_from_statename("Delaware"))
 cfips = fips_counties_from_state_abbrev(c("RI", "DE"))

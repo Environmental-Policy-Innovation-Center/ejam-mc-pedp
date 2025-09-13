@@ -31,7 +31,7 @@ ejam2report(
     names_d_other_count),
   extratable_hide_missing_rows_for = as.vector(unlist(extratable_list_of_sections)),
   report_title = NULL,
-  logo_path = NULL,
+  logo_path = EJAM:::global_or_param("report_logo"),
   logo_html = NULL
 )
 }
@@ -40,7 +40,7 @@ ejam2report(
 if sitenumber parameter is used, or a data.table called \code{results_overall} otherwise}
 
 \item{sitenumber}{If a number is provided, the report is about
-\code{ejamitout$results_bysite[sitenumber, ]} and if no number is provided (param is NULL)
+\code{ejamitout$results_bysite[sitenumber, ]} and if no number is provided (param is NULL or "")
 then the report is about \code{ejamitout$results_overall}}
 
 \item{analysis_title}{optional title of analysis}

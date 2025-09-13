@@ -29,13 +29,16 @@ If set FALSE, faster since avoids checking but some links might not work and not
 
 \item{baseurl}{do not change unless endpoint actually changed}
 
-\item{...}{unused}
+\item{...}{unused - allows it to ignore things like lat, lon, if called from \code{\link[=url_columns_bysite]{url_columns_bysite()}}}
 }
 \value{
 URL(s)
 }
 \description{
 Get URL(s) for EPA ECHO webpage with facility information
+}
+\details{
+Additional details...
 }
 \examples{
  \donttest{
