@@ -4,6 +4,7 @@
 #' @param x R object
 #'
 #' @return attributes of x, excluding row.names
+#'
 #' @export
 #' @keywords internal
 #'
@@ -16,6 +17,15 @@ attributes2 = function(x) {
 # helper function to update 1 attribute such as ONLY the EJAM VERSION metadata for ALL datasets in EJAM/data/
 # AND NOT ARROW FILES AND NOT TXT FILES - ONLY THE .RDA FILES
 
+#' @param x vector of 1+ quoted names of data object(s), like "testpoints_10"
+#'
+#' @param attr_name e.g. "ejam_package_version"
+#' @param newvalue the new value of that attribute
+#'
+#' @seealso [metadata_check_print()] [metadata_check()] [metadata_add()] [metadata_update_attr()]
+#'
+#' @keywords internal
+#'
 metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_package_version", newvalue = desc::desc_get("Version")) {
 
   # x param is vector of names of data objects to update in the source package
@@ -50,12 +60,11 @@ metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_pa
 #   metadata_update_attr()
 #################################################### #
 
-#' helper function for package to set metadata attributes of a dataset
-#'
+#' helper function for package to set metadata attributes of a dataset, used by scripts in /data-raw/
 #' @details
 #' to update only the ejam_package_version attribute of every data item:
 #'
-#'   metadata_update_attr()
+#'   [metadata_update_attr()]
 #'
 #' @description Together with the metadata_mapping script, this can be used
 #'  annually to update the metadata for datasets in a package.
@@ -72,7 +81,7 @@ metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_pa
 #' @param x dataset (or any object) whose metadata (stored as attributes) you want to update or create
 #'  EJAM, EJSCREEN, and other dataset versions and release dates are tracked in DESCRIPTION
 #'  @param update_date_saved_in_package set to FALSE to avoid changing this attribute
-#' @seealso metadata_check()
+#' @seealso [metadata_check_print()] [metadata_check()] [metadata_add()] [metadata_update_attr()]
 #'
 #' @return returns x but with new or altered attributes
 #' @examples
@@ -83,11 +92,10 @@ metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_pa
 #'
 #' @keywords internal
 #'
-
-# source("R/metadata_mapping.R")  # this already would get loaded via devtools::load_all() or library(EJAM)
-# rstudioapi::documentOpen("./R/metadata_mapping.R")
-
 metadata_add <- function(x, update_date_saved_in_package = TRUE) {
+
+  # source("R/metadata_mapping.R")  # this already would get loaded via devtools::load_all() or library(EJAM)
+  # rstudioapi::documentOpen("./R/metadata_mapping.R")
 
   metadata <- get_metadata_mapping(deparse(substitute(x)))
   if (is.null(metadata)) {
@@ -110,8 +118,46 @@ metadata_add <- function(x, update_date_saved_in_package = TRUE) {
 }
 #################################################### #
 
+#' helper function in updating the package metadata, used by scripts in /data-raw/
+#' prints to console info about some missing metadata
+#' @inheritParams metadata_check
+#' @return same as [metadata_check()], invisibly
+#' @seealso [metadata_check_print()] [metadata_check()] [metadata_add()] [metadata_update_attr()]
+#' @keywords internal
+#'
+metadata_check_print = function(...) {
 
-#' helper function in updating the package metadata
+  ## check which dataset objects have which metadata info about vintage, etc.
+
+  x = EJAM:::metadata_check(...)
+  cat("\n\n See what metadata is stored as attributes \n\n")
+  print(t(head(x,1)))
+  cat("\n\n")
+  ## see which data objects have outdated or missing metadata about ejam_package_version, etc.
+  y <- x[(x$has_metadata %in% FALSE) | is.na(x$date_saved_in_package)  |  is.na(x$ejam_package_version) | !(x$ejam_package_version %in% desc::desc_get("Version")), ]
+  y <- y[order( is.na(y$date_saved_in_package), y$ejam_package_version, y$has_metadata), ]
+  rownames(y) <- NULL
+  y[,  c('item', 'ejam_package_version', 'date_saved_in_package', 'has_metadata')]
+  cat("\n\n See which data objects have outdated or missing metadata about ejam_package_version, etc. \n\n")
+  print(y)
+  cat("\n\n")
+
+  # --------------------------------------------------------------------------------- -
+  ## how many lack ejscreen_version info (maybe not always relevant)
+  print(table(How.many.have.ejscreen_info = x$ejscreen_version, useNA = "always"))
+  cat("\n\n")
+  # --------------------------------------------------------------------------------- -
+  ## see ACS version info and date saved
+  print(table(How.many.have.acs_version = x$acs_version, useNA = 'always'))
+  z = x[is.na(y$acs_version), c('item', 'date_saved_in_package', 'acs_version' )]
+  cat("\n\n see where is ACS version info missing, and date saved \n\n")
+  print(z[order(z$item), ])
+  ## probably should have acs_version:  usastats, testoutput_*
+  invisible(x)
+}
+#################################################### #
+
+#' helper function in updating the package metadata, used by scripts in /data-raw/
 #'
 #' @description Quick and dirty helper during development, to check all the
 #'   attributes of all the data files in relevant packages.
@@ -129,12 +175,15 @@ metadata_add <- function(x, update_date_saved_in_package = TRUE) {
 #' @param grepdatasets optional, if set to TRUE, datasets should be a query to use
 #'   via grep to identify which datasets to check. It always uses ignore.case=TRUE for this.
 #' @param loadifnotloaded Optional to control if func should temporarily attach packages not already loaded.
-#' @seealso [pkg_functions_and_data()]
-#' @examples
-#'   # tail(metadata_check( ))
-#'   metadata_check(packages = NULL)
 #'
-#'   x <- metadata_check("EJAM")
+#' @seealso [metadata_check_print()] [metadata_check()] [metadata_add()] [metadata_update_attr()]
+#'   [pkg_functions_and_data()]
+#' @examples
+#'
+#'   # tail(EJAM:::metadata_check( ))
+#'   EJAM:::metadata_check(packages = NULL)
+#'
+#'   x <- EJAM:::metadata_check_print("EJAM")
 #'   x[x$has_metadata == TRUE, ]
 #'   table(x$has_metadata)
 #'

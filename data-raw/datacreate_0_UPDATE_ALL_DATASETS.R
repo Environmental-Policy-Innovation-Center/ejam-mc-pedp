@@ -311,7 +311,7 @@ source_maybe("datacreate_names_pct_as_fraction.R")
 # to update only the ejam_package_version attribute for ALL dataset objects in /data/
 # (other than the .txt and .arrow files there)
 # use this:
-stop('confirm you want to do this next step')
+stop('confirm you want to do this next step - it is inconvenient for some dataset objects like meters_per_mile to have attributes like ejam_package_version')
 
 #     metadata_update_attr()
 
