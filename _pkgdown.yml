@@ -209,6 +209,8 @@ reference:
   - shapes_counties_from_countyfips
   - acs_bycounty
   - plot_bycounty
+  - url_county_health
+  - url_county_equityatlas
 - subtitle: "States"
   contents:
   - states_shapefile
@@ -221,6 +223,8 @@ reference:
   - fips2state_fips
   - state_from_fips_bybg
   - state_from_latlon
+  - url_state_health
+  - url_state_equityatlas
 - subtitle: "Regions"
   contents:
   - fips_st2eparegion
@@ -425,6 +429,8 @@ reference:
   - url_frs_facility
   - url_county_health
   - url_state_health
+  - url_county_equityatlas
+  - url_state_equityatlas
   - url_naics.com
 - title: "Utilities handling variable names"
   desc: "Utilities to handle variable names, indicator metadata, formulas, etc."

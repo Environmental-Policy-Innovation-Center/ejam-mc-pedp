@@ -151,7 +151,10 @@ url_ejamapi = function(
   }
   if (is.null(linktext)) {linktext <- paste0("Report")}
   # print( rlang::list2(...) )
-  and_other_query_terms = paste0("&", urls_from_keylists(keylist_bysite = ..., baseurl = ""))
+  ###################### #
+  #   ... args  ####
+  and_other_query_terms = urls_from_keylists(keylist_bysite = ..., baseurl = "")
+  if (length(and_other_query_terms) > 0 && !(and_other_query_terms %in% "")) {and_other_query_terms <- paste0("&", and_other_query_terms)}
   ################################################## #  ################################################## #
   if (is.null(baseurl)) {
     baseurl <- "https://ejamapi-84652557241.us-central1.run.app/report?"
@@ -172,7 +175,7 @@ url_ejamapi = function(
     sitenumber <- 0  # overall summary multisite report except Not specifying sitenumber and only providing 1 site will create a 1-site report.
   }
   ################################################## #  sitetype ? --------------------- -
-  # determine sitetype ####
+  # sitetype ####
   # and convert any lat,lon to sitepoints
   sites <- sites_from_input(sitepoints = sitepoints, lat = lat, lon = lon, fips = fips, shapefile = shapefile)
   sitepoints <- sites$sitepoints
@@ -183,12 +186,12 @@ url_ejamapi = function(
   # regid_from_input ####
   # handle case where only regid is provided, not the actual sitepoints,
   # so use regid as a last resort way to get latlon
+  ## latlon_from_regid ####
   if (is.null(sites$sitetype)) {
     dotsargs = rlang::list2(...)
     if ("regid" %in% names(dotsargs)) {regid <- dotsargs$regid} else {regid = NULL}
     if  ("sitepoints" %in% names(dotsargs)) {sitepoints <- dotsargs$sitepoints} else {sitepoints = NULL}
     regid <- regid_from_input(regid=regid, sitepoints=sitepoints) # here we only want it as a way to get lat,lon not to use the regid as in echo or frs report
-    # latlon_from_regid ####
     if (!is.null(regid)) {
       sites <- list(
         sitepoints =  latlon_from_regid(regid),
@@ -199,6 +202,7 @@ url_ejamapi = function(
   }
 
   ###################################### #  shapefile
+  # > shapefile ####
   if ("shp" %in% sitetype) {
 
     if (missing(radius) || is.null(radius) || all(radius %in% c(0, "", NA))) {radius <- 0}
@@ -222,6 +226,7 @@ url_ejamapi = function(
     url_of_report[is.na(geotxt)] <- NA # later will convert to ifna
   } else {
     ###################################### # fips
+    # > fips #####
     if ("fips" %in% sitetype) {
       if (missing(radius) || is.null(radius) || all(radius %in% c(0, "", NA))) {radius <- 0}
       if (NROW(fips) == 1) {sitenumber <- 1}
@@ -244,6 +249,7 @@ url_ejamapi = function(
       # url_of_report[!(ftype %in% "blockgroup")] <- NA
     } else {
       ###################################### # sitepoints
+      # > sitepoints ####
       if ("latlon" %in% sitetype) {
         x <- sitepoints
         # x <- latlon_from_anything(sitepoints, interactiveprompt = F) # do we want this actually ?? see notes in sites_from_input() and related
@@ -273,17 +279,18 @@ url_ejamapi = function(
     }
   }
   ###################### #
-  # add other parameters from ...
 
-  other_query_terms <- url_from_keylist(baseurl = "", ...)
   urlx <- url_of_report
   ok <- !(is.na(urlx)) # so !ok means bad/NA
-  urlx[ok] <- paste0(urlx[ok], "&", other_query_terms)
+  # urlx[ok] <- paste0(urlx[ok], and_other_query_terms) # "&", other_query_terms)   # already done now
 
+  ###################### #
+  # default URL if bad ####
   # use a default URL if bad input, and only linkify when not NA
 
   urlx[!ok] <- ifna  # possibly user set ifna to NA or else it is a default url
   ok <- !is.na(urlx)  # now ok means it was a good  input or bad input, except if ifna was set to NA, that is not ok so we can avoid urlencoding that type of NA !
+
   if (as_html) {
     urlx[ok] <- URLencode(urlx[ok]) # consider if we want  reserved = TRUE ***
     urlx[ok] <- url_linkify(urlx[ok], text = linktext)
