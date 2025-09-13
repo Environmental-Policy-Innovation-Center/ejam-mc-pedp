@@ -80,7 +80,8 @@ metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_pa
 #'
 #' @param x dataset (or any object) whose metadata (stored as attributes) you want to update or create
 #'  EJAM, EJSCREEN, and other dataset versions and release dates are tracked in DESCRIPTION
-#'  @param update_date_saved_in_package set to FALSE to avoid changing this attribute
+#' @param update_date_saved_in_package can set to FALSE to avoid changing this attribute
+#' @param update_ejam_package_version  can set to FALSE to avoid changing this attribute
 #' @seealso [metadata_check_print()] [metadata_check()] [metadata_add()] [metadata_update_attr()]
 #'
 #' @return returns x but with new or altered attributes
@@ -92,7 +93,8 @@ metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_pa
 #'
 #' @keywords internal
 #'
-metadata_add <- function(x, update_date_saved_in_package = TRUE) {
+metadata_add <- function(x, update_date_saved_in_package = TRUE,
+                         update_ejam_package_version = TRUE) {
 
   # source("R/metadata_mapping.R")  # this already would get loaded via devtools::load_all() or library(EJAM)
   # rstudioapi::documentOpen("./R/metadata_mapping.R")
@@ -109,6 +111,9 @@ metadata_add <- function(x, update_date_saved_in_package = TRUE) {
   }
   if(update_date_saved_in_package) {
     metadata$date_saved_in_package <- as.character(Sys.Date())
+  }
+  if (update_ejam_package_version) {
+    metadata$ejam_package_version <- as.vector(desc::desc_get("Version"))
   }
   for (i in seq_along(metadata)) {
     attr(x, which = names(metadata)[i]) <- metadata[[i]]
