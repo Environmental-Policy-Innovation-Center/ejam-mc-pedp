@@ -29,7 +29,57 @@ grab_hits = function(pattern, x, ignore.case = TRUE, ignorecomments = FALSE, val
   return(out)
 }
 ################################ #
+#
+# funcnamesearch = function() {
+#   ## very strict query for function names - finds only 61
+#   z = find_in_files( "^[0123456789abcdefghijklmnopqrstuvwxyz_.]* *[<-|=] *function\\(", path = "./R")
+#   z = as.vector(unlist(z))
+#   z = gsub("([^ ]*) .*", "\\1", z)
+#   return(z)
+# }
+################################ #
+# find names of functions with @export or other tag
+
+#  exported_functions <- functions_by_roxygen_tag()
+
+functions_by_roxygen_tag <- function(
+    tagpattern = "#' @export", path="./R"
+) {
+
+  x = find_in_files(tagpattern, path = path)
+  n = length(x)
+  fname = vector(length = n); rownums = list()
+  funcname <- NULL
+
+  for (i in seq_along(x)) {
+    fname[i] = names(x[i])
+    rownums[[i]] = names(x[[i]] )
+    taglinenumbers = as.numeric(rownums[[i]])
+    txt = readLines(fname[i])
+    for (ii in 1:length(taglinenumbers)) {
+      nextfuncname <-
+        grep(pattern = "^([^# ]*) .*function\\(",
+             x = txt[   taglinenumbers[ii]:(4 + taglinenumbers[ii]) ],
+             value = TRUE)
+      nextfuncname <- gsub("^([^ #]*) .*function\\(.*", "\\1", nextfuncname)
+      if (is.null(nextfuncname)
+          # || (0 %in% length(nextfuncname) )
+          ) {
+        cat("no function definition found just after line ", taglinenumbers[ii], " in file ", fname[i])
+        nextfuncname <- NULL
+      } else {
+          if ("" %in% nextfuncname) { nextfuncname <- NULL} else {
+            if (length(nextfuncname) == 0) { nextfuncname <- NULL}
+          }
+        }
+      funcname <- c(funcname, nextfuncname)
+    }
+    }
+  return(funcname)
+  }
+################################ #
 # search for one query term in a list of files
+
 
 find_in_files <- function(pattern, path = "./tests/testthat", filename_pattern = "\\.R$|\\.r$",
                           ignorecomments = FALSE,
@@ -325,3 +375,9 @@ used (or mentioned) by the most R/*.R files
 ## and
 
 # x = EJAM:::linesofcode2(packages = 'EJAM')
+
+######## #
+# different way --   look for those tagged as @export or keywords internal
+
+# exported_functions <- functions_by_roxygen_tag()
+# keywords_internal = functions_by_roxygen_tag(tagpattern = "#' @keywords internal")
