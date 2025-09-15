@@ -7,7 +7,7 @@
 #' @param eachsite table to save in one tab, from ejamit()$results_bysite, EJAM analysis site by site (one row per site)
 #' @param longnames vector of indicator names to display in Excel table
 #' @param formatted optional table to save in one tab, from ejamit()$results_overall, EJAM analysis overall in different format
-#' @param bybg Optional large table of details of each block group that is only needed to analyze distances by group.
+#' @param bybg Optional large table of details of each blockgroup that is only needed to analyze distances by group.
 #' @param sitetype normally would be like ejamit()$sitetype
 #'
 #' @param plot_distance_by_group logical, whether to try to add a plot of mean distance by group.

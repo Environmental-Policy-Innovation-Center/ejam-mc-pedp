@@ -14,9 +14,8 @@ attributes2 = function(x) {
 }
 #################################################### #
 
-# helper function to update 1 attribute such as ONLY the EJAM VERSION metadata for ALL datasets in EJAM/data/
-# AND NOT ARROW FILES AND NOT TXT FILES - ONLY THE .RDA FILES
-
+#' helper func to update 1 metadata attribute (e.g. "ejam_package_version") in all pkg datasets
+#' updates EJAM/data/*.rda (BUT NOT ARROW & NOT TXT FILES)
 #' @param x vector of 1+ quoted names of data object(s), like "testpoints_10"
 #'
 #' @param attr_name e.g. "ejam_package_version"

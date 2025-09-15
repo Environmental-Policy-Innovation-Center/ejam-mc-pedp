@@ -1,13 +1,13 @@
 #' Utility to create lookup table of percentiles 0 to 100 and mean for each indicator by State or USA total
 #'
-#' @details EJSCREEN assigns each indicator in each block group a percentile value via python script, using
+#' @details EJSCREEN assigns each indicator in each blockgroup a percentile value via python script, using
 #' <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.percentileofscore.html>
 #'
 #' \preformatted{
 #'   The way the python function is used as of 2023 is that percentileofscore is 80% if
 #'   80% of all indicator values (statewide or nationwide, depending on the type being calculated)
 #'   are less than (NOT equal to) the indicator value
-#'   in the specified block group (since kind="strict").
+#'   in the specified blockgroup (since kind="strict").
 #'   The percentile recorded in the EJSCREEN dataset is the floor of that,
 #'   meaning if the 81.9% of values are less than x, the percentile is reported as 81.
 #'   The EJSCREEN python script used to create percentile lookup tables is in a file

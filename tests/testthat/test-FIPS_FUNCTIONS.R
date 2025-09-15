@@ -19,10 +19,10 @@
 #     name2fips() and names2fips()  # inconsistent naming, but useful aliases
 #          fips_from_name()  # same as name2fips()
 #    fips_state_from_state_abbrev()
-#    fips_state_from_statename()     # should it be statename or state_name
-# fips_counties_from_statefips(   )  # should it be statefips or state_fips
+#    fips_state_from_statename()
+# fips_counties_from_statefips(   )
 # fips_counties_from_state_abbrev()
-# fips_counties_from_statename(   )  # should it be statename or state_name
+# fips_counties_from_statename(   )
 # fips_counties_from_countyname()
 # fips_counties_from_countynamefull()  internal helper
 
@@ -248,7 +248,7 @@ testthat::test_that("fipstype2nchar ok", {
 # [8,] NA           NA                "12345678"
 # [9,] NA           NA                "123456789"
 # [10,] "tract"      "01234567890"     "1234567890"
-# [11,] "tract" ?    "12345678901"     "12345678901"  # AMBIGUOUS CASE - MIGHT BE BLOCK GROUP MISSING THE LEADING 0 ***
+# [11,] "tract" ?    "12345678901"     "12345678901"  # AMBIGUOUS CASE - MIGHT BE BLOCKGROUP MISSING THE LEADING 0 ***
 # [12,] "blockgroup" "123456789012"    "123456789012"
 # [13,] NA           NA                "1234567890123"
 # [14,] "block"      "012345678901234" "12345678901234"
@@ -1427,7 +1427,7 @@ test_that("fips2name() works", {
 # [8,] NA           NA                "12345678"
 # [9,] NA           NA                "123456789"
 # [10,] "tract"      "01234567890"     "1234567890"
-# [11,] "tract"      "12345678901"     "12345678901"  # AMBIGUOUS CASE - MIGHT BE BLOCK GROUP MISSING THE LEADING 0 ***
+# [11,] "tract"      "12345678901"     "12345678901"  # AMBIGUOUS CASE - MIGHT BE BLOCKGROUP MISSING THE LEADING 0 ***
 # [12,] "blockgroup" "123456789012"    "123456789012"
 # [13,] NA           NA                "1234567890123"
 # [14,] "block"      "012345678901234" "12345678901234"

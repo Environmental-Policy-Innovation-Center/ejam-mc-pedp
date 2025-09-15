@@ -183,7 +183,7 @@ reference:
 - title: "Specify Counties etc."
   desc: >
     Tools to work with Census units and FIPS codes
-    - block groups, tracts, counties, states,
+    - blockgroups, tracts, counties, states,
     and EPA Regions
 - subtitle: "FIPS tools"
   contents:
@@ -219,8 +219,8 @@ reference:
   - fips_state_from_statename
   - fips_states_in_eparegion
   - fips2statename
-  - fips2state_abbrev
-  - fips2state_fips
+  - fips2stateabbrev
+  - fips2statefips
   - state_from_fips_bybg
   - state_from_latlon
   - url_state_health
@@ -447,6 +447,8 @@ reference:
 - title: internal
   contents:
   - state_from_sitetable
+  - fips2state_abbrev
+  - fips2state_fips
   - fips_bg_from_latlon
   - testshapes_2
   - testoutput_getblocksnearby_10pts_1miles

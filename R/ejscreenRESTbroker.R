@@ -57,7 +57,7 @@
 #'   where newer 2023 version is default, using ejscreenRESTbroker1.aspx,
 #'   and old style/mini version is at ejscreenRESTbroker.aspx
 #' @param ipurl fixed ip or domain/URL to try
-#' @param reportstyle EJscreen_SOE_report for the full community profile that was new as of 7/2023,
+#' @param reportstyle EJscreen_SOE_report for the full community profile that was new as of 7/2023, but went down 1/2025,
 #'   or EJSCREEN_report for the older style standard report (which has fewer indicators on it).
 #' @param fips If specified, lon and lat are ignored, and the one fips code must be the
 #'   FIPS code of a blockgroup or tract, or county (5 digits with leading zero)

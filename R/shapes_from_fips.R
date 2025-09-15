@@ -82,6 +82,9 @@ shapes_from_fips <- function(fips,
 
   oktypes <- c("blockgroup", "tract", "city", "county", "state") # NOT block - but maybe we should return at least lat,lon of blocks?
 
+  # in shapes_from_fips() try to either get block bounds via API or substitute a point/circle using blockpoints lat,lon info for block fips ***
+  # or else ensure other functions like map_ejam_plus_shp() can handle an empty geometry row better
+
   suppressWarnings({
     ftype <- fipstype(fips) # NULL or NA or one of oktypes or "block"
   })

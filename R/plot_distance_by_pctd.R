@@ -8,10 +8,10 @@
 #' @details Also see ejamit_compare_distances() for a plot  of several indicators at several distances!
 #'
 #'   This function uses the distance of each Census block from the site in conjunction with
-#'   the block group residential population data, to provide a relatively detailed picture of
+#'   the blockgroup residential population data, to provide a relatively detailed picture of
 #'   how far away residents in each group live. In contrast, the function
 #'   [distance_cdf_by_group_plot()] is based on ejamit()$results_bybg_people,
-#'   which provides only block group resolution information about distance.
+#'   which provides only blockgroup resolution information about distance.
 #'
 #' @param s2b output of [getblocksnearby()], or else can be
 #'   a table of points with lat,lon columns and 1 row per point.
@@ -119,7 +119,7 @@ plot_distance_by_pctd <- function(s2b = NULL, sitenumber = 1, #  NULL,
   if (!("ejam_uniq_id" %in% colnames(s2b)) || !(sitenumber %in% s2b$ejam_uniq_id)) {stop("sitenumber of ", sitenumber, " not found among s2b$ejam_uniq_id values")}
   # limit analysis to this one site and limited radius to view and drop unpopulated blocks
   s2b <- data.table::copy(s2b[ejam_uniq_id == sitenumber & blockwt > 0 & distance <= radius, ])
-  # get the relevant EJSCREEN demog or envt indicator scores, by block group
+  # get the relevant EJSCREEN demog or envt indicator scores, by blockgroup
   s2b <- merge(s2b, blockgroupstats[pop > 0, c(..allvarnames)], all.x = TRUE, all.y = FALSE, by = "bgid")
   # sort by increasing distance
   data.table::setorder(s2b, distance)

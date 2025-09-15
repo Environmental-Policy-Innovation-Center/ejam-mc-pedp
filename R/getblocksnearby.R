@@ -15,9 +15,9 @@
 #'   residents live.
 #'
 #'   Finding which blocks have their internal points in a circle provides
-#'   a way to quickly estimate what fraction of a block group is
+#'   a way to quickly estimate what fraction of a blockgroup is
 #'   inside the circular buffer more accurately and more quickly than
-#'   areal apportionment of block groups would provide.
+#'   areal apportionment of blockgroups would provide.
 #'
 #' @details
 #'  See [ejamit()] for examples.

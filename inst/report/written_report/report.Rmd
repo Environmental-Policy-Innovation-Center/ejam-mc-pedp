@@ -247,14 +247,14 @@ with residential population data based on the Census Bureau's
 `r params$acs_version` American Community Survey (ACS) 5-year summary file, 
 and the corresponding version of Decennial Census
 information on blocks, with recent geographic boundaries and FIPS codes for 
-block groups, tracts, counties, and States.
+blockgroups, tracts, counties, and States.
 
-Demographic and environmental indicators were at block group resolution (or tract level
+Demographic and environmental indicators were at blockgroup resolution (or tract level
 for some indicators such as ambient air pollutant levels or air toxics indicators
 as noted in technical documentation).
 Locations of residential populations were based on Census block points 
 (the highest resolution available from the Census Bureau) 
-and then summarized by block group, then by 
+and then summarized by blockgroup, then by 
 location analyzed, and finally overall across the locations as a whole.
 
 See [EJAM package documentation](https://ejanalysis.org/ejamdocs) for methodology details.
@@ -276,10 +276,10 @@ population as nearby if that point is nearby. The percent of each block
 group's population that is estimated as inside a buffer is based on
 which Census block internal points are included in the buffer, and then
 using a block weight that is the Census 2020 block population as a
-fraction of the parent block group's Census 2020 population (which is
+fraction of the parent blockgroup's Census 2020 population (which is
 not quite the same as the ACS population count). That block weight is a
-fraction of the parent block group, and is used to estimate how many of
-the block groups residents are nearby or in the buffer.
+fraction of the parent blockgroup, and is used to estimate how many of
+the blockgroups residents are nearby or in the buffer.
 
 The only notable differences between the EJSCREEN and EJAM calculations
 of proximity and indicators are the following:
@@ -768,13 +768,13 @@ Residents / conditions ...
 -   ARP / ARPA American Rescue Plan Act
 -   BACT Best Available Control Technology
 -   Benmap (EPA criteria pollutants risk and benefit modeling tool)
--   bg Census Block Group
+-   bg Census blockgroup
 -   BR Biennial Report (under RCRA)
 -   CAA Clean Air Act
 -   CAFOs Concentrated Animal Feeding Operations
 -   CAMD Clean Air Markets Division, USEPA
 -   CARB California Air Resources Board
--   CBG Census Block Group
+-   CBG Census blockgroup
 -   CDR Chemical Data Reporting (TSCA)
 -   CEQ Council on Environmental Quality, Executive Office of the
     President
@@ -810,7 +810,7 @@ Residents / conditions ...
 -   FIFRA Federal Insecticide, Fungicide, and Rodenticide Act
 -   FIP Federal Implementation Plan (CAA program)
 -   FIPS Codes Federal Information Processing Standards codes for
-    geographic locations such as Census block groups
+    geographic locations such as Census blockgroups
 -   FR, FRN Federal Register, FR Notice (but sometimes FR refers to a
     Final Rule)
 -   FRS Facility Registry Service

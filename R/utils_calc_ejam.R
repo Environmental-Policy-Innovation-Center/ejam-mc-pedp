@@ -22,7 +22,7 @@
 #' @return data.frame of calculated variables one row per bg row
 #' @examples
 #' \dontrun{
-#' ### example using just 10 block groups from 1 county in Delaware
+#' ### example using just 10 blockgroups from 1 county in Delaware
 #'
 #'  c1 <- fips2countyname(fips_counties_from_state_abbrev('DE'), includestate = FALSE)[1]
 #'  bgdf = data.frame(EJAM::blockgroupstats[ST == "DE" & countyname == c1, ])[1:10, ]
@@ -130,16 +130,16 @@ calc_ejam <- function(bg,
 #' @param mydf data.frame of indicators or variables to use
 #' @param formulas text strings of formulas
 #' @param keep useful if some of the formulas are just interim steps
-#'   creating evanescent variables created only for use in later formulas 
+#'   creating evanescent variables created only for use in later formulas
 #'   and not needed after that
-#' @return data.frame of results, but 
+#' @return data.frame of results, but
 #'   if mydf was a data.table, returns a data.table
 #'
 calc_byformula <- function(mydf, formulas = NULL, keep = formula_varname(formulas)) {
 
 
   # DRAFT WORK NOT COMPLETED
-  
+
   if (is.data.table(mydf)) {
     wasdt = TRUE
     setDF(mydf)
@@ -147,7 +147,7 @@ calc_byformula <- function(mydf, formulas = NULL, keep = formula_varname(formula
   } else {
     wasdt = FALSE
   }
-    
+
   if (is.null(formulas)) {
     stop("no formulas specified or found, so no calculation done")
   }
@@ -221,7 +221,7 @@ calc_byformula <- function(mydf, formulas = NULL, keep = formula_varname(formula
   if (wasdt) {
     setDT(outdf)
   }
-  
+
   return(outdf)
 }
 ################################################################ #

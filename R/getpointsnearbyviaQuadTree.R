@@ -3,7 +3,7 @@
 #' @description Given a set of frompoints (e.g., facilities or blocks) and a specified radius in miles,
 #'   this function quickly finds all the topoints (e.g., blocks or facilities) near each point.
 #'   If from and to are facilities and census blocks, respectively, this can be used to aggregate
-#'   over block groups near a facility for an EJAM analysis. But if it is used to define from
+#'   over blockgroups near a facility for an EJAM analysis. But if it is used to define from
 #'   as blocks and to as facilities, it finds all facilities near each block, which is how
 #'   proxistat works to create proximity indicators.
 #'
@@ -59,9 +59,9 @@ getpointsnearbyviaQuadTree  <- function(frompoints, radius = 3, maxradius = 31.0
                                         quaddatatable,
                                         updateProgress = NULL) {
 
-  
-  
-  
+
+
+
   if (!is(quadtree,"QuadTree")) {
     if (shiny::isRunning()) {
       warning('quadtree must be an index created with indexpoints(pts), from SearchTrees package with treeType = "quad" and dataType = "point"')

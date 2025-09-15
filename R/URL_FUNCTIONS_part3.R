@@ -551,7 +551,7 @@ url_to_any_rest_services_ejscreen_ejquery <- function(servicenumber=7) {
 
   baseurl <- paste0(
     'https://geopub.epa.gov/arcgis/rest/services/ejscreen/ejquery/MapServer/',
-    servicenumber,  # 7 is ACS 2019 block groups
+    servicenumber,  # 7 is ACS 2019 blockgroups
     '/query?'
   )
   queryurl <- paste0(
@@ -694,7 +694,7 @@ url_to_get_ACS2019_rest_services_ejscreen_ejquery_MapServer_7 <- function(
 
   baseurl <- paste0(
     'https://geopub.epa.gov/arcgis/rest/services/ejscreen/ejquery/MapServer/',
-    7,  # servicenumber 7 is ACS 2019 block groups
+    7,  # servicenumber 7 is ACS 2019 blockgroups
     '/query?'
   )
   queryurl <- paste0(

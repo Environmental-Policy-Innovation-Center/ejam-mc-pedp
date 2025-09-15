@@ -9,7 +9,7 @@
 -   Restored some text: "EJ Indexes" now once again refers to what were called "Summary Indexes" in early 2025 through July 2025. "Supplementary EJ Indexes" is similarly used once again.
 -   Did not restore all old text, at least not yet: Other language related to "environmental justice" was edited in early 2025 at EPA in response to an Executive Order, but has not been changed back to its original language even in this non-EPA version of the package. For anyone interested, notes listing those changes were archived in a file saved as "EJAM/data-raw/0_generic_terms_notes.R".
 -   Made "EJSCREEN" all-caps everywhere (not "EJScreen")
--   Edited descriptions of some language-related indicators (to be shorter and more consistent).
+-   Edited descriptions of some language-related indicators (to be shorter and more consistent), changed "block group" to "blockgroup", etc.
 
 ### Summary Report and Tables of Sites: Header, Footer, and Links to 1-Site Reports
 

@@ -1,6 +1,6 @@
 
 #########   ONLY NEEDS TO BE DONE AFTER blockpoints or blockwts changes
-## i.e., if there are new FIPS codes or boundaries for any block groups in US
+## i.e., if there are new FIPS codes or boundaries for any blockgroups in US
 
 
 #########     THIS IS ONLY A DRAFT -- NEEDS CLEANUP BEFORE USED AGAIN
@@ -21,7 +21,7 @@ bgpts_blocks <- copy(blockpoints)
 bgpts_blocks[ , bgid    := blockwts$bgid]
 bgpts_blocks[ , blockwt := blockwts$blockwt]
 
-# Find popwtd centroid lat lon in each block group ####
+# Find popwtd centroid lat lon in each blockgroup ####
 ## but note weight is zero sometimes.
 # > sum(bgpts_blocks$blockwt == 0)
 # [1] 2368443
@@ -38,12 +38,12 @@ rm(bgpts_blocks)
 stopifnot( all.equal(bgpts$bgid, bgid2fips$bgid) )
 bgpts[ , bgfips := bgid2fips$bgfips]
 
-############################################# # 
+############################################# #
 #  THE  v2.32 block table from EJSCREEN team with weights already had PR at least,
 
 ## bgid2fips has only 50 states plus DC and PR, but not AS GU MP VI, which is fine:
 length(fips2state_abbrev(rownames(table(substr(bgid2fips$bgfips,1,2)))))
-## AS GU MP VI were in blockgroupstats but NOT in bgpts! will drop from blockgroupstats. 
+## AS GU MP VI were in blockgroupstats but NOT in bgpts! will drop from blockgroupstats.
 # unique(blockgroupstats[, .(statename, island = is.island(ST), bgcount = .N), by = "ST"])
 ## ST abbrev is in blockgroupstats and will not be stored in bgpts or bgid2fips etc.
 # blockid2fips[, ST := fips2state_abbrev(substr(blockfips,1,2))][,.N,by = "ST"]
@@ -56,16 +56,16 @@ length(fips2state_abbrev(rownames(table(substr(bgid2fips$bgfips,1,2)))))
 ## [39] "PA"   "PR"   "RI" "SC" "SD" "TN" "TX" "UT" "VA" "VT" "WA" "WI" "WV" "WY"
 # setdiff(names(stcounts), stateinfo$ST)
 ## same
-# 
+#
 ## if using downloaded file,
 ## PR, but not "AS" "GU" "MP" "VI", were found in downloaded census2020 block table ***
 
-############################################# # 
+############################################# #
 
-## view those block group points on a map (plot only a subset which is enough)
+## view those blockgroup points on a map (plot only a subset which is enough)
 # sam <- sample(seq_along(bgpts$bgid),5000)
 # plot(x = bgpts$lon[sam], y = bgpts$lat[sam], pch = '.')
-# 
+#
 ## view one state, florida, where 12 are the 1st 2 digits of the FIPS:
 # bgpts[bgid2fips[substr(bgfips,1,2) == '12', ], on = 'bgid']
 # xx <- '12'
@@ -73,7 +73,7 @@ length(fips2state_abbrev(rownames(table(substr(bgid2fips$bgfips,1,2)))))
 # plot(mystate, pch = '.')
 # rm(mystate, xx)
 
-############################################# # 
+############################################# #
 ## How blockcounts can be done:
 
 ## need  data.table pkg loaded
@@ -93,25 +93,25 @@ bgpts[ , blockcount := bg_blockcounts2$blockcount]
 rm(bg_blockcounts2)
 # dim(bgpts)
 # 242355    5
-############################################# # 
+############################################# #
 
 # add metadata ####
-# EJAM :::  metadata_add(), 
+# EJAM :::  metadata_add(),
 # latest source version of this internal function is available after devtools::load_all()
 
 bgpts <- metadata_add(bgpts)
 
-############################################# # 
+############################################# #
 
 # save for EJAM package ####
 
 usethis::use_data(bgpts, overwrite = TRUE)
 
 # documentation ####
-dataset_documenter('bgpts', 
-  title = "bgpts (DATA) lat lon of popwtd center of blockgroup, and count of blocks per block group",
-  description = "This is just a list of US block groups and how many blocks are in each. It also has the lat and lon roughly of each blockgroup", 
-  details = 'The point used for each bg is the Census 2020 population weighted mean of the internal points of the blocks. It gives an approximation of where people live and where each bg is, which is useful for some situations. Has all US States, DC, PR, but not  "AS" "GU" "MP" "VI" (and not U.S. Minor Outlying Islands FIPS 74 UM)', 
+dataset_documenter('bgpts',
+  title = "bgpts (DATA) lat lon of popwtd center of blockgroup, and count of blocks per blockgroup",
+  description = "This is just a list of US blockgroups and how many blocks are in each. It also has the lat and lon roughly of each blockgroup",
+  details = 'The point used for each blockgroup. is the Census 2020 population weighted mean of the internal points of the blocks in the blockgroup. It gives an approximation of where people live and where each bg is, which is useful for some situations. Has all US States, DC, PR, but not  "AS" "GU" "MP" "VI" (and not U.S. Minor Outlying Islands FIPS 74 UM)',
 )
 
-############################################# # 
+############################################# #

@@ -784,7 +784,7 @@ app_ui  <- function(request) {
                                                    selectInput(inputId = 'in_areas_where',
                                                                label = 'Describe the surrounding area',
                                                                choices = c('in areas with',
-                                                                           'where','in block groups where')
+                                                                           'where','in blockgroups where')
                                                    )
                                             ),
                                             column(4,

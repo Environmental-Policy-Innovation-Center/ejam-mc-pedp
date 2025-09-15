@@ -19,10 +19,10 @@
 #     name2fips() and names2fips()  # inconsistent naming, but useful aliases
 #          fips_from_name()  # same as name2fips()
 #    fips_state_from_state_abbrev()
-#    fips_state_from_statename()     # should it be statename or state_name
-# fips_counties_from_statefips(   )  # should it be statefips or state_fips
+#    fips_state_from_statename()
+# fips_counties_from_statefips(   )
 # fips_counties_from_state_abbrev()
-# fips_counties_from_statename(   )  # should it be statename or state_name
+# fips_counties_from_statename(   )
 # fips_counties_from_countyname()
 # fips_counties_from_countynamefull()  internal helper
 #       fips_bgs_in_fips()
@@ -1710,7 +1710,6 @@ fips_st2eparegion <- function(stfips) {
 #'
 #' @export
 #'
-#'
 fips2stateabbrev <- function(fips) {
 
   abb <- stateinfo2$ST[match(substr(fips_lead_zero(fips), 1, 2), stateinfo2$FIPS.ST)] # using match is ok
@@ -1723,36 +1722,19 @@ fips2stateabbrev <- function(fips) {
   }
   return(x)
 }
-############################################################################# #
-
+######################################### #
 # this function name was inconsistent so now will try to shift to fips2statefips()
 
 fips2state_abbrev <- function(fips) {
-
-  abb <- stateinfo2$ST[match(substr(fips_lead_zero(fips), 1, 2), stateinfo2$FIPS.ST)] # using match is ok
-  abb[abb == "US"] <- NA
-  # confirm returns same length as input, and check how it handles nonmatches
-  x = abb
-  if (anyNA(x)) {
-    howmanyna = sum(is.na(x))
-    warning("NA returned for ", howmanyna," values that failed to match")
-  }
-  return(x)
+  fips2stateabbrev(fips=fips)
 }
 ############################################################################# #
-
 # this function name was inconsistent so now will try to shift to fips2statefips()
 
 fips2state_fips <- function(fips) {
-
-  stfips <- substr(fips_lead_zero(fips), 1, 2)
-  if (anyNA(stfips)) {
-    howmanyna = sum(is.na(stfips))
-    warning(howmanyna, " fips could not be converted to state fips - returning NA for those")
-  }
-  return(stfips)
+  fips2statefips(fips=fips)
 }
-############################################################################# #
+######################################### #
 
 #' FIPS - Get FIPS codes of the States CONTAINING the given census units (of any type)
 #'
@@ -1762,7 +1744,7 @@ fips2state_fips <- function(fips) {
 #' @param fips vector of FIPS
 #' @return vector of State FIPS 2 characters each
 #'
-#' @inherit fips2state_abbrev examples
+#' @inherit fips2stateabbrev examples
 #'
 #' @export
 #'
@@ -1898,7 +1880,7 @@ fips2blockgroupname <- function(fips, ftype = 'blockgroup', prefix = "") {
   # but adds a default prefix to each fips
 
   # in case any block fips were provided, it reports name of parent Census unit required
-  fips <- substr(fips_lead_zero(fips), 1, 12) # #########  block group is 12 digits once leading zero included
+  fips <- substr(fips_lead_zero(fips), 1, 12) # #########  blockgroup is 12 digits once leading zero included
   fips[!(fipstype(fips) %in% "blockgroup")] <- NA
 
   if (missing(prefix)) {
