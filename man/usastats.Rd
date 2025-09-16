@@ -12,7 +12,7 @@ usastats
 }
 \description{
 data.frame of 100 percentiles and means (about 100 rows)
-in the USA overall, across all locations (e.g., block groups in \link{blockgroupstats})
+in the USA overall, across all locations (e.g., blockgroups in \link{blockgroupstats})
 for a set of indicators such as percent low income.
 Each column is one indicator (or specifies the percentile).
 

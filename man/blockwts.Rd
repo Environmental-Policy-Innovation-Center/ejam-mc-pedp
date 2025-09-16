@@ -10,7 +10,7 @@ blockwts (DATA) population weights of Census blocks
 For documentation on EJSCREEN, see \href{https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen}{EJSCREEN documentation}
 
 blockwts is a table of all census blocks, with the weights reflecting
-what fraction of the parent block group census 2020 population lived in
+what fraction of the parent blockgroup census 2020 population lived in
 that block.  The weights are used to aggregate block-level data to blockgroup,
 for cases where only some of the blockgroup is in a circular buffer or polygon.
 
@@ -18,7 +18,7 @@ It also has a column
 called \code{blockid} that can join it to other block datasets.
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{  dataload_dynamic('blockwts')
-  
+
   names(blockwts)
   dim(blockwts)
 }\if{html}{\out{</div>}}

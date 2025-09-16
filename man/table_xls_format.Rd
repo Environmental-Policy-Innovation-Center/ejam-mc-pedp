@@ -57,7 +57,7 @@ but if entire output of ejamit() is passed as if it were overall, function figur
 
 \item{formatted}{optional table to save in one tab, from ejamit()$results_overall, EJAM analysis overall in different format}
 
-\item{bybg}{Optional large table of details of each block group that is only needed to analyze distances by group.}
+\item{bybg}{Optional large table of details of each blockgroup that is only needed to analyze distances by group.}
 
 \item{sitetype}{normally would be like ejamit()$sitetype}
 

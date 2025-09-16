@@ -2,7 +2,7 @@
 % Please edit documentation in R/PROXIMITY_FUNCTIONS.R
 \name{proxistat}
 \alias{proxistat}
-\title{DRAFT - Create a custom proximity score for every block group, representing count and proximity of specified points
+\title{DRAFT - Create a custom proximity score for every blockgroup, representing count and proximity of specified points
 Indicator of proximity of residents in each US blockgroup to a custom set of facilities or sites}
 \usage{
 proxistat(
@@ -27,7 +27,7 @@ such as \link{blockpoints}, the centroid/internal point of every block in the US
 a data.table of Census block points lat lon, representing where residents are,
 for the entire US (or at least a whole State, for example -- it should be all blocks for which you need a proximity score).
 The score is calculated for a given block based on all topoints near the block,
-and then summarized over all blocks in a given block group to create a score for that block group.}
+and then summarized over all blocks in a given blockgroup to create a score for that blockgroup.}
 
 \item{blocks_per_batch}{number of blocks to process in each batch, defaults to 1000}
 
@@ -54,10 +54,10 @@ built during use of EJAM package. create_quaddata()}
 created by create_quaddata() utility, and used to create quadtree}
 }
 \value{
-data.table of block groups, with proximityscore, bgfips, lat, lon, etc.
+data.table of blockgroups, with proximityscore, bgfips, lat, lon, etc.
 }
 \description{
-DRAFT - Create a custom proximity score for every block group, representing count and proximity of specified points
+DRAFT - Create a custom proximity score for every blockgroup, representing count and proximity of specified points
 Indicator of proximity of residents in each US blockgroup to a custom set of facilities or sites
 }
 \details{
@@ -82,7 +82,7 @@ like the TSDF or RMP scores.
 Any custom user-provided set of points can be turned into a proximity score,
 such as locations of all industrial sites of a certain type,
 or all grocery stores, or all schools. A proximity score can be
-created for all blocks and block groups in the US (or just one State or Region).
+created for all blocks and blockgroups in the US (or just one State or Region).
 Then the proximity scores can be analyzed in a tool like EJAM, just as the
 existing pre-calculated proximity scores are analyzed to represent the
 number of nearby hazardous waste treatment storage and disposal facilities,

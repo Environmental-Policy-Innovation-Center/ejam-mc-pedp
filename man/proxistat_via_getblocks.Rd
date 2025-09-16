@@ -2,7 +2,7 @@
 % Please edit documentation in R/PROXIMITY_FUNCTIONS.R
 \name{proxistat_via_getblocks}
 \alias{proxistat_via_getblocks}
-\title{DRAFT - Create a custom proximity score for every block group, representing count and proximity of specified points
+\title{DRAFT - Create a custom proximity score for every blockgroup, representing count and proximity of specified points
 Indicator of proximity of residents in each US blockgroup to a custom set of facilities or sites}
 \usage{
 proxistat_via_getblocks(pts, countradius = 5, maxradius = 31)
@@ -23,10 +23,10 @@ so 1000 km is 1000 / 1.609344 = 621.3712 miles.
 However, the exact min value implies 1337.288 kilometers, or 830.9523 miles?}
 }
 \value{
-data.table of block groups, with proximityscore, bgfips, lat, lon, etc.
+data.table of blockgroups, with proximityscore, bgfips, lat, lon, etc.
 }
 \description{
-DRAFT - Create a custom proximity score for every block group, representing count and proximity of specified points
+DRAFT - Create a custom proximity score for every blockgroup, representing count and proximity of specified points
 Indicator of proximity of residents in each US blockgroup to a custom set of facilities or sites
 }
 \details{

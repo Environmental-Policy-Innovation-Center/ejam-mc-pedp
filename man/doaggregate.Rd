@@ -105,7 +105,7 @@ list with named elements:
 aggregated results for all unique residents.
 \item \strong{\code{results_bysite}}   results for individual sites (buffers) - a data.table of results,
 one row per ejam_uniq_id, one column per indicator
-\item \strong{results_bybg_people}  results for each block group, to allow for showing the distribution of each
+\item \strong{results_bybg_people}  results for each blockgroup, to allow for showing the distribution of each
 indicator across everyone within each residential population group.
 \item \strong{longnames}  descriptive long names for the indicators in the above outputs
 \item \strong{count_of_blocks_near_multiple_sites}  additional detail
@@ -120,7 +120,7 @@ Used by ejamit() and the shiny app to summarize blockgroups scores at each site 
 \code{\link[=getblocksnearby]{getblocksnearby()}} and doaggregate() are the two key functions that run \code{\link[=ejamit]{ejamit()}}.
 \code{doaggregate()} takes a set of sites like facilities and the
 set of blocks that are near each,
-combines those with indicator scores for block groups, and
+combines those with indicator scores for blockgroups, and
 aggregates the numbers within each place and across all overall.
 
 For all examples, see \code{\link[=getblocksnearbyviaQuadTree]{getblocksnearbyviaQuadTree()}}
@@ -163,7 +163,7 @@ The identification of nearby residents is currently done in a way that includes 
 This is taken from the EJSCREEN block weights file, but can also be independently calculated.
 
 The summary or aggregation or "rollup" within the buffer is done by calculating the
-population-weighted average block group score among all the people residing in the buffer.
+population-weighted average blockgroup score among all the people residing in the buffer.
 The weighting is by population count for variables that are fractions of population,
 but other denominators and weights (e.g., households count) are used as appropriate,
 as explained in EJSCREEN technical documentation on the formulas, and
@@ -178,8 +178,8 @@ and that fraction is calculated as the fraction of the blockgroup's decennial ce
 that is in the census blocks inside the buffer.
 
 A given block is considered entirely inside or entirely outside the buffer,
-and those are used to more accurately estimate what fraction of a given block group's
-population is inside the buffer. This is more accurate and faster than areal apportionment of block groups.
+and those are used to more accurately estimate what fraction of a given blockgroup's
+population is inside the buffer. This is more accurate and faster than areal apportionment of blockgroups.
 Census blocks are generally so small relative to typical buffers that this is very accurate -
 it is least accurate if a very small buffer distance is specified
 in an extremely low density rural area where a block can be geographically large.

@@ -160,7 +160,7 @@ dim(testoutput_ejamit_10pts_1miles$results_summarized$keyindicators)
 \item \strong{results_overall}  a data.table with one row that provides the summary across all sites, the aggregated results for all unique residents.
 \item \strong{results_bysite}   results for individual sites (buffers) - a data.table of results,
 one row per ejam_uniq_id (i.e., each site analyzed), one column per indicator
-\item \strong{results_bybg_people}  results for each block group, to allow for
+\item \strong{results_bybg_people}  results for each blockgroup, to allow for
 showing the distribution of each
 indicator across everyone, including the distribution within a
 single residential population group, for example. This table is essential

@@ -4,12 +4,19 @@
 \alias{metadata_add}
 \title{helper function for package to set metadata attributes of a dataset, used by scripts in /data-raw/}
 \usage{
-metadata_add(x, update_date_saved_in_package = TRUE)
+metadata_add(
+  x,
+  update_date_saved_in_package = TRUE,
+  update_ejam_package_version = TRUE
+)
 }
 \arguments{
 \item{x}{dataset (or any object) whose metadata (stored as attributes) you want to update or create
-EJAM, EJSCREEN, and other dataset versions and release dates are tracked in DESCRIPTION
-@param update_date_saved_in_package set to FALSE to avoid changing this attribute}
+EJAM, EJSCREEN, and other dataset versions and release dates are tracked in DESCRIPTION}
+
+\item{update_date_saved_in_package}{can set to FALSE to avoid changing this attribute}
+
+\item{update_ejam_package_version}{can set to FALSE to avoid changing this attribute}
 }
 \value{
 returns x but with new or altered attributes

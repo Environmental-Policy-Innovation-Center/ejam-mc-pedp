@@ -2,7 +2,7 @@
 % Please edit documentation in R/acs_bybg.R
 \name{acs_bybg}
 \alias{acs_bybg}
-\title{download ACS 5year data from Census API, at block group resolution (slowly if for entire US)}
+\title{download ACS 5year data from Census API, at blockgroup resolution (slowly if for entire US)}
 \usage{
 acs_bybg(
   variables = c(pop = "B01001_001"),
@@ -30,7 +30,7 @@ acs_bybg(
 
 \item{table}{see get_acs from tidycensus package.
 
-EJSCREEN-relevant key tables at block group resolution include these:
+EJSCREEN-relevant key tables at blockgroup resolution include these:
 acstabs <- c("B01001", "B03002", "B15002", "C16002", "C17002", "B25034", "B23025")
 and at tract resolution:   "B18101"}
 
@@ -61,7 +61,7 @@ the helper function in the EJAM package called \code{\link[=acsendyear]{acsendye
 
 \item{show_call}{see get_acs from tidycensus package}
 
-\item{geography}{"block group"}
+\item{geography}{"block group" (note this needs the space between words)}
 
 \item{dropname}{whether to drop the column called NAME}
 
@@ -71,7 +71,7 @@ the helper function in the EJAM package called \code{\link[=acsendyear]{acsendye
 data.table (not tibble, and not just a data.frame)
 }
 \description{
-download ACS 5year data from Census API, at block group resolution (slowly if for entire US)
+download ACS 5year data from Census API, at blockgroup resolution (slowly if for entire US)
 }
 \details{
 Probably requires \href{https://api.census.gov/data/key_signup.html}{getting and specifying an API key for Census Bureau} ! (at least if query is large).
@@ -134,7 +134,7 @@ dim(newvars)
 newvars
 newvars[ST == "DC", ]
 
-## Calculate a new indicator for each block group, using ACS data
+## Calculate a new indicator for each blockgroup, using ACS data
 
 mystates = c("DC", 'RI')
 newvars <- acs_bybg(variables = c("B01001_001", paste0("B01001_0", 31:39)),

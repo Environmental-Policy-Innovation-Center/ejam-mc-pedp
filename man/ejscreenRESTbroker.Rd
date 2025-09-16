@@ -48,7 +48,7 @@ and old style/mini version is at ejscreenRESTbroker.aspx}
 
 \item{f}{pjson for results in JSON format, or report for the URL of the pdf report}
 
-\item{reportstyle}{EJscreen_SOE_report for the full community profile that was new as of 7/2023,
+\item{reportstyle}{EJscreen_SOE_report for the full community profile that was new as of 7/2023, but went down 1/2025,
 or EJSCREEN_report for the older style standard report (which has fewer indicators on it).}
 }
 \value{

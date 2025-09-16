@@ -48,20 +48,20 @@ These are some key column names in the \link{map_headernames} table:
 \item "acsname" (aka "acs", as found in a ACS data file internally used by EJSCREEN, containing all the extra residential population groups and other indicators not stored in the CSV files on the EJSCREEN FTP site)
 \item "DEJ" (whether the indicator is residential population, environmental, etc.)
 \item "varlist" (which group of names is this variable in, such as "names_d", "names_d_subgroups", "names_d_state_pctile", etc.)
-\item "calculation_type" (how it should be aggregated over block groups, such as "wtdmean", "sum of counts", etc.)
+\item "calculation_type" (how it should be aggregated over blockgroups, such as "wtdmean", "sum of counts", etc.)
 \item "denominator" (the weight to use in aggregating as a wtdmean, normally a count variable that is the universe for a percentage, such as "pop", "hhlds", etc.)
 }
 }
 \examples{
  # see package tests
-  
+
  names_d
  namesbyvarlist('names_d')
  x = varinfo("pctlowinc")
  x = varinfo("pcthisp")
- 
 
- # see the different names for the same variable, 
+
+ # see the different names for the same variable,
  # and see it is not in the csv tables on the FTP site
  varinfo("pcthisp", c("csvname", "acsname", "apiname"))
 
@@ -72,13 +72,13 @@ These are some key column names in the \link{map_headernames} table:
  fixcolnames(c("RAW_D_INCOME", "S_D_LIFEEXP"), newtype = "longname")
 
  addmargins(table(map_headernames$vartype, map_headernames$DEJ))
-  
+
   # the columns "newsort" and "reportsort" provide useful sort orders
   x <- map_headernames$rname[map_headernames$varlist == "names_d"]
-  # same as 
-  
-  print("original order"); print(x) 
-  x <-  sample(x, length(x), replace = FALSE)   
+  # same as
+
+  print("original order"); print(x)
+  x <-  sample(x, length(x), replace = FALSE)
   print("out of order"); print(x)
   print("fixed order")
   x[ order(fixcolnames(x, oldtype = "r", newtype = "newsort")) ]

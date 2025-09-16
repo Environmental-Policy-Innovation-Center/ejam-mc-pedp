@@ -53,10 +53,10 @@ for a single population group.
 Also see ejamit_compare_distances() for a plot  of several indicators at several distances!
 
 This function uses the distance of each Census block from the site in conjunction with
-the block group residential population data, to provide a relatively detailed picture of
+the blockgroup residential population data, to provide a relatively detailed picture of
 how far away residents in each group live. In contrast, the function
 \code{\link[=distance_cdf_by_group_plot]{distance_cdf_by_group_plot()}} is based on ejamit()$results_bybg_people,
-which provides only block group resolution information about distance.
+which provides only blockgroup resolution information about distance.
 }
 \examples{
 

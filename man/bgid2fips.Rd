@@ -2,20 +2,20 @@
 % Please edit documentation in R/data_bgid2fips.R
 \name{bgid2fips}
 \alias{bgid2fips}
-\title{bgid2fips (DATA) Census FIPS codes of block groups}
+\title{bgid2fips (DATA) Census FIPS codes of blockgroups}
 \description{
-bgid2fips (DATA) Census FIPS codes of block groups
+bgid2fips (DATA) Census FIPS codes of blockgroups
 }
 \details{
 For documentation on EJSCREEN, see \href{https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen}{EJSCREEN documentation}
 
-bgid2fips is a table of all census block groups, with their FIPS codes.
+bgid2fips is a table of all census blockgroups, with their FIPS codes.
 
 It also has a column
 called \code{blockid} that can join it to other block datasets.
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{  dataload_dynamic('bgid2fips')
-  
+
   names(bgid2fips)
   dim(bgid2fips)
 }\if{html}{\out{</div>}}

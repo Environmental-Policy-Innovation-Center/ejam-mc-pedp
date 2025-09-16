@@ -3,7 +3,7 @@
 \docType{data}
 \name{bgej}
 \alias{bgej}
-\title{bgej (DATA) Summary Indexes for Census block groups}
+\title{bgej (DATA) Summary Indexes for Census blockgroups}
 \description{
 bgej is a table of all blockgroups, with the raw scores of the Summary Indexes
 and Supplemental Summary Indexes for all the environmental indicators.

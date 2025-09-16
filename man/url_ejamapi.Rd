@@ -15,7 +15,7 @@ url_ejamapi(
   as_html = FALSE,
   ifna = "https://ejanalysis.com",
   baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?",
-  sitenumber = "",
+  sitenumber = "each",
   ...
 )
 }
@@ -39,17 +39,32 @@ which might get too long for encoding in a URL for the API using GET}
 
 \item{baseurl}{do not change unless endpoint actually changed}
 
-\item{sitenumber}{same as in \code{\link[=ejam2report]{ejam2report()}}, so NULL or "" means an overall
-summary report (assuming >1 sites were provided)
-while a number like 3 means a report based on the third site
-found in the inputs (third point or third fips or third polygon).
-Not specifying sitenumber and only providing 1 site will create a 1-site report.}
+\item{sitenumber}{\itemize{
+\item "each" (or -1) means return each site's URL
+\item "overall" (or 0) means return one URL, combining all sites
+\item N (a number > 0) means return just the Nth site's URL
+}
+
+Like with other url_xyz functions, the default is to output
+a vector of URLs, one per site. The default value for sitenumber is
+"each" or -1 which means we want one url for each site.
+Note there is no comparable value of sitenumber in the ejam2report() or ejam2map() or similar functions,
+which never return a vector of reports, maps, etc. Getting a vector of 1 per site is useful mainly for
+the url_xyz functions like url_ejamapi().
+
+Like the sitenumber parameter in \code{\link[=ejam2report]{ejam2report()}},
+a value of NULL or 0 or "" or "overall" in url_ejamapi() means
+a single URL is returned that requests one
+overall summary report (assuming >1 sites were provided).
+
+Specifying sitenumber as a number like 3 means a report based on the third site
+found in the inputs (third point or third fips or third polygon).}
 
 \item{...}{a named list of other query parameters passed to the API,
 to allow for expansion of allowed parameters}
 }
 \value{
-vector of character string URLs
+vector of character string URLs -- see details on sitenumber parameter
 }
 \description{
 Get URL(s) of HTML summary reports for use with EJAM-API
@@ -66,16 +81,28 @@ app but has url-encoded parameters that are app settings, such as sitepoints, ra
 }
 }
 \examples{
+
  pts = data.frame(lat=37.64122, lon=-122.41065)
- pts = data.frame(lat = c(37.64122, 43.92249), lon = c(-122.41065, -72.663705))
- x = url_ejamapi(sitepoints = pts)
- x = url_ejamapi(testpoints_10, radius = 3.1)
- x = url_ejamapi(system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM"))
+ pts2 = data.frame(lat = c(37.64122, 43.92249), lon = c(-122.41065, -72.663705))
+ pts10 = testpoints_10
+ pts_fname = system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM")
 
+  # vector of 1-site report URLs
+ x = url_ejamapi(pts_fname)
+ x = url_ejamapi(sitepoints = pts2)
+ x_bysite = url_ejamapi(pts10, radius = 3.1, sitenumber = "each")
+
+ ## 1 summary report URL - may not be implemented yet
+ # x_overall = url_ejamapi(pts10, radius = 3.1, sitenumber = "overall")
+
+ # FIPS Census units
  y = url_ejamapi(fips = c("050014801001", "050014802001"))
- y = url_ejamapi(fips = testinput_fips_mix)
+ ## blockgroups may not be implemented yet
+ # y = url_ejamapi(fips = testinput_fips_mix)
 
- z = url_ejamapi(shapefile = testinput_shapes_2[2, c("geometry", "FIPS")])
+ # Polygons
+ shp = testinput_shapes_2[2, c("geometry", "FIPS", "NAME")]
+ z = url_ejamapi(shapefile = shp)
 
  \dontrun{
  browseURL("https://ejamapi-84652557241.us-central1.run.app/report?lat=33&lon=-112&buffer=4")
@@ -84,5 +111,6 @@ app but has url-encoded parameters that are app settings, such as sitepoints, ra
  browseURL(y[1])
  browseURL(z[1])
 }
+
 
 }

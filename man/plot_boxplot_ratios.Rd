@@ -68,7 +68,7 @@ e.g., 20\% of these sites have scores at least in the top 5\% of US scores
 \itemize{
 \item leaving aside statistical significance
 ie whether this could be by chance if sites were randomly picked
-from US block groups or people's bg scores)
+from US blockgroups or people's bg scores)
 }
 }
 \examples{

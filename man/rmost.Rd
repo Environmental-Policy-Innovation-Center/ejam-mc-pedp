@@ -7,7 +7,7 @@
 rmost(
   notremove = c("blockwts", "blockpoints", "blockid2fips", "quaddata", "localtree",
     "bgej", "bgid2fips", "frs", "frs_by_programid", "frs_by_naics", "frs_by_sic",
-    "frs_by_mact")
+    "frs_by_mact", "global_default_package")
 )
 }
 \description{
