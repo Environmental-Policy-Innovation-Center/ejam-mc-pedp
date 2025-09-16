@@ -437,6 +437,9 @@ global_defaults_shiny <- list(
 
   ## ------------------------ Short report options ####
 
+  ## TO TURN OFF THE LOGO in the REPORT HEAADER
+  report_logo = "",
+  ## but to  use the logo, should be left as-set in global_defaults_package.R
 
   default_standard_analysis_title = 'Summary of Analysis', # Default title to show on each short report
   default_plotkind_1pager = "bar",  #    Bar = "bar", Box = "box", Ridgeline = "ridgeline"

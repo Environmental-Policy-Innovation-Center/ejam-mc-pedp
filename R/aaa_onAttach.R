@@ -30,33 +30,55 @@
   # startup msg shown at library(EJAM) or when reinstalling from source ####
   packageStartupMessage("Now running .onAttach(), as part of attaching the EJAM package.")
 
-
+  #################### #
+  packageStartupMessage("Reading global_defaults_package.R")
   # get location of logo etc. so that ejam2report() using generate_html_header() can find logo  even without launching shiny app
+  ## notloaded <- inherits(try( path.package("EJAM") , silent = TRUE), "try-error")
+  notloaded_and_notinstalled <- inherits(try( find.package("EJAM") , silent = TRUE), "try-error")
+  if (notloaded_and_notinstalled) {
+    cat("EJAM package must be installed or at least loaded from source already for .onAttach() to be able to use system.file(package = 'EJAM') \n")
+    # try using local source package folders
+    localpath <- file.path('./inst/global_defaults_package.R')
+    if (!file.exists(localpath)) {
+      cat("Cannot find", localpath, "to create global_defaults_package object\n")
+    } else {
+      junk = try(source(localpath))
+      if (inherits(junk, "try-error")) {
+        cat("Cannot source", localpath, "to create global_defaults_package object\n")
+      }
+    }
+  } else {
   localpath <- system.file("global_defaults_package.R", package = "EJAM")
   # if you have just used devtools::load_all(), then this will find and try to the local source version of the global_defaults_package.R
   # if you have not done that, this will find and use the installed version.
   # It will source the file in the global environment by using local=FALSE
   # BUT, when this tries to source that .R file during .onAttach(), R has not yet attached all the .R files ?
+  if (!file.exists(localpath)) {
+    cat("EJAM package is installed or loaded but cannot find file at", localpath, "\n")
+  } else {
+    packageStartupMessage("Trying to source a local source code copy from ", localpath, " \n")
+  }
   junk1 = try({
     source(localpath, local = FALSE)
     }, silent = TRUE)
-  if (inherits(junk1, "try-error")) {
+  if (file.exists(localpath) && inherits(junk1, "try-error")) {
     cat("in .onAttach() -- Unable to do
     source(system.file('global_defaults_package.R', package = 'EJAM')
     ")
-    cat("Trying to source a local source code copy from inst/global_defaults_package.R \n")
     # localpath <- system.file('inst/global_defaults_package.R', package = 'EJAM') # system.file() does not like starting with inst/
     localpath <- file.path(dirname(system.file(package = "EJAM")), "inst", "global_defaults_package.R")
+    cat("Trying to source a local source code copy from ", localpath, " \n")
     junk2 = try(source(localpath), silent = TRUE)
     if (inherits(junk2, "try-error")) {
+      cat("Cannot source", localpath, "to create global_defaults_package object\n")
       warning(paste0("
-    Error in .onAttach() -- Unable to do
+    Problem in .onAttach() -- Unable to create global_defaults_package object because cannot do
        source(system.file('global_defaults_package.R', package = 'EJAM'))
        or
        source(system.file('inst/global_defaults_package.R', package = 'EJAM')
 
     ", junk2, "
-    You may need to reinstall the package by building from source.
+    Try (re)installing the package from source -- see guide on installing.
     Some functions are referred to in the file global_defaults_package.R
     while the package is loaded as with devtools::load_all(),
     but if those functions are new or got renamed to a new name
@@ -66,6 +88,9 @@
     they cause .onAttach() to fail if those functions are not yet recognized."))
     }
   }
+  }
+  rm(notloaded_and_notinstalled)
+  #################### #
 
   # download BLOCK (not blockgroup) data, etc ####
 

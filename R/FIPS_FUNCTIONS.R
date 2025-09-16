@@ -1798,7 +1798,7 @@ fips2countyfips <- function(fips) {
 #' @param fips vector of FIPS
 #'
 #' @return vector of state names
-#' @inherit fips2state_abbrev examples
+#' @inherit fips2stateabbrev examples
 #'
 #' @export
 #'

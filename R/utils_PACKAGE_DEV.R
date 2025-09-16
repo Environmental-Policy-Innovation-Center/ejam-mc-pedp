@@ -71,10 +71,18 @@
 ################################ ################################# #
 
 
-# LISTING THE  FUNCTIONS, DATA, SOURCEFILES, ETC. ####
+# LISTING PKG  FUNCTIONS, DATA, SOURCEFILES, ETC. ####
 
 ##################################################################################### #
 # . ####
+
+## package directory ####
+
+pkg_dir_installed = function(pkg="EJAM") {find.package(pkg, lib.loc = .libPaths())}
+pkg_dir_loaded_from = function(pkg="EJAM") {find.package(pkg, lib.loc = NULL)}
+
+##################################################################################### #
+
 ## searching text in source files ####
 
 grab_hits = function(pattern, x, ignore.case = TRUE, ignorecomments = FALSE, value = TRUE) {

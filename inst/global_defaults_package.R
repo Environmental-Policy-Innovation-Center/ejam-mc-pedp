@@ -61,7 +61,37 @@ app_logo <- "www/favicon.png"  # (small wordless hex)
 
 # REPORT LOGO ####
 
-report_logo <- system.file('report/community_report/ejamhex4.png', package = "EJAM")  #  'www/EPA_logo_white_2.png'  #  was used in the EPA version until 1/2025
+############################### ################################ #
+### DEBUGGING ISSUES IN USING system.file() to find logo path after devtools::load_all() is used:
+## see .onAttach() code trying to find paths before the pkg is installed or even attached.
+# This system.file() line fails after clean R restart if this file is only doing load_all() instead of library(EJAM)
+
+notloaded_and_notinstalled <- inherits(try( find.package("EJAM") , silent = TRUE), "try-error")
+if (notloaded_and_notinstalled) {
+  report_logo <- "./inst/report/community_report/ejamhex4.png"
+  if (!file.exists(report_logo)) {
+    report_logo <- ""
+    cat("Cannot find report_logo from within global_defaults_package.R \n")
+  }
+} else {
+  report_logo <- system.file('report/community_report/ejamhex4.png', package = "EJAM")  #  'www/EPA_logo_white_2.png'  #  was used in the EPA version until 1/2025
+  if ("" %in% report_logo) {
+    warning("report_logo file location could not be set as expected in global_defaults_package.R")
+    possible_logo <- file.path(EJAM:::pkg_dir_loaded_from(), "inst/report/community_report/ejamhex4.png")
+    if (file.exists(possible_logo)) {
+      report_logo <- possible_logo
+    } else {
+      possible_logo <- file.path(EJAM:::pkg_dir_installed(), "report/community_report/ejamhex4.png")
+      if (file.exists(possible_logo)) {
+        report_logo <- possible_logo
+      } else {
+        stop("report_logo file location could not be set as expected in global_defaults_package.R")
+      }
+    }
+  }
+}
+rm(notloaded_and_notinstalled)
+############################### ################################ #
 
 global_defaults_package <- c(
   global_defaults_package,
