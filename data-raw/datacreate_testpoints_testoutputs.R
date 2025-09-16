@@ -19,10 +19,11 @@ pkg_update_testpoints_testoutputs <- function(
 
   resaving_testpoints_overlap3 = FALSE,
   creatingnew_testpoints_data   = FALSE, # TO REPLACE THE ACTUAL TEST POINTS (can be false and still do other steps below)
-  resaving_testpoints_rda       = FALSE,
-  resaving_testpoints_excel     = FALSE,
-  resaving_testpoints_helpdocs  =   FALSE,
-  resaving_testpoints_bad       = FALSE,
+
+  resaving_testpoints_rda       = TRUE,
+  resaving_testpoints_excel     = TRUE,
+  resaving_testpoints_helpdocs  =   TRUE,
+  resaving_testpoints_bad       = TRUE,
 
   recreating_getblocksnearby    = TRUE,  # eg if block data changed, or if recreating_doaggregate_output = TRUE b
   resaving_getblocksnearby_rda  = TRUE,
@@ -39,7 +40,7 @@ pkg_update_testpoints_testoutputs <- function(
   resaving_ejam2report        = TRUE,
 
   redoing_ejscreenit_10_for_ejam_to_have  = FALSE # no longer in the mid-2025 version of EJAM (it had been outdated)
-  # and  there are these:  5, 50, 500  ##
+  # and  there are these:  5, 50, 500  ## handled by a separate file
 
 ) {
   ######################################################## ######################################################### #
@@ -67,8 +68,7 @@ pkg_update_testpoints_testoutputs <- function(
 
   if (file.exists("./inst/global_defaults_package.R")) {source("./inst/global_defaults_package.R")} else {stop('need path to logo file')}
 
-  ###################################################### #
-
+###################################################### #
   # Create and save datasets  ####
   # _ ####
   # >_____testpoints_   _____________________####
@@ -90,15 +90,17 @@ pkg_update_testpoints_testoutputs <- function(
     # plotblocksnearby(pts,radius = 1)
 
     ############# #
-    ## use_data
-    text_to_do <- paste0(
-      "", "testpoints_overlap3", " = metadata_add(", "testpoints_overlap3", ")"
-    )
-    eval(parse(text = text_to_do))
-    usethis::use_data(testpoints_overlap3, overwrite = TRUE)     ############# #
+    ### save ####
+    ### metadata_add, use_data ### #
+    metadata_add_and_use_this("testpoints_overlap3")
+    # text_to_do <- paste0(
+    #   "", "testpoints_overlap3", " = metadata_add(", "testpoints_overlap3", ")"
+    # )
+    # eval(parse(text = text_to_do))
+    # usethis::use_data(testpoints_overlap3, overwrite = TRUE)     ############# #
 
     ############# #
-    ## save as DOCUMENTATION
+    ### save as DOCUMENTATION ### #
     dataset_documenter("testpoints_overlap3",
                        title = "test points data.frame with columns note, lat, lon",
                        details = "examples of test points for testing functions that need lat lon,
@@ -112,7 +114,7 @@ pkg_update_testpoints_testoutputs <- function(
 #'  ```"
     )
     ############# #
-    ## save as  EXCEL   ###   #
+    ### save as  EXCEL   ### #
     writexl::write_xlsx(list(testpoints = testpoints_overlap3),
                         path = paste0("./inst/testdata/latlon/", "testpoints_overlap3", ".xlsx"))    ############# #
   }
@@ -136,17 +138,19 @@ pkg_update_testpoints_testoutputs <- function(
       )
     )
     ############# #
-    ## metadata_add
-    text_to_do <- paste0(
-      "", "testpoints_bad", " = metadata_add(", "testpoints_bad", ")"
-    )
-    eval(parse(text = text_to_do))
-    ############# #
-    ## use_data
-    usethis::use_data(testpoints_bad, overwrite = TRUE)     ############# #
+    ### save ####
+    ### metadata_add, use_data ### #
+    metadata_add_and_use_this("testpoints_bad")
+    # text_to_do <- paste0(
+    #   "", "testpoints_bad", " = metadata_add(", "testpoints_bad", ")"
+    # )
+    # eval(parse(text = text_to_do))
+    # ############# #
+    # ## use_data
+    # usethis::use_data(testpoints_bad, overwrite = TRUE)     ############# #
 
     ############# #
-    ## save as DOCUMENTATION
+    ### save as DOCUMENTATION ### #
     dataset_documenter(
       "testpoints_bad",
       title = "test points data.frame with columns note, lat, lon",
@@ -156,7 +160,7 @@ pkg_update_testpoints_testoutputs <- function(
 #'   "
     )
     ############# #
-    ## save as  EXCEL   ###   #
+    ### save as  EXCEL   ### #
     writexl::write_xlsx(list(testpoints = testpoints_bad),
                         path = paste0("./inst/testdata/latlon/", "testpoints_bad", ".xlsx"))    ############# #
   }
@@ -183,6 +187,7 @@ pkg_update_testpoints_testoutputs <- function(
       assign("testpoints_data", get(  testpoints_name ))
 
     } else {
+      ## create new random points/ ####
       cat("creating ", n, "new random points\n")
 
       testpoints_data <- EJAM::testpoints_n(n = n, weighting = "frs", dt = FALSE)               ############# #
@@ -198,27 +203,26 @@ pkg_update_testpoints_testoutputs <- function(
       if (n == 100) {
         testpoints_100_dt <- data.table(testpoints_100)
         if (resaving_testpoints_rda) {
-          # attr(testpoints_100_dt, "date_saved_in_package") <- Sys.Date()
           testpoints_100_dt = metadata_add(testpoints_100_dt)
           usethis::use_data(testpoints_100_dt , overwrite = TRUE)
         }
       }
     }
 
-    ## save as DATA IN PACKAGE ####
+    ### save as DATA IN PACKAGE ####
     # metadata_add
     if (resaving_testpoints_rda) {
-      text_to_do <- paste0(
-        "", testpoints_name, " = metadata_add(", testpoints_name, ")"
-        # "attr(",  testpoints_name  ,", 'date_saved_in_package') <- Sys.Date()"
-      )
-      eval(parse(text = text_to_do))
-      # use_data
-      text_to_do <- paste0("usethis::use_data(", testpoints_name, ", overwrite=TRUE)")
-      eval(parse(text = text_to_do))
+      metadata_add_and_use_this(testpoints_name)
+      # text_to_do <- paste0(
+      #   "", testpoints_name, " = metadata_add(", testpoints_name, ")"
+      # )
+      # eval(parse(text = text_to_do))
+      # # use_data
+      # text_to_do <- paste0("usethis::use_data(", testpoints_name, ", overwrite=TRUE)")
+      # eval(parse(text = text_to_do))
     }
 
-    ## save as DOCUMENTATION  ####
+    ### save as DOCUMENTATION  ####
 
     if (resaving_testpoints_helpdocs) {
 
@@ -235,13 +239,9 @@ pkg_update_testpoints_testoutputs <- function(
       }
     }
 
-    ## save as EXCEL  ####
+    ### save as EXCEL  ####
     if (resaving_testpoints_excel) {
-      # testpoints_data$EJSCREEN_MAP = url_ejscreenmap(lat = testpoints_data$lat, lon = testpoints_data$lon, as_html = FALSE) # NOT CLICKABLE IN EXCEL THIS WAY BUT OK
-      # testpoints_data$REGISTRY_ID <- as.character(testpoints_data$REGISTRY_ID)  # for excel just save as character not number, or could write as special zip code format in excel
-      # Note the old links work on popup map but not in excel, if as_html=T
-      # testpoints_data$EJSCREEN_MAP = url_ejscreenmap(lat = testpoints_data$lat, lon = testpoints_data$lon, as_html = T)
-      #
+
       writexl::write_xlsx(list(testpoints = testpoints_data),
                           path = paste0("./inst/testdata/latlon/", testpoints_name, ".xlsx"))    ############# #
     }
@@ -254,34 +254,21 @@ pkg_update_testpoints_testoutputs <- function(
       namebase <- "testoutput_getblocksnearby_"
 
       out_varname_getblocks = paste0(namebase, n, "pts_", myrad, "miles")
-      # out_varname_getblocks_alias <- paste0("sites2blocks_example", n, "pts_", myrad, "miles")
       if (recreating_getblocksnearby) {
         out_data_getblocks <- getblocksnearby(testpoints_data, radius = myrad, quiet = TRUE)                     ############# #
         assign(out_varname_getblocks, out_data_getblocks)
         ################################## #
-        # >_____sites2blocks ALIAS  ####
-        #    for convenience / might be easier to remember / holdover from when it was called that
-        # out_data_getblocks_alias <- out_data_getblocks
-        # assign(out_varname_getblocks_alias, out_data_getblocks_alias)
       }
       if (n <= 10000) {
         ## save as DATA IN PACKAGE ####
         if (resaving_getblocksnearby_rda) {
-          text_to_do <- paste0(
-            "", out_varname_getblocks, " = metadata_add(", out_varname_getblocks, ")"
-            # "attr(",  out_varname_getblocks  ,", 'date_saved_in_package') <- Sys.Date()"
-          )
-          eval(parse(text = text_to_do))
-          text_to_do = paste0("usethis::use_data(", out_varname_getblocks, ", overwrite=TRUE)")
-          eval(parse(text = text_to_do))                                             ############# #
-
+          metadata_add_and_use_this(out_varname_getblocks)
           # text_to_do <- paste0(
-          #   "", out_varname_getblocks_alias, " = metadata_add(", out_varname_getblocks_alias, ")"
-          #   # "attr(",  out_varname_getblocks_alias  ,", 'date_saved_in_package') <- Sys.Date()"
+          #   "", out_varname_getblocks, " = metadata_add(", out_varname_getblocks, ")"
           # )
           # eval(parse(text = text_to_do))
-          # text_to_do = paste0("usethis::use_data(", out_varname_getblocks_alias, ", overwrite=TRUE)")
-          # eval(parse(text = text_to_do))
+          # text_to_do = paste0("usethis::use_data(", out_varname_getblocks, ", overwrite=TRUE)")
+          # eval(parse(text = text_to_do))                                             ############# #
         }
         # save as DOCUMENTATION  ####
 
@@ -293,22 +280,6 @@ pkg_update_testpoints_testoutputs <- function(
             details = paste0("This is the output of getblocksnearby(", testpoints_name,", radius = ", myrad,")"),
             seealso = paste0("[getblocksnearby()]  [doaggregate()]  [", testpoints_name,"]")
           )
-          ############################## #
-          #        #
-          #        filecontents <- paste0(
-          #          "#' @name ", out_varname_getblocks_alias, "
-          # #' @docType data
-          # #' @title test output of getblocksnearby(), and is an input to doaggregate()
-          # #' @details This is the output of getblocksnearby(", testpoints_name,", radius = ", myrad,")
-          # #'   This is the same as  [", out_varname_getblocks,"]
-          # #' @seealso [getblocksnearby()]  [doaggregate()]  [", testpoints_name,"]
-          # '",out_varname_getblocks_alias,"'"
-          #         )
-          #         # prefix documentation file names with "data_"
-          #         writeChar(filecontents, con = paste0("./R/data_", out_varname_getblocks_alias, ".R"))       ############# #
-          #        # end of making alias version
-          ############################## #
-
         }
 
       } # end of if n <
@@ -333,13 +304,13 @@ pkg_update_testpoints_testoutputs <- function(
       ## save as DATA IN PACKAGE ####
 
       if (resaving_doaggregate_rda) {
-        text_to_do <- paste0(
-          "", out_varname_doagg, " = metadata_add(", out_varname_doagg, ")"
-          # "attr(",  out_varname_doagg  ,", 'date_saved_in_package') <- Sys.Date()"
-        )
-        eval(parse(text = text_to_do))
-        text_to_do = paste0("usethis::use_data(", out_varname_doagg, ", overwrite=TRUE)")
-        eval(parse(text = text_to_do))                                             ############# #
+        metadata_add_and_use_this(out_varname_doagg)
+        # text_to_do <- paste0(
+        #   "", out_varname_doagg, " = metadata_add(", out_varname_doagg, ")"
+        # )
+        # eval(parse(text = text_to_do))
+        # text_to_do = paste0("usethis::use_data(", out_varname_doagg, ", overwrite=TRUE)")
+        # eval(parse(text = text_to_do))                                             ############# #
       }
 
       # save as DOCUMENTATION ####
@@ -392,13 +363,13 @@ pkg_update_testpoints_testoutputs <- function(
 
       ## save as DATA IN PACKAGE ####
       if (resaving_ejamit_rda) {
-        text_to_do <- paste0(
-          "", out_varname_ejamit, " = metadata_add(", out_varname_ejamit, ")"
-          # "attr(",  out_varname_ejamit  ,", 'date_saved_in_package') <- Sys.Date()"
-        )
-        eval(parse(text = text_to_do))
-        text_to_do = paste0("usethis::use_data(", out_varname_ejamit, ", overwrite=TRUE)")
-        eval(parse(text = text_to_do))                                             ############# #
+        metadata_add_and_use_this(out_varname_ejamit)
+        # text_to_do <- paste0(
+        #   "", out_varname_ejamit, " = metadata_add(", out_varname_ejamit, ")"
+        # )
+        # eval(parse(text = text_to_do))
+        # text_to_do = paste0("usethis::use_data(", out_varname_ejamit, ", overwrite=TRUE)")
+        # eval(parse(text = text_to_do))                                             ############# #
       }
 
       # save as DOCUMENTATION ####
@@ -456,12 +427,13 @@ pkg_update_testpoints_testoutputs <- function(
       testpoints_10, radius = 1, calculate_ratios = TRUE,
       nosave = TRUE, nosee = TRUE,
       interactiveprompt = FALSE)
-    text_to_do <- paste0(
-      "", "testoutput_ejscreenit_10pts_1miles", " = metadata_add(", "testoutput_ejscreenit_10pts_1miles", ")"
-      # "attr(testoutput_ejscreenit_10pts_1miles, 'date_saved_in_package') <- Sys.Date()"
-    )
-    eval(parse(text = text_to_do))
-    usethis::use_data(testoutput_ejscreenit_10pts_1miles, overwrite = TRUE)
+
+    metadata_add_and_use_this("testoutput_ejscreenit_10pts_1miles")
+    # text_to_do <- paste0(
+    #   "", "testoutput_ejscreenit_10pts_1miles", " = metadata_add(", "testoutput_ejscreenit_10pts_1miles", ")"
+    # )
+    # eval(parse(text = text_to_do))
+    # usethis::use_data(testoutput_ejscreenit_10pts_1miles, overwrite = TRUE)
 
     ## save as DOCUMENTATION ####
 
@@ -478,9 +450,8 @@ pkg_update_testpoints_testoutputs <- function(
 #'  See testoutput_ejamit_10pts_1miles$results_bysite",
                        seealso = "[ejscreenit_for_ejam()]"
     )
-
-
   }
+############################################# #
 
   cat('
     REMEMBER TO UPDATE .Rd files PACKAGE DOCUMENTATION:

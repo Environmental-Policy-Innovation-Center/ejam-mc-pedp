@@ -228,7 +228,8 @@ x <- EJAM:::test_ejam(
         "test-state_from_sitetable.R"
       ),
       test_maps = c(
-        "test-MAP_FUNCTIONS.R"
+        "test-MAP_FUNCTIONS.R",
+        "test-ejam2map.R"
       ),
       test_shape = c(
         "test-shapefile_xyz.R",

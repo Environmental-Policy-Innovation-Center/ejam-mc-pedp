@@ -89,7 +89,7 @@
 #'   * **results_bysite**   results for individual sites (buffers) - a data.table of results,
 #'     one row per ejam_uniq_id (i.e., each site analyzed), one column per indicator
 #'
-#'   * **results_bybg_people**  results for each block group, to allow for
+#'   * **results_bybg_people**  results for each blockgroup, to allow for
 #'      showing the distribution of each
 #'      indicator across everyone, including the distribution within a
 #'      single residential population group, for example. This table is essential
@@ -405,7 +405,12 @@ ejamit <- function(sitepoints = NULL,
     # . radius is ignored for fips ####
     radius <- 999 # use this value when analyzing by fips not by circular buffers, as input to doaggregate(),
     # then in output of doaggregate()$results_bysite$radius.miles is returned as 0 for every fips, as in _overall.
-    if (!missing(radius) && radius != 0 && radius != 999) {warning("radius was specified, but will be ignored as irrelevant when analyzing fips")}
+
+    ## ONCE WE IMPLEMENT BUFFERING radius IN FIPS CASE,   we have to downloaded bounds, we have to add the buffering
+    if (!is.null(radius) && radius > 0 && radius != 999) {
+      warning("adding buffer around fips is not yet implemented")
+      # shp <- shape_buffered_from_shapefile(shp, radius.miles = radius)
+    }
 
     # . getblocksnearby_from_fips() ####
 
@@ -734,11 +739,17 @@ ejamit <- function(sitepoints = NULL,
 
   if ("REGISTRY_ID" %in% names(out$results_bysite)) {regid <- out$results_bysite$REGISTRY_ID} else {regid <- NULL}
 
+  if (999 %in% radius || is.na(radius)) {
+    buffer_for_links <- 0
+  } else {
+    buffer_for_links <- radius
+  }
+
   links <- url_columns_bysite(
     sitepoints = {if ("latlon" %in% sitetype) {out$results_bysite[, .(lat = lat, lon = lon, ejam_uniq_id = ejam_uniq_id)]} else {NULL} },
     fips       = {if ("fips"   %in% sitetype) {fips} else {NULL}}, # or use out$results_bysite$ejam_uniq_id if that sitetype ?
     shapefile  = {if ("shp"    %in% sitetype) {shp}  else {NULL}}, # has only valids but also has ejam_uniq_id
-    radius = radius,
+    radius = buffer_for_links,
     regid = regid,
     sitetype = sitetype,
     reports = reports, # EJAM:::global_or_param("default_reports")

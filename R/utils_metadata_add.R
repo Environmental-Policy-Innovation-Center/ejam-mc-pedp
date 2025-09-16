@@ -57,6 +57,19 @@ metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_pa
 ## to use it:
 
 #   metadata_update_attr()
+###################################################### #
+
+#  helper func to update ALL metadata attributes for JUST ONE pkg dataset AND save in EJAM/data/
+# used in data-raw/datacreate_*.R functions while updating/making datasets
+
+metadata_add_and_use_this <- function(objectname) {
+
+  text_to_do <- paste0("", objectname, " = metadata_add(", objectname, ")")
+  eval(parse(text = text_to_do))
+
+  text_to_do <- paste0("usethis::use_data(", objectname, ", overwrite=TRUE)")
+  eval(parse(text = text_to_do))
+}
 #################################################### #
 
 #' helper function for package to set metadata attributes of a dataset, used by scripts in /data-raw/
@@ -81,6 +94,8 @@ metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_pa
 #'  EJAM, EJSCREEN, and other dataset versions and release dates are tracked in DESCRIPTION
 #' @param update_date_saved_in_package can set to FALSE to avoid changing this attribute
 #' @param update_ejam_package_version  can set to FALSE to avoid changing this attribute
+#' @param metadata optional - when omitted, it checks metadata_mapping using get_metadata_mapping().
+#'   Can provide a list of key=value attributes to add
 #' @seealso [metadata_check_print()] [metadata_check()] [metadata_add()] [metadata_update_attr()]
 #'
 #' @return returns x but with new or altered attributes
@@ -92,13 +107,15 @@ metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_pa
 #'
 #' @keywords internal
 #'
-metadata_add <- function(x, update_date_saved_in_package = TRUE,
+metadata_add <- function(x, metadata=NULL,
+                         update_date_saved_in_package = TRUE,
                          update_ejam_package_version = TRUE) {
 
   # source("R/metadata_mapping.R")  # this already would get loaded via devtools::load_all() or library(EJAM)
   # rstudioapi::documentOpen("./R/metadata_mapping.R")
-
-  metadata <- get_metadata_mapping(deparse(substitute(x)))
+  if (is.null(metadata)) {
+    metadata <- get_metadata_mapping(deparse(substitute(x)))
+  }
   if (is.null(metadata)) {
     txt <- paste0(paste0(names(metadata), "=", unlist(metadata)), collapse = ", ")
     message("metadata not specified, so used defaults from source code of this function: ", txt, "\n")

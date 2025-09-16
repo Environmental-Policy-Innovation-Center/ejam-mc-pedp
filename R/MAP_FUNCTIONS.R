@@ -42,8 +42,6 @@ map_ejam_plus_shp <- function(shp, out, radius_buffer = NULL, circle_color = '#0
   ### see also ejam2map()
   ### add popups parameter maybe
 
-  sitetype = ejamit_sitetype_from_output(out)
-
   if (!("results_bysite" %in% names(out))) {
     # maybe were given the table not the whole list
     if ("ejam_uniq_id" %in% names(out)) {
@@ -52,6 +50,11 @@ map_ejam_plus_shp <- function(shp, out, radius_buffer = NULL, circle_color = '#0
     } else {
       stop("out needs to be a list with results_bysite in it, as from ejamit()")
     }
+  }
+  if ("sitetype" %in% names(out)) {
+    sitetype <- out$sitetype
+  } else {
+    sitetype <- ejamit_sitetype_from_output(out)
   }
 
   if ("ejam_uniq_id" %in% names(shp)) {
@@ -513,7 +516,7 @@ map_shapes_leaflet <- function(shapes, color = "green", popup = NULL, fillOpacit
     if("SQMI" %in% colnames(shapes)) {
       shapes$area_sqmi <- round(shapes$SQMI, 1)
     } else {
-    shapes$area_sqmi <- round(area_sqmi_from_shp(shapes), 1)
+      shapes$area_sqmi <- round(area_sqmi_from_shp(shapes), 1)
     }
   }
 
