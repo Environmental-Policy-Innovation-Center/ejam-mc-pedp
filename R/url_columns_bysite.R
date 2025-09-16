@@ -42,6 +42,21 @@
 #'
 #' @param ... passed to each function, and can be any parameter that any of them uses
 #'
+#' @examples
+#' x =  url_columns_bysite(testpoints_10[1:2,], radius = 1)
+#'
+#' x =  url_columns_bysite(
+#'   data.frame(lat=1:2, lon=101:102), radius = 1,
+#'   INFO_FOR_SITE2 = c(NA, "site2"),
+#'   Place1info = c("North", ""),
+#'   keylist_bysite = list(newkey_all_sites = "YES",
+#'                         site_name = c("NRO", "CRS"))
+#'   )
+#' unlinkify(x[[2]])
+#' x = x[[1]]
+#' x = x[, "EJAM Report"]
+#' unlinkify(x)
+#'
 #' @seealso  [url_ejscreen_report()] [url_ejscreenmap()] [url_echo_facility()] [url_ejscreenapi_clusters_and_sort_cols()]
 #' @return list of data.frames to append to the list of data.frames created by
 #'   [ejamit()] or [doaggregate()],

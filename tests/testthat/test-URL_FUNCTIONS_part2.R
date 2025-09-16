@@ -5,6 +5,8 @@
 
 # tests  ####
 
+# function should be identical to the copy in test-ejamapi.R
+
 do_url_tests = function(funcname = "url_ejscreenmap", FUN = NULL) {
 
   ## e.g.,
@@ -29,55 +31,38 @@ do_url_tests = function(funcname = "url_ejscreenmap", FUN = NULL) {
 
   ############### #
   try(test_that(paste0(funcname, " sitepoints POINTS works"), {
-
     expect_no_error({suppressWarnings({x <- FUN(sitepoints = testpoints_10[1,])})})
     expect_no_error({suppressWarnings({x <- FUN(sitepoints = testpoints_10, radius = 1)})})
-
     expect_true(url_online(x[1]))
   }))
   ############### #
   try(test_that(paste0(funcname, " BG FIPS works"), {
     expect_no_error({
-      # suppressWarnings({
       x <- FUN(fips = testinput_fips_blockgroups[1] )
-      # })
     })
     expect_no_error({
-      # suppressWarnings({
       x <- FUN(fips = testinput_fips_blockgroups[1:2] )
-      # })
     })
-
     expect_true(url_online(x[1]))
-
   }))
   ############### #
   try(test_that(paste0(funcname, " mix of FIPS works"), {
     expect_no_error({
-      # suppressWarnings({
       x <- FUN(fips = fipsmix)
-      # })
     })
-
     expect_true(url_online(x[1]))
-
   }))
   ############### #
   try(test_that(paste0(funcname, " SHAPEFILE works"), {
-
     expect_no_error({  ({x <- FUN(shapefile = testinput_shapes_2[1, ])})})
     expect_no_error({  ({x <- FUN(shapefile = testinput_shapes_2, radius = 1)})})
-
     expect_true(url_online(x[1]))
-
   }))
   ############### #
   try(test_that(paste0(funcname, " REGID works"), {
     expect_no_error({
       x <- FUN( regid = testinput_regid[1] )
-
       expect_true(url_online(x[1]))
-
     })
     expect_no_error({  ({
       x <- FUN(sitepoints = data.frame(lat = 35, lon = -100,
@@ -86,12 +71,9 @@ do_url_tests = function(funcname = "url_ejscreenmap", FUN = NULL) {
     expect_no_error({  ({
       x <- FUN(sitepoints = data.frame(lat = 35, lon = -100,
                                        regid = testinput_regid[1]))
-      # x <- FUN(regid = testinput_regid, radius = 1)
     })})
   }))
-
   ############### #
-
   try(test_that(paste0(funcname, " 1 url per sitepoint OR regid"), {
     expect_no_error({
       suppressWarnings({
@@ -121,8 +103,6 @@ do_url_tests = function(funcname = "url_ejscreenmap", FUN = NULL) {
     expect_equal(length(x), 6)
     expect_true(substr(x[1], 1, 5) == "https")
   }))
-
-
 }
 ############## ############### ############### ############### ############### #
 ############## ############### ############### ############### ############### #

@@ -1,9 +1,11 @@
 
 # test-url_ejamapi.R
 
-############### test all the other url_xyz functions in a loop:
+# tests  ####
 
-do_url_tests = function(funcname, FUN) {
+# function should be identical to the copy in test-URL_FUNCTIONS_part2.R
+
+do_url_tests = function(funcname = "url_ejamapi", FUN = NULL, ...) {
 
   ## e.g.,
   #   funcname <- "url_ejamapi"; FUN <- NULL
@@ -11,7 +13,7 @@ do_url_tests = function(funcname, FUN) {
   if (is.null(FUN)) {FUN <- get(funcname)}
 
   test_that("Site responds with 200", {
-    expect_true(url_online(FUN(sitepoints = testpoints_10[1,])))
+    expect_true(url_online(FUN(sitepoints = testpoints_10[1,], ...)))
   })
 
   # fipsmix = testinput_fips_mix
@@ -24,53 +26,100 @@ do_url_tests = function(funcname, FUN) {
     testinput_fips_states[2]
   )
 
-  test_that(paste0(funcname, " sitepoints works"), {
-    expect_no_error({x = FUN(sitepoints = testpoints_10[1,])})
-    expect_no_error({x = FUN(sitepoints = testpoints_10, radius = 1)})
-  })
-  test_that(paste0(funcname, " fips works"), {
-    expect_no_error({x = FUN(fips = blockgroupstats$bgfips[1])})
-    expect_no_error({x = FUN(fips = blockgroupstats$bgfips[1:2] )})
-    expect_no_error({x = FUN(fips = fipsmix)})
-  })
-  test_that(paste0(funcname, " shapefile works"), {
-    expect_no_error({x = FUN(shapefile = testinput_shapes_2[1, ])})
-    expect_no_error({x = FUN(shapefile = testinput_shapes_2, radius = 1)})
-  })
-  test_that(paste0(funcname, " regid works"), {
-    expect_no_error({x = FUN(regid = testinput_regid[1])})
-    expect_no_error({x = FUN(regid = testinput_regid, radius = 1)})
-  })
 
-  test_that(paste0(funcname, " 1 url per sitepoint or regid"), {
-    expect_no_error({x = FUN(sitepoints = testpoints_10[1:6, ], radius = 1,
-                             # fips = fipsmix[1:6],
-                             # shapefile = rbind(testinput_shapes_2,testinput_shapes_2,testinput_shapes_2),
-                             regid = testinput_regid[1:6])})
+  ############### #
+  try(test_that(paste0(funcname, " sitepoints POINTS works"), {
+    expect_no_error({suppressWarnings({x <- FUN(sitepoints = testpoints_10[1,], ...)})})
+    expect_no_error({suppressWarnings({x <- FUN(sitepoints = testpoints_10, radius = 1, ...)})})
+    expect_true(url_online(x[1]))
+  }))
+  ############### #
+  try(test_that(paste0(funcname, " BG FIPS works"), {
+    expect_no_error({
+      x <- FUN(fips = testinput_fips_blockgroups[1] , ...)
+    })
+    expect_no_error({
+      x <- FUN(fips = testinput_fips_blockgroups[1:2] , ...)
+    })
+    expect_true(url_online(x[1]))
+  }))
+  ############### #
+  try(test_that(paste0(funcname, " mix of FIPS works"), {
+    expect_no_error({
+      x <- FUN(fips = fipsmix, ...)
+    })
+    expect_true(url_online(x[1]))
+  }))
+  ############### #
+  try(test_that(paste0(funcname, " SHAPEFILE works"), {
+    expect_no_error({  ({x <- FUN(shapefile = testinput_shapes_2[1, ], ...)})})
+    expect_no_error({  ({x <- FUN(shapefile = testinput_shapes_2, radius = 1, ...)})})
+    expect_true(url_online(x[1]))
+  }))
+  ############### #
+  try(test_that(paste0(funcname, " REGID works"), {
+    expect_no_error({
+      x <- FUN( regid = testinput_regid[1], ... )
+      expect_true(url_online(x[1]))
+    })
+    expect_no_error({  ({
+      x <- FUN(sitepoints = data.frame(lat = 35, lon = -100,
+                                       regid = testinput_regid[1], ...))
+    })})
+    expect_no_error({  ({
+      x <- FUN(sitepoints = data.frame(lat = 35, lon = -100,
+                                       regid = testinput_regid[1], ...))
+    })})
+  }))
+  ############### #
+  try(test_that(paste0(funcname, " 1 url per sitepoint OR regid"), {
+    expect_no_error({
+      suppressWarnings({
+        x <- FUN(sitepoints = testpoints_10[1:6, ], radius = 1,
+                 # fips = fipsmix[1:6],
+                 # shapefile = rbind(testinput_shapes_2,testinput_shapes_2,testinput_shapes_2),
+                 regid = testinput_regid[1:6], ...)
+      })
+    })
     expect_equal(length(x), 6)
     expect_true(substr(x[1], 1, 5) == "https")
-  })
-  test_that(paste0(funcname, " 1 url per fips or regid"), {
-    expect_no_error({x = FUN( # sitepoints = testpoints_10[1:6, ], radius = 1,
-      fips = fipsmix[1:6],
-      # shapefile = rbind(testinput_shapes_2,testinput_shapes_2,testinput_shapes_2),
-      regid = testinput_regid[1:6])})
+  }))
+  try(test_that(paste0(funcname, " 1 url per fips OR regid"), {
+    expect_no_error({
+      suppressWarnings({x <- FUN( # sitepoints = testpoints_10[1:6, ], radius = 1,
+        fips = fipsmix[1:6], ...,
+        # shapefile = rbind(testinput_shapes_2,testinput_shapes_2,testinput_shapes_2),
+        regid = testinput_regid[1:6])})})
     expect_equal(length(x), 6)
     expect_true(substr(x[1], 1, 5) == "https")
-  })
-  test_that(paste0(funcname, " 1 url per polygon of shapefile or regid"), {
-    expect_no_error({x = FUN( # sitepoints = testpoints_10[1:6, ], radius = 1,
+  }))
+  try(test_that(paste0(funcname, " 1 url per polygon of shapefile or regid"), {
+    expect_no_error({suppressWarnings({
+      x <- FUN( # sitepoints = testpoints_10[1:6, ], radius = 1,
       # fips = fipsmix[1:6],
-      shapefile = rbind(testinput_shapes_2,testinput_shapes_2,testinput_shapes_2),
-      regid = testinput_regid[1:6])})
+      shapefile = rbind(testinput_shapes_2,testinput_shapes_2,testinput_shapes_2), ...,
+      regid = testinput_regid[1:6])
+      })})
     expect_equal(length(x), 6)
     expect_true(substr(x[1], 1, 5) == "https")
-  })
-
+  }))
 }
-###############
+############## ############### ############### ############### ############### #
+############## ############### ############### ############### ############### #
 
-do_url_tests("url_ejamapi", url_ejamapi)   # fips must be blockgroup fips currently? - other types not yet implemented 9/2025
+# fips must be blockgroup fips currently? - other types not yet implemented 9/2025
+
+do_url_tests("url_ejamapi", url_ejamapi)
+
+do_url_tests("url_ejamapi", url_ejamapi, sitenumber = 2)
+
+
+# sitenumber (overall vs 1-site) ####
+
+# N  means Nth site report
+# -1 means "overall" report
+# 0  means "each" site report, in a vector of URLs
+
 
 if (FALSE) {
   # somewhat like the examples:

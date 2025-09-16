@@ -200,6 +200,9 @@ url_xl_style <- function(urls, urltext = urls) {
 # }
 ########################################################### #
 
+# ... lets you pass params like a=1:2, b=101:102, c="word"
+# keylist lets you pass params like list(a=1:2, b=101:102, c="word")
+# this also drops any keys whose value is NA, NULL, or ""
 
 url_from_keylist <- function(..., keylist = NULL,
                              baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?",
@@ -231,6 +234,11 @@ url_from_keylist <- function(..., keylist = NULL,
   return(urlx)
 }
 # ########################################################### #
+
+# ... lets you pass params like a=1:2, b=101:102, c="word"
+# keylist lets you pass params like list(a=1:2, b=101:102, c="word")
+# this also drops any keys whose value is NA, NULL, or ""
+
 # vector length 1 applies to every site
 # vectors length N are vectorized over N sites and should all be N long!!
 # the ... param lets you provide vectors over sites and single values that apply to all sites
@@ -261,19 +269,19 @@ urls_from_keylists <- function(..., keylist_bysite=NULL, keylist_4all=NULL,
 
     # NULL will cause error in as.data.frame
     ## so how pass a parameter value of NULL ??
-    keylist_bysite[sapply(keylist_bysite, is.null)] <- pass_null_as
+    keylist_bysite[sapply(keylist_bysite, is.null)] <- pass_null_as # actually it will turn into "" and then get dropped entirely by url_from_keylist() now
 
     keylist_bysite <- paste0(
       # "&",
       apply(as.data.frame(keylist_bysite) , 1,
             # function(z) {paste0(names(z) , "=", z, collapse = "&")}
             function(z) {
-              url_from_keylist(keylist = as.list(z), baseurl = "", encode = encode)
+              url_from_keylist(keylist = as.list(z), baseurl = "", encode = encode) # should drop empties
             }
       ))
   }
 
-  forallpart <- url_from_keylist(keylist = keylist_4all, baseurl = "", encode = encode, ifna = "")
+  forallpart <- url_from_keylist(keylist = keylist_4all, baseurl = "", encode = encode, ifna = "") # should drop empties
   if (length(forallpart) > 0 &&  !(all(forallpart %in% "")) &&
       length(keylist_bysite) > 0 && !(all(keylist_bysite %in% ""))) {
     forallpart <- paste0("&", forallpart)
@@ -317,14 +325,35 @@ if (FALSE ) {
 
 }
 # ########################################################### #
+# simplify by removing unused / empty parameters, but only if it is empty for all in the vector of values for that key
+#
+# drops ""
+# drops NA
+# drops NULL
+#
 drop_empty_keys_from_list <- function(klist) {
-  # simplify by removing unused / empty parameters
-  emptykeys <- sapply(klist, length) == 0
+
+  # if a key is empty like "" in the 1 URL or all of the URLs if vector of values for that key
+  emptykeys <- sapply(klist, function(v) {all(nchar(v)  %in% 0 )})
   klist <- klist[!emptykeys]
+
+  # if a key is NULL (it would always be NULL in all URLs)
+  emptykeys <- sapply(klist, is.null)
+  klist <- klist[!emptykeys]
+
+  # if a key is NA in the 1 URL or all of the URLs if vector of values for that key
+  emptykeys <- sapply(klist, function(v) {all(is.na(v))})
+  klist <- klist[!emptykeys]
+
   return(klist)
 }
 #################################################### #
+# drops if ""
+# does NOT do anything about NA or "NA"
+# does NOT check for NULL or null
+
 drop_empty_keys_from_url = function(quer) {
+
   # simplify by removing unused / empty parameters
   quer =  gsub("[^=&]*=&", "", x = quer) # drop any empty one except first or last param
   quer = gsub("?[^&=]*=&", "?", x = quer) # drop any empty one at start
