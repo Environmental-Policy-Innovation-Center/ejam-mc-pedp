@@ -60,15 +60,15 @@
 -   Restored columns of weblinks in single-site reports - they had been missing since 1/2025. Added back to the tables of sites (results_bysite table from `ejamit()`, `ejam2tableviewer()`, etc.) and map popups (in various map functions like `ejam2map()` etc.)
 -   Added several new functions that can provide these kinds of reports:
 
-| header (column title) | text (of link) | function name | parameters |
+| header (column title) | text (of link) | function name | key parameters |
 |---------------|--------------|-----------------|----------------------|
-| EJAM Report | Report | `url_ejamapi()` | sitepoints, lat, lon, radius, fips, shapefile, etc. |
-| EJSCREEN Map | EJSCREEN | `url_ejscreenmap()` | sitepoints, lat, lon, shapefile, fips, wherestr, etc. |
-| Enviromapper Report | Enviromapper | `url_enviromapper()` | sitepoints, lon, lat, shapefile, fips, zoom, etc. |
-| ECHO Report | ECHO | `url_echo_facility()` | regid, validate_regids, etc. |
-| FRS Report | FRS | `url_frs_facility()` | regid, validate_regids, etc. |
-| County Health Report | County | `url_county_health()` | fips, year, etc. |
-| State Health Report | State | `url_state_health()` | fips, year, etc. |
+| EJAM Report | Report | `url_ejamapi()` | sitepoints (or lat,lon) or shapefile or fips |
+| EJSCREEN Map | EJSCREEN | `url_ejscreenmap()` | sitepoints (or lat,lon) or shapefile or fips |
+| Enviromapper Report | Enviromapper | `url_enviromapper()` | sitepoints (or lat,lon) or shapefile or fips |
+| ECHO Report | ECHO | `url_echo_facility()` | regid |
+| FRS Report | FRS | `url_frs_facility()` | regid |
+| County Health Report | County | `url_county_health()` | fips |
+| State Health Report | State | `url_state_health()` | fips |
 | County Equity Atlas Report | County | `url_county_equityatlas()` | fips |
 | State Equity Atlas Report | State | `url_state_equityatlas()` | fips |
 
@@ -93,6 +93,7 @@
 ### Added or Changed
 
 -   `ejam2report()` now downloads FIPS bounds if missing.
+-   `ejam2map()` now downloads FIPS bounds if missing.
 -   `mapfast()` and some others now drop sites with empty geometry before trying to map, avoid an error
 -   `popup_from_any()` and other map popup functions now have different parameters that can handle more columns of URLs/links of any type
 -   `popup_from_any()` and other map popup functions now drop the geometry column from spatial data.frames to avoid including a mess in the popup
