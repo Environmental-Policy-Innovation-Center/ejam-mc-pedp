@@ -88,7 +88,8 @@ report_setup_temp_files <- function(Rmd_name = 'community_report_template.Rmd',
 #' @param filename path to file to save HTML content to; if null, returns as string (used in Shiny app)
 #' @param report_title generic name of this type of report, to be shown at top, like "EJAM Multisite Report"
 #' @param logo_path optional relative path to a logo for the upper right of the overall header.
-#'   Ignored if logo_html is specified and not NULL, but otherwise uses default or param set in [ejamapp()]
+#'   Ignored if logo_html is specified and not NULL, otherwise uses default or param set in [ejamapp()],
+#'  except NULL means default logo, "" means omit logo entirely.
 #' @param logo_html optional HTML for img of logo for the upper right of the overall header.
 #'   If specified, it overrides logo_path. If omitted, gets created based on logo_path.
 #'
@@ -131,7 +132,7 @@ build_community_report <- function(output_df,
                                    in_shiny = FALSE,
                                    filename = NULL,
                                    report_title = NULL,
-                                   logo_path = NULL,
+                                   logo_path = NULL, # NULL means default logo, "" means omit logo
                                    logo_html = NULL
 ) {
 

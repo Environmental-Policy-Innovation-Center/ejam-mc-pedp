@@ -10,11 +10,9 @@
 #'
 #' @param ejamitout output as from [ejamit()], list with a data.table called `results_bysite`
 #'   if sitenumber parameter is used, or a data.table called `results_overall` otherwise
-#'
-#' @param sitenumber If an integer > 0 (and =< number of sites total) is provided, the report is about
-#'   `ejamitout$results_bysite[sitenumber, ]` and if no number is provided (or param is NULL or "" or -1 or "overall")
+#' @param sitenumber If a number is provided, the report is about
+#'   `ejamitout$results_bysite[sitenumber, ]` and if no number is provided (param is NULL or "")
 #'   then the report is about `ejamitout$results_overall`
-#'
 #' @param analysis_title optional title of analysis
 #' @param submitted_upload_method something like "latlon", "SHP", "FIPS", etc. (just used as-is as part of the filename)
 #' @param shp provide the sf spatial data.frame of polygons that were analyzed so you can map them since
@@ -111,10 +109,6 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
   }
   if (is.null(logo_path)) {
     logo_path <- EJAM:::global_or_param("report_logo")
-    if ("" %in% logo_path) {
-      stop("logo_path cannot be obtained via EJAM:::global_or_param('report_logo')! Try restarting R and using library(EJAM)")
-      # logo_path <- get_global_defaults_or_user_options()$report_logo
-    }
   }
   if (!interactive()) {launch_browser <- FALSE} # but that means other functions cannot override this while not interactive.
 
@@ -126,7 +120,7 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
     warning("fileextension must be one of", fileextensions_implemented)
     fileextension <- ".html"
   }
-  # sitetype ####
+
   if (missing(submitted_upload_method)) {
     # as used in server, this could be SHP, FIPS, latlon, MACT, FRS, EPA_PROGRAM_up, etc. etc.
     # create_filename() did use that version in server.
@@ -146,32 +140,23 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
       }
     }
   }
-sitetype <- ejamitout$sitetype
   ################################################## #  ################################################## #
   # overall vs 1-site ####
 
-  if (all(is.na(sitenumber)) || is.null(sitenumber) || length(sitenumber) == 0 || length(sitenumber) > 1 ||
-      all(sitenumber %in% "") || all(sitenumber) %in% "overall" || all(sitenumber) < 0) {
-    sitenumber <- -1
-  }
   sitenumber <- as.numeric(sitenumber)
-
+  if (all(is.na(sitenumber)) || is.null(sitenumber) || length(sitenumber) == 0 || all(sitenumber %in% "") || all(sitenumber) %in% 0 || all(sitenumber) < 0) {
+    sitenumber <- 0
+  }
   ### > nsites ####
   nsites <- NROW(ejamitout$results_bysite[ejamitout$results_bysite$valid %in% TRUE, ]) # might differ from ejamout1$sitecount_unique
-  if (all(is.na(sitenumber)) || sitenumber > nsites) {
-    sitenumber <- -1
-  }
-  ## radius ####
-  rad <- ejamitout$results_bysite$radius.miles[1]
-  if (is.na(rad) || rad %in% 999) {rad <- 0}
 
   ## OVERALL ###################################################
 
-  if (sitenumber %in% -1 && nsites == 1) {
+  if (sitenumber %in% 0 && nsites == 1) {
     sitenumber <- 1
   }
 
-  if (sitenumber %in% -1) {
+   if (sitenumber %in% 0) {
 
     ejamout1 <- ejamitout$results_overall # one row
     ejamout1$valid <- TRUE
@@ -182,14 +167,7 @@ sitetype <- ejamitout$sitetype
 
     ## > fips bounds ####
     if (submitted_upload_method %in% "FIPS" && is.null(shp)) {
-      shp <- shapes_from_fips(ejamitout$results_bysite$ejam_uniq_id)
-
-      ## ONCE WE IMPLEMENT BUFFERING radius IN FIPS CASE, since we just downloaded bounds, we have to add the buffering
-
-      if (!is.null(rad) && !(all(is.na(rad))) && rad > 0 && rad != 999) {
-        warning("adding buffer around fips is not yet implemented")
-        # shp <- shape_buffered_from_shapefile(shp, radius.miles = rad)
-      }
+      shp <- shapes_from_fips(ejamitout$results_bysite$fips)
     }
   } else {
 
@@ -225,8 +203,11 @@ sitetype <- ejamitout$sitetype
     #
     # as adapted from app_server
 
+    rad <- ejamout1$radius.miles
     # nsites
     popstr <- prettyNum(round(ejamout1$pop, table_rounding_info("pop")), big.mark = ',')
+
+    sitetype <- ejamitout$sitetype  # sitetype <- tolower(submitted_upload_method) # did not work here
 
     if (sitetype == "shp" && is.null(shp)) {
       # this should not happen unless ejam2report() got called for shp analysis results but user did not provide the bounds
@@ -325,34 +306,34 @@ sitetype <- ejamitout$sitetype
     rmd_template <- system.file("report/community_report/combine_after_build_community_report.Rmd", package = "EJAM")
 
     #Barplot from community report
-    bplot <- plot_barplot_ratios_ez(ejamitout) # + ggplot2::guides(fill = ggplot2::guide_legend(nrow = 2)) # all done by that function now
+    plot <- plot_barplot_ratios_ez(ejamitout) + ggplot2::guides(fill = ggplot2::guide_legend(nrow = 2))
 
     # This presumes shp was provided in SHP cases
-    if (sitenumber %in% -1 || is.null(sitenumber) || length(sitenumber) == 0 || sitenumber %in% 0) {
+    if (is.null(sitenumber) || length(sitenumber) == 0 || sitenumber %in% 0) {
       # Map from community report should be ALL the sites that were passed here, UNLESS sitenumber param was used to pick 1
       if (sitetype %in% c("fips", "shp") && !is.null(shp)) {
         map <- ejam2map(ejamitout = ejamitout$results_bysite, shp = shp, launch_browser = FALSE) # it figures out radius if used
       } else {
-        map <- ejam2map(ejamitout = ejamitout, launch_browser = FALSE)
+        map <- mapfastej(ejamitout)
       }
     } else {
       # just 1 site specified by sitenumber so map should show just that 1 site! shp and ejamout1 both 1 row already in this case
       if (sitetype %in% c("fips", "shp") && !is.null(shp)) {
-        map <- ejam2map(ejamitout = ejamitout, shp=shp, launch_browser = FALSE, sitenumber = sitenumber) # it figures out radius if used
+        map <- ejam2map(ejamitout = ejamout1, shp = shp, launch_browser = FALSE) # it figures out radius if used
       } else {
-        map <- ejam2map(ejamitout = ejamitout, launch_browser = FALSE, sitenumber = sitenumber)
+        map <- mapfastej(ejamout1)
       }
     }
     if (is.null(map)) {
       report_params <- list(
         community_html = community_html,
-        plot = bplot
+        plot = plot
 
       )
     } else {
       report_params <- list(
         community_html = community_html,
-        plot = bplot,
+        plot = plot,
         map = map
       )
     }

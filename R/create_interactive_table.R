@@ -8,16 +8,16 @@
 #' @param reports ignored for now - info about which URLs/links/reports columns to include among those already in out
 #' @param columns_used if specified in server based on defaults or inputs, these are a subset of
 #'   colnames from ejamit()$results_bysite  to show in site-by-site interactive table
-#' @param site_report_download_colname header for column to create with buttons to download 1-site reports in shiny app
-#' @param show_1site_download_buttons if TRUE, add column near first with buttons to allow download of 1-site html summary report
+#' @param sitereport_download_buttons_colname header for column to create with buttons to download 1-site reports in shiny app
+#' @param sitereport_download_buttons_show if TRUE, add column near first with buttons to allow download of 1-site html summary report
 #' @keywords internal
 #'
 create_interactive_table <- function(out,
                                      reports = EJAM:::global_or_param("default_reports"),
-                                     site_report_download_colname = "Download EJAM Report",
+                                     sitereport_download_buttons_colname = "Download EJAM Report",
+                                     sitereport_download_buttons_show = TRUE,
                                      # can limit columns to just some important subset:
-                                     columns_used = NULL,
-                                     show_1site_download_buttons = TRUE
+                                     columns_used = NULL
 ) {
 
   ################################################################################################### #
@@ -56,7 +56,7 @@ create_interactive_table <- function(out,
 
   ## BUTTONS for 1-site reports ####
 
-  if (show_1site_download_buttons) {
+  if (sitereport_download_buttons_show) {
   # function to create shiny UI buttons, one per row (site), to download 1-site report for given site
   shinyInputmaker <- function(FUN, len, id, ...) {
     inputs <- character(len)
@@ -67,7 +67,7 @@ create_interactive_table <- function(out,
   }
   index <- 1:NROW(x)
   buttoncolumn <- shinyInputmaker(
-    FUN = actionButton,
+    FUN = shiny::actionButton,
     len = length(index),
     id = paste0('button_', index),
     label = "Download",
@@ -75,7 +75,7 @@ create_interactive_table <- function(out,
   )
   x$buttoncolumn <- buttoncolumn
   x <- dplyr::relocate(x, buttoncolumn)  # will be second column
-  names(x) <- gsub("buttoncolumn", site_report_download_colname, names(x))
+  names(x) <- gsub("buttoncolumn", sitereport_download_buttons_colname, names(x))
   # x <- dplyr::relocate(x, ejam_uniq_id) # done in ejam2tableviewer()
 }
   ################################################################################################### #
@@ -115,7 +115,7 @@ create_interactive_table <- function(out,
 #
 #   cols_to_select <- c('ejam_uniq_id', 'invalid_msg',
 #                       'pop',
-#                       'site_report_download_colname_placeholder', # #################### #
+#                       'sitereport_download_buttons_colname_placeholder', # #################### #
 #                       hyperlink_header, # vector of colnames of reports
 #                       names_d, names_d_subgroups,
 #                       names_e #,
@@ -124,7 +124,7 @@ create_interactive_table <- function(out,
 #   tableheadnames <- c('Site ID',
 #                       'Est. Population',
 #                       # # or  Barplot/Community Report   here
-#                       site_report_download_colname,
+#                       sitereport_download_buttons_colname,
 #                       hyperlink_header, # vector of colnames of reports
 #                       fixcolnames(c(names_d, names_d_subgroups, names_e), 'r', 'shortlabel'))
 #
@@ -171,9 +171,9 @@ create_interactive_table <- function(out,
 #     dplyr::rowwise() %>%
 #     dplyr::mutate(
 #       pop = ifelse(valid == TRUE, pop, NA),
-#       # site_report_download_colname =
+#       # sitereport_download_buttons_colname =
 #       # `Download EJAM Report`
-#       site_report_download_colname_placeholder = ifelse(
+#       sitereport_download_buttons_colname_placeholder = ifelse(
 #         valid == TRUE,
     #
 #         shinyInputmaker(
@@ -188,7 +188,7 @@ create_interactive_table <- function(out,
 #     dplyr::ungroup() %>%
 #     dplyr::select(dplyr::all_of(cols_to_select), ST)
 #
-#   names(dt) <- gsub("site_report_download_colname_placeholder", site_report_download_colname, names(dt))
+#   names(dt) <- gsub("sitereport_download_buttons_colname_placeholder", sitereport_download_buttons_colname, names(dt))
 #
 #
 #   ############################## #

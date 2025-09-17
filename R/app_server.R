@@ -2086,6 +2086,7 @@ app_server <- function(input, output, session) {
       # sitenumber not relevant for overall report
       # ejam_uniq_id not relevant for overall report
     )
+    pkg_relative_path = function(fpath) {gsub((system.file( "", package = "EJAM")), "", fpath)}
 
     full_page <- build_community_report(in_shiny = TRUE,
 
@@ -2103,8 +2104,8 @@ app_server <- function(input, output, session) {
 
                                         filename = NULL,
                                         report_title = EJAM:::global_or_param("report_title"),
-                                        logo_path    = EJAM:::global_or_param("report_logo"),
-                                        logo_html = NULL # NOT app_logo_html... gets defined downstream
+                                        logo_path = pkg_relative_path(EJAM:::global_or_param("report_logo")), # use relative path, not full path #  # NULL means default, "" means no logo
+                                        logo_html = NULL # this is the report logo, NOT app_logo_html... and gets defined downstream based on logo_path
     )
 
     ## return generated HTML
@@ -2432,8 +2433,8 @@ app_server <- function(input, output, session) {
         extratable_title_top_row = input$extratable_title_top_row,
         extratable_list_of_sections = EJAM:::global_or_param("default_extratable_list_of_sections"),
         extratable_hide_missing_rows_for = input$extratable_hide_missing_rows_for,
-        logo_path = EJAM:::global_or_param("report_logo"),
-        logo_html = NULL
+        logo_path =  EJAM:::global_or_param("report_logo"), # use FULL path for ejam2report() unlike for UI build # app_sys("report/community_report/ejamhex4.png"),   # NULL means default, "" means no logo
+        logo_html = NULL # this is the report logo, NOT app_logo_html... and gets defined downstream based on logo_path
       )
     }
   )
@@ -2552,8 +2553,8 @@ cat("Clicked on site #", sitenumber, "for a 1-site report\n")
                              #  (among those already created in data_processed() via ejamit() etc.)
                              #  could change to be an input$ in advanced tab possibly:
                              reports = EJAM:::global_or_param("default_reports"),
-                             show_1site_download_buttons = input$show_1site_download_buttons,
-                             site_report_download_colname = "Download EJAM Report", # for DOWNLOAD BUTTON in each row, to get 1-site reports. could change to be an input$ in advanced tab possibly
+                             sitereport_download_buttons_show = input$sitereport_download_buttons_show,
+                             sitereport_download_buttons_colname = "Download EJAM Report", # for DOWNLOAD BUTTON in each row, to get 1-site reports. could change to be an input$ in advanced tab possibly
 
                              columns_used = input$bysite_webtable_colnames
                              ## if NULL, uses all available from data_processed()

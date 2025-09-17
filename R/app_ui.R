@@ -1311,9 +1311,9 @@ app_ui  <- function(request) {
 
                  shiny::renderUI("bysite_webtable_colnames_ui"),
 
-                 checkboxInput("show_1site_download_buttons",
+                 checkboxInput("sitereport_download_buttons_show",
                                label = "Show column of buttons that download 1-site report per row",
-                               value = isTRUE(EJAM:::global_or_param("show_1site_download_buttons"))),
+                               value = isTRUE(EJAM:::global_or_param("sitereport_download_buttons_show"))),
 
                  ######################################################## #
                  ### Plots on webpages ####
@@ -1520,11 +1520,14 @@ golem_add_external_resources <- function() {
     "www",
     app_sys("app/www") #   points to  installed/EJAM/app/www which is same as   source/EJAM/inst/app/www
   )
-
   golem::add_resource_path(
-    "community_report",
-    app_sys("report/community_report") #   points to  installed/EJAM/report/community_report which is same as   source/EJAM/inst/report/community_report
+    "report",
+    app_sys("report")
   )
+  # golem::add_resource_path(
+  #   "community_report",
+  #   app_sys("report/community_report") #   points to  installed/EJAM/report/community_report which is same as   source/EJAM/inst/report/community_report
+  # )
 
   tags$head(
 

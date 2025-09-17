@@ -594,7 +594,8 @@ generate_report_footnotes <- function(
 #' @param in_shiny, whether the function is being called in or outside of shiny - affects location of header
 #' @param report_title generic name of this type of report, to be shown at top, like "EJAM Multisite Report"
 #' @param logo_path optional relative path to a logo for the upper right of the overall header.
-#'   Ignored if logo_html is specified and not NULL, but otherwise uses default or param set in ejamapp()
+#'   Ignored if logo_html is specified and not NULL, but otherwise uses default or param set in ejamapp(),
+#'   but NULL means default and "" means omit logo entirely.
 #' @param logo_html optional HTML for img of logo for the upper right of the overall header.
 #'   If specified, it overrides logo_path. If omitted, gets created based on logo_path.
 #'
@@ -627,23 +628,81 @@ generate_html_header <- function(analysis_title,
   #     cat("TRYING TO USE logo_path = ", logo_path, "\n")
   #   }
   # }
+  ########## #
+  # helper function picking report logo info -- helps to decide which parameter to use or when to use defaults or warn
+  report_logo_html_from_inputs = function(logo_path, logo_html) {
 
-  if (is.null(logo_html)) {
-    if (is.null(logo_path) || !file.exists(logo_path) ) {
-      # truly want nothing as logo or cant find and should omit logi without it looking like a problem
-      logo_html <- ""
-    } else {
-      # add padding and adjust size so that the img_html object is a bit lower on the screen and does not get shrunk
-      # note this is NOT the same as app_logo_html since it is for the report not app webpage header
-      logo_html <- paste0('<img src=\"', logo_path, '\" alt=\"logo\" width=\"220\" height=\"70\">')
+    default_logo_path <- EJAM:::global_or_param("report_logo")
+
+    pkg_relative_path = function(fpath) {gsub((system.file( "", package = "EJAM")), "", fpath)}
+    #### might need RELATIVE not absolute path here, though. See app_server.R
+    #
+    # default_logo_path <-  pkg_relative_path(default_logo_path) # maybe ***
+    # logo_path <- pkg_relative_path(logo_path)                  # maybe ***
+
+    default_logo_html <- paste0('<img src=\"', default_logo_path, '\" alt=\"logo\" width=\"220\" height=\"70\">')
+    notempty <- function(z) {!is.null(z) & !("" %in% z)}
+
+    # if both NULL, use defaults to create html
+    if (is.null(logo_path) && is.null(logo_html)) {
+      return(default_logo_html)
     }
+    # if logo_path NULL and logo_html "", warn of conflict and use defaults to make html from path (ignore empty html)
+    if (is.null(logo_path) && ("" %in% logo_html)) {
+      return(default_logo_html)
+    }
+
+    # if both "", omit logo
+    if (("" %in% logo_path) && ("" %in% logo_html)) {
+      return("")
+    }
+    # if logo_path "" and logo_html NULL, omit logo (dont warn)
+    if (("" %in% logo_path) && is.null(logo_html)) {
+      return("")
+    }
+
+    # if both PROVIDED as not null and not empty,  try to use given html (and ignore given path)
+    if (notempty(logo_path) && notempty(logo_html)) {
+      # warn if html not seem to match path or a valid path?
+      path_from_html <- gsub(".*img src=.(.*). alt.*", "\\1", logo_html)
+      if (!file.exists(path_from_html)) {
+        warning("logo_html seems to point to -- but cannot find -- ", path_from_html, ", but will try using logo_html as provided")
+      }
+      return(logo_html)
+    }
+    # if logo_path NULL or "", but logo_html PROVIDED as not null not empty, try to use given html  (and ignore given path)
+    if (!notempty(logo_path) && notempty(logo_html)) {
+      #  warn if html not seem ok ?
+      path_from_html <- gsub(".*img src=.(.*). alt.*", "\\1", logo_html)
+      if (!file.exists(path_from_html)) {
+        warning("logo_html seems to point to -- but cannot find -- ", path_from_html, ", but will try using logo_html as provided")
+      }
+      return(logo_html)
+    }
+
+    # if logo_path PROVIDED as not null and not empty, and logo_html NULL or "", (warn?) try to use path to make html (and ignore given html)
+    if (notempty(logo_path) && !notempty(logo_html)) {
+      if (!file.exists(logo_path)) {
+        warning("cannot find ", logo_path, " but will try to use it for the logo on report")
+        # return("") # to be safe could omit logo if seems like file not available
+      }
+      logo_html <- paste0('<img src=\"', logo_path, '\" alt=\"logo\" width=\"220\" height=\"70\">')
+      return(logo_html)
+    }
+
+    # catchall
+    return(default_logo_html)
   }
+
+
+  logo_html <- report_logo_html_from_inputs(logo_path = logo_path, logo_html = logo_html)
+
+########## #
   if (is.null(report_title)) {
     if (shiny::isRunning()) {
       report_title <- EJAM:::global_or_param("report_title")
     } else {
-      report_title <- EJAM:::global_or_param("report_title") # should work now
-      # report_title <- global_defaults_package$report_title
+      report_title <- EJAM:::global_or_param("report_title") # was # report_title <- global_defaults_package$report_title
     }
   }
 
@@ -667,7 +726,7 @@ generate_html_header <- function(analysis_title,
     '<div id="header-primary-background">',
     '<div id="header-primary-background-inner">',
 
-    '<h1 id="title" tabindex="0">',          report_title,
+    '<h1 id="title" tabindex="0">',            report_title,
     '</h1>',
     '<p>This report summarizes environmental and residential population information for user-defined areas,',
     '<br>and combines that data into indexes.</p>',
@@ -679,11 +738,11 @@ generate_html_header <- function(analysis_title,
 
     '<div class="header">
        <div>
-        <h2 id="placename">',                analysis_title,
+        <h2 id="placename">',                  analysis_title,
     '</h2>
       </div>
     <div>
-     <h5>',                                     locationstr,
+     <h5>',                                    locationstr,
     '<br>Population: <span id="TOTALPOP">',    totalpop,
     '</span><br></h5>
     </div>

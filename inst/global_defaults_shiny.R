@@ -361,10 +361,10 @@ global_defaults_shiny <- list(
 
   ## ------------------------ by-site interactive web table ####
 
-  show_1site_download_buttons = TRUE,
+  sitereport_download_buttons_show = TRUE,
 
   default_bysite_webtable_colnames = c('ejam_uniq_id',
-                                       # site_report_download_colname will go here
+                                       # sitereport_download_buttons_colname will go here
                                        sapply(EJAM:::global_or_param("default_reports"), function(x) x$header), # vector of colnames of reports
                                        'lon', 'lat', "statename", 'invalid_msg',
                                        'pop',
@@ -437,8 +437,8 @@ global_defaults_shiny <- list(
 
   ## ------------------------ Short report options ####
 
-  ## TO TURN OFF THE LOGO in the REPORT HEAADER
-  report_logo = "",
+  ## TO TURN OFF THE LOGO in the REPORT HEADER, set these to empty ""
+  # report_logo = "", report_html = "",
   ## but to  use the logo, should be left as-set in global_defaults_package.R
 
   default_standard_analysis_title = 'Summary of Analysis', # Default title to show on each short report
