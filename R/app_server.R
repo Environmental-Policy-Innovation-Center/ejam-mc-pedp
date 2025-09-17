@@ -2554,7 +2554,7 @@ cat("Clicked on site #", sitenumber, "for a 1-site report\n")
                              #  could change to be an input$ in advanced tab possibly:
                              reports = EJAM:::global_or_param("default_reports"),
                              sitereport_download_buttons_show = input$sitereport_download_buttons_show,
-                             sitereport_download_buttons_colname = "Download EJAM Report", # for DOWNLOAD BUTTON in each row, to get 1-site reports. could change to be an input$ in advanced tab possibly
+                             sitereport_download_buttons_colname = input$sitereport_download_buttons_colname, # "Download EJAM Report", # for DOWNLOAD BUTTON in each row, to get 1-site reports. could change to be an input$ in advanced tab possibly
 
                              columns_used = input$bysite_webtable_colnames
                              ## if NULL, uses all available from data_processed()
@@ -2562,7 +2562,7 @@ cat("Clicked on site #", sitenumber, "for a 1-site report\n")
   })
   #############################################################################  #
   ### UI for picking columns to show in table of sites  ####
-
+  # but note this is not the same as controlling the url report columns defined by default_reports
   output$bysite_webtable_colnames_ui <- renderUI({
 
     choicelist =  list(names(testoutput_ejamit_10pts_1miles$results_overall))

@@ -1311,6 +1311,13 @@ app_ui  <- function(request) {
 
                  shiny::renderUI("bysite_webtable_colnames_ui"),
 
+                 # default_reports is not adjustable here-  changing this in advance tab is complicated since it is a list of functions, etc.
+
+                 # sitereport_download_buttons_colname = "Download EJAM Report", # input$sitereport_download_buttons_colname
+                 shiny::textInput("sitereport_download_buttons_colname",
+                                  label = "Name of column of uttons that download 1-site report per row",
+                                  value = EJAM:::global_or_param("sitereport_download_buttons_show")),
+
                  checkboxInput("sitereport_download_buttons_show",
                                label = "Show column of buttons that download 1-site report per row",
                                value = isTRUE(EJAM:::global_or_param("sitereport_download_buttons_show"))),
@@ -1348,13 +1355,13 @@ app_ui  <- function(request) {
                  h3("Spreadsheet of results"),
 
 
-                 # default_reports ?
+                 # default_reports ? changing this in advance tab is complicated since it is a list of functions, etc.
 
                  checkboxInput(inputId = "ok2plot",
                                label = "OK to try to plot graphics and include in Excel download",
                                value = EJAM:::global_or_param("default_ok2plot")),
 
-                 p("May add more options here TBD"),
+                 # p("May add more options here TBD"),
 
                  # heatmap column names
 

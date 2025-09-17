@@ -361,7 +361,8 @@ global_defaults_shiny <- list(
 
   ## ------------------------ by-site interactive web table ####
 
-  sitereport_download_buttons_show = TRUE,
+  sitereport_download_buttons_show = FALSE,
+  sitereport_download_buttons_colname = "Download EJAM Report",
 
   default_bysite_webtable_colnames = c('ejam_uniq_id',
                                        # sitereport_download_buttons_colname will go here
