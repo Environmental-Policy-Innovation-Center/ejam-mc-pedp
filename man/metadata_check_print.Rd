@@ -14,6 +14,11 @@ same as \code{\link[=metadata_check]{metadata_check()}}, invisibly
 helper function in updating the package metadata, used by scripts in /data-raw/
 prints to console info about some missing metadata
 }
+\examples{
+# x = metadata_check( which = "ejam_package_version")
+# x[!x$ejam_package_version \%in\% "2.32.6", ]
+
+}
 \seealso{
 \code{\link[=metadata_check_print]{metadata_check_print()}} \code{\link[=metadata_check]{metadata_check()}} \code{\link[=metadata_add]{metadata_add()}} \code{\link[=metadata_update_attr]{metadata_update_attr()}}
 }

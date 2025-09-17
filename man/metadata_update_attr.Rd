@@ -8,7 +8,8 @@ updates EJAM/data/*.rda (BUT NOT ARROW & NOT TXT FILES)}
 metadata_update_attr(
   x = pkg_data("EJAM")$Item,
   attr_name = "ejam_package_version",
-  newvalue = desc::desc_get("Version")
+  newvalue = desc::desc_get("Version"),
+  exclude_atomic_vectors = TRUE
 )
 }
 \arguments{
@@ -17,6 +18,9 @@ metadata_update_attr(
 \item{attr_name}{e.g. "ejam_package_version"}
 
 \item{newvalue}{the new value of that attribute}
+
+\item{exclude_atomic_vectors}{if TRUE, avoids updating attributes on atomic vectors like names_e,
+since it is distracting when printing them to console}
 }
 \description{
 helper func to update 1 metadata attribute (e.g. "ejam_package_version") in all pkg datasets

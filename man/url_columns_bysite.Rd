@@ -77,6 +77,22 @@ URL functions - Compile URLs in columns, for EJAM
 \details{
 used in \code{\link[=table_xls_format]{table_xls_format()}}, and server, to create hyperlinks to reports or webpages, one per site
 }
+\examples{
+x =  url_columns_bysite(testpoints_10[1:2,], radius = 1)
+
+x =  url_columns_bysite(
+  data.frame(lat=1:2, lon=101:102), radius = 1,
+  INFO_FOR_SITE2 = c(NA, "site2"),
+  Place1info = c("North", ""),
+  keylist_bysite = list(newkey_all_sites = "YES",
+                        site_name = c("NRO", "CRS"))
+  )
+unlinkify(x[[2]])
+x = x[[1]]
+x = x[, "EJAM Report"]
+unlinkify(x)
+
+}
 \seealso{
 \code{\link[=url_ejscreen_report]{url_ejscreen_report()}} \code{\link[=url_ejscreenmap]{url_ejscreenmap()}} \code{\link[=url_echo_facility]{url_echo_facility()}} \code{\link[=url_ejscreenapi_clusters_and_sort_cols]{url_ejscreenapi_clusters_and_sort_cols()}}
 }

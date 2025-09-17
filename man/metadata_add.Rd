@@ -6,6 +6,7 @@
 \usage{
 metadata_add(
   x,
+  metadata = NULL,
   update_date_saved_in_package = TRUE,
   update_ejam_package_version = TRUE
 )
@@ -13,6 +14,9 @@ metadata_add(
 \arguments{
 \item{x}{dataset (or any object) whose metadata (stored as attributes) you want to update or create
 EJAM, EJSCREEN, and other dataset versions and release dates are tracked in DESCRIPTION}
+
+\item{metadata}{optional - when omitted, it checks metadata_mapping using get_metadata_mapping().
+Can provide a list of key=value attributes to add}
 
 \item{update_date_saved_in_package}{can set to FALSE to avoid changing this attribute}
 

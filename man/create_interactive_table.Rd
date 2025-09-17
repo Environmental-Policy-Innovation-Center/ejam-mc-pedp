@@ -7,9 +7,9 @@
 create_interactive_table(
   out,
   reports = EJAM:::global_or_param("default_reports"),
-  site_report_download_colname = "Download EJAM Report",
-  columns_used = NULL,
-  show_1site_download_buttons = TRUE
+  sitereport_download_buttons_colname = "Download EJAM Report",
+  sitereport_download_buttons_show = TRUE,
+  columns_used = NULL
 )
 }
 \arguments{
@@ -17,12 +17,12 @@ create_interactive_table(
 
 \item{reports}{ignored for now - info about which URLs/links/reports columns to include among those already in out}
 
-\item{site_report_download_colname}{header for column to create with buttons to download 1-site reports in shiny app}
+\item{sitereport_download_buttons_colname}{header for column to create with buttons to download 1-site reports in shiny app}
+
+\item{sitereport_download_buttons_show}{if TRUE, add column near first with buttons to allow download of 1-site html summary report}
 
 \item{columns_used}{if specified in server based on defaults or inputs, these are a subset of
 colnames from ejamit()$results_bysite  to show in site-by-site interactive table}
-
-\item{show_1site_download_buttons}{if TRUE, add column near first with buttons to allow download of 1-site html summary report}
 }
 \description{
 Builds site by site table after an analysis in EJAM app. Pulls in uploaded and analyzed data to create table

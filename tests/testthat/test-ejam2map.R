@@ -43,8 +43,7 @@ test_that("ejam2map() works fips given shp, radius=1", {
   expect_no_error({
     suppressWarnings({
       x = ejam2map(testoutput_ejamit_fips_counties,
-                   shp = shapes_from_fips(  testinput_fips_counties),
-                   radius = 1
+                   shp = shapes_from_fips(  testinput_fips_counties)
       )
     })
   })

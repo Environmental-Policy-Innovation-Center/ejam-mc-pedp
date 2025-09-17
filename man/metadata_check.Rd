@@ -37,6 +37,8 @@ It loads unloaded packages as needed, which you might not want it to do,
 but it is not coded to be able to check attributes without doing that.
 }
 \examples{
+x = metadata_check( which = "ejam_package_version")
+x[!x$ejam_package_version \%in\% "2.32.6", ]
 
   # tail(EJAM:::metadata_check( ))
   EJAM:::metadata_check(packages = NULL)

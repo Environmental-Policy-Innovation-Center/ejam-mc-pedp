@@ -22,7 +22,7 @@ pkg_update_testpoints_testoutputs <- function(
 
   resaving_testpoints_rda       = TRUE,
   resaving_testpoints_excel     = TRUE,
-  resaving_testpoints_helpdocs  =   TRUE,
+  resaving_testpoints_helpdocs  = TRUE,
   resaving_testpoints_bad       = TRUE,
 
   recreating_getblocksnearby    = TRUE,  # eg if block data changed, or if recreating_doaggregate_output = TRUE b
@@ -292,7 +292,7 @@ pkg_update_testpoints_testoutputs <- function(
     if (n < 10000) { # dont save huge files
 
       namebase <- "testoutput_doaggregate_"
-
+      # testoutput_doaggregate_10pts_1miles, testoutput_doaggregate_100pts_1miles, testoutput_doaggregate_1000pts_1miles
       out_varname_doagg = paste0(namebase, n, "pts_", myrad, "miles")
       if (recreating_doaggregate_output) {
         ## NOTE THE DEFAULTS:    args(EJAM::doaggregate)
@@ -454,11 +454,21 @@ pkg_update_testpoints_testoutputs <- function(
 ############################################# #
 
   cat('
-    REMEMBER TO UPDATE .Rd files PACKAGE DOCUMENTATION:
-    devtools::document()  # for .Rd help files. or Clean and INSTALL package
-    see EJAM/data-raw/datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R  for the documentation website
-    devtools::build_manual()  # for pdf manual
-    postdoc::render_package_manual()  # for html manual
+  REMEMBER TO UPDATE .Rd files PACKAGE DOCUMENTATION:
+
+  devtools::document()  # for .Rd help files. or Clean and INSTALL package
+  devtools::build_manual()  # for pdf manual
+  postdoc::render_package_manual()  # for html manual
+
+  See also EJAM/data-raw/datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R  for the documentation website
+  See also
+
+  metadata_update_attr() # to update attributes like package version in all datasets
+
+  devtools::install_local(build = FALSE, upgrade = "never")
+
+  rstudioapi::restartSession(clean = TRUE)
+
     \n')
 
 }

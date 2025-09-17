@@ -20,12 +20,15 @@ attributes2 = function(x) {
 #'
 #' @param attr_name e.g. "ejam_package_version"
 #' @param newvalue the new value of that attribute
-#'
+#' @param exclude_atomic_vectors if TRUE, avoids updating attributes on atomic vectors like names_e,
+#'   since it is distracting when printing them to console
 #' @seealso [metadata_check_print()] [metadata_check()] [metadata_add()] [metadata_update_attr()]
 #'
 #' @keywords internal
 #'
-metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_package_version", newvalue = desc::desc_get("Version")) {
+metadata_update_attr <- function(x = pkg_data('EJAM')$Item,
+                                 attr_name = "ejam_package_version", newvalue = desc::desc_get("Version"),
+                                 exclude_atomic_vectors = TRUE) {
 
   # x param is vector of names of data objects to update in the source package
   fnamesimplied = tolower(paste0(x, ".rda"))
@@ -33,12 +36,15 @@ metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_pa
   whichisrdafound = which(fnamesimplied %in% fnamesfound)
   x = x[whichisrdafound]
   # that should exclude ejamdata_version.txt
-  #  and excludes all the .arrow files ! those should get metadata updated separately ?
+  #  and excludes all the .arrow files ! those should get metadata updated separately ? ***
 
   cat("newvalue is: \n")
   print(newvalue)
 
   for (i in 1:length(x))  {
+    if (exclude_atomic_vectors && is.atomic(get(x[i])) && is.vector(get(x[i]))) {
+      # ignore this object
+    } else {
     src = paste0("attr(", x[i], ", '", attr_name, "') <- newvalue")
     # e.g.,   attr(avg.in.us, "ejam_package_version") <- desc::desc_get("Version")
     print(src)
@@ -46,6 +52,7 @@ metadata_update_attr <- function(x = pkg_data('EJAM')$Item, attr_name = "ejam_pa
     src = paste0("usethis::use_data(", x[i], ", overwrite = TRUE)")
     print(src)
     eval(parse(text = src))
+  }
   }
   cat("datasets have been updated\n")
   return(NULL)
@@ -143,6 +150,10 @@ metadata_add <- function(x, metadata=NULL,
 #' prints to console info about some missing metadata
 #' @inheritParams metadata_check
 #' @return same as [metadata_check()], invisibly
+#' @examples
+#' # x = metadata_check( which = "ejam_package_version")
+#' # x[!x$ejam_package_version %in% "2.32.6", ]
+#'
 #' @seealso [metadata_check_print()] [metadata_check()] [metadata_add()] [metadata_update_attr()]
 #' @keywords internal
 #'
@@ -155,10 +166,21 @@ metadata_check_print = function(...) {
   print(t(head(x,1)))
   cat("\n\n")
   ## see which data objects have outdated or missing metadata about ejam_package_version, etc.
+
+  if (all("has_metadata" %in% names(x), "date_saved_in_package" %in% names(x), "ejam_package_version" %in% names(x)  )) {
   y <- x[(x$has_metadata %in% FALSE) | is.na(x$date_saved_in_package)  |  is.na(x$ejam_package_version) | !(x$ejam_package_version %in% desc::desc_get("Version")), ]
   y <- y[order( is.na(y$date_saved_in_package), y$ejam_package_version, y$has_metadata), ]
+  } else {
+    if ("ejam_package_version" %in% names(x)) {
+      cat("Not latest ejam_package_version \n\n")
+      print(
+        x[!(x$ejam_package_version %in% desc::desc_get("Version")),  ]
+      )
+    }
+    y <- x
+  }
   rownames(y) <- NULL
-  y[,  c('item', 'ejam_package_version', 'date_saved_in_package', 'has_metadata')]
+  y[,  intersect(c('item', 'ejam_package_version', 'date_saved_in_package', 'has_metadata'), names(y))]
   cat("\n\n See which data objects have outdated or missing metadata about ejam_package_version, etc. \n\n")
   print(y)
   cat("\n\n")
@@ -169,10 +191,12 @@ metadata_check_print = function(...) {
   cat("\n\n")
   # --------------------------------------------------------------------------------- -
   ## see ACS version info and date saved
+  if ("acs_version" %in% names(x)) {
   print(table(How.many.have.acs_version = x$acs_version, useNA = 'always'))
-  z = x[is.na(y$acs_version), c('item', 'date_saved_in_package', 'acs_version' )]
+  z = x[is.na(x$acs_version), intersect(c('item', 'date_saved_in_package', 'acs_version' ), names(x))]
   cat("\n\n see where is ACS version info missing, and date saved \n\n")
   print(z[order(z$item), ])
+  }
   ## probably should have acs_version:  usastats, testoutput_*
   invisible(x)
 }
@@ -200,6 +224,8 @@ metadata_check_print = function(...) {
 #' @seealso [metadata_check_print()] [metadata_check()] [metadata_add()] [metadata_update_attr()]
 #'   [pkg_functions_and_data()]
 #' @examples
+#' x = metadata_check( which = "ejam_package_version")
+#' x[!x$ejam_package_version %in% "2.32.6", ]
 #'
 #'   # tail(EJAM:::metadata_check( ))
 #'   EJAM:::metadata_check(packages = NULL)
@@ -343,9 +369,9 @@ metadata_check <- function(packages = EJAM::ejampackages,
     }
     ############################################### #
 
-    if (length(which) == 1) {    # this case was not working yet
-
-      results <- cbind(sapply(rdafiles, FUN = get1attribute, which))
+    # if (length(which) == 1) {    # this case was not working yet
+if (FALSE) {
+      results <- cbind(sapply(rdafiles, FUN = get1attribute, which, dates_as_text = TRUE))
       colnames(results) <- which
 
       results$has_metadata <- FALSE
@@ -364,8 +390,8 @@ metadata_check <- function(packages = EJAM::ejampackages,
         wasnotloaded <- NULL
       }
 
-      if (length(which) == 1) {
-
+      # if (length(which) == 1) {
+        if (FALSE) {
         results <- cbind(sapply(rdafiles, FUN = get1attribute, which, dates_as_text = TRUE))
         colnames(results) <- which
 
