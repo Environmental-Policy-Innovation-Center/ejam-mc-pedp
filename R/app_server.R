@@ -2714,7 +2714,7 @@ cat("Clicked on site #", sitenumber, "for a 1-site report\n")
                    choiceNames = c('Residential Populations', 'Environmental',
                                    'EJ Index', 'Suppl. EJ Index'), # displayed versions of names
                    choiceValues = c('Demographic', 'Environmental',
-                                    'EJ Index', 'Supplementary Index'), # internal versions of name types as found in map_headernames
+                                    'EJ Index', 'Supplementary EJ Index'), # internal versions of name types as found in map_headernames
                    selected = "Environmental")
     } else {
       radioButtons(inputId = 'summ_bar_ind',
