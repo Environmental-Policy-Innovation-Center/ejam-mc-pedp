@@ -46,3 +46,6 @@ x = shape2geojson(shp)
 nchar(x)
 
 }
+\seealso{
+\code{\link[=shapefile_from_any]{shapefile_from_any()}} \code{\link[=shapefile_from_geojson_text]{shapefile_from_geojson_text()}}
+}

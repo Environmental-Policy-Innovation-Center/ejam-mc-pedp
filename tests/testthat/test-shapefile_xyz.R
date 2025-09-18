@@ -39,8 +39,8 @@ testthat::test_that("test data files are available", {
     testfilename_shp_alone <- system.file("testdata/shapes/portland_folder_shp/Neighborhoods_regions.shp", package = "EJAM") # Neighborhoods_regions.shp
     testfilenameset_4 <- shapefile_filepaths_validize(testfilename_shp_alone)
     junk <- capture.output({
-    testshape        <- shapefile_from_folder(testfilename_dirshp)
-    # could also use  testshapes_2
+      testshape        <- shapefile_from_folder(testfilename_dirshp)
+      # could also use  testshapes_2
     })
     testshape_points <- shapefile_from_sitepoints(testpoints_10)
   })
@@ -61,8 +61,79 @@ testthat::test_that("test data files are available", {
   #  ##"portland_shp.zip"  ### "stations_shp.zip" "stations.zip"
 })
 ################################################################ #
-
+testthat::test_that("shapefile_from_geojson_text(1 polygon) is inverse of shape2geojson()", {
+  expect_no_error({
+    shp1 = testinput_shapes_2[1,]
+    txt = shape2geojson(shp1)
+    shp2 = shapefile_from_geojson_text(txt)
+  })
+  ## ALMOST identical but columns reordered, attributes change a bit, and space removed in a name
+  # > all.equal( shp1b, shp2 , check.attributes=F)
+  # [1] "Component “NAMELSAD”: 1 string mismatch"
+  # > shp1b$NAMELSAD
+  # [1] "Riverview CDP"
+  # > shp2$NAMELSAD
+  # [1] "RiverviewCDP"
+  expect_setequal(names(shp2),
+                  names(shp1)
+  )
+  expect_setequal(names(attributes(shp2$geometry)),
+                  names(attributes(shp1$geometry))
+  )
+  expect_true(
+    all.equal(shp2$geometry, shp1$geometry, check.attributes=FALSE)
+  )
+  expect_equal(
+    NROW(shp2),
+    NROW(shp1)
+  )
+})
 ################################################################ #
+testthat::test_that("shapefile_from_geojson_text(multi string) ok", {
+  # vector text: Multiple polygons each as 1 character string geojson
+  expect_no_error({
+    shp1 = testinput_shapes_2
+    txt = shape2geojson(shp1, combine_in_one_string = FALSE) # default
+    shp2 = shapefile_from_geojson_text(txt)
+  })
+  expect_setequal(names(shp2),
+                  names(shp1)
+  )
+  expect_setequal(names(attributes(shp2$geometry)),
+                  names(attributes(shp1$geometry))
+  )
+  expect_true(
+    all.equal(shp2$geometry, shp1$geometry, check.attributes=FALSE)
+  )
+  expect_equal(
+    NROW(shp2),
+    NROW(shp1)
+  )
+})
+################################################################ #
+testthat::test_that("shapefile_from_geojson_text(SINGLE TXT MULTI POLYGON) ok", {
+  # Multiple polygons as 1 character string geojson
+  expect_no_error({
+    shp1 = testinput_shapes_2
+    txt = shape2geojson(shp1, combine_in_one_string = TRUE) # NOT default
+    shp2 = shapefile_from_geojson_text(txt)
+  })
+  expect_setequal(names(shp2),
+                  names(shp1)
+  )
+  expect_setequal(names(attributes(shp2$geometry)),
+                  names(attributes(shp1$geometry))
+  )
+  expect_true(
+    all.equal(shp2$geometry, shp1$geometry, check.attributes=FALSE)
+  )
+  expect_equal(
+    NROW(shp2),
+    NROW(shp1)
+  )
+})
+################################################################ #
+
 testthat::test_that("shapefile_from_json(testfilename_json) not crash", {
   testfilename_json      <- system.file("testdata/shapes/portland.json", package = "EJAM")
   expect_no_error({suppressWarnings({
@@ -217,7 +288,7 @@ testthat::test_that("shapefile_filepaths_from_folder() returns NULL and warns on
     junk <- capture.output({
       shapefile_filepaths_from_folder(emptyfolder)
     })
-      })  # character(0) ??
+  })  # character(0) ??
   expect_equal(0, length(shapefile_filepaths_from_folder(emptyfolder))  )
 
   suppressWarnings(expect_warning({nullresults <- shapefile_from_folder(emptyfolder)}))
@@ -229,7 +300,7 @@ testthat::test_that("shapefile_filepaths_valid(testfilenameset_4) not crash", {
   testfilenameset_4 <- shapefile_filepaths_validize(testfilename_shp_alone)
   expect_no_error({suppressWarnings({
     junk <- capture.output({
-    JUNK <- shapefile_filepaths_valid(testfilenameset_4)
+      JUNK <- shapefile_filepaths_valid(testfilenameset_4)
     })
   })})
   expect_true({
@@ -252,7 +323,7 @@ testthat::test_that("shapefile_filepaths_validize(testfilename_shp_alone) not cr
 testthat::test_that("shapefile_clean(testshape) not crash", {
   testfilename_dirshp    <- system.file("testdata/shapes/portland_folder_shp", package = "EJAM")
   junk <- capture.output({
-  testshape <- testshapes_2 # shapefile_from_folder(testfilename_dirshp)
+    testshape <- testshapes_2 # shapefile_from_folder(testfilename_dirshp)
   })
   expect_no_error({suppressWarnings({
     JUNK <- shapefile_clean(testshape)
@@ -266,7 +337,7 @@ testthat::test_that("shapefile_clean(testshape) not crash", {
 testthat::test_that("shape_buffered_from_shapefile(testshape) not crash", {
   testfilename_dirshp    <- system.file("testdata/shapes/portland_folder_shp", package = "EJAM")
   junk <- capture.output({
-  testshape <- testshapes_2 # shapefile_from_folder(testfilename_dirshp)[c(1,3), ]
+    testshape <- testshapes_2 # shapefile_from_folder(testfilename_dirshp)[c(1,3), ]
   })
   expect_no_error({suppressWarnings({
     JUNK <- shape_buffered_from_shapefile(testshape, radius.miles = 0.5)
@@ -283,7 +354,7 @@ testthat::test_that("shape_buffered_from_shapefile(testshape) not crash", {
 ######################################################### #
 testthat::test_that("shape_buffered_from_shapefile_points(testshape_points) not crash", {
   junk <- capture.output({
-  testshape_points <- shapefile_from_sitepoints(testpoints_10[1:3, ])
+    testshape_points <- shapefile_from_sitepoints(testpoints_10[1:3, ])
   })
   expect_no_error({suppressWarnings({
     JUNK <- shape_buffered_from_shapefile_points(testshape_points, radius.miles = 1)
@@ -298,12 +369,12 @@ testthat::test_that("shape_buffered_from_shapefile_points(testshape_points) not 
 ######################################################### #
 testthat::test_that("shapefile2latlon(testshape_points) aka latlon_from_shapefile(testshape) not crash", {
   junk <- capture.output({
-  testshape_points <- shapefile_from_sitepoints(testpoints_10)
+    testshape_points <- shapefile_from_sitepoints(testpoints_10)
   })
   expect_no_error({suppressWarnings({
     junk <- capture.output({
-    JUNK <- shapefile2latlon(testshape_points)
-    JUNK <- latlon_from_shapefile(testshape_points)
+      JUNK <- shapefile2latlon(testshape_points)
+      JUNK <- latlon_from_shapefile(testshape_points)
     })
   })})
   expect_true(
@@ -318,7 +389,7 @@ testthat::test_that("latlon_from_shapefile(testshape_points) not crash", {
   })
   expect_no_error({suppressWarnings({ suppressMessages({
     junk <- capture.output({
-    JUNK <- latlon_from_shapefile(testshape_points)
+      JUNK <- latlon_from_shapefile(testshape_points)
     })
   })  })})
   expect_true(
@@ -384,10 +455,21 @@ testthat::test_that("shapefile_from_any(testfilename_zipshp) works", {
 testthat::test_that("shapefile_from_any(testfilename_json) works", {
   testfilename_json      <- system.file("testdata/shapes/portland.json",           package = "EJAM")
   expect_warning({
-  expect_no_error({junk <- capture.output({
-    JUNK <- shapefile_from_any(testfilename_json)
-  })  })}, regexp = 'ejam_uniq_id columns was already in shp')
+    expect_no_error({junk <- capture.output({
+      JUNK <- shapefile_from_any(testfilename_json)
+    })  })}, regexp = 'ejam_uniq_id columns was already in shp')
   expect_true("sf" %in% class(JUNK))
+})
+######################################################### #
+testthat::test_that("shapefile_from_any(test_geojson_text) works", {
+  test_geojson_text      <- shape2geojson(testinput_shapes_2)
+  # expect_warning({
+    expect_no_error({junk <- capture.output({
+      JUNK <- shapefile_from_any(test_geojson_text)
+    })  })
+    # }, regexp = 'ejam_uniq_id columns was already in shp')
+  expect_true("sf" %in% class(JUNK))
+  expect_equal(NROW(JUNK), NROW(testinput_shapes_2))
 })
 ######################################################### #
 testthat::test_that("shapefile_from_any(testfilename_shp_alone) works", {

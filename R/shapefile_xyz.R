@@ -4,30 +4,11 @@
 #   read_sf returns an sf-tibble rather than an sf-data.frame.
 #   read_sf is quiet by default/does not print information about the data source.
 
-### list of functions here ####
+### list of functions here ### #
 # see source code Outline for list
 
-# shapefile_from_any()
-# shapefile_from_json()
-# shapefile_from_zip()
-# shapefile_from_gdb()
-# shapefile_from_gdbzip()
-# shapefile_from_folder()
-# shapefile_from_filepaths()
-
-# shapefile_filepaths_from_folder()
-# shapefile_filepaths_valid()
-# shapefile_filepaths_validize()
-# shapefile_clean()
-
-# shape_buffered_from_shapefile()
-# shape_buffered_from_shapefile_points()
-# shapefile_from_sitepoints()
-
-# shapefile2latlon()
-# latlon_from_shapefile()
-
 ############################################################################################## #
+# key function ####
 
 
 #' Read shapefile from any file or folder (trying to infer the format)
@@ -142,6 +123,14 @@ shapefile_from_any <- function(path = NULL, cleanit = TRUE, crs = 4269, layer = 
     }
   }
 
+  if (all(grepl("type.*FeatureCollection", path))) {
+    # might be geojson text string(s)
+    x <- shapefile_from_geojson_text(path, quiet=TRUE)
+    if (!is.null(x)) {
+      return(x)
+    }
+  }
+
   if (length(path) == 1) {
     x <- NULL
     if (file.exists(path)) {
@@ -204,6 +193,7 @@ shapefile_from_any <- function(path = NULL, cleanit = TRUE, crs = 4269, layer = 
   }
 }
 ############################################################################################## #
+# helpers ####
 
 
 #' read .json or .geojson shapefile data
@@ -233,6 +223,38 @@ shapefile_from_json <- function(path, cleanit = TRUE, crs = 4269, layer = NULL, 
 }
 ############################################################################################## #
 
+#' read text string that is geojson, return spatial data.frame
+#' helper for [shapefile_from_any()]
+#' @param x single text string like from [shape2geojson()]
+#' @param quiet whether to avoid warning on failure
+#' @returns spatial data.frame like from [shapefile_from_any()]
+#'
+#' @keywords internal
+#'
+shapefile_from_geojson_text <- function(x, quiet = FALSE) {
+
+  if (all(grepl("type.*FeatureCollection",    x))) {
+    # might be geojson text string(s)
+    junk = capture.output({
+    shp <- try({
+
+      z <- lapply(x, sf::st_read)
+      do.call(rbind, z)
+
+      }, silent = TRUE)
+    })
+    if (inherits(shp, "try-error") || !("sf" %in% class(shp))) {
+      if (!quiet) {warning("cannot read text string provided using sf::st_read()")}
+      return(NULL)
+    } else {
+      return(shp)
+    }
+  } else {
+    if (!quiet) {warning("cannot find type FeatureCollection in the text string provided")}
+    return(NULL)
+  }
+}
+############################################################################################## #
 
 #' read zipped .zip that may contain a geodatabase file or .shp file etc.
 #'
@@ -636,7 +658,6 @@ shapefile_filepaths_valid <- function(filepaths) {
 }
 ############################################################################################## #
 
-
 #' Convert filepath(s) into one complete set (if possible) of a single basename and extensions .shp, .shx, .dbf, .prj
 #'
 #' @param filepaths vector of full path(s) with filename(s) as strings
@@ -688,6 +709,7 @@ shapefile_filepaths_validize <- function(filepaths, inputname = NULL) {
   }
 }
 ############################################################################################## #
+# utilities / other ####
 
 
 #' Drop invalid rows, warn if all invalid, add unique ID, transform (CRS)
