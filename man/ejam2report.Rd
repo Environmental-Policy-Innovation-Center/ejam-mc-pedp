@@ -39,8 +39,8 @@ ejam2report(
 \item{ejamitout}{output as from \code{\link[=ejamit]{ejamit()}}, list with a data.table called \code{results_bysite}
 if sitenumber parameter is used, or a data.table called \code{results_overall} otherwise}
 
-\item{sitenumber}{If an integer > 0 (and =< number of sites total) is provided, the report is about
-\code{ejamitout$results_bysite[sitenumber, ]} and if no number is provided (or param is NULL or "" or -1 or "overall")
+\item{sitenumber}{If a number is provided, the report is about
+\code{ejamitout$results_bysite[sitenumber, ]} and if no number is provided (param is NULL or "")
 then the report is about \code{ejamitout$results_overall}}
 
 \item{analysis_title}{optional title of analysis}

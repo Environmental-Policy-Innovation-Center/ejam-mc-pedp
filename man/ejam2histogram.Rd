@@ -6,11 +6,13 @@
 \usage{
 ejam2histogram(
   ejamitout,
-  varname = "pop",
+  varname = "Demog.Index",
+  pctile.varname = paste0("pctile.", varname),
+  popvarname = "pop",
   distn_type = "Sites",
   data_type = "raw",
   n_bins = 30,
-  sitetype = ejamitout$sitetype,
+  sitetype = NULL,
   title_people_raw = "Population Weighted Histogram of Raw Indicator Values",
   title_people_pctile = "Population Weighted Histogram of US Percentile Values",
   title_sites_raw = "Histogram of Raw Indicator Values Across Sites",
@@ -20,9 +22,11 @@ ejam2histogram(
 )
 }
 \arguments{
-\item{ejamitout}{output of an EJAM analysis, like from \code{\link[=ejamit]{ejamit()}}}
+\item{ejamitout}{output of an EJAM analysis, like from \code{\link[=ejamit]{ejamit()}}, or just the $results_bysite part of that}
 
-\item{varname}{indicator name, such as 'Demog.Ind' or 'pctlowinc'}
+\item{varname}{indicator name that is a column name in ejamitout$results_bysite (or in ejamitout), such as 'Demog.Index' or 'pctlowinc'}
+
+\item{pctile.varname}{name of percentile version of varname}
 
 \item{distn_type}{group to show distribution across, either 'Sites' or 'People'}
 
@@ -30,7 +34,7 @@ ejam2histogram(
 
 \item{n_bins}{number of bins}
 
-\item{sitetype}{what type of sites were analyzed, like \code{\link[=ejamit]{ejamit()}} 'sitetype'. Examples are 'latlon', 'FIPS', 'SHP'}
+\item{sitetype}{what type of sites were analyzed, like latlon, fips/FIPS, shp/SHP}
 
 \item{title_people_raw}{title above plot for this type of plot}
 
