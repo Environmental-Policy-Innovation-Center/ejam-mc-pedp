@@ -167,7 +167,7 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
 
     ## > fips bounds ####
     if (submitted_upload_method %in% "FIPS" && is.null(shp)) {
-      shp <- shapes_from_fips(ejamitout$results_bysite$fips)
+      shp <- shapes_from_fips(ejamitout$results_bysite$ejam_uniq_id)
     }
   } else {
 
@@ -312,7 +312,7 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
     if (is.null(sitenumber) || length(sitenumber) == 0 || sitenumber %in% 0) {
       # Map from community report should be ALL the sites that were passed here, UNLESS sitenumber param was used to pick 1
       if (sitetype %in% c("fips", "shp") && !is.null(shp)) {
-        map <- ejam2map(ejamitout = ejamitout$results_bysite, shp = shp, launch_browser = FALSE) # it figures out radius if used
+        map <- ejam2map(ejamitout = ejamitout, shp = shp, launch_browser = FALSE) # it figures out radius if used
       } else {
         map <- mapfastej(ejamitout)
       }

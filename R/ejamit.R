@@ -720,6 +720,12 @@ ejamit <- function(sitepoints = NULL,
                               out$results_bysite,
                               by = 'ejam_uniq_id', all = T)
 
+  ## * restore sort (results_bysite) like input was sorted ####
+
+  out$results_bysite[original_order, n := n, on = "ejam_uniq_id"]
+  setorder(out$results_bysite, n)
+  out$results_bysite[, n := NULL]
+
   out$results_overall$valid <- TRUE # needs to be TRUE for some functions like ejam2report() ? or  sum(out$results_bysite$valid, na.rm = T)
   out$results_overall$invalid_msg <- ""
   if (!setequal(names(out$results_overall), names(out$results_bysite))) {stop('column names in bysite and overall do not match')}
@@ -759,13 +765,7 @@ ejamit <- function(sitepoints = NULL,
   setDT(links$results_overall)
   ############################# #
   ##      options for how to merge/join links to results_bysite table:
-  #
-  ## via merge (inefficient to make a copy like this)
-  # if ("ejam_uniq_id" %in% names(out$results_bysite) && "ejam_uniq_id" %in% names(links$result_bysite)) {
-  #   out$results_bysite <- merge(out$results_bysite, links$results_bysite, on = "ejam_uniq_id")
-  #   ## or via join ? maybe faster but would need to fix syntax!
-  #   # out$results_bysite[links$results_bysite, newcolnames := ..newcolnames, on = "ejam_uniq_id"]
-  # } else {
+  ## must do via merge if earlier merge changed order and that wasnt resorted
     ## via assuming rows are identical  (inefficient to make a copy like this and fails if not 1-to-1 same rows) ?
     out$results_bysite <- cbind(links$results_bysite, out$results_bysite)
     ## or via assuming rows are identical but using data.table to append columns by reference (fails if not 1-to-1 same rows) ?   fix syntax!
