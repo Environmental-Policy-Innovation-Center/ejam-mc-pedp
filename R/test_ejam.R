@@ -266,11 +266,13 @@ x <- EJAM:::test_ejam(
       ),
       test_ejamit = c(
         "test-ejamit.R",
-        "test-ejam2barplot_sites.R",
         "test-ejamit_compare_distances.R",
         "test-ejamit_compare_types_of_places.R",
         "test-ejamit_sitetype_from_input.R",
-        "test-ejamit_sitetype_from_output.R"
+        "test-ejamit_sitetype_from_output.R",
+
+        "test-ejam2barplot_sites.R",
+        "test-ejam2histogram.R"
       ),
       test_misc = c(
         "test-sites_from_input.R",

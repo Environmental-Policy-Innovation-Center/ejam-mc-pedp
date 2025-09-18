@@ -6,11 +6,17 @@
 \usage{
 ejam2histogram(
   ejamitout,
-  varname,
+  varname = "pop",
   distn_type = "Sites",
   data_type = "raw",
   n_bins = 30,
-  sitetype = ejamitout$sitetype
+  sitetype = ejamitout$sitetype,
+  title_people_raw = "Population Weighted Histogram of Raw Indicator Values",
+  title_people_pctile = "Population Weighted Histogram of US Percentile Values",
+  title_sites_raw = "Histogram of Raw Indicator Values Across Sites",
+  title_sites_pctile = "Histogram of US Percentile Indicator Values Across Sites",
+  ylab_sites = "Number of sites",
+  ylab_people = "Weighted Density"
 )
 }
 \arguments{
@@ -25,10 +31,23 @@ ejam2histogram(
 \item{n_bins}{number of bins}
 
 \item{sitetype}{what type of sites were analyzed, like \code{\link[=ejamit]{ejamit()}} 'sitetype'. Examples are 'latlon', 'FIPS', 'SHP'}
+
+\item{title_people_raw}{title above plot for this type of plot}
+
+\item{title_people_pctile}{title above plot for this type of plot}
+
+\item{title_sites_raw}{title above plot for this type of plot}
+
+\item{title_sites_pctile}{title above plot for this type of plot}
+
+\item{ylab_sites}{label on y axis for this type of plot}
+
+\item{ylab_people}{label on y axis for this type of plot}
 }
 \description{
 Histogram of single indicator from EJAM output
 }
 \examples{
 ejam2histogram(testoutput_ejamit_1000pts_1miles, 'Demog.Index', distn_type='Sites', data_type='raw')
+
 }

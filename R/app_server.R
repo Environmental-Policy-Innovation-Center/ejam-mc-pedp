@@ -2842,10 +2842,19 @@ cat("Clicked on site #", sitenumber, "for a 1-site report\n")
     req(data_processed())
     req(input$summ_hist_ind)
 
-    ejam2histogram(ejamitout = data_processed(),
-                   varname = current_hist_ind(),
+    ejam2histogram(ejamitout = data_processed(),  # now can be data.frame, data.table, or whole list of outputs of ejamit()
                    distn_type = input$summ_hist_distn,
                    data_type = input$summ_hist_data,
+                   varname = current_hist_ind(),
+                   ### other params that could be adjusted by global_defaults if useful later:
+                   # pctile.varname = paste0("pctile.",  current_hist_ind()),
+                   # popvarname = "pop",
+                   # title_people_raw = "Population Weighted Histogram of Raw Indicator Values",
+                   # title_people_pctile = "Population Weighted Histogram of US Percentile Values",
+                   # title_sites_raw = "Histogram of Raw Indicator Values Across Sites",
+                   # title_sites_pctile = "Histogram of US Percentile Indicator Values Across Sites",
+                   # ylab_sites = "Number of sites",
+                   # ylab_people = "Weighted Density",
                    n_bins = input$summ_hist_bins,
                    sitetype = submitted_upload_method())
 
