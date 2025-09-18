@@ -74,7 +74,10 @@ map_ejam_plus_shp <- function(shp, out, radius_buffer = NULL, circle_color = '#0
   # in FIPS case, ejam_uniq_id is fips not 1:N, so merge() here would fail.
   # but if we assume same NROW and same sort for shp and out#results_bysite, then we can just use the row number to match them up, or use cbind(shp, out$results_bysite)
   if (sitetype %in% "fips") {
-    shpout <- cbind(shp, out$results_bysite)
+    shp$ejam_uniq_id <- NULL # since it is 1:NROW there but was the fips value in out$results_bysite
+    shpout <- cbind(shp, out$results_bysite) # retains "sf" class only if shp is 1st in cbind()
+    names(shpout)[names(shpout) != "geometry"] <- names(out$results_bysite) #  fixes colnames where dot replaced space
+    # headers2fix = sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
   } else {
     shpout <- merge(shp, out$results_bysite,
                     by = "ejam_uniq_id",
@@ -83,20 +86,20 @@ map_ejam_plus_shp <- function(shp, out, radius_buffer = NULL, circle_color = '#0
   # as long as inputs are correct, matching on id should work and then we can drop invalid polygons to avoid mapping them.
   # and all.x or all.y should not matter
   # but we are about to drop all invalid ones to avoid mapping them.
-  message("There were ", sum(!shpout$valid, na.rm = TRUE), " invalid polygons." )
-  if ("valid" %in% names(shpout)) {
-    shpout <- shpout[shpout$valid == TRUE, ] # Drop invalid polygons, dont try to map
+  if (!("valid" %in% names(shpout))) {
+    shpout$valid <- TRUE
   }
-  popup_labels <- fixcolnames(namesnow = setdiff(names(shpout), c('geometry', 'valid', 'invalid_msg')), oldtype = 'r', newtype = 'shortlabel')
+  # drop empty geometry rows
+  shpout$valid <- shpout$valid & !(sf::st_is_empty(shpout))
+  if (sum(!shpout$valid, na.rm = TRUE) > 0 ) {
+    message("There were ", sum(!shpout$valid, na.rm = TRUE), " invalid polygons." )
+  }
+  shpout <- shpout[shpout$valid == TRUE, ] # Drop invalid polygons, dont try to map
+
+  # linkcolnames = sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
   pops <- popup_from_ejscreen(
     shpout %>% sf::st_drop_geometry()
   )
-  ## previously had been something like this:
-  # pops <- popup_from_df(
-  #   shpout %>% sf::st_drop_geometry(),
-  #   labels = popup_labels
-  # )
-
   if (is.null(radius_buffer)) {
     radius_buffer <- out$results_bysite$radius.miles[1]
   }
@@ -104,6 +107,7 @@ map_ejam_plus_shp <- function(shp, out, radius_buffer = NULL, circle_color = '#0
     shpout <- sf::st_buffer(shpout, # was "ESRI:102005" but want 4269
                             dist = units::set_units(radius_buffer, "mi"))
   } else {
+    ## why was it doing this ?
     shpout <- shpout %>%
       sf::st_zm() %>% sf::as_Spatial()
   }
@@ -113,7 +117,6 @@ map_ejam_plus_shp <- function(shp, out, radius_buffer = NULL, circle_color = '#0
     leaflet::addPolygons(color = circle_color,
                          popup = pops,
                          popupOptions = leaflet::popupOptions(maxHeight = 200))
-
 
   # see in browser ####
 
@@ -534,7 +537,7 @@ map_shapes_leaflet <- function(shapes, color = "green", popup = NULL, fillOpacit
   if (is.null(popup)) {
     # if all but 3 colnames are in both, looks like results of ejamit(), so use that type of popup formatting
     if (length(setdiff2(names(shapes), names(testoutput_ejamit_10pts_1miles$results_overall))) < 3) {
-      popup = popup_from_ejscreen(sf::st_drop_geometry(shapes))
+      popup = popup_from_ejscreen(sf::st_drop_geometry(shapes))# linkcolnames = sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
     } else {
       popup <- popup_from_any(sf::st_drop_geometry(shapes))
     }
