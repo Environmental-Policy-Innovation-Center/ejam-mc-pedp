@@ -28,6 +28,8 @@ ejam2histogram(
 
 \item{pctile.varname}{name of percentile version of varname}
 
+\item{popvarname}{name of column with population counts (default is "pop")}
+
 \item{distn_type}{group to show distribution across, either 'Sites' or 'People'}
 
 \item{data_type}{type of values to show for the indicator, either 'raw' or 'pctile'}

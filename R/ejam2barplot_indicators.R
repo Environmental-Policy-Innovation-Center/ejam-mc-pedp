@@ -22,6 +22,8 @@
 #'
 #' @examples ejam2barplot_indicators(testoutput_ejamit_1000pts_1miles)
 #'
+#' @export
+#'
 ejam2barplot_indicators <- function(ejamitout, indicator_type = 'Demographic', data_type = 'raw',
                                     mybarvars.stat = "avg",
                                     mybarvars.sumstat = c('Average site', 'Average person at these sites')

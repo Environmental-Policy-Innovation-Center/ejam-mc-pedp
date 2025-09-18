@@ -139,7 +139,7 @@ setting that we failed to provide in global_defaults files and that variable nam
 ### Advanced Tab
 
 Then, SOME BUT NOT ALL global_defaults_ settings are in the Advanced Tab (in app_ui)
-where they typically provide the default for an input$ but that default can be overriden
+where they typically provide the default for an input$ but that default can be overridden
 there by someone using the app's Advanced Tab,
 so what ui or server ends up using could be an input$ that is adjustable in the Advanced Tab
 and therefore can be bookmarked (since inputs can be bookmarked unless specifically excluded from that).

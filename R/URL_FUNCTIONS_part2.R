@@ -21,7 +21,7 @@
 # 2        EJSCREEN Map     EJSCREEN
 # 3         ECHO Report         ECHO
 # 4          FRS Report          FRS
-# 5 Enviromapper Report Enviromapper
+# 5 EnviroMapper Report EnviroMapper
 # 6       County Health Report       County
 # 7       State Health Report       State
 
@@ -208,8 +208,7 @@ url_frs_facility <- function(regid = NULL,
 #' Get URL(s) for (new) EJSCREEN app with map centered at given point(s)
 #'
 #' @param sitepoints data.frame with colnames lat, lon (or lat, lon parameters can be provided separately)
-#' @param lon one or more longitudes
-#' @param lat one or more latitudes
+#' @param lat,lon vectors of coordinates, ignored if sitepoints provided, can be used otherwise, if shapefile and fips not used
 #' @param fips The FIPS code of a place to center map on (blockgroup, tract, city/cdp, county, state FIPS).
 #'   It gets translated into the right wherestr parameter if fips is provided.
 #'
@@ -232,7 +231,6 @@ url_frs_facility <- function(regid = NULL,
 #'
 #' @param shapefile shows URL of a EJSCREEN app map centered on the centroid of a given polygon,
 #'   but does not actually show the polygon.
-#' @param lat,lon ignored if sitespoints provided, can be used otherwise, if shapefile and fips not used
 #' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
 #' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
 #' @param ifna URL shown for missing, NA, NULL, bad input values
@@ -377,7 +375,7 @@ url_ejscreenmap <- function(sitepoints = NULL, lat = NULL, lon = NULL,
 #' @details EnviroMapper lets you view EPA-regulated facilities and other information on a map, given the lat,lon
 #'
 #' @param sitepoints data.frame with colnames lat, lon (or lat, lon parameters can be provided separately)
-#' @param lat,lon ignored if sitespoints provided, can be used otherwise, if shapefile and fips not used
+#' @param lat,lon ignored if sitepoints provided, can be used otherwise, if shapefile and fips not used
 #' @param shapefile if provided function uses centroids of polygons for lat lon
 #' @param fips ignored
 #' @param zoom initial map zoom extent
@@ -403,12 +401,12 @@ url_ejscreenmap <- function(sitepoints = NULL, lat = NULL, lon = NULL,
 url_enviromapper <- function(sitepoints = NULL, lon = NULL, lat = NULL, shapefile = NULL, fips = NULL,
                              zoom = 13,
                              as_html = FALSE,
-                             linktext = "Enviromapper",
+                             linktext = "EnviroMapper",
                              ifna = "https://geopub.epa.gov/myem/efmap/",
                              baseurl = "https://geopub.epa.gov/myem/efmap/index.html?ve=",
                              ...) {
 
-  if (is.null(linktext)) {linktext <- paste0("Enviromapper")}
+  if (is.null(linktext)) {linktext <- paste0("EnviroMapper")}
 
   # "https://geopub.epa.gov/myem/efmap/index.html?ve=13,38.895237,-77.029145"
 
@@ -498,7 +496,7 @@ url_enviromapper <- function(sitepoints = NULL, lon = NULL, lat = NULL, shapefil
 #' @param fips vector of fips codes
 #' @param year e.g., 2025
 #' @param sitepoints if provided and fips is NULL, gets county fips from lat,lon columns of sitepoints
-#' @param lat,lon ignored if sitespoints provided, can be used otherwise, if shapefile and fips not used
+#' @param lat,lon ignored if sitepoints provided, can be used otherwise, if shapefile and fips not used
 #' @param shapefile if provided and fips is NULL, gets county fips from lat,lon of polygon centroid
 #' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
 #' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
@@ -694,7 +692,7 @@ url_state_health = function(fips = NULL, year = 2025,
 #'
 #' @param fips vector of fips codes
 #' @param sitepoints if provided and fips is NULL, gets county fips from lat,lon columns of sitepoints
-#' @param lat,lon ignored if sitespoints provided, can be used otherwise, if shapefile and fips not used
+#' @param lat,lon ignored if sitepoints provided, can be used otherwise, if shapefile and fips not used
 #' @param shapefile if provided and fips is NULL, gets county fips from lat,lon of polygon centroid
 #' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
 #' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE

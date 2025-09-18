@@ -90,7 +90,7 @@ url_columns_bysite <- function(sitepoints = NULL, lat = NULL, lon = NULL,
   }
 
   sites <- sites_from_input(sitepoints = sitepoints, lat = lat, lon = lon, shapefile = shapefile, fips = fips)
-  sitespoints <- sites$sitepoints
+  sitepoints <- sites$sitepoints
   sitetype <- sites$sitetype
 
   # get regid
@@ -98,8 +98,8 @@ url_columns_bysite <- function(sitepoints = NULL, lat = NULL, lon = NULL,
   if (!missing(regid) && !is.null(regid)) {
     # regid <- regid
   } else {
-    if ("REGISTRY_ID" %in% names(sitespoints)) {
-      regid <- sitespoints$REGISTRY_ID
+    if ("REGISTRY_ID" %in% names(sitepoints)) {
+      regid <- sitepoints$REGISTRY_ID
     } else {
       regid <- NULL
     }
@@ -132,7 +132,7 @@ url_columns_bysite <- function(sitepoints = NULL, lat = NULL, lon = NULL,
       , list(header = "EJSCREEN Map",  text =  "EJSCREEN", FUN = url_ejscreenmap) # EJSCREEN site, zoomed to the location
       # , list(header = "ECHO Report",         text = "ECHO",         FUN = url_echo_facility) # if regid provided
       # , list(header = "FRS Report",          text =  "FRS",         FUN = url_frs_facility)            # if regid provided
-      # , list(header = "Enviromapper Report", text = "Enviromapper", FUN = url_enviromapper)          # if lat,lon provided
+      # , list(header = "EnviroMapper Report", text = "EnviroMapper", FUN = url_enviromapper)          # if lat,lon provided
       # , list(header = "County Health Report",       text = "County",       FUN = url_county_health)  # if fips provided
       # , list(header = "State Health Report",       text = "State",       FUN = url_state_health)  # if fips provided
     )

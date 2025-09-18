@@ -5,7 +5,7 @@
 #'
 #' @param varname indicator name that is a column name in ejamitout$results_bysite (or in ejamitout), such as 'Demog.Index' or 'pctlowinc'
 #' @param pctile.varname name of percentile version of varname
-#'
+#' @param popvarname name of column with population counts (default is "pop")
 #' @param distn_type group to show distribution across, either 'Sites' or 'People'
 #' @param data_type type of values to show for the indicator, either 'raw' or 'pctile'
 #'

@@ -57,7 +57,7 @@ test_that("url_columns_bysite all url types", {
     , list(header = "ECHO Report",          text = "ECHO",          FUN = url_echo_facility) # if regid provided # e.g., browseURL(url_echo_facility(110070874073))
     , list(header = "FRS Report",           text =  "FRS",          FUN = url_frs_facility)  # if regid provided # e.g., browseURL(url_frs_facility(testinput_registry_id[1]))
 
-    , list(header = "Enviromapper Report",  text = "Enviromapper", FUN = url_enviromapper)   # if lat,lon provided or can be approximated # e.g., browseURL(url_enviromapper(lat = 38.895237, lon = -77.029145, zoom = 17))
+    , list(header = "EnviroMapper Report",  text = "EnviroMapper", FUN = url_enviromapper)   # if lat,lon provided or can be approximated # e.g., browseURL(url_enviromapper(lat = 38.895237, lon = -77.029145, zoom = 17))
 
     , list(header = "County Health Report", text = "County",       FUN = url_county_health)  # if fips provided
     , list(header = "State Health Report",  text = "State",        FUN = url_state_health)   # if fips provided

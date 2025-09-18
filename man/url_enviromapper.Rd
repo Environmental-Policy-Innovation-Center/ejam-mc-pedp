@@ -12,7 +12,7 @@ url_enviromapper(
   fips = NULL,
   zoom = 13,
   as_html = FALSE,
-  linktext = "Enviromapper",
+  linktext = "EnviroMapper",
   ifna = "https://geopub.epa.gov/myem/efmap/",
   baseurl = "https://geopub.epa.gov/myem/efmap/index.html?ve=",
   ...
@@ -21,7 +21,7 @@ url_enviromapper(
 \arguments{
 \item{sitepoints}{data.frame with colnames lat, lon (or lat, lon parameters can be provided separately)}
 
-\item{lat, lon}{ignored if sitespoints provided, can be used otherwise, if shapefile and fips not used}
+\item{lat, lon}{ignored if sitepoints provided, can be used otherwise, if shapefile and fips not used}
 
 \item{shapefile}{if provided function uses centroids of polygons for lat lon}
 

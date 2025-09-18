@@ -21,9 +21,7 @@ url_ejscreenmap(
 \arguments{
 \item{sitepoints}{data.frame with colnames lat, lon (or lat, lon parameters can be provided separately)}
 
-\item{lat}{one or more latitudes}
-
-\item{lon}{one or more longitudes}
+\item{lat, lon}{vectors of coordinates, ignored if sitepoints provided, can be used otherwise, if shapefile and fips not used}
 
 \item{shapefile}{shows URL of a EJSCREEN app map centered on the centroid of a given polygon,
 but does not actually show the polygon.}
@@ -57,8 +55,6 @@ but using the fips parameter is probably a better idea.}
 \item{baseurl}{do not change unless endpoint actually changed}
 
 \item{...}{unused}
-
-\item{lat, lon}{ignored if sitespoints provided, can be used otherwise, if shapefile and fips not used}
 }
 \value{
 URL(s)

@@ -64,7 +64,7 @@
 |---------------|--------------|-----------------|----------------------|
 | EJAM Report | Report | `url_ejamapi()` | sitepoints (or lat,lon) or shapefile or fips |
 | EJSCREEN Map | EJSCREEN | `url_ejscreenmap()` | sitepoints (or lat,lon) or shapefile or fips |
-| Enviromapper Report | Enviromapper | `url_enviromapper()` | sitepoints (or lat,lon) or shapefile or fips |
+| EnviroMapper Report | EnviroMapper | `url_enviromapper()` | sitepoints (or lat,lon) or shapefile or fips |
 | ECHO Report | ECHO | `url_echo_facility()` | regid |
 | FRS Report | FRS | `url_frs_facility()` | regid |
 | County Health Report | County | `url_county_health()` | fips |
@@ -111,7 +111,7 @@
 
 -   Added `ejamapp()` as the new name (alias) for `run_app()`
 -   Added ability to set many options and defaults as parameters passed to `ejamapp()`.
--   Added many examples to `ejamapp()` documention showing how to change defaults and options. You can now
+-   Added many examples to `ejamapp()` documentation showing how to change defaults and options. You can now
     -   Use a preferred default way to pick sites (e.g., to have the app launch with the Counties option selected by default)
     -   Provide pre-selected industry NAICS codes, or a set of specific Counties
     -   Provide a table of lat/lon coordinates to preload at launch e.g., `ejamapp(sitepoints=testpoints_10)`
