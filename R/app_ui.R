@@ -108,7 +108,7 @@ app_ui  <- function(request) {
                                                'Upload specific locations'),
                                choiceValues = c('dropdown',
                                                 'upload'),
-                               selected = EJAM:::global_or_param("default_upload_dropdown")),
+                               selected = input$default_ss_choose_method), # which has a default of EJAM:::global_or_param("default_upload_dropdown")
                   # selected = 'upload'),   # if hard-coded default selection.
                   # uiOutput(outputId = 'ss_choose_method_ui'), # flexible default selection, if handled in server code.
 

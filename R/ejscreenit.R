@@ -337,7 +337,7 @@ ejscreenit <- function(x, y=NULL, radius = 3, maxradiusmiles=10,
   } else {
 
   #   longer popup text (all Demog and all Envt indicators)
-  mypopup_full_results <- popup_from_ejscreen(out)
+  mypopup_full_results <- popup_from_ejscreen(out) # linkcolnames = sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
   #  popup_print(mypopup_full_results)
   outmap  <- leaflet::leaflet(out) %>% leaflet::addTiles() %>% leaflet::clearShapes() %>%
     leaflet::addCircles(radius = out$radius.miles[1] * meters_per_mile ,   #  units in meters for addCircles, and pixels for addCircleMarkers

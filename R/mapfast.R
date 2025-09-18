@@ -91,7 +91,7 @@ mapfast <- function(mydf, radius = 3, column_names='all', labels = column_names,
       mydf <- cbind(mydf, ejna)
     }
 
-    mypop <- popup_from_ejscreen(sf::st_drop_geometry(mydf))
+    mypop <- popup_from_ejscreen(sf::st_drop_geometry(mydf)) # linkcolnames = sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
 
   } else if (column_names[1] == 'all') {
     mypop <- popup_from_df(sf::st_drop_geometry(mydf))

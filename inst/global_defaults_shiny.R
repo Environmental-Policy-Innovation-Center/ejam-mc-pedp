@@ -109,6 +109,9 @@ global_defaults_shiny <- list(
 
   # upload or dropdown method of site selection
   default_upload_dropdown = "upload",
+  # global_default or ejamapp() parameter: default_upload_dropdown, which is initial selected value of
+  # input in advanced tab: input$default_ss_choose_method, which is initial selected value of
+  # input in server:              input$ss_choose_method
 
   # NAICS
   default_naics = "313", # 313 is about 900 textile mills and subcategories of that #  initial value of ss_select_naics
