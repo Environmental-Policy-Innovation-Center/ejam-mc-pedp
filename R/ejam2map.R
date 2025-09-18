@@ -117,7 +117,7 @@ ejam2map <- function(ejamitout, column_names = "ej", launch_browser = TRUE, shp 
 
   # MAP ####
 
-  if (sitetype %in% "shp") {
+  if (sitetype %in% "shp" || (sitetype %in% "fips" && !is.null(shp))) {
     ## shp/fips ####
     # we have to assume that buffer was already added to polygons passed here - do not add them again
     map_ejam_plus_shp(shp = shp,
