@@ -2746,7 +2746,7 @@ cat("Clicked on site #", sitenumber, "for a 1-site report\n")
                    choiceNames  = c('Percentile'),
                    selected = 'raw')
     }
-    else if (input$summ_bar_ind == 'Supplementary Index') {
+    else if (input$summ_bar_ind == 'Supplementary EJ Index') {
       radioButtons(inputId = 'summ_bar_data',
                    label = 'Data Type',
                    choiceValues = c('raw'),
