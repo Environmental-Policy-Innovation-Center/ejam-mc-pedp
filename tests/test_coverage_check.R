@@ -30,33 +30,35 @@
 #
 # term nfiles nhits
 #
-# 18                  ejam2report      6    15  ***  ***  SUMMARY REPORT (compares to prior but does not test header, logo, footer, table contents, map, plot)
+# 18                  ejam2report      6    15  ***  ***  SUMMARY REPORT - needs unit tests ideally (the ejam2map and maybe barplot? parts are tested) (compares to prior? but does not test header, logo, footer, table contents, map, plot)
 #
-# ####   and maybe    ejam2excel is important  ***  ***   EXCEL (Tables headers aligned, working URL links, right tabs, sorting of cols?, nrow/ncol?, etc.)
+# ####   and maybe    ejam2excel is important  ***  ***   EXCEL (now has some tests) (Tables headers aligned, working URL links, right tabs, sorting of cols?, nrow/ncol?, etc.)
 #
-# 9           plot_barplot_ratios      8    18  *** RATIOS TO AVG
-# 15           calc_ratios_to_avg      6    10  ***
-#   and maybe calc_ejam ?
-#   2                   table_round     14    22  ***  *** TABLE ROUNDING
-# 14                 table_signif      7    10  ***  ***
-#   20      table_signif_round_x100      6     8  ***  ***
-#   7           table_rounding_info      9    15  ***  ***
+#   2                   table_round     14    22  ***  *** TABLE ROUNDING needs unit tests ideally
+#   14                 table_signif      7    10  ***  *** same
+#   20      table_signif_round_x100      6     8  ***  *** same
+#   7           table_rounding_info      9    15  ***  *** same
 #
-#   13          popup_from_ejscreen      7     9  ***  *** POPUPS
-# 19                popup_from_df      6    13  ***  ***
-#   3                       mapfast     10    20  *** *** MAPS
+#   13          popup_from_ejscreen      7   9  ***  *** POPUPS- it is tested actually, in test-MAP_FUNCTIONS.R
+# 19                popup_from_df      6    13  ***  ***       - it is tested actually, in test-MAP_FUNCTIONS.R
+#   3                       mapfast     10    20  *** *** MAPS - it is tested actually, in test-MAP_FUNCTIONS.R
 #
-# 6           sitepoints_from_any      9    13  *** SITEPOINTS INPUT
+# 6           sitepoints_from_any      9    13  *** SITEPOINTS INPUT needs unit tests ideally
+
 # 10               read_csv_or_xl      8    16
-#
 # 1               global_or_param     16   196
 # 4                       varinfo      9    16
-# 5                    app_server      9    17
-# 8                        app_ui      8    16
+
+# 5                    app_server      9    17 - app functionality tests should handle this
+# 8                        app_ui      8    16 - app functionality tests should handle this
 # 11                  indexblocks      7    13
 # 12             fixnames_aliases      7    12
 # 16              create_filename      6    10
 # 17 distance_via_surfacedistance      6    11
+
+# 9           plot_barplot_ratios      8    18  But this is used ONLY by old ejscreenapi functions
+# 15           calc_ratios_to_avg      6    10  But this is used ONLY by old ejscreenapi functions (via plot_boxplot_ratios() etc.)
+#   and maybe calc_ejam ?
 
 ################################ ################################# #
 
