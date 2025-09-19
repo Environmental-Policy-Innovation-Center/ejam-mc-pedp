@@ -11,7 +11,7 @@
 #'  For example:
 #'  ```
 #'  ejamapp(
-#'    radius_default=3.1,
+#'    radius=3.1,
 #'    default_max_miles=31,
 #'    default_max_mb_upload=100
 #'  )
@@ -83,28 +83,27 @@
 #'  ## using parameters called `sitepoints` and `shapefile` as in `ejamit()`
 #'
 #'  #  data.frame with latitude, longitude
-#'  ejamapp(sitepoints = testpoints_10[1:2,], radius_default = 3.1,
-#'          default_upload_dropdown = "upload", default_selected_type_of_site_upload = "latlon")
+#'  ejamapp(sitepoints = testpoints_10[1:2,], radius = 3.1)
 #'
 #'  #  file with latitude, longitude
-#'  ejamapp(sitepoints = system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM"),
-#'          default_upload_dropdown = "upload", default_selected_type_of_site_upload = "latlon")
+#'  ejamapp(sitepoints = system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM"))
 #'
 #'  #  spatial data.frame with polygons
-#'  ejamapp(shapefile = testshapes_2,
-#'          default_upload_dropdown = "upload", default_selected_type_of_site_upload = "SHP")
+#'  ejamapp(shapefile = testshapes_2)
 #'
 #'  # file with polygons
-#'  ejamapp(shapefile = system.file("testdata/shapes/testinput_shapes_2.zip", package="EJAM"),
-#'          default_upload_dropdown = "upload", default_selected_type_of_site_upload = "SHP")
+#'  ejamapp(shapefile = system.file("testdata/shapes/testinput_shapes_2.zip", package="EJAM"))
 #'
-#'  # a vector or file with fips codes will be allowed also - not implemented yet
+#'  # a vector or file with fips codes
+#'  ejamapp(fips = testinput_fips_counties)
+#'  ejamapp(fips = testinput_fips_cities)
+#'
 #'
 #'  ## Use preferred settings, for your set of analyses:
 #'
 #' ejamapp(
 #'   default_standard_analysis_title = "PREFERRED REPORT TITLE FOR THESE ANALYSES",
-#'   radius_default = 3.1, # PREFERRED RADIUS
+#'   radius = 3.1, # PREFERRED RADIUS
 #'   default_max_miles = 31,      # to raise the radius cap
 #'   default_max_mb_upload = 100, # to raise the file upload size cap
 #'   radius_default_shapefile = 0.1 # preferred distance from polygons
@@ -124,7 +123,7 @@
 #'   default_selected_type_of_site_category="NAICS",
 #'   default_naics_digits_shown="detailed", # if default_naics is >3 digits, this has to be "detailed" not "basic"
 #'   default_naics="562211",
-#'   radius_default=3.1,
+#'   radius=3.1,
 #'   default_show_advanced_settings=TRUE
 #' )
 #'
@@ -237,8 +236,11 @@ ejamapp <- function(
   options(shiny.autoload.r=FALSE) # instead of using the file _disable_autoload.R
   on.exit(options(shiny.autoload.r=FALSE)) # restore normal behavior for rest of R session once app halts
 
+  ################### #
   # handle some key convenient parameters that are special cases, not inputs and not defaults:
+
   dots = rlang::list2(...)
+
   if ("fips" %in% names(dots)) {
     # dots$fips will be used
     dots$default_upload_dropdown <- "upload"
@@ -249,7 +251,17 @@ ejamapp <- function(
     dots$default_upload_dropdown = "upload"
     dots$default_selected_type_of_site_upload = "SHP"
   }
-
+  if ("sitepoints" %in% names(dots)) {
+    dots$default_upload_dropdown = "upload"
+    dots$default_selected_type_of_site_upload = "latlon"
+  }
+  if ("lat" %in% names(dots) & "lon" %in% names(dots) & !("sitepoints" %in% names(dots))) {
+    dots$sitepoints = data.frame(lat=dots$lat, lon = dots$lon)
+  }
+  if ("radius" %in% names(dots)) {
+    dots$radius_default <- dots$radius
+  }
+  ################### #
 
   global_defaults_or_user_options <- get_global_defaults_or_user_options(
     user_specified_options = dots, # list(...),
@@ -280,26 +292,7 @@ run_app <- function(
     onStart = NULL,
     uiPattern = "/"
 ) {
-
-  options(shiny.autoload.r=FALSE) # instead of using the file _disable_autoload.R
-  on.exit(options(shiny.autoload.r=FALSE)) # restore normal behavior for rest of R session once app halts
-
-  global_defaults_or_user_options <- get_global_defaults_or_user_options(
-    user_specified_options = list(...),
-    bookmarking_allowed = enableBookmarking
-  )
-
-  golem::with_golem_options(
-    app = shiny::shinyApp(
-      ui = app_ui,
-      server = app_server,
-      enableBookmarking = enableBookmarking,
-      onStart = onStart,
-      options = options,
-      uiPattern = uiPattern
-    ),
-    golem_opts = global_defaults_or_user_options
-  )
+  ejamapp(... = ..., enableBookmarking = enableBookmarking, options = options, onStart = onStart, uiPattern = uiPattern)
 }
 ###################################### ###################################### #
 
@@ -313,25 +306,6 @@ app_run_EJAM <- function(
     onStart = NULL,
     uiPattern = "/"
 ) {
-
-  options(shiny.autoload.r=FALSE) # instead of using the file _disable_autoload.R
-  on.exit(options(shiny.autoload.r=FALSE)) # restore normal behavior for rest of R session once app halts
-
-  global_defaults_or_user_options <- get_global_defaults_or_user_options(
-    user_specified_options = list(...),
-    bookmarking_allowed = enableBookmarking
-  )
-
-  golem::with_golem_options(
-    app = shiny::shinyApp(
-      ui = app_ui,
-      server = app_server,
-      enableBookmarking = enableBookmarking,
-      onStart = onStart,
-      options = options,
-      uiPattern = uiPattern
-    ),
-    golem_opts = global_defaults_or_user_options
-  )
+  ejamapp(... = ..., enableBookmarking = enableBookmarking, options = options, onStart = onStart, uiPattern = uiPattern)
 }
 ###################################### ###################################### #

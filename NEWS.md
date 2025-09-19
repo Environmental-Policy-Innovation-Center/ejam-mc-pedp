@@ -89,15 +89,22 @@
 -   Made some functions internal that until now had been exported, to simplify things for most R users.
 -   Updated {roxygen2} help file docs and pkgdown documentation webpages
 -   New function `url_github_preview()` makes it a bit easier to view rendered HTML reports that each package release or branch stores in the testdata/examples_of_outputs folder, to compare how they look in different versions. 
+-   Spell checked / fixed some typos
+-   Fixed some documentation
 
 ### Added or Changed
 
+-   `ejam2report()` now has a sitenumber parameter, to get a report on one site more easily
+-   `ejam2map()` now has a sitenumber parameter, to map one site more easily
 -   `ejam2report()` now downloads FIPS bounds if missing.
 -   `ejam2map()` now downloads FIPS bounds if missing.
+-    unit tests added for functions including ejam2map() and ejam2excel()
 -   `mapfast()` and some others now drop sites with empty geometry before trying to map, avoid an error
 -   `popup_from_any()` and other map popup functions now have different parameters that can handle more columns of URLs/links of any type
 -   `popup_from_any()` and other map popup functions now drop the geometry column from spatial data.frames to avoid including a mess in the popup
+-   `ejam2histogram()` is now exported and has more flexible parameters for title, y axis label, variable names
 -   `shape2geojson()` is a new helper function that tries to convert a spatial data.frame to text string geojson, the format needed by the 8/2025 version of the EJAM-API
+-   `shapefile_from_any()` now can also recognize a vector of character strings that are geojson polygons, via helper shapefile_from_geojson_text(), the inverse of shape2geojson()
 -   `testinput_fips_mix` is a new dataset with fips of each type: block, blockgroup, tract, city, county, state
 -   `fips_county_from_latlon()` and `fips_state_from_latlon()` are new internal functions - for each point, they identify the county or state it is in
 -   `fips2countyfips()` reports what US County contains each fips-based Census unit, such as the Counties in which some blockgroups are located.
@@ -105,17 +112,20 @@
 -   `sites_from_input()` new internal function that helps other functions flexibly accept sites in various formats of input parameters: table of points, vectors of lat,lon, spatial data.frame, or fips code vector 
 -   `sitepoints_from_latlon_or_sitepoints()` supports sites_from_input() - it flexibly accepts input as either lat and lon vectors or just a table of point with lat,lon columns - it figures out which to use.
 -   `regids_valid()` is a new internal function
--  `url_linkify()` improved and made internal
+-   `url_linkify()` improved and made internal
+-   `urls_from_keylists()` utility drafted to help assemble url-encoded API query from lists of key=value arguments, etc.
+-   `url_ejamapi2arglist()` is a new helper that just parses url-encoded API requests back to arguments like ejamit() would need
 
 ### Web app customization details
 
 -   Added `ejamapp()` as the new name (alias) for `run_app()`
 -   Added ability to set many options and defaults as parameters passed to `ejamapp()`.
 -   Added many examples to `ejamapp()` documentation showing how to change defaults and options. You can now
+    -   Provide a table of lat/lon coordinates to preload at launch e.g., `ejamapp(sitepoints=testpoints_10, radius=5)`
+    -   Provide a shapefile to preload upon launch
+    -   Provide a fips vector to preload at launch
     -   Use a preferred default way to pick sites (e.g., to have the app launch with the Counties option selected by default)
     -   Provide pre-selected industry NAICS codes, or a set of specific Counties
-    -   Provide a table of lat/lon coordinates to preload at launch e.g., `ejamapp(sitepoints=testpoints_10)`
-    -   Provide a shapefile to preload upon launch
 -   Drafted a new article with technical details: [Defaults and Custom Settings for the Web App](../articles/dev-app-settings.html)
 -   Changed where the app title is stored. It is stored in the DESCRIPTION file as a field. (The app title also can be modified by editing `global_defaults_package.R` or by passing parameters to `ejamapp()`).
 -   Fixed a bug where `isPublic` parameter in `ejamapp()` was being ignored.

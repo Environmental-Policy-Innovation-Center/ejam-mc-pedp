@@ -180,11 +180,16 @@ metadata_check_print = function(...) {
     y <- x
   }
   rownames(y) <- NULL
-  y[,  intersect(c('item', 'ejam_package_version', 'date_saved_in_package', 'has_metadata'), names(y))]
+  y$is.atomic <- sapply(y$item, function(z) try(is.atomic(get(z))))
+browser()
+  # y[,  ]
   cat("\n\n See which data objects have outdated or missing metadata about ejam_package_version, etc. \n\n")
-  print(y)
+  cat("but omit atomic vectors since adding attributes to those makes them nonvectors and messier to print \n")
+  print(y[ y$is.atomic != "TRUE", intersect(c('item', 'is.atomic', 'ejam_package_version', 'date_saved_in_package', 'has_metadata'), names(y))])
   cat("\n\n")
-
+cat("atomic: \n\n")
+print(y$item[y$is.atomic == "TRUE"])
+cat("\n\n")
   # --------------------------------------------------------------------------------- -
   ## how many lack ejscreen_version info (maybe not always relevant)
   print(table(How.many.have.ejscreen_info = x$ejscreen_version, useNA = "always"))
