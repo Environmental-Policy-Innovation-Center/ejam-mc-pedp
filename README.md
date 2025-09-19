@@ -24,7 +24,8 @@ same time.
 
 ## Status of EJAM package after mid-June 2025
 
-See ejanalysis.org/status for more information.
+See [ejanalysis.org/status](https://ejanalysis.org/status) for more
+information.
 
 *As of mid-June 2025, content related to what had been the USEPA-hosted
 open source R package EJAM will be archived (and/or unpublished)*
@@ -37,15 +38,16 @@ detached fork.
 
 ### code repositories and open source contributions
 
-See ejanalysis.org/ejamrepo
+See [ejanalysis.org/ejamrepo](https://ejanalysis.org/ejamrepo)
 
 ### documentation
 
-See ejanalysis.org/ejamdocs for current documentation.
+See [ejanalysis.org/ejamdocs](https://ejanalysis.org/ejamdocs) for
+current documentation.
 
 ### datasets
 
-See ejanalysis.com/ejam-code
+See [ejanalysis.com/ejam-code](https://ejanalysis.com/ejam-code)
 
 Until mid-2025, datasets had been in a repository *archived and/or
 unpublished in mid-2025*
@@ -55,7 +57,7 @@ it to be further updated by EPA.
 ### web app hosting
 
 A (non-EPA) version of the EJAM web app may be found via this link:
-ejanalysis.org/ejamapp
+[ejanalysis.org/ejamapp](https://ejanalysis.org/ejamapp)
 
 For information about how to host the web app, see [Deploying the Web
 App](https://ejanalysis.github.io/EJAM/articles/dev-deploy-app.html)

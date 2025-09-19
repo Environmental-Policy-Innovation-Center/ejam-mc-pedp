@@ -271,6 +271,7 @@ x <- EJAM:::test_ejam(
         "test-ejamit_sitetype_from_input.R",
         "test-ejamit_sitetype_from_output.R",
 
+        "test-ejam2excel.R",
         "test-ejam2barplot_sites.R",
         "test-ejam2histogram.R"
       ),
