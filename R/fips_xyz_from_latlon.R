@@ -58,6 +58,15 @@ fips_bg_from_latlon <- function(df = testpoints_10[1:2, ], nblocks = 50, nbg = 3
 
   #  see also [state_from_latlon()] -- the function state_from_latlon() seems at least as fast, surprisingly?
 
+  # if lat and lon are NA it gets stuck in a loop so drop those while doing the work
+  df_complete = df
+  suppressWarnings({
+  badrow <- !latlon_is.valid(lat = df$lat, lon = df$lon)
+  })
+  df = df[!badrow, ]
+if (NROW(df) == 0) {
+  return(rep(NA, NROW(df_complete)))
+}
   ##  df = testpoints_10[1:3, ]
   # find blockgroups nearby, quickly
   radius <- radius1
@@ -126,7 +135,9 @@ fips_bg_from_latlon <- function(df = testpoints_10[1:2, ], nblocks = 50, nbg = 3
   fips_out[bg_per_site == 1] <- shp_bgs$FIPS[as.vector(unlist(
     x
     ))]
-  return(fips_out)
+  all_out = rep(NA, NROW(df_complete))
+  all_out[!badrow] <- fips_out
+  return(all_out)
 }
 ########################################### #
 

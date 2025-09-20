@@ -179,8 +179,8 @@ latlon_from_anything <- function(anything, lon_if_used, interactiveprompt = TRUE
   # refactor this to accept maybe sitepoints,lat,lon inputs, as with   sitepoints_from_latlon_or_sitepoints()
   # except this is more flexible in sense that input can be a file while
   # other is more flexible in sense that input can be lat=1,lon=2 or sitepoints=3 etc. ***
-
-  if (missing(anything) || is.null(anything) || all(length(anything) == 0) || all(is.na(anything)) || all("" == anything)) {
+#   all(is.na(anything)) || was removed since it caught data.frame(lat=NA, lon=NA) but we want to treat that as invalid points, not do interactive request for a table
+  if (missing(anything) || is.null(anything) || all(length(anything) == 0) || all(anything %in% "")) {
     if (interactive() && !shiny::isRunning() && interactiveprompt) {
 # could switch to use select_valid_file
       if (!rstudioapi::isAvailable()) {
