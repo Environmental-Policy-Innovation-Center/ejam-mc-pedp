@@ -95,7 +95,7 @@ do_url_tests = function(funcname = "url_ejscreenmap", FUN = NULL) {
     expect_equal(length(x), 6)
     expect_true(substr(x[1], 1, 5) == "https")
   }))
-  try(test_that(paste0(funcname, " 1 url per polygon of shapefile or regid"), {
+  try(test_that(paste0(funcname, " 1 url per polygon of SHAPEFILE or regid"), {
     expect_no_error({suppressWarnings({x <- FUN( # sitepoints = testpoints_10[1:6, ], radius = 1,
       # fips = fipsmix[1:6],
       shapefile = rbind(testinput_shapes_2,testinput_shapes_2,testinput_shapes_2),
