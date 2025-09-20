@@ -124,7 +124,6 @@ test_that("ejam2map() works given shp", {
     suppressWarnings({
       x = ejam2map(testoutput_ejamit_shapes_2,
                    shp = testinput_shapes_2,
-                   # radius = 0,
                    # sitenumber = 0,
                    launch_browser = F
       )
@@ -138,7 +137,6 @@ test_that("ejam2map()  missing shp", {
     suppressWarnings({
       x = ejam2map(testoutput_ejamit_shapes_2,
                    # shp = testinput_shapes_2,
-                   # radius = 0,
                    # sitenumber = 0,
                    launch_browser = F
       )
@@ -152,7 +150,6 @@ test_that("ejam2map() works given shp and a radius", {
     suppressWarnings({
       x = ejam2map(testoutput_ejamit_shapes_2,
                    shp = testinput_shapes_2,
-                   radius = 1,
                    # sitenumber = 0,
                    launch_browser = F
       )
@@ -169,7 +166,6 @@ test_that("ejam2map() works given shp, sitenumber=2", {
     suppressWarnings({
       x = ejam2map(testoutput_ejamit_shapes_2,
                    shp = testinput_shapes_2,
-                   # radius = 0,
                    sitenumber = 2,
                    launch_browser = F
       )

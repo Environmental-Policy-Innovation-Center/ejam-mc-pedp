@@ -1,6 +1,8 @@
 # Tests for shapefile_ functions
 ################################################################ #
 
+# See outline of this file for list of functions. ctrl-shift-o
+
 # shapefile_from_json(testfilename_json)
 # shapefile_from_zip(testfilename_zipdir)    # shapefile_from_zip(testfilename_zipdir2)  #  shapefile_from_zip(testfilename_zipshp)
 # shapefile_from_gdb(testfilename_gdb)
@@ -23,6 +25,8 @@
 # shapefile_from_any(   )
 
 ################################################################ #
+# . ####
+
 testthat::test_that("test data files are available", {
 
   ## also see
@@ -60,7 +64,10 @@ testthat::test_that("test data files are available", {
   #  ##"portland_folder_shp"  "portland_folder_shp.zip"
   #  ##"portland_shp.zip"  ### "stations_shp.zip" "stations.zip"
 })
+# . ####
 ################################################################ #
+# . ####
+
 testthat::test_that("shapefile_from_geojson_text(1 polygon) is inverse of shape2geojson()", {
   expect_no_error({
     shp1 = testinput_shapes_2[1,]
@@ -320,87 +327,9 @@ testthat::test_that("shapefile_filepaths_validize(testfilename_shp_alone) not cr
   rm(JUNK)
 })
 ######################################################### #
-testthat::test_that("shapefile_clean(testshape) not crash", {
-  testfilename_dirshp    <- system.file("testdata/shapes/portland_folder_shp", package = "EJAM")
-  junk <- capture.output({
-    testshape <- testshapes_2 # shapefile_from_folder(testfilename_dirshp)
-  })
-  expect_no_error({suppressWarnings({
-    JUNK <- shapefile_clean(testshape)
-  })})
-  expect_true(
-    "sf" %in% class(JUNK)
-  )
-  rm(JUNK)
-})
-######################################################### #
-testthat::test_that("shape_buffered_from_shapefile(testshape) not crash", {
-  testfilename_dirshp    <- system.file("testdata/shapes/portland_folder_shp", package = "EJAM")
-  junk <- capture.output({
-    testshape <- testshapes_2 # shapefile_from_folder(testfilename_dirshp)[c(1,3), ]
-  })
-  expect_no_error({suppressWarnings({
-    JUNK <- shape_buffered_from_shapefile(testshape, radius.miles = 0.5)
-  })})
-  # mapview(testshape, col.regions = "darkgreen") + mapview(JUNK, col.regions = "lightgray")
-  expect_true({
-    "sf" %in% class(JUNK) & "sf" %in% class(testshape)
-  })
-  expect_true(
-    all((as.numeric((sf::st_area(JUNK)) / (sf::st_area(testshape)))) > 1)
-  )
-  rm(JUNK)
-})
-######################################################### #
-testthat::test_that("shape_buffered_from_shapefile_points(testshape_points) not crash", {
-  junk <- capture.output({
-    testshape_points <- shapefile_from_sitepoints(testpoints_10[1:3, ])
-  })
-  expect_no_error({suppressWarnings({
-    JUNK <- shape_buffered_from_shapefile_points(testshape_points, radius.miles = 1)
-  })})
-  # mapview::mapview(JUNK[1, ])
-  # mapfast(testpoints_10[1, ], radius = 1)
-  expect_true(
-    "sf" %in% class(JUNK)
-  )
-  rm(JUNK)
-})
-######################################################### #
-testthat::test_that("shapefile2latlon(testshape_points) aka latlon_from_shapefile(testshape) not crash", {
-  junk <- capture.output({
-    testshape_points <- shapefile_from_sitepoints(testpoints_10)
-  })
-  expect_no_error({suppressWarnings({
-    junk <- capture.output({
-      JUNK <- shapefile2latlon(testshape_points)
-      JUNK <- latlon_from_shapefile(testshape_points)
-    })
-  })})
-  expect_true(
-    is.data.frame(JUNK) & data.table::is.data.table(JUNK)
-  )
-  rm(JUNK)
-})
-######################################################### #
-testthat::test_that("latlon_from_shapefile(testshape_points) not crash", {
-  junk <- capture.output({
-    testshape_points <- shapefile_from_sitepoints(testpoints_10)
-  })
-  expect_no_error({suppressWarnings({ suppressMessages({
-    junk <- capture.output({
-      JUNK <- latlon_from_shapefile(testshape_points)
-    })
-  })  })})
-  expect_true(
-    is.data.frame(JUNK) & data.table::is.data.table(JUNK)
-  )
-  rm(JUNK)
-})
-######################################################### #
 
 ################################################################ #
-
+# . ####
 # shapefile_from_any(   various  inputs  allowed   )
 
 ######################################################### #
@@ -491,3 +420,53 @@ testthat::test_that("shapefile_from_any(testfilenameset_4) works", {
 ######################################################### #
 
 
+#. ####
+######################################################### #
+
+testthat::test_that("shapefile_clean(testshape) not crash", {
+  testfilename_dirshp    <- system.file("testdata/shapes/portland_folder_shp", package = "EJAM")
+  junk <- capture.output({
+    testshape <- testshapes_2 # shapefile_from_folder(testfilename_dirshp)
+  })
+  expect_no_error({suppressWarnings({
+    JUNK <- shapefile_clean(testshape)
+  })})
+  expect_true(
+    "sf" %in% class(JUNK)
+  )
+  rm(JUNK)
+})
+######################################################### #
+testthat::test_that("shape_buffered_from_shapefile(testshape) not crash", {
+  testfilename_dirshp    <- system.file("testdata/shapes/portland_folder_shp", package = "EJAM")
+  junk <- capture.output({
+    testshape <- testshapes_2 # shapefile_from_folder(testfilename_dirshp)[c(1,3), ]
+  })
+  expect_no_error({suppressWarnings({
+    JUNK <- shape_buffered_from_shapefile(testshape, radius.miles = 0.5)
+  })})
+  # mapview(testshape, col.regions = "darkgreen") + mapview(JUNK, col.regions = "lightgray")
+  expect_true({
+    "sf" %in% class(JUNK) & "sf" %in% class(testshape)
+  })
+  expect_true(
+    all((as.numeric((sf::st_area(JUNK)) / (sf::st_area(testshape)))) > 1)
+  )
+  rm(JUNK)
+})
+######################################################### #
+testthat::test_that("shape_buffered_from_shapefile_points(testshape_points) not crash", {
+  junk <- capture.output({
+    testshape_points <- shapefile_from_sitepoints(testpoints_10[1:3, ])
+  })
+  expect_no_error({suppressWarnings({
+    JUNK <- shape_buffered_from_shapefile_points(testshape_points, radius.miles = 1)
+  })})
+  # mapview::mapview(JUNK[1, ])
+  # mapfast(testpoints_10[1, ], radius = 1)
+  expect_true(
+    "sf" %in% class(JUNK)
+  )
+  rm(JUNK)
+})
+######################################################### #

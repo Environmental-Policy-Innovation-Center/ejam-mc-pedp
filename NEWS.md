@@ -30,8 +30,8 @@
 -   [ejanalysis.org/ejam](https://ejanalysis.org/ejam) has info on EJAM
 -   [ejanalysis.org/status](https://ejanalysis.org/status) has info about the 2025 status and history of transition from EPA to non-EPA versions of EJSCREEN and EJAM
 -   [ejanalysis.org/ejamdocs](https://www.ejanalysis.org/ejamdocs) directs you to the documentation:
-    -   [What is EJAM?](../articles/whatis.html) is an overview of what EJAM can do.
-    -   [Accessing the Web App](../articles/webapp.html) is about the web app.
+    -   [What is EJAM?](https://ejanalysis.github.io/EJAM/articles/whatis.html) is an overview of what EJAM can do.
+    -   [Accessing the Web App](https://ejanalysis.github.io/EJAM/articles/webapp.html) is about the web app.
 
 ### Web App Documentation
 
@@ -82,7 +82,7 @@
 ### Added documentation
 
 -   Simplified the [README](https://github.com/ejanalysis/EJAM/#readme)
--   Improved the [article on how to install the package](../articles/installing.html), but it does need some additional testing/fixes.
+-   Improved the [article on how to install the package](https://ejanalysis.github.io/EJAM/articles/installing.html), but it does need some additional testing/fixes.
 -   Renamed fields in the DESCRIPTION file, for VERSION and DATE info!
 -   Redid sample report, etc. outputs in `testdata/examples_of_outputs` folder to reflect changes in version numbers shown in report footer and app header, etc.
 -   Renamed various \*.R files and relocated some source code among those, to make some filenames more consistent.
@@ -109,8 +109,11 @@
 -   `fips_county_from_latlon()` and `fips_state_from_latlon()` are new internal functions - for each point, they identify the county or state it is in
 -   `fips2countyfips()` reports what US County contains each fips-based Census unit, such as the Counties in which some blockgroups are located.
 -   `fips2name()` now handles block fips instead of warning
--   `sites_from_input()` new internal function that helps other functions flexibly accept sites in various formats of input parameters: table of points, vectors of lat,lon, spatial data.frame, or fips code vector 
--   `sitepoints_from_latlon_or_sitepoints()` supports sites_from_input() - it flexibly accepts input as either lat and lon vectors or just a table of point with lat,lon columns - it figures out which to use.
+-   `sites_from_input()` new internal function that helps other functions flexibly accept sites in various formats of input parameters: 
+      - lat= and lon= vectors of point coordinates, or
+      - sitepoints= a data.frame with columns called lat and lon, or
+      - shapefile= a spatial data.frame of polygons, or 
+      - fips= a vector of census FIPS code
 -   `regids_valid()` is a new internal function
 -   `url_linkify()` improved and made internal
 -   `urls_from_keylists()` utility drafted to help assemble url-encoded API query from lists of key=value arguments, etc.
@@ -118,21 +121,22 @@
 
 ### Web app customization details
 
--   Added `ejamapp()` as the new name (alias) for `run_app()`
+-   Added `ejamapp()` as the new name for what was `run_app()` -- This launches EJAM as a local shiny app, in RStudio.
 -   Added ability to set many options and defaults as parameters passed to `ejamapp()`.
 -   Added many examples to `ejamapp()` documentation showing how to change defaults and options. You can now
     -   Provide a table of lat/lon coordinates to preload at launch e.g., `ejamapp(sitepoints=testpoints_10, radius=5)`
     -   Provide a shapefile to preload upon launch
     -   Provide a fips vector to preload at launch
-    -   Use a preferred default way to pick sites (e.g., to have the app launch with the Counties option selected by default)
+    -   Provide radius as a parameter.
+    -   Specify a preferred default way to pick sites (e.g., to have the app launch with the Counties option selected by default)
     -   Provide pre-selected industry NAICS codes, or a set of specific Counties
--   Drafted a new article with technical details: [Defaults and Custom Settings for the Web App](../articles/dev-app-settings.html)
+-   Drafted a new article with technical details: [Defaults and Custom Settings for the Web App](https://ejanalysis.github.io/EJAM/articles/dev-app-settings.html)
 -   Changed where the app title is stored. It is stored in the DESCRIPTION file as a field. (The app title also can be modified by editing `global_defaults_package.R` or by passing parameters to `ejamapp()`).
 -   Fixed a bug where `isPublic` parameter in `ejamapp()` was being ignored.
 -   Fixed a bug where threshold-related parameters passed to `ejamapp()` were being ignored in the latlon case.
 -   Changed how Advanced tab visibility is controlled ("default_can_show_advanced_settings" and "default_show_advanced_settings" set initial values of shiny inputs of the same names)
 -   Renamed some global_defaults\_ variables and shiny app input variables and related variables so they are easier to use as parameters in ejamapp().
-    -   For example, radius is now settable by `ejamapp(radius_default=3.1)` -- the old `input$default_miles` is now called `input$radius_default`, and the old `input$bt_rad_buff` is now called `input$radius_now`
+    -   For example, radius is now settable by `ejamapp(radius=3.1)`
     -   Renamed global defaults related to app title, logo, and version number, to be more clear and consistent, and moved them to global_defaults_package.R. So logos e.g. could be changed via ejamapp(report_logo="www/EPA_logo_white_2.png", app_logo="www/EPA_logo_white_2.png"). Other similar changes:
     -   the old global_defaults\_ variable "max_default_miles" is now called "max_radius_default"
     -   the old global_defaults\_ variable "intro_text" is now called "aboutpage_text"

@@ -193,7 +193,9 @@ x <- EJAM:::test_ejam(
         "test-state_from_latlon.R",
         "test-is.numeric.text.R",
         "test-fips2countyfips.R",
-        "test-fips_bg_from_latlon.R"
+        "test-fips_bg_from_latlon.R",
+
+        "test-latlon_from_fips.R"
       ),
       test_naics = c(
         "test-naics_categories.R",
@@ -212,8 +214,7 @@ x <- EJAM:::test_ejam(
         "test-frs_from_programid.R",
         "test-frs_from_regid.R",
         "test-frs_from_sic.R",
-        "test-frs_is_valid.R",
-        "test-latlon_from_fips.R"
+        "test-frs_is_valid.R"
       ),
       test_latlon = c(
         "test-latlon_infer.R",
@@ -232,6 +233,8 @@ x <- EJAM:::test_ejam(
         "test-ejam2map.R"
       ),
       test_shape = c(
+        "test-latlon_from_shapefile.R",
+
         "test-shapefile_xyz.R",
         "test-shapes_from_fips.R",
         "test-ejam2shapefile.R",

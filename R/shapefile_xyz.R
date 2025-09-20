@@ -195,6 +195,48 @@ shapefile_from_any <- function(path = NULL, cleanit = TRUE, crs = 4269, layer = 
 ############################################################################################## #
 # helpers ####
 
+############################################################################################## #
+
+
+#' Convert table of lat,lon points/sites into spatial data.frame / shapefile
+#'
+#' Creates a simple feature (sf) dataframe from points
+#' @param sitepoints a data.table or data.frame with columns called lat,lon (or aliases of those)
+#' @param crs used in st_as_sf() default is crs = 4269 or Geodetic CRS NAD83
+#' @param ... passed to [sf::st_as_sf()]
+#'
+#' @return A shapefile via [sf::st_as_sf()].
+#'  Note other columns get returned,
+#'  and the lat,lon columns do get returned but as "lat" and "lon" even if they were provided as aliases of those
+#' @seealso [get_blockpoints_in_shape()] [shapefile_from_sitepoints()] [shape_buffered_from_shapefile_points()]
+#'
+#' @export
+#'
+shapefile_from_sitepoints <- function(sitepoints, crs = 4269, ...) {
+
+  stopifnot(is.data.frame(sitepoints))
+  suppressWarnings({
+    sitepoints <- try(latlon_from_anything(sitepoints, interactiveprompt = FALSE), silent = TRUE)
+    # infers lat,lon colnames from aliases, e.g., latlon_from_anything(data.table(latitude = testpoints_10$lat, longitude = testpoints_10$lon))
+  })
+  if (inherits(sitepoints, "try-error")) {
+    stop("cannot interpret as lat,lon points")
+  }
+  # note other columns get returned, but the lat,lon columns do not get returned but get turned into the geometry column
+  ## treat latlon NA as zero since sf::st_as_sf() errors on NA coordinates
+  pts <- sitepoints
+  pts$lat[is.na(pts$lat)] <- 0
+  pts$lon[is.na(pts$lon)] <- 0
+  shpcoord <- sf::st_as_sf(pts, coords = c('lon', 'lat'), crs = crs, ...) #   want 4269
+  # return geometry column along with original columns and lat,lon
+  shpcoord <- cbind(shpcoord, sitepoints[, c("lat", "lon")])
+  zero_na <-  (0 == rowSums(sf::st_coordinates(shpcoord)))
+  if (any(zero_na)) {
+    shpcoord$geometry[zero_na] <- NA
+  }
+  return(shpcoord)
+}
+############################################################################################## #
 
 #' read .json or .geojson shapefile data
 #'
@@ -236,10 +278,10 @@ shapefile_from_geojson_text <- function(x, quiet = FALSE) {
   if (all(grepl("type.*FeatureCollection",    x))) {
     # might be geojson text string(s)
     junk = capture.output({
-    shp <- try({
+      shp <- try({
 
-      z <- lapply(x, sf::st_read)
-      do.call(rbind, z)
+        z <- lapply(x, sf::st_read)
+        do.call(rbind, z)
 
       }, silent = TRUE)
     })
@@ -679,7 +721,7 @@ shapefile_filepaths_validize <- function(filepaths, inputname = NULL) {
 
   mydir <- unique(dirname(filepaths))[1] # should only be one directory, but just in case do this
   keepfiles <- tools::file_ext(filepaths) %in% c('shp','shx','dbf','prj')
-   filepaths <- filepaths[keepfiles]
+  filepaths <- filepaths[keepfiles]
 
   if(!is.null(inputname)){
     outfiles <- file.path(mydir, inputname[keepfiles])
@@ -707,43 +749,6 @@ shapefile_filepaths_validize <- function(filepaths, inputname = NULL) {
     # and cpg is ok but not essential?
     return(NULL)
   }
-}
-############################################################################################## #
-# utilities / other ####
-
-
-#' Drop invalid rows, warn if all invalid, add unique ID, transform (CRS)
-#'
-#' @param shp a shapefile object using sf::st_read()
-#' @param crs used in shp <- sf::st_transform(shp, crs = crs), default is crs = 4269 or Geodetic CRS NAD83
-#'
-#' @return like input shp, but applying crs and dropping if not valid,
-#'   plus column ejam_uniq_id 1:NROW()
-#' @seealso [shapefile_from_folder()]
-#'
-#' @export
-#'
-shapefile_clean <- function(shp, crs = 4269) {
-
-  # add error checking ***
-
-  if (nrow(shp) > 0) {
-    if ("ejam_uniq_id" %in% names(shp)) {warning("ejam_uniq_id columns was already in shp, but replacing it now!")}
-    shp <- dplyr::mutate(shp, ejam_uniq_id = dplyr::row_number()) # number them before dropping invalid ones,
-    #   so that original list can be mapped to results list more easily
-
-    shp <- shp[sf::st_is_valid(shp), ]          # determines valid shapes, to use those and drop the others
-    ## or...  ## *** shouldnt it also drop st_is_empty ones as in ejamit() ?
-    #  shp <- shp[sf::st_is_valid(shp) & !sf::st_is_empty(shp), ]
-
-    shp <- sf::st_transform(shp, crs = crs)  # NEED TO DOCUMENT THE ASSUMPTION IT USES THIS CRS ***
-
-  } else {
-
-    warning('No shapes found in file uploaded.')
-    shp <- NULL
-  }
-  return(shp)
 }
 ############################################################################################## #
 
@@ -879,51 +884,57 @@ Except, if Counties were analyzed, see  mapfastej_counties() \n')
 }
 ############################################################################################## #
 
+# utilities  ####
 
-#' Convert table of lat,lon points/sites into sf:: shapefile
+
+#' Drop invalid rows, warn if all invalid, add unique ID, transform (CRS)
 #'
-#' Creates a simple feature (sf) dataframe from points
-#' @param sitepoints a data.table or data.frame with columns called lat,lon (or aliases of those)
-#' @param crs used in st_as_sf() default is crs = 4269 or Geodetic CRS NAD83
-#' @param ... passed to [sf::st_as_sf()]
+#' @param shp a shapefile object using sf::st_read()
+#' @param crs used in shp <- sf::st_transform(shp, crs = crs), default is crs = 4269 or Geodetic CRS NAD83
 #'
-#' @return A shapefile via [sf::st_as_sf()].
-#'  Note other columns get returned,
-#'  and the lat,lon columns do get returned but as "lat" and "lon" even if they were provided as aliases of those
-#' @seealso [get_blockpoints_in_shape()] [shapefile_from_sitepoints()] [shape_buffered_from_shapefile_points()]
+#' @return like input shp, but applying crs and dropping if not valid,
+#'   plus column ejam_uniq_id 1:NROW()
+#' @seealso [shapefile_from_folder()]
 #'
 #' @export
 #'
-shapefile_from_sitepoints <- function(sitepoints, crs = 4269, ...) {
+shapefile_clean <- function(shp, crs = 4269) {
 
-  stopifnot(is.data.frame(sitepoints))
-  suppressWarnings({
-  sitepoints <- try(latlon_any_format(sitepoints), silent = TRUE) # infers lat,lon colnames from aliases, e.g., latlon_any_format(data.table(latitude = testpoints_10$lat, longitude = testpoints_10$lon))
-  })
-  if (inherits(sitepoints, "try-error")) {
-    stop("cannot interpret as lat,lon points")
+  # add error checking ***
+
+  if (nrow(shp) > 0) {
+    if ("ejam_uniq_id" %in% names(shp)) {warning("ejam_uniq_id columns was already in shp, but replacing it now!")}
+    shp <- dplyr::mutate(shp, ejam_uniq_id = dplyr::row_number()) # number them before dropping invalid ones,
+    #   so that original list can be mapped to results list more easily
+
+    shp <- shp[sf::st_is_valid(shp), ]          # determines valid shapes, to use those and drop the others
+    ## or...  ## *** shouldnt it also drop st_is_empty ones as in ejamit() ?
+    #  shp <- shp[sf::st_is_valid(shp) & !sf::st_is_empty(shp), ]
+
+    shp <- sf::st_transform(shp, crs = crs)  # NEED TO DOCUMENT THE ASSUMPTION IT USES THIS CRS ***
+
+  } else {
+
+    warning('No shapes found in file uploaded.')
+    shp <- NULL
   }
-  # note other columns get returned, but the lat,lon columns do not get returned but get turned into the geometry column
-  ## treat latlon NA as zero since sf::st_as_sf() errors on NA coordinates
-  pts <- sitepoints
-  pts$lat[is.na(pts$lat)] <- 0
-  pts$lon[is.na(pts$lon)] <- 0
-  shpcoord <- sf::st_as_sf(pts, coords = c('lon', 'lat'), crs = crs, ...) #   want 4269
-  # return geometry column along with original columns and lat,lon
-  shpcoord <- cbind(shpcoord, sitepoints[, c("lat", "lon")])
-  zero_na <-  (0 == rowSums(sf::st_coordinates(shpcoord)))
-  if (any(zero_na)) {
-  shpcoord$geometry[zero_na] <- NA
-  }
-  return(shpcoord)
+  return(shp)
+}
+############################################################################################## #
+# . ####
+# shapefile2___ ####
+
+
+# internal alias leftover
+
+shapefile2latlon <- function(shp, include_only_latlon = TRUE) {
+  latlon_from_shapefile(shp, include_only_latlon)
 }
 ############################################################################################## #
 
-
-#' Convert shapefile (class sf) of points to data.table of lat, lon columns
+#' Convert shapefile (class sf) to data.table of lat and lon columns
+#' Makes lat and lon columns, from a sfc_POINT class geometry field, or finds centroids of POLYGONS
 #'
-#' Makes lat and lon columns, from a sfc_POINT class geometry field,
-#'   via [sf::st_coordinates()]
 #' @param shp shapefile that is class sf, as from [shapefile_from_any()]
 #'   or [sf::st_read()], with geometry column that has points
 #'   so is class sfc_POINT
@@ -933,15 +944,27 @@ shapefile_from_sitepoints <- function(sitepoints, crs = 4269, ...) {
 #' @return data.table with columns named lat and lon,
 #'   and optionally all from shp as well,
 #'   as can be used as input to [ejamit()], [mapfast()], etc.
-#' @aliases latlon_from_shapefile
+#' @aliases [shapefile2latlon()]
+#' @seealso [latlon_from_shapefile_centroids()]
+#'
 #' @export
 #'
-shapefile2latlon <- function(shp, include_only_latlon = TRUE) {
+latlon_from_shapefile <- function(shp, include_only_latlon = TRUE) {
 
-  if (!("sf" %in% class(shp)) ||
-      !("geometry" %in% names(shp)) ||
-      !("sfc_POINT" %in% class(shp$geometry))) {
-    stop("shp must be class sf, and shp$geometry must be class sfc_POINT")
+  # confirm spatial and standardize geometry colname
+  gcolname <- attr(shp, "sf_column")
+  if (!("sf" %in% class(shp)) || is.null(gcolname))  {
+    stop("shp must be sf class with a geometry column")
+  }
+  names(shp) <- gsub(gcolname, "geometry", names(shp))
+
+  if (!("sfc_POINT" %in% class(shp$geometry))) {
+    pts <- try(latlon_from_shapefile_centroids(shp), silent = TRUE)
+    if (!inherits(pts, "try-error")) {
+      return(pts)
+    } else {
+      stop("cannot find points or centroids of polygons based on input shp")
+    }
   }
   pts <- data.table::data.table(sf::st_coordinates(shp))
   data.table::setnames(pts, old = "X", new = "lat")
@@ -957,15 +980,7 @@ shapefile2latlon <- function(shp, include_only_latlon = TRUE) {
     pts <- data.table::data.table(pts, shp)
   }
   message("note that no changes were made to coordinate reference system - input CRS is ", sf::st_crs(pts)$input)
-  print(sf::st_crs(pts))
+  # print(sf::st_crs(pts))
   return(pts)
-}
-############################################################################################## #
-
-
-#' @export
-#'
-latlon_from_shapefile <- function(shp, include_only_latlon = TRUE) {
-  shapefile2latlon(shp, include_only_latlon)
 }
 ############################################################################################## #

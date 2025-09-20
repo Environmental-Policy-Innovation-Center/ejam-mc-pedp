@@ -1,13 +1,20 @@
 #################### #
+
 select_valid_file <- function(silentinteractive = FALSE) {
 
-  # helper utility - select a file
-  # interactively non in shiny, let user select a file (full path and filename) by browsing to it
+  # used in ejamit()
+  # select_valid_file() could be used in latlon_from_anything()
+
+  # helper utility - select a file interactively not in shiny,
+  # let user select a file (full path and filename) by browsing to it
   # that is a valid type of file for use as an input to ejamit()
 
-  #  see  shapefile_from_any()
+  # see  shapefile_from_any()
+  # see  sites_from_file()
+
   #  c("zip", "gdb", "geojson", "json", "kml", "shp", "shx", "dbf", "prj")
   # *.zip, *.gdb, *.geojson, *.json, *.kml, *.shp, *.shx, *.dbf, *.prj
+
   if (interactive() && !silentinteractive) {
     if (rstudioapi::isAvailable()) {
       selected_pathfile <- rstudioapi::selectFile(
@@ -16,7 +23,7 @@ select_valid_file <- function(silentinteractive = FALSE) {
         # filter = "", # allow anything to be picked and validate allowed formats later?
         #   or else list all the shp and latlon types allowed like
         filter = paste0("Excel/csv/Shapefiles (*.xlsx, *.xls, *.csv, *.zip, *.gdb, *.geojson, *.json, *.kml, *.shp)"),
-          #  *.shx, *.dbf, *.prj, *.cpg, ## not relevant since selectFile doese not let you select multiple files ? but if filter allows .shp, these others do appear just not .cpg ?
+        #  *.shx, *.dbf, *.prj, *.cpg, ## not relevant since selectFile doese not let you select multiple files ? but if filter allows .shp, these others do appear just not .cpg ?
         existing = TRUE
       )
     } else {
@@ -28,84 +35,6 @@ select_valid_file <- function(silentinteractive = FALSE) {
   return(selected_pathfile)
 }
 #################### #
-
-sitetype_from_filepath <- function(filepath) {
-
-  # helper utility - what kind of file is it? (latlon, fips, shp)
-  # try to infer the type of data provided by the file as a valid input to ejamit() parameters sitepoint or fips or shp
-  ext <- tools::file_ext(filepath)
-  if (ext %in% c("xlsx", "xls", "csv")) {
-    # either fips or latlon...
-
-    # must read it to know if fips or latlon!?
-    # sitepoints_from_any() using  latlon_from_anything() should be able to obtain lat lon directly or via addresses geocoded
-
-    mytable = read_csv_or_xl(filepath)
-    # fips <- fips_from_table()
-    seems_like_fips <- FALSE
-
-
-    if (seems_like_fips) {
-      return("fips")
-    } else {
-      return("latlon")
-    }
-  } else if (ext %in% c("zip", "gdb", "geojson", "json", "kml", "shp")) {
-    # not shx dbf prj cpg
-    return("shp")
-  } else {
-    stop(paste0("File type not recognized: ", ext))
-  }
-}
-#################### #
-
-#################### #
-#' helper - given filename, figure out type and return list of input params for ejamit()
-#' Do not actually read file but get list of sitepoints, fips, shapefile args to pass to ejamit()
-#'
-#' @param file a file name (with path) to look at
-#'
-#' @returns named list, with sitepoints, fips, shapefile as names
-#'
-#' @keywords internal
-#'
-sites_from_file <- function(file) {
-
-  selected_pathfile <- file
-  # infer type
-  filetype <- sitetype_from_filepath(selected_pathfile)
-
-  # sitepoints = NULL # actually should be missing if not applicable
-  fips = NULL
-  if (filetype == "latlon") {
-    sitepoints <- selected_pathfile
-    shapefile = NULL
-    fips = NULL
-  }
-  if (filetype == "shp") {
-    sitepoints = NULL
-    shapefile <- selected_pathfile
-    fips = NULL
-  }
-  if (filetype == "fips") {
-    sitepoints = NULL
-    shapefile = NULL
-    fipstable <- read_csv_or_xl(fname = basename(selected_pathfile), path = dirname(selected_pathfile))
-    fips <- fips_from_table(fips_table = fipstable)
-  }
-
-  return(list(sitepoints = sitepoints, fips = fips, shapefile = shapefile))
-
-  ## if we had to omit sitepoints instead of it being null
-  # if (is.null(sitepoints)) {
-  #   return(list(fips = fips, shapefile = shapefile))
-  # } else {
-  #   return(list(sitepoints = sitepoints, fips = fips, shapefile = shapefile))
-  # }
-}
-#################### #
-
-
 
 #' Get lat/lon flexibly - from file, data.frame, data.table, or lat/lon vectors
 #'
@@ -123,32 +52,19 @@ sites_from_file <- function(file) {
 #'  which in turn uses [latlon_infer()] [latlon_as.numeric()] [latlon_is.valid()]
 #'
 #'
-#'  A draft function [read_and_clean_points()] would a more general way to get points,
-#'
-#'  but is still work in progress... it is similar to latlon_from_anything()
-#'
-#'   except it also uses these functions:
-#'
-#'   [latlon_from_regid()],  [latlon_from_programid()]
-#'
-#'   and could eventually use  _from_naics() etc.
-#'
-#'   Even more generally, FIPS and shapefile inputs could be read through a
-#'   single wrapper function at some point.
-#'
 #' @param anything If missing and interactive mode in RStudio, prompts user for file. Otherwise,
 #'   this can be a filename (csv or xlsx, with path), or data.frame/ data.table/ matrix,
 #'  or vector of longitudes (in which case y must be the latitudes).
 #'   File or data.frame/data.table/matrix must have columns called lat and lon, or names that can
-#'   be inferred to be that by latlon_infer()
+#'   be inferred to be that by [latlon_infer()]
 #' @param lon_if_used If anything parameter is a vector of longitudes, lon_if_used must be the latitudes. Ignored otherwise.
 #' @param interactiveprompt If TRUE (default) and in interactive mode not running shiny,
 #'    will prompt user for file if "anything" is missing.
 #' @param invalid_msg_table Set to TRUE to add columns "valid" and "invalid_msg" to output
-#' @param set_invalid_to_na used by latlon_df_clean()
+#' @param set_invalid_to_na used by [latlon_df_clean()]
 #' @seealso
 #'   [sitepoints_from_any()] which is like this but also adds ejam_uniq_id column,
-#'   [latlon_from_fips()] and [latlon_from_shapefile()] that find centroids,
+#'   [latlon_from_fips()] and [latlon_from_shapefile_centroids()] that find centroids,
 #'   and see [read_csv_or_xl()] and [latlon_df_clean()]
 #' @return A data.frame that has at least columns lon and lat (and others if they were in anything),
 #'   and a logical column called "valid"
@@ -176,13 +92,28 @@ sites_from_file <- function(file) {
 latlon_from_anything <- function(anything, lon_if_used, interactiveprompt = TRUE, invalid_msg_table = FALSE, set_invalid_to_na = TRUE) {
 
 
-  # refactor this to accept maybe sitepoints,lat,lon inputs, as with   sitepoints_from_latlon_or_sitepoints()
-  # except this is more flexible in sense that input can be a file while
-  # other is more flexible in sense that input can be lat=1,lon=2 or sitepoints=3 etc. ***
+  # refactor this latlon_from_anything()? NOTES: ***
+#
+#    A draft function [read_and_clean_points()] would a more general way to get points from many types of inputs,
+#    but was still work in progress... it is similar to latlon_from_anything()
+#     except it also uses these functions:
+#
+#     [latlon_from_regid()],  [latlon_from_programid()]
+#     and could eventually use  _from_naics() etc.
+#     and  could  accept inputs like  sitepoints,lat,lon   using   sitepoints_from_latlon_or_sitepoints()
+  #      but note this is more flexible in sense that input can be a file while
+  #      sitepoints_from_latlon_or_sitepoints() is more flexible in sense that input can be lat=1,lon=2 or sitepoints=3 etc.
+
+  #     Even more generally, FIPS and shapefile inputs could be read through a
+#     single wrapper function at some point.
+
+
 #   all(is.na(anything)) || was removed since it caught data.frame(lat=NA, lon=NA) but we want to treat that as invalid points, not do interactive request for a table
   if (missing(anything) || is.null(anything) || all(length(anything) == 0) || all(anything %in% "")) {
     if (interactive() && !shiny::isRunning() && interactiveprompt) {
-# could switch to use select_valid_file
+
+# could switch to use  select_valid_file() here in latlon_from_anything() ***
+
       if (!rstudioapi::isAvailable()) {
         x <- file.choose()
         # if somehow the user is interactive like in R console NOT using RStudio
@@ -202,6 +133,14 @@ latlon_from_anything <- function(anything, lon_if_used, interactiveprompt = TRUE
     }} else {
       x <- anything
     }
+
+
+  # could switch to use here one or more of these: ***
+  # sitetype_from_filepath()
+  # sites_from_file()
+  # sites_from_input()
+  # sitetype_from_filepath()
+
 
   # figure out if x is a filename or data.table or data.frame
   # of lat, lon values, and clean it up for use.
@@ -277,15 +216,4 @@ latlon_from_anything <- function(anything, lon_if_used, interactiveprompt = TRUE
   return(pts)
 }
 ########################################################### #
-
-
-#' Get lat/lon flexibly - from file, data.frame, data.table, or lat/lon vectors
-#' @inherit latlon_from_anything
-#' @return A data.frame that has at least columns lon and lat (and others if they were in x)
-#' @export
-#' @keywords internal
-#'
-latlon_any_format <- function(anything, lon_if_used, interactiveprompt = TRUE, invalid_msg_table = FALSE) {
-  latlon_from_anything(anything = anything, lon_if_used = lon_if_used, interactiveprompt = interactiveprompt, invalid_msg_table = invalid_msg_table)
-}
-########################################################### #
+# got rid of latlon_any_format() alias

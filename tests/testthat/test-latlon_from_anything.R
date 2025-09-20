@@ -1,7 +1,7 @@
 
 ################################################ #
 
-testthat::test_that("latlon_from_anything works with data.frames", {
+testthat::test_that("latlon_from_anything works with data.frame pts", {
 
   expect_no_error({
     x <- latlon_from_anything(testpoints_100[1:6, ])
@@ -18,6 +18,44 @@ testthat::test_that("latlon_from_anything works with data.frames", {
   expect_true(
     all(c("lat", "lon") %in% names(x))
   )
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
+})
+################################################ #
+
+testthat::test_that("latlon_from_anything works with SHAPEFILE with INTPTLAT INTPTLON", {
+
+  expect_no_error({
+    suppressMessages({
+    x <- latlon_from_anything(testinput_shapes_2)
+    })
+  })
+  expect_equal(
+    NROW(x), 2
+  )
+  expect_true(
+    all(c("lat", "lon") %in% names(x))
+  )
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
+})
+################################################ #
+
+testthat::test_that("latlon_from_anything works with SHAPEFILE with geometry NOT INTPTLAT INTPTLON", {
+
+  expect_no_error({
+    suppressMessages({
+      x <- latlon_from_anything(testinput_shapes_2[,c("NAME", "geometry")])
+  })
+})
+  expect_equal(
+    NROW(x), 2
+  )
+  expect_true(
+    all(c("lat", "lon") %in% names(x))
+  )
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
 })
 ################################################ #
 
@@ -78,6 +116,8 @@ testthat::test_that("latlon_from_anything works with x, y vectors", {
     y <- latlon_from_anything(testpoints_100[1:6, ])
   })
   expect_identical(x[, c("lat", "lon")], y[, c("lat", "lon")])
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
 })
 ################################################ #
 
@@ -136,6 +176,8 @@ testthat::test_that("latlon_from_anything works with tibbles", {
     y ,
     ignore_attr = TRUE
   )
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
 })
 ################################################ #
 
@@ -148,6 +190,8 @@ testthat::test_that("latlon_from_anything (after create tempfile) works with csv
   x <- latlon_from_anything(tfile)
   y <- latlon_from_anything(testpoints_10[1:2, ])
   testthat::expect_equal(x, y, ignore_attr = TRUE)
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
 })
 ################################################ #
 
@@ -161,6 +205,8 @@ testthat::test_that("latlon_from_anything works with xlsx", {
     {x <- latlon_from_anything(fname)}
   )
   expect_equal(NROW(x), 10)
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
 })
 ################################################ #
 
@@ -184,5 +230,7 @@ testthat::test_that("latlon_from_anything works with matrix", {
     colnames(x2),
     c("lat",   "lon",   "valid", "invalid_msg")
   )
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
 })
 ################################################ #
