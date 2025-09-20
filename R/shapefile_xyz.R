@@ -897,13 +897,24 @@ Except, if Counties were analyzed, see  mapfastej_counties() \n')
 shapefile_from_sitepoints <- function(sitepoints, crs = 4269, ...) {
 
   stopifnot(is.data.frame(sitepoints))
+  suppressWarnings({
   sitepoints <- try(latlon_any_format(sitepoints), silent = TRUE) # infers lat,lon colnames from aliases, e.g., latlon_any_format(data.table(latitude = testpoints_10$lat, longitude = testpoints_10$lon))
+  })
   if (inherits(sitepoints, "try-error")) {
     stop("cannot interpret as lat,lon points")
   }
   # note other columns get returned, but the lat,lon columns do not get returned but get turned into the geometry column
-  shpcoord <- sf::st_as_sf(sitepoints, coords = c('lon', 'lat'), crs = crs, ...) #   want 4269
+  ## treat latlon NA as zero since sf::st_as_sf() errors on NA coordinates
+  pts <- sitepoints
+  pts$lat[is.na(pts$lat)] <- 0
+  pts$lon[is.na(pts$lon)] <- 0
+  shpcoord <- sf::st_as_sf(pts, coords = c('lon', 'lat'), crs = crs, ...) #   want 4269
+  # return geometry column along with original columns and lat,lon
   shpcoord <- cbind(shpcoord, sitepoints[, c("lat", "lon")])
+  zero_na <-  (0 == rowSums(sf::st_coordinates(shpcoord)))
+  if (any(zero_na)) {
+  shpcoord$geometry[zero_na] <- NA
+  }
   return(shpcoord)
 }
 ############################################################################################## #
