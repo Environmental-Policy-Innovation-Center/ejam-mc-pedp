@@ -1,123 +1,171 @@
 
-# DRAFT
 
 # get approx centroid of each fips census unit
 
 
 latlon_from_fips <- function(fips) {
 
-  ftype = fipstype(fips)
+  suppressWarnings( {
+    ftype = fipstype(fips)
+  })
+  dtf = data.table::data.table(ftype=ftype, fips=fips)
+  #  latlon_join_on_ does nothing if lat,lon cols already there
 
-  dtf = data.table::data.table(ftype=ftype, fips=fips) #, lat = NA, lon = NA) latlon_join_on_ does nothing if lat,lon cols already there
+  ####################################### #  ####################################### #
+  # blocks: ####
+  thistype = "block"
+  if ((thistype %in% ftype)) {
 
-  ####################################### #
-  # blocks: fips to blockid to lat,lon
 
-  if (("block" %in% ftype)) {
-    if (!exists("blockid2fips")) {
-      dataload_dynamic("blockid2fips")
-    }
+    # fips to blockid to lat,lon
+    if (!exists("blockid2fips")) {dataload_dynamic("blockid2fips")}
     # get blockid via fips
     setnames(dtf, 'fips', 'blockfips')
     dtf[blockid2fips, blockid := blockid, on = "blockfips"]
     setnames(dtf, 'blockfips', 'fips')
     # get latlon via blockid
-    # if (!exists("blockid2fips")) {
-    #   dataload_dynamic("blockid2fips")
-    # } # done by:
     latlon_join_on_blockid(dtf)
     dtf[, blockid := NULL]
   }
-  ####################################### #
-  # blockgroups:  just use bgpts table from this pkg
+  ####################################### #  ####################################### #
+  # blockgroups####
+  thistype = "blockgroup"
+  if (thistype %in% ftype) {
 
-  if ("blockgroup" %in% ftype) {
 
-    dtf_bg = dtf[ftype %in% "blockgroup", .(ftype, fips)]
+    #   just use bgpts table
+    dtf_bg = dtf[ftype %in% thistype, .(ftype, fips)]
     setnames(dtf_bg, 'fips', 'bgfips')
     dtf_bg[bgpts, `:=`(lat = lat, lon = lon), on = "bgfips"]
     setnames(dtf_bg, 'bgfips', 'fips')
 
+    ########################## #
     if (!("lat" %in% names(dtf)) || !("lat" %in% names(dtf))) {
-      dtf$lat = 0
-      dtf$lon = 0
+      dtf$lat = NA_real_
+      dtf$lon = NA_real_
     }
-    dtf[ftype %in% "blockgroup", ] <- dtf_bg[, .(ftype,fips,lat,lon)]
-
-    # latlon_from_bgfips = function(fips) {
-    #
-    #
-    # return(dtf)
-    # }
-    #
-    # x <-  latlon_from_bgfips(fips[ftype %in% "blockgroup"])
-
-
+    ########################## #
+    dtf[ftype %in% thistype, ] <- dtf_bg[, .(ftype,fips,lat,lon)]
   }
-  ####################################### #
-  # tracts:
-  if ("tract" %in% ftype) {
-
-    # maybe just take average of lat and average of lon of the blockgroups in a tract?
-
+  ####################################### #  ####################################### #
+  # cities ####
+  thistype = "city"
+  if (thistype %in% ftype) {
 
 
-  }
-  ####################################### #
-  # cities
-  if ("city" %in% ftype) {
+    cities_shp <- shapes_from_fips(fips[ftype %in% thistype])
+    cities_centroids <- latlon_from_shapefile_centroids(cities_shp)
+    if (NROW(cities_centroids) > 0) {
 
-    require(AOI)
-    placename <-  fips_place2placename(fips[ftype %in% "city"])
-    if (NROW(placename) > 0 && !is.null(placename) && "lat" %in% names(placename)) {
-      newrows <- data.table(ftype = ftype[ftype %in% "city"], fips = fips[ftype %in% "city"], lat = placename$lat, lon = placename$lon)
-      dtf[ftype %in% "city", ] <- newrows
+      newrows <- data.table(ftype = ftype[ftype %in% thistype],
+                            fips = fips[ftype %in% thistype],
+                            lat = cities_centroids$lat,
+                            lon = cities_centroids$lon)
+
+      ########################## #
+      if (!("lat" %in% names(dtf) && "lon" %in% names(dtf))) {
+        dtf$lat = NA_real_
+        dtf$lon = NA_real_
+      }
+      ########################## #
+      dtf[ftype %in% thistype, ] <- newrows
     }
-
   }
+  ####################################### #  ####################################### #
+  # tracts: ####
+  thistype = "tract"
+  if (thistype %in% ftype) {
 
-  ####################################### #
-  # counties ?
-  if ("county" %in% ftype) {
-    # use tidycensus:: to get this info??  or shapes_from_fips() ?
-    # or just the average lat and lon among blocks in the county
 
-    cfips = fips[ftype %in% "county"]
+    tracts_as_sites = function(fips) {
+      # mostly copied from/ like counties_as_sites()
+      if (any(is.numeric(fips))) {
+        fips <- fips_lead_zero(fips)
+      }
+      tract2bg <- bgpts[substr(bgfips,1,11) %in% fips, .(tractfips = substr(bgfips,1,11), bgid) ]
+      if (NROW(tract2bg) == 0) {warning("no valid fips, so returning empty data.table of 0 rows")}
+      tract2bg[, ejam_uniq_id := .GRP , by = "tractfips"]
+      tract2bg$blockid = blockwts[tract2bg, .(blockid = blockid[1]), on = "bgid", by = "bgid"]$blockid
+      tract2bg[, .(ejam_uniq_id, tractfips, bgid, blockid )]  # , blockwt, distance, distance_unadjusted)]
+    }
+    tfips = fips[ftype %in% thistype]
+    # get all blocks in tract
+    x = tracts_as_sites(tfips)
+    # get latlon pts
+    latlon_join_on_bgid(x)
+    #   just take average of lat and average of lon of the blocks in a tract
+    x <- x[, .(ftype = thistype, lat = mean(lat), lon = mean(lon)), by = "tfips"]
+    setnames(x, "tfips", "fips")
+
+    ########################## #
+    y = dtf[ ftype %in% thistype, .(  fips)]
+    # add latlon columns via merge
+    y = (merge(x, y, by = "fips", all.x = TRUE))
+    y <- unique(y[, .(ftype,fips,lat,lon)])
+    ########################## #
+    if (!("lat" %in% names(dtf)) || !("lat" %in% names(dtf))) {
+      dtf$lat = NA_real_
+      dtf$lon = NA_real_
+    }
+    ########################## #
+    dtf$lat[ ftype %in% thistype] <- y$lat[match(dtf$fips[dtf$ftype %in% thistype], y$fips)]
+    dtf$lon[ ftype %in% thistype] <- y$lon[match(dtf$fips[dtf$ftype %in% thistype], y$fips)]
+  }
+  ####################################### #  ####################################### #
+  # counties ####
+  thistype = "county"
+  if (thistype %in% ftype) {
+
+
+    cfips = fips[ftype %in% thistype]
     # get all blocks in county
     x = counties_as_sites(cfips)
     # get latlon pts
     latlon_join_on_bgid(x)
     # take averages within each county
-    x <- x[, .(ftype = "county", lat = mean(lat), lon = mean(lon)), by = "countyfips"]
+    x <- x[, .(ftype %in% thistype, lat = mean(lat), lon = mean(lon)), by = "countyfips"]
     setnames(x, "countyfips", "fips")
-    # for the subset of the original fips that were county fips,
-    y = dtf["county" == ftype, .(  fips)]
+
+    ########################## #
+    y = dtf[ ftype %in% thistype, .(  fips)]
     # add latlon columns via merge
     y = merge(x, y, by = "fips", all.x = TRUE)
-
+    y <- unique(y[, .(ftype,fips,lat,lon)])
+    ########################## #
     if (!("lat" %in% names(dtf)) || !("lat" %in% names(dtf))) {
-      dtf$lat = 0
-      dtf$lon = 0
+      dtf$lat = NA_real_
+      dtf$lon = NA_real_
     }
-    # same sort order?
-    dtf["county" == ftype, ] <- y[, .(ftype,fips,lat,lon)]
+    ########################## #
+    dtf$lat[ ftype %in% thistype] <- y$lat[match(dtf$fips[dtf$ftype %in% thistype], y$fips)]
+    dtf$lon[ ftype %in% thistype] <- y$lon[match(dtf$fips[dtf$ftype %in% thistype], y$fips)]
   }
+  ####################################### #  ####################################### #
+  # states ####
+  thistype = "state"
+  if (thistype %in% ftype) {
 
-  ####################################### #
-  # states ?
-  if ("state" %in% ftype) {
-    # for the subset of the original fips that were state fips,
-    y = dtf["state" == ftype, .(ftype, fips)]
+
     x = data.table(stateinfo2[!is.na(stateinfo2$FIPS.ST), c("FIPS.ST", "lat", "lon")])
     setnames(x, "FIPS.ST", 'fips')
+
+    ########################## #
+    y = dtf[ ftype %in% thistype, .(ftype, fips)]
     # add latlon columns via merge
     y = merge(x, y, by = "fips", all.y = TRUE)
+    y <- unique(y[, .(ftype,fips,lat,lon)])
+    ########################## #
     if (!("lat" %in% names(dtf)) || !("lat" %in% names(dtf))) {
-      dtf$lat = 0
-      dtf$lon = 0
+      dtf$lat = NA_real_
+      dtf$lon = NA_real_
     }
-    dtf["state" == ftype, ] <- y[, .(ftype, fips, lat, lon)]
+    ########################## #
+    dtf$lat[ ftype %in% thistype] <- y$lat[match(dtf$fips[dtf$ftype %in% thistype], y$fips)]
+    dtf$lon[ ftype %in% thistype] <- y$lon[match(dtf$fips[dtf$ftype %in% thistype], y$fips)]
   }
+  ####################################### #  ####################################### #
+  # if no   latlon got added at all
+  if (!("lat" %in% names(dtf))) {dtf$lat = NA_real_; dtf$lon = NA_real_}
 
   return(dtf[])
 
