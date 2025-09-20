@@ -638,7 +638,6 @@ knitr
 landarea
 lat_alias
 latlon
-latlon_any_format
 latlon_as.numeric
 latlon_df_clean
 latlon_from_address

@@ -94,6 +94,7 @@ reference:
   - latlon_from_anything
   - latlon_from_address_table
   - latlon_from_address
+  - latlon_from_shapefile
   - address_from_table
   - latlon_is.valid
   - lat_alias
@@ -172,14 +173,13 @@ reference:
   - shapefile_from_sitepoints
   - shape_buffered_from_shapefile
   - shape_buffered_from_shapefile_points
-  - shapefile2blockpoints
-  - shapefile2latlon
   - shapes_from_fips
   - shapes_counties_from_countyfips
   - shapes_blockgroups_from_bgfips
   - shape2zip
   - ejam2shapefile
   - shape2geojson
+  - latlon_from_shapefile
 - title: "Specify Counties etc."
   desc: >
     Tools to work with Census units and FIPS codes
@@ -498,7 +498,6 @@ reference:
   - frs_update_datasets
   - frs_active_ids
   - frs_clean
-  - latlon_any_format
   - distances.all
   - out_bydistance2results_bydistance
   - out_bydistance2results_bydistance_bysite
@@ -526,6 +525,7 @@ reference:
   - proximity.score.in.miles
   - fips_counties_from_countyname
   - fips_place_from_placename
+  - shapefile2blockpoints
   - shapefile_filepaths_validize
   - shapefile_from_json
   - state_from_s2b_bysite

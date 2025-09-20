@@ -1,5 +1,5 @@
 
-# draft utility to make a function flexible in accepting either sitepoints or lat,lon
+#   utility to make a function flexible in accepting either sitepoints or lat,lon
 # so points cam be specified either as sitepoints= OR lat=,lon=
 # see also sites_from_input() that uses this
 

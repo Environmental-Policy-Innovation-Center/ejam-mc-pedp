@@ -5,7 +5,7 @@
 #' @param lat,lon optional vectors of latitudes and longitudes
 #' @param shapefile  optional polygons in a spatial data.frame
 #' @param fips  optional Census units as a fips code vector
-#'
+#' @seealso [sites_from_file()]
 #' @returns a list with names sitetype, sitepoints, fips, and shapefile.
 #'   sitetype is "latlon" or "fips" or "shp" or NULL
 #'   others are NULL except the one corresponding to the sitetype

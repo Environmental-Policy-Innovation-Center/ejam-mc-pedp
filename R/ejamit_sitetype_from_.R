@@ -1,5 +1,8 @@
 ############################ ############################# #
 
+# see sitetype_from_filepath()
+# see sites_from_file()
+# see sites_from_input()
 
 #' helper to infer what type of sites were analyzed by looking at params given as INPUT to ejamit()
 #' used by ejamit() and ejamit_compare_types_of_places()
@@ -10,13 +13,15 @@
 #' @param sitepoints  parameter as was passed to [ejamit()]
 #' @param fips  parameter as was passed to [ejamit()]
 #' @param shapefile parameter as was passed to [ejamit()]
-#'
+#' @seealso [sites_from_input()]
 #' @return either "latlon", "fips", or "shp",
 #'   or errors if 2 or 3 types were specified at once
 #'
 #' @keywords internal
 #'
 ejamit_sitetype_from_input <- function(sitepoints = NULL, fips = NULL, shapefile = NULL) {
+
+  # see also now  sites_from_input()
 
   if (!is.null(shapefile)) {
     sitetype <- "shp"
@@ -43,7 +48,6 @@ ejamit_sitetype_from_input <- function(sitepoints = NULL, fips = NULL, shapefile
 ############################ ############################# #
 ############################ ############################# #
 
-
 #' helper to infer what type of sites were analyzed by looking at OUTPUT of ejamit()
 #'
 #' @param out from ejamit()
@@ -68,6 +72,7 @@ ejamit_sitetype_from_output = function(out) {
 ############################ ############################# #
 
 # helper to infer what type of sites were analyzed by looking at 1 table like OUTPUT of ejamit()$results_bysite
+
 
 sitetype_from_dt <- function(dt) {
 
