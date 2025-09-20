@@ -333,7 +333,7 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny
       shiny::validate('No blockgroups found for noncity FIP codes.')
       return(NULL)
     } else {
-      warning('No blockgroups found for noncity FIP codes.') #  just give a warning so that mix of valid city and no valid noncity can continue
+      cat('No blockgroups found for noncity FIP codes.\n') # maybe  give a warning so that mix of valid city and no valid noncity can continue
       return(NULL)
     }
   } else {

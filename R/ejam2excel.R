@@ -85,7 +85,7 @@ ejam2excel <- function(ejamitout,
   # server already handles it, but for nonshiny we can handle adding a missing shapefile for MAP + shapefile for map for REPORT in lower-level function table_xls_format()
   # if report is added, map is redundant
   # if (mapadd == T && is.null(report_map)) {
-  #   report_map <- ejam2map(ejamitout, radius = radius_or_buffer_in_miles)
+  #   report_map <- ejam2map(ejamitout)
   # }
 
   # server already handles it, but for nonshiny we can handle adding a missing shapefile for MAP + shapefile for map for REPORT in lower-level function table_xls_format()

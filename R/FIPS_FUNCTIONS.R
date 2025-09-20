@@ -1874,7 +1874,7 @@ fips2countyname <- function(fips, includestate = c("ST", "Statename", "")[1]) {
 }
 ############################################################################# #
 
-fips2blockgroupname <- function(fips, ftype = 'blockgroup', prefix = "") {
+fips2blockgroupname <- function(fips, ftype = 'blockgroup', prefix = "blockgroup ") {
 
   # simplistic - could just return the fips itself as the name, or NA,
   # but adds a default prefix to each fips
@@ -1883,9 +1883,6 @@ fips2blockgroupname <- function(fips, ftype = 'blockgroup', prefix = "") {
   fips <- substr(fips_lead_zero(fips), 1, 12) # #########  blockgroup is 12 digits once leading zero included
   fips[!(fipstype(fips) %in% "blockgroup")] <- NA
 
-  if (missing(prefix)) {
-    prefix <- paste0(ftype, " ")
-  }
   xname <- paste0(prefix, fips)
 
   if (anyNA(fips)) {
@@ -1897,7 +1894,12 @@ fips2blockgroupname <- function(fips, ftype = 'blockgroup', prefix = "") {
 }
 ############################################################################# #
 
-fips2tractname <- function(fips, ftype = 'tract', prefix = "") {
+fips2blockname <- function(fips, ftype = 'block', prefix = "block ") {
+  fips2ftypename(fips = fips, ftype = ftype, prefix = prefix)
+}
+############################################################################# #
+
+fips2tractname <- function(fips, ftype = 'tract', prefix = "tract ") {
   fips2ftypename(fips = fips, ftype = ftype, prefix = prefix)
 }
 
@@ -1905,14 +1907,12 @@ fips2tractname <- function(fips, ftype = 'tract', prefix = "") {
 
 # GENERIC DRAFT that would  prefix fips
 
-  fips2ftypename <- function(fips, ftype = c('block', 'blockgroup', 'tract', 'city', 'county', 'state')[6], prefix = "") {
+  fips2ftypename <- function(fips, ftype = c('block', 'blockgroup', 'tract', 'city', 'county', 'state')[6], prefix = paste0(" ", ftype)) {
 
-  if (missing(prefix)) {
-    prefix <- paste0(ftype, " ")
-  }
+    stopifnot(length(ftype) == 1)
 
+  fips <- fips_lead_zero(fips)
   ftype_wanted = ftype
-  stopifnot(length(ftype) == 1)
   validtypes = c('block', 'blockgroup', 'tract', 'city', 'county', 'state')
   if (!(ftype_wanted %in% validtypes)) {
     stop(paste0("ftype requested must be one of ", paste0(validtypes, collapse = ", ")))
@@ -2005,7 +2005,7 @@ fips2name  <- function(fips, ...) {
     }
     fblock <- ftype %in% "block"
     if (any(!nafips & fblock)) {
-      out[!nafips & fblock] <-  fips[!nafips & fblock] # just return the block fips code at least
+      out[!nafips & fblock] <-  fips2blockname(fips = fips[!nafips & fblock]) # fips[!nafips & fblock] # just return the block fips code at least
     }
   })
   if (anyNA(out)) {
