@@ -392,7 +392,8 @@ and all filenames listed there actually exist as in that folder called `test`.\n
     cat("\n   COUNTS OF AVAILABLE FILES IN EACH GROUP OF TESTS\n\n")
     print(count_available_files_bygroup)
     cat("\n")
-    { #          groupnames shortgroupnames filecount
+    {
+      #          groupnames shortgroupnames filecount
       # 1         test_fips            fips         3 or 4?
       # 2        test_naics           naics         8
       # 3          test_frs             frs         6
@@ -416,182 +417,220 @@ and all filenames listed there actually exist as in that folder called `test`.\n
 
     # TIME the tests, predict ETA ####
 
-    timebyfile <- structure(list(
-      file = c("test-ejamit.R", "test-ejamit_compare_distances.R",
-               "test-ejam2barplot_sites.R", "test-ejamit_compare_types_of_places.R",
-               "test-ejamit_sitetype_from_input.R", "test-ejamit_sitetype_from_output.R",
-               "test-getblocksnearbyviaQuadTree.R", "test-getblocksnearby.R",
-               "test-proxistat.R", "test-get_blockpoints_in_shape.R", "test-getblocks_summarize_blocks_per_site.R",
-               "test-getblocksnearby_from_fips.R", "test-radius_inferred.R",
-               "test-report_residents_within_xyz.R", "test-utils_indexpoints.R",
-               "test-MAP_FUNCTIONS.R", "test-doaggregate.R", "test-area_sqmi.R",
-               "test-batch.summarize.R", "test-utils_flagged_FUNCTIONS.R", "test-pctile_from_raw_lookup.R",
-               "test-shapes_from_fips.R", "test-ejam2shapefile.R", "test-shape2zip.R",
-               "test-shapefile_xyz.R", "test-latlon_from_anything.R", "test-address_xyz.R",
-               "test-latlon_as.numeric.R", "test-latlon_df_clean.R", "test-latlon_from_address.R",
-               "test-latlon_from_sic.R", "test-latlon_from_vectorofcsvpairs.R",
-               "test-latlon_infer.R", "test-latlon_is.valid.R", "test-state_from_sitetable.R",
-               # add    "test-fips_bgs_in_fips.R"
-               "test-FIPS_FUNCTIONS.R",
-               "test-is.numeric.text.R", "test-state_from_fips_bybg.R",
-               "test-state_from_latlon.R", "test-fixcolnames.R", "test-fixcolnames_infer.R",
-               "test-fixnames.R", "test-fixnames_to_type.R", "test-utils_metadata_add.R",
-               "test-varinfo.R", "test-frs_from_naics.R", "test-frs_from_programid.R",
-               "test-frs_from_regid.R", "test-frs_from_sic.R", "test-frs_is_valid.R",
-               "test-regid_from_naics.R", "test-golem_utils_server.R", "test-acs_bybg.R",
-               "test-mod_save_report.R", "test-mod_specify_sites.R", "test-mod_view_results.R",
-               "test-naics2children.R", "test-naics_categories.R", "test-naics_findwebscrape.R",
-               "test-naics_from_any.R", "test-naics_from_code.R", "test-naics_from_name.R",
-               "test-naics_subcodes_from_code.R", "test-naics_validation.R",
-               "test-test1.R", "test-test2.R"),
-      seconds_byfile = c(74.3, 58.3, 27.3, 11.7, 2, 10.3, 6.2, 10, 3, 4.8, 4.1, 7.2,
-                         15.1, 2, 1.9, 40.5, 31.1, 6.5, 6.7, 6.4, 2.1, 6, 3.2, 2, 6, 2.6,
-                         6.9, 1.9, 3.2, 5.5, 2.1, 2, 2.1, 2, 6.4,
-                         # add    "test-fips_bgs_in_fips.R"
-                         30.6, # subtract some for removed    "test-fips_bgs_in_fips.R"
-                         2, 3.8, 10.5,
-                         4.2, 2.9, 2, 2, 3.7, 2.1, 9, 2.2, 2.1, 2.2, 2.1, 5.8, 1.8, 4.6,
-                         1.8, 1.8, 1.8, 2.2, 1.9, 3.8, 2.5, 1.9, 1.9, 1.9, 1.9, 1.7, 1.8
-      )), class = "data.frame", row.names = c(NA, -66L
-      ))
+    ## from output of having run them all to update the timing estimates:
+    ## after e.g., #    biglist <- test_ejam(ask = F, y_save = T, mydir = "~/Desktop/ejamtests")
+    # timebyfile_new <- biglist$bytest_all[, .(seconds_byfile = (seconds_byfile[1]) ), by = "file"]
 
-    #     # other names for tests that did not get run when dput used?
-    timebyfile <- rbind(timebyfile,
-                        data.frame(file =  c("test-latlon-functionality.R", "test-shp-gdb-zip-functionality.R",
-                                             "test-shp-json-functionality.R", "test-shp-unzip-functionality.R",
-                                             "test-shp-zip-functionality.R", "test-FIPS-functionality.R",
-                                             "test-NAICS-functionality.R",
-                                             "test-ui_and_server.R", "test-golem_utils_server.R",
-                                             c("test-ejscreenRESTbroker-functions.R",
-                                               "test-ejscreenapi.R", "test-ejscreenapi1.R", "test-ejscreenapi_plus.R",
-                                               "test-ejscreenit.R")
-                        ),
-                        seconds_byfile = c(120, 157, 156, 160, 163,
-                                           134, 115,
-                                           2.7, 2.4,
-                                           c(67, 7,
-                                             7.8, 14 , 13)
-                        )
-                        ))
-    ## test_ejscreenapi timing was removed
+    timebyfile <- data.table(
+      file = c(
+        "test-getblocksnearby_from_fips.R", "test-proxistat.R",
+        "test-get_blockpoints_in_shape.R", "test-getblocks_summarize_blocks_per_site.R",
+        "test-getblocksnearby.R", "test-getblocksnearbyviaQuadTree.R",
+        "test-radius_inferred.R", "test-report_residents_within_xyz.R",
+        "test-utils_indexpoints.R", "test-FIPS_FUNCTIONS.R", "test-state_from_latlon.R",
+        "test-fips2countyfips.R", "test-fips_bg_from_latlon.R", "test-fips_bgs_in_fips.R",
+        "test-is.numeric.text.R", "test-state_from_fips_bybg.R", "test-ejam2barplot_sites.R",
+        "test-ejamit_compare_distances.R", "test-ejam2excel.R", "test-ejamit.R",
+        "test-ejam2histogram.R", "test-ejamit_compare_types_of_places.R",
+        "test-ejamit_sitetype_from_input.R", "test-ejamit_sitetype_from_output.R",
+        "test-ejam2map.R", "test-MAP_FUNCTIONS.R", "test-latlon_from_address.R",
+        "test-address_xyz.R", "test-latlon_from_anything.R", "test-latlon_as.numeric.R",
+        "test-latlon_df_clean.R", "test-latlon_from_sic.R", "test-latlon_from_vectorofcsvpairs.R",
+        "test-latlon_infer.R", "test-latlon_is.valid.R", "test-state_from_sitetable.R",
+        "test-doaggregate.R", "test-area_sqmi.R", "test-batch.summarize.R",
+        "test-pctile_from_raw_lookup.R", "test-utils_flagged_FUNCTIONS.R",
+        "test-url_columns_bysite.R", "test-URL_FUNCTIONS_part1.R", "test-URL_FUNCTIONS_part2.R",
+        "test-acs_bybg.R", "test-is.numericish.R", "test-sites_from_input.R",
+        "test-url_ejamapi.R", "test-fixcolnames.R", "test-fixcolnames_infer.R",
+        "test-fixnames.R", "test-fixnames_to_type.R", "test-utils_metadata_add.R",
+        "test-varinfo.R", "test-frs_from_naics.R", "test-frs_from_programid.R",
+        "test-frs_from_regid.R", "test-frs_from_sic.R", "test-frs_is_valid.R",
+        "test-latlon_from_fips.R", "test-regid_from_input.R", "test-regid_from_naics.R",
+        "test-golem_utils_server.R", "test-golem_utils_ui.R", "test-mod_save_report.R",
+        "test-mod_specify_sites.R", "test-mod_view_results.R", "test-naics2children.R",
+        "test-naics_categories.R", "test-naics_findwebscrape.R", "test-naics_from_any.R",
+        "test-naics_from_code.R", "test-naics_from_name.R", "test-naics_subcodes_from_code.R",
+        "test-naics_validation.R", "test-ejam2shapefile.R", "test-shape2geojson.R",
+        "test-shape2zip.R", "test-shapefile_xyz.R", "test-shapes_from_fips.R",
+        "test-test1.R", "test-test2.R"),
+      seconds_byfile = c(
+        258.375,
+        5.51800000000003, 7.27299999999991, 5.529, 19.4390000000001,
+        9.995, 11.0790000000001, 3.18700000000001, 2.95500000000004,
+        40.632, 19.825, 4.09900000000005, 11.99, 20.885, 3.12600000000003,
+        4.02900000000005, 25.2220000000002, 65.377, 7.94699999999989,
+        81.223, 2.85100000000011, 12.0909999999999, 1.87200000000007,
+        12.7570000000001, 53.407, 33.534, 6.34399999999999, 6.67899999999997,
+        3.36000000000001, 3.04900000000004, 3.59100000000001, 4.08999999999997,
+        2.935, 3.101, 3.10200000000003, 12.692, 83.5840000000001, 7.75399999999991,
+        30.1079999999999, 3.65599999999995, 17.779, 4.91599999999994,
+        1.93900000000008, 35.7619999999999, 5.24800000000005, 1.78999999999996,
+        2.07300000000009, 98.78, 2.99000000000001, 3.22900000000004,
+        7.13100000000009, 3.41700000000014, 3.82099999999991, 2.89999999999986,
+        11.126, 4.20600000000002, 4.02199999999999, 3.40199999999999,
+        3.87300000000005, 5.60500000000002, 3.07100000000003, 7.87, 1.78600000000006,
+        1.78200000000015, 1.84400000000005, 1.75, 1.77200000000016, 2.988,
+        2.99700000000001, 5.233, 3.79700000000003, 3.214, 3.22799999999995,
+        2.93099999999998, 3.09199999999998, 3.46399999999994, 3.05799999999999,
+        3.04399999999998, 7.79999999999995, 13.968, 1.68599999999992,
+        1.83199999999988)
+    )
 
-    {
-      #                                          file seconds_byfile
-      # 1                               test-ejamit.R         74.258
-      # 2             test-ejamit_compare_distances.R         58.289
-      # 3                   test-ejam2barplot_sites.R         27.297
-      # 4       test-ejamit_compare_types_of_places.R         11.744
-      # 5           test-ejamit_sitetype_from_input.R          1.986
-      # 6          test-ejamit_sitetype_from_output.R         10.279
-      # 7           test-getblocksnearbyviaQuadTree.R          6.232
-      # 8                      test-getblocksnearby.R          9.954
-      # 9                            test-proxistat.R          3.035
-      # 10            test-get_blockpoints_in_shape.R          4.806
-      # 11 test-getblocks_summarize_blocks_per_site.R          4.069
-      # 12           test-getblocksnearby_from_fips.R          7.155
-      # 13                     test-radius_inferred.R         15.127
-      # 14         test-report_residents_within_xyz.R          1.956
-      # 15                   test-utils_indexpoints.R          1.926
-      # 16                       test-MAP_FUNCTIONS.R         40.495
-      # 17                         test-doaggregate.R         31.119
-      # 18                           test-area_sqmi.R          6.532
-      # 19                     test-batch.summarize.R          6.711
-      # 20             test-utils_flagged_FUNCTIONS.R          6.416
-      # 21              test-pctile_from_raw_lookup.R          2.066
-      # 22                    test-shapes_from_fips.R          5.964
-      # 23                      test-ejam2shapefile.R          3.161
-      # 24                           test-shape2zip.R          1.957
-      # 25                       test-shapefile_xyz.R          6.001
-      # 26                test-latlon_from_anything.R          2.570
-      # 27                         test-address_xyz.R          6.859
-      # 28                   test-latlon_as.numeric.R          1.903
-      # 29                     test-latlon_df_clean.R          3.196
-      # 30                 test-latlon_from_address.R          5.490
-      # 31                     test-latlon_from_sic.R          2.076
-      # 32        test-latlon_from_vectorofcsvpairs.R          2.003
-      # 33                        test-latlon_infer.R          2.089
-      # 34                     test-latlon_is.valid.R          1.953
-      # 35                test-state_from_sitetable.R          6.378
-      # 36                      test-FIPS_FUNCTIONS.R         30.649
-      # 37                     test-is.numeric.text.R          2.017
-      # 38                test-state_from_fips_bybg.R          3.771
-      # 39                   test-state_from_latlon.R         10.485
-      # 40                         test-fixcolnames.R          4.212
-      # 41                   test-fixcolnames_infer.R          2.852
-      # 42                            test-fixnames.R          2.014
-      # 43                    test-fixnames_to_type.R          1.968
-      # 44                  test-utils_metadata_add.R          3.673
-      # 45                             test-varinfo.R          2.106
-      # 46                      test-frs_from_naics.R          8.987
-      # 47                  test-frs_from_programid.R          2.156
-      # 48                      test-frs_from_regid.R          2.072
-      # 49                        test-frs_from_sic.R          2.208
-      # 50                        test-frs_is_valid.R          2.143
-      # 51                    test-regid_from_naics.R          5.812
-      # 52                  test-golem_utils_server.R          1.818
-      # 53                            test-acs_bybg.R          4.570
-      # 54                     test-mod_save_report.R          1.837
-      # 55                   test-mod_specify_sites.R          1.802
-      # 56                    test-mod_view_results.R          1.802
-      # 57                      test-naics2children.R          2.239
-      # 58                    test-naics_categories.R          1.893
-      # 59                 test-naics_findwebscrape.R          3.778
-      # 60                      test-naics_from_any.R          2.520
-      # 61                     test-naics_from_code.R          1.894
-      # 62                     test-naics_from_name.R          1.946
-      # 63            test-naics_subcodes_from_code.R          1.910
-      # 64                    test-naics_validation.R          1.888
-      # 65                               test-test1.R          1.734
-      # 66                               test-test2.R          1.789
+    #     # other names for tests that did not get run when dput used
+    timebyfile <- rbind(
+      timebyfile,
+      data.frame(
+        file =  c(
+          "test-latlon-functionality.R", "test-shp-gdb-zip-functionality.R",
+          "test-shp-json-functionality.R", "test-shp-unzip-functionality.R",
+          "test-shp-zip-functionality.R", "test-FIPS-functionality.R",
+          "test-NAICS-functionality.R",
+          "test-ui_and_server.R", "test-golem_utils_server.R",
+          c("test-ejscreenRESTbroker-functions.R",
+            "test-ejscreenapi.R", "test-ejscreenapi1.R", "test-ejscreenapi_plus.R",
+            "test-ejscreenit.R")
+        ),
+        seconds_byfile = c(
+          120, 157, 156, 160, 163,
+          134, 115,
+          2.7, 2.4,
+          c(67, 7,
+            7.8, 14 , 13)
+        )
+      )
+    )
 
-      # 67                test-latlon-functionality.R        119.793
-      # 68           test-shp-gdb-zip-functionality.R        157.021
-      # 69              test-shp-json-functionality.R        156.421
-      # 70             test-shp-unzip-functionality.R        160.492
-      # 71               test-shp-zip-functionality.R        163.264
-      # 72                  test-FIPS-functionality.R        133.808
-      # 73                 test-NAICS-functionality.R        114.904
-      ################# #
-    }
+    timebyfile$seconds_byfile <- round(timebyfile$seconds_byfile, 0)
+    # timebyfile
+    #
+    #                                         <char>          <num>
+    # 1:           test-getblocksnearby_from_fips.R            258 ###
+    # 2:                           test-proxistat.R              6
+    # 3:            test-get_blockpoints_in_shape.R              7
+    # 4: test-getblocks_summarize_blocks_per_site.R              6
+    # 5:                     test-getblocksnearby.R             19
+    # 6:          test-getblocksnearbyviaQuadTree.R             10
+    # 7:                     test-radius_inferred.R             11
+    # 8:         test-report_residents_within_xyz.R              3
+    # 9:                   test-utils_indexpoints.R              3
+    # 10:                      test-FIPS_FUNCTIONS.R             41 ###
+    # 11:                   test-state_from_latlon.R             20
+    # 12:                     test-fips2countyfips.R              4
+    # 13:                 test-fips_bg_from_latlon.R             12
+    # 14:                    test-fips_bgs_in_fips.R             21
+    # 15:                     test-is.numeric.text.R              3
+    # 16:                test-state_from_fips_bybg.R              4
+    # 17:                  test-ejam2barplot_sites.R             25
+    # 18:            test-ejamit_compare_distances.R             65 ###
+    # 19:                          test-ejam2excel.R              8
+    # 20:                              test-ejamit.R             81 ###
+    # 21:                      test-ejam2histogram.R              3
+    # 22:      test-ejamit_compare_types_of_places.R             12
+    # 23:          test-ejamit_sitetype_from_input.R              2
+    # 24:         test-ejamit_sitetype_from_output.R             13
+    # 25:                            test-ejam2map.R             53 ###
+    # 26:                       test-MAP_FUNCTIONS.R             34
+    # 27:                 test-latlon_from_address.R              6
+    # 28:                         test-address_xyz.R              7
+    # 29:                test-latlon_from_anything.R              3
+    # 30:                   test-latlon_as.numeric.R              3
+    # 31:                     test-latlon_df_clean.R              4
+    # 32:                     test-latlon_from_sic.R              4
+    # 33:        test-latlon_from_vectorofcsvpairs.R              3
+    # 34:                        test-latlon_infer.R              3
+    # 35:                     test-latlon_is.valid.R              3
+    # 36:                test-state_from_sitetable.R             13
+    # 37:                         test-doaggregate.R             84 ###
+    # 38:                           test-area_sqmi.R              8
+    # 39:                     test-batch.summarize.R             30
+    # 40:              test-pctile_from_raw_lookup.R              4
+    # 41:             test-utils_flagged_FUNCTIONS.R             18
+    # 42:                  test-url_columns_bysite.R              5
+    # 43:                 test-URL_FUNCTIONS_part1.R              2
+    # 44:                 test-URL_FUNCTIONS_part2.R             36
+    # 45:                            test-acs_bybg.R              5
+    # 46:                       test-is.numericish.R              2
+    # 47:                    test-sites_from_input.R              2
+    # 48:                         test-url_ejamapi.R             99 ###
+    # 49:                         test-fixcolnames.R              3
+    # 50:                   test-fixcolnames_infer.R              3
+    # 51:                            test-fixnames.R              7
+    # 52:                    test-fixnames_to_type.R              3
+    # 53:                  test-utils_metadata_add.R              4
+    # 54:                             test-varinfo.R              3
+    # 55:                      test-frs_from_naics.R             11
+    # 56:                  test-frs_from_programid.R              4
+    # 57:                      test-frs_from_regid.R              4
+    # 58:                        test-frs_from_sic.R              3
+    # 59:                        test-frs_is_valid.R              4
+    # 60:                    test-latlon_from_fips.R              6
+    # 61:                    test-regid_from_input.R              3
+    # 62:                    test-regid_from_naics.R              8
+    # 63:                  test-golem_utils_server.R              2
+    # 64:                      test-golem_utils_ui.R              2
+    # 65:                     test-mod_save_report.R              2
+    # 66:                   test-mod_specify_sites.R              2
+    # 67:                    test-mod_view_results.R              2
+    # 68:                      test-naics2children.R              3
+    # 69:                    test-naics_categories.R              3
+    # 70:                 test-naics_findwebscrape.R              5
+    # 71:                      test-naics_from_any.R              4
+    # 72:                     test-naics_from_code.R              3
+    # 73:                     test-naics_from_name.R              3
+    # 74:            test-naics_subcodes_from_code.R              3
+    # 75:                    test-naics_validation.R              3
+    # 76:                      test-ejam2shapefile.R              3
+    # 77:                       test-shape2geojson.R              3
+    # 78:                           test-shape2zip.R              3
+    # 79:                       test-shapefile_xyz.R              8
+    # 80:                    test-shapes_from_fips.R             14
+    # 81:                               test-test1.R              2
+    # 82:                               test-test2.R              2
+    # file seconds_byfile
+
+    ################# #
+
+    # sum(timebyfile[timebyfile$file %in% testlist[['test_app']], ]$seconds_byfile)
+
     # timebygroup
 
     # dput(x$bygroup[, .(testgroup, seconds_bygroup)])
+    # biglist$bygroup[, .(testgroup, seconds_bygroup)]
 
-    timebygroup <- structure(list(
-      testgroup = c("test_ejamit", "test_getblocks",
-                    "test_maps", "test_doag", "test_shape", "test_latlon", "test_fips",
-                    "test_fixcolnames", "test_frs", "test_golem", "test_misc", "test_mod",
-                    "test_naics", "test_test"),
-      seconds_bygroup = c(204, 81, 43, 67, 29, 66, 61, 34, 42, 9, 8, 14, 43, 9)),
-      class = "data.frame", row.names = c(NA, -14L))
-    # missing  "test_ejscreenapi" and "test_app"
-    #sum(timebyfile[timebyfile$file %in% testlist[['test_app']], ]$seconds_byfile)
-    # 1006
+    timebygroup <- data.table::data.table(
+      testgroup = c("test_getblocks", "test_fips", "test_ejamit",
+                    "test_maps", "test_latlon", "test_doag", "test_misc", "test_fixcolnames",
+                    "test_frs", "test_golem", "test_mod", "test_naics", "test_shape",
+                    "test_test"),
+      seconds_bygroup = c(350, 128, 229, 92, 78, 158,
+                          167, 41, 65, 8, 13, 51, 44, 8)
+    )
+
     timebygroup = rbind(timebygroup, cbind(testgroup = 'test_app', seconds_bygroup = 1006))
     timebygroup = rbind(timebygroup, cbind(testgroup = 'test_ejscreenapi', seconds_bygroup = 0))
     timebygroup$seconds_bygroup = as.numeric(timebygroup$seconds_bygroup)
     timebygroup$minutes_bygroup = round(as.numeric(timebygroup$seconds_bygroup) / 60, 1)
     data.table::setDT(timebygroup)
-    # timebygroup
-    #
-    #           testgroup seconds_bygroup minutes_bygroup
+
+    # > timebygroup
+    #           testgroup    seconds_bygroup     minutes_bygroup
     #              <char>           <num>           <num>
-    # 1:      test_ejamit             204             3.4
-    # 2:   test_getblocks              81             1.4
-    # 3:        test_maps              43             0.7
-    # 4:        test_doag              67             1.1
-    # 5:       test_shape              29             0.5
-    # 6:      test_latlon              66             1.1
-    # 7:        test_fips              61             1.0
-    # 8: test_fixcolnames              34             0.6
-    # 9:         test_frs              42             0.7
-    #10:       test_golem               9             0.1
-    #11:        test_misc               8             0.1
-    #12:         test_mod              14             0.2
-    #13:       test_naics              43             0.7
-    #14:        test_test               9             0.1
-    #15:         test_app            1006            16.8
-    #16: test_ejscreenapi               0             0.0
+    # 1:   test_getblocks             350             5.8 ###
+    # 2:        test_fips             128             2.1 #
+    # 3:      test_ejamit             229             3.8 #
+    # 4:        test_maps              92             1.5
+    # 5:      test_latlon              78             1.3
+    # 6:        test_doag             158             2.6 #
+    # 7:        test_misc             167             2.8 #
+    # 8: test_fixcolnames              41             0.7
+    # 9:         test_frs              65             1.1
+    # 10:       test_golem               8             0.1
+    # 11:         test_mod              13             0.2
+    # 12:       test_naics              51             0.8
+    # 13:       test_shape              44             0.7
+    # 14:        test_test               8             0.1
+    # 15:         test_app            1006            16.8 ###
+    # 16: test_ejscreenapi               0             0.0
 
     ########################### #  ########################################## #
 
@@ -612,7 +651,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
         timing_needed <- TRUE
 
         cat("Need to update the timing info on unit tests after running them again \n")
-        }
+      }
       cat('\n')
     }
     ########################### #  ########################################## #
@@ -669,7 +708,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
               cat("\n\n ********** FAILED TO GET ANY RESULTS TRYING TO RUN TESTS IN", file.path("./tests/testthat/", fnames[i]), '\n\n')
               xtable[[i]] <- NULL
               next
-              }
+            }
             x$tests <- x$nb
             x$nb <- NULL
             x$flag <- x$tests - x$passed
@@ -822,8 +861,8 @@ and all filenames listed there actually exist as in that folder called `test`.\n
               cat(paste0("     ***      Some FAILED in ", tgroupname, ": ",
                          paste0(unique(xtable[[i]]$file[xtable[[i]]$failed]), collapse = ","), "\n"))
             } else {
-            cat(paste0("     ***      Some UNTESTED or WARNED in ", tgroupname, ": ",
-                       paste0(unique(xtable[[i]]$file[xtable[[i]]$flagged]), collapse = ","), "\n"))
+              cat(paste0("     ***      Some UNTESTED or WARNED in ", tgroupname, ": ",
+                         paste0(unique(xtable[[i]]$file[xtable[[i]]$flagged]), collapse = ","), "\n"))
             }
           }
 
@@ -844,7 +883,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       }
     }   #   done defining functions
     ########################### #  ########################################## #
-# . ###
+    # . ###
     # >> ASK WHAT TO DO << ####
 
     # *** THIS SECTION ASKS ABOUT run_these SO IT USES THE LATEST LIST OF TESTS FOUND to ask which ones to use, to know what the options are,
@@ -945,7 +984,8 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       partial_testlist <-  testlist
       if (length(skip_these) > 0 && !is.null(skip_these)) {
         partial_testlist <-  testlist[!(names(testlist) %in% skip_these)]
-      }}
+      }
+    }
     ################################### #  ################################### #
     if (y_runall == FALSE && y_runsome == FALSE) {
       stop('no tests run')
@@ -1013,13 +1053,13 @@ and all filenames listed there actually exist as in that folder called `test`.\n
   }
   cat("Downloading all large datasets that might be needed...\n")
   dataload_dynamic("all")
-  ## should happen later in the function test1group() via testbygroup
-  # if (file.exists("./tests/testthat/setup.R")) {
-  #   # rstudioapi::navigateToFile("./tests/testthat/setup.R")
-  #   source("./tests/testthat/setup.R") #   asks if need load_all or library
-  # } else {
-  #   cat("Need to source the setup.R file first \n")
-  # }
+  ##
+  if (file.exists("./tests/testthat/setup.R")) {
+    # rstudioapi::navigateToFile("./tests/testthat/setup.R")
+    source("./tests/testthat/setup.R")
+  } else {
+    cat("Need to source the setup.R file first \n")
+  }
   ########################### #  ########################################## #
 
   ## DO BASIC QUICK CHECKS, NOT UNIT TESTS   ####

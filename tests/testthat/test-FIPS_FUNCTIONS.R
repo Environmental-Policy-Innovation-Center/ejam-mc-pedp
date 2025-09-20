@@ -454,7 +454,7 @@ test_that("counties_as_sites works", {
       length(unique(x$ejam_uniq_id)) == length(fips_counties_from_state_abbrev("DE"))
     )
 
-    expect_warning(
+    expect_no_warning(
       counties_as_sites(c(10001, NA))  # it does warn in this case
     )
     expect_warning(
@@ -687,9 +687,8 @@ test_that("fips_from_table() works", {
       other = c("ok", "ok", "ok", "not ok, na", "not fips, text")
     )
     expect_no_error({
-      expect_warning({
         x = EJAM:::fips_from_table(fips_table = mydat)
-      })
+
     })
     expect_true(
       all(c("10001", "01", "10", NA, NA) == x, na.rm = T)
@@ -699,9 +698,8 @@ test_that("fips_from_table() works", {
       countyfips = c("10001", 1, 10, NA, "text"),
       other = c("ok", "ok", "ok", "not ok, na", "not fips, text")
     )
-    expect_warning({
       y = EJAM:::fips_from_table(mydat_y)
-    })
+
     expect_identical(x, y)
 
     # uses acceptable names in order or preference picking best one
@@ -958,16 +956,13 @@ test_that("fips_counties_from_state_abbrev() works", {
         is.na(fips_counties_from_state_abbrev("UM"))#  NO data for U.S. Minor Outlying Islands
       )
 
-      expect_warning(expect_warning(
-        expect_warning(
+         expect_warning(
           fips_counties_from_state_abbrev("text")
-        )))
-      expect_warning(expect_warning(
+        )
+
         expect_warning(fips_counties_from_state_abbrev(13))
-      ))
-      expect_warning(expect_warning(
+
         expect_warning(fips_counties_from_state_abbrev(c(NA, "RI")))
-      ))
 
       expect_true(
         is.na(
@@ -983,9 +978,8 @@ test_that("fips_counties_from_state_abbrev() works", {
 # fips_counties_from_statename(   )  # should it be statename or state_name
 
 test_that("fips_counties_from_statename() works", {
-  suppressWarnings({
-    suppressWarnings({
-      suppressMessages({
+
+      suppressWarnings({
         expect_true({
           all(fips2state_abbrev(
             fips_counties_from_statename(c("Montana", "District of Columbia"))
@@ -1009,23 +1003,20 @@ test_that("fips_counties_from_statename() works", {
           is.na(fips_counties_from_statename("U.S. Minor Outlying Islands"))  #  NO data for U.S. Minor Outlying Islands
         )
 
-        expect_warning(expect_warning(expect_warning(fips_counties_from_statename("text"))))
+        expect_warning(fips_counties_from_statename("text"))
         expect_true(
           suppressWarnings(
             is.na(fips_counties_from_statename("text"))   # DOES NOT RETURN NA, just empty
           )
         )
-        expect_warning(expect_warning(expect_warning(fips_counties_from_statename(13))))
-        expect_warning(expect_warning(expect_warning(fips_counties_from_statename(c(NA, "Montana")))))
-      })
-    })
-  })
+         expect_warning(fips_counties_from_statename(13))
+         expect_warning(fips_counties_from_statename(c(NA, "Montana")))
+})
 })
 #################################################################### #
 # fips_counties_from_countyname()
 
 test_that("fips_counties_from_countyname() works", {
-  suppressWarnings({
     suppressMessages({
       expect_identical(
         fips_counties_from_countyname("Harris County", "TX"),
@@ -1051,7 +1042,7 @@ test_that("fips_counties_from_countyname() works", {
         # fips_counties_from_countyname("Harris County, Texas", "TX") # finds 0 if state spelled out
       })
     })
-  })
+
 })
 #################################################################### #
 ## fips2...  ####
@@ -1229,7 +1220,7 @@ test_that("fips2statename() works", {
       fips2statename(TESTFIPS),
       fips2statename( c("02", "02", "10","01" ,"01", "01") )
     )
-    expect_warning(fips2statename(NA))
+
     expect_true(
       is.na(fips2statename(NA))  # returns United States instead of NA due to stateinfo2 table
     )
@@ -1285,8 +1276,8 @@ test_that("fips2tractname() works", {
       fips2tractname(test_tracts, prefix = "TRACT: ")
       ,
       paste0("TRACT: ", test_tracts)
-
     )
+
     expect_equal(
       fips2tractname(test_tracts)
       ,
@@ -1356,7 +1347,7 @@ test_that("fips2blockgroupname() works", {
 })
 
 #################################################################### #
-#    fips2name()    # inverse of name2fips()
+#    fips2name()    # inverse of name2fips(), other than block/tract/blockgroup prefixes
 
 test_that("fips2name() works", {
   suppressWarnings({
@@ -1386,6 +1377,19 @@ test_that("fips2name() works", {
         c("Kent County, DE", "New Castle County, DE", "Sussex County, DE")
       )
     })
+
+    expect_equal(
+      fips2name("05001480200"),
+      "tract 05001480200"
+    )
+    expect_equal(
+      fips2name("050014801001"),
+      "blockgroup 050014801001"
+    )
+    expect_equal(
+      fips2name("091701844002024"),
+      "block 091701844002024"
+    )
 
     #
   })
@@ -1485,14 +1489,14 @@ test_that("negative, decimal, space, any non-digit means NA is returned", {
 # should it warn if the fips <1 or >78 (largest possible 2digit number code) ?
 
 test_that('1 digit', {
-  expect_no_warning({val <- fips_lead_zero("1")})
+  expect_no_warning({val <- fips_lead_zero("1", quiet = FALSE)})
   expect_equal(val, "01")
-  expect_no_warning({val <- fips_lead_zero(1)})
+  expect_no_warning({val <- fips_lead_zero(1, quiet = FALSE)})
   expect_equal(val, "01")
 
-  expect_no_warning({val <- fips_lead_zero("0")})
+  expect_no_warning({val <- fips_lead_zero("0, quiet = FALSE")})
   expect_equal(val, "00")
-  expect_no_warning({val <- fips_lead_zero(0)})
+  expect_no_warning({val <- fips_lead_zero(0, quiet = FALSE)})
   expect_equal(val, "00")
 })
 #################### # #################### #
@@ -1503,12 +1507,12 @@ test_that('2 digit', {
     expect_no_error({val <- fips_lead_zero("01")}) # leading zero
   })
   expect_equal(val, "01")
-  expect_no_warning({val <- fips_lead_zero(10)}) # numeric
+  expect_no_warning({val <- fips_lead_zero(10, quiet = FALSE)}) # numeric
   expect_equal(val, "10")
-  expect_no_warning({val <- fips_lead_zero(01)}) #leading zero in numeric
+  expect_no_warning({val <- fips_lead_zero(01, quiet = FALSE)}) #leading zero in numeric
   expect_equal(val, "01")
   suppressWarnings({
-    expect_no_warning({fips_lead_zero("00")})  # DOES NOT FULLY VALIDATE SO DOES NOT KNOW 00 IS NOT ANY STATE'S FIPS
+    expect_no_warning({fips_lead_zero("00", quiet = FALSE)})  # DOES NOT FULLY VALIDATE SO DOES NOT KNOW 00 IS NOT ANY STATE'S FIPS
     expect_no_error({val <- fips_lead_zero("00")}) # zero string
   })
   expect_equal(val, "00")
@@ -1519,20 +1523,20 @@ test_that('2 digit', {
 test_that('3 digit', {
   suppressWarnings({
     expect_no_error({val <- fips_lead_zero("001")}) # leading zero
-    expect_warning({val <- fips_lead_zero("001")}) # leading zero
+    expect_warning({val <- fips_lead_zero("001", quiet = FALSE)}) # leading zero
   })
   #expect_equal(val, "011")
   expect_true(is.na(val))
   suppressWarnings({
-    expect_warning({val <- fips_lead_zero(100)}) # numeric
+    expect_warning({val <- fips_lead_zero(100, quiet = FALSE)}) # numeric
     expect_no_error({val <- fips_lead_zero(100)}) # numeric
   })
   #expect_equal(val, "100")
   expect_true(is.na(val))
-  expect_no_warning({val <- fips_lead_zero(001)}) #leading zero in numeric
+  expect_no_warning({val <- fips_lead_zero(001, quiet = FALSE)}) #leading zero in numeric
   expect_equal(val, "01")
   suppressWarnings({
-    expect_warning({val <- fips_lead_zero("000")}) # zero string
+    expect_warning({val <- fips_lead_zero("000", quiet = FALSE)}) # zero string
     expect_no_error({val <- fips_lead_zero("000")}) # zero string
   })
   expect_true(is.na(val))
@@ -1544,18 +1548,18 @@ test_that('3 digit', {
 test_that('4 digit', {
   suppressWarnings({
     expect_no_error({val <- fips_lead_zero("0001")}) # leading zero
-    expect_no_warning({val <- fips_lead_zero("0001")}) # leading zero # zero string ### LENGTH SEEMS OK AND IT DOES NOT KNOW 00001 IS NO COUNTY'S FIPS
+    expect_no_warning({val <- fips_lead_zero("0001, quiet = FALSE")}) # leading zero # zero string ### LENGTH SEEMS OK AND IT DOES NOT KNOW 00001 IS NO COUNTY'S FIPS
   })
   expect_equal(val, "00001")
   #expect_true(is.na(val))
-  expect_no_warning({val <- fips_lead_zero(1000)}) # numeric
+  expect_no_warning({val <- fips_lead_zero(1000, quiet = FALSE)}) # numeric
   expect_equal(val, "01000")
   #expect_true(is.na(val))
-  expect_no_warning({val <- fips_lead_zero(0001)}) #leading zero in numeric
+  expect_no_warning({val <- fips_lead_zero(0001, quiet = FALSE)}) #leading zero in numeric
   expect_equal(val, "01")
   suppressWarnings({
     expect_no_error({val <- fips_lead_zero("0000")}) # zero string
-    expect_no_warning({val <- fips_lead_zero("0000")}) # zero string ### LENGTH SEEMS OK AND IT DOES NOT KNOW 00000 IS NO COUNTY'S FIPS
+    expect_no_warning({val <- fips_lead_zero("0000", quiet = FALSE)}) # zero string ### LENGTH SEEMS OK AND IT DOES NOT KNOW 00000 IS NO COUNTY'S FIPS
   })
   expect_equal(val, "00000")
 })
@@ -1565,24 +1569,24 @@ test_that('4 digit', {
 test_that('5 digit', {
   suppressWarnings({
     expect_no_error({val <- fips_lead_zero("00001")}) # leading zero - invalid actual code, but format is valid - does not warn since not really validating fully
-    expect_no_warning({val <- fips_lead_zero("00001")}) # leading zero- same
+    expect_no_warning({val <- fips_lead_zero("00001", quiet = FALSE)}) # leading zero- same
   })
   expect_equal(val, "00001")
   #expect_true(is.na(val))
   suppressWarnings({
-    expect_no_warning({val <- fips_lead_zero(10000)}) # numeric
+    expect_no_warning({val <- fips_lead_zero(10000, quiet = FALSE)}) # numeric
     expect_no_error({val <- fips_lead_zero(10000)}) # numeric
   })
   expect_equal(val, "10000")
   #expect_true(is.na(val))
   suppressWarnings({
     expect_no_error({val <- fips_lead_zero(00001)}) #leading zero in numeric - invalid actual code, but format is valid - does not warn since not really validating fully
-    expect_no_warning({val <- fips_lead_zero(00001)}) #leading zero in numeric - same
+    expect_no_warning({val <- fips_lead_zero(00001, quiet = FALSE)}) #leading zero in numeric - same
   })
   expect_equal(val, "01")
   suppressWarnings({
     expect_no_error({val <- fips_lead_zero("00000")}) # zero string - invalid actual code, but format (length) is valid
-    expect_no_warning({val <- fips_lead_zero("00000")}) # same
+    expect_no_warning({val <- fips_lead_zero("00000", quiet = FALSE)}) # same
   })
   expect_equal(val, "00000")
 })
@@ -1597,18 +1601,18 @@ test_that('6 digit', {
   options(scipen = 999)
   on.exit({options(scipen = 0)})
   suppressWarnings({
-    testthat::expect_no_warning({val <- fips_lead_zero("000001")}) #
+    testthat::expect_no_warning({val <- fips_lead_zero("000001", quiet = FALSE)}) #
     expect_true(!is.na(val))
   })
   #
-  expect_no_warning({val <- fips_lead_zero(100000)}) # numeric -------------------    1e+05  unless adjust options in which case it is NA and test passes
+  expect_no_warning({val <- fips_lead_zero(100000, quiet = FALSE)}) # numeric -------------------    1e+05  unless adjust options in which case it is NA and test passes
   expect_true(!is.na(val))
   suppressWarnings({
-    expect_no_warning({val <- fips_lead_zero(100001)}) # numeric
+    expect_no_warning({val <- fips_lead_zero(100001, quiet = FALSE)}) # numeric
     expect_true(!is.na(val))
   })
   suppressWarnings({
-    expect_no_warning({val <- fips_lead_zero("000000")}) # zero string
+    expect_no_warning({val <- fips_lead_zero("000000", quiet = FALSE)}) # zero string
     expect_true(!is.na(val))
   })
   options(scipen = 0)
@@ -1620,13 +1624,13 @@ test_that('7 digit', {
   options(scipen = 999)
   on.exit({options(scipen = 0)})
 
-  expect_no_warning({val <- fips_lead_zero("0000001")}) # leading zero
+  expect_no_warning({val <- fips_lead_zero("0000001", quiet = FALSE)}) # leading zero
   expect_true(!is.na(val))
-  expect_no_warning({val <- fips_lead_zero(3651000)}) # numeric
+  expect_no_warning({val <- fips_lead_zero(3651000, quiet = FALSE)}) # numeric
   expect_true(!is.na(val))
-  expect_no_warning({val <- fips_lead_zero(1000001)}) # numeric
+  expect_no_warning({val <- fips_lead_zero(1000001, quiet = FALSE)}) # numeric
   expect_true(!is.na(val))
-  expect_no_warning({val <- fips_lead_zero("0000000")}) # zero string
+  expect_no_warning({val <- fips_lead_zero("0000000", quiet = FALSE)}) # zero string
   expect_true(!is.na(val))
 
   options(scipen = 0)
@@ -1638,16 +1642,18 @@ test_that('8 digit', {
   options(scipen = 999)
   on.exit({options(scipen = 0)})
 
-  expect_warning({val <- fips_lead_zero("00000001")}) # leading zero
+  ## warnings were excessive and got removed unless quiet = FALSE
+
+  expect_warning({val <- fips_lead_zero("00000001", quiet = FALSE)}) # leading zero
   expect_true(is.na(val))
-  expect_warning({val <- fips_lead_zero(10000000)}) # numeric
+  expect_warning({val <- fips_lead_zero(10000000, quiet = FALSE)}) # numeric
   # expect_true(is.na(val))
-  expect_warning({val <- fips_lead_zero(10000001)}) # numeric
+  expect_warning({val <- fips_lead_zero(10000001, quiet = FALSE)}) # numeric
   expect_true(is.na(val))
 
-  expect_no_warning({val <- fips_lead_zero(00000001)}) #leading zero in numeric - drops the zeroes and then sees it as a 1 which is ok
+  expect_no_warning({val <- fips_lead_zero(00000001, quiet = FALSE)}) #leading zero in numeric - drops the zeroes and then sees it as a 1 which is ok
   expect_equal(val, "01")
-  expect_warning({val <- fips_lead_zero("00000000")}) # zero string
+  expect_warning({val <- fips_lead_zero("00000000", quiet = FALSE)}) # zero string
   expect_true(is.na(val))
 
   options(scipen = 0)
@@ -1659,13 +1665,13 @@ test_that('9 digit', {
   options(scipen = 999)
   on.exit({options(scipen = 0)})
 
-  expect_warning({val <- fips_lead_zero("000000001")}) # leading zero
+  expect_warning({val <- fips_lead_zero("000000001", quiet = FALSE)}) # leading zero
   expect_true(is.na(val))
-  expect_warning({val <- fips_lead_zero(100000000)}) # numeric
+  expect_warning({val <- fips_lead_zero(100000000, quiet = FALSE)}) # numeric
   expect_true(is.na(val))
-  expect_warning({val <- fips_lead_zero(100000001)}) # numeric
+  expect_warning({val <- fips_lead_zero(100000001, quiet = FALSE)}) # numeric
   expect_true(is.na(val))
-  expect_warning({val <- fips_lead_zero("000000000")}) # zero string
+  expect_warning({val <- fips_lead_zero("000000000", quiet = FALSE)}) # zero string
   expect_true(is.na(val))
 
   options(scipen = 0)
@@ -1677,13 +1683,13 @@ test_that('10 digit', {
   options(scipen = 999)
   on.exit({options(scipen = 0)})
 
-  expect_no_warning({val <- fips_lead_zero("0000000001")}) # leading zero
+  expect_no_warning({val <- fips_lead_zero("0000000001", quiet = FALSE)}) # leading zero
   expect_equal(val, "00000000001")
-  expect_no_warning({val <- fips_lead_zero(1000000000)}) # numeric
+  expect_no_warning({val <- fips_lead_zero(1000000000, quiet = FALSE)}) # numeric
   expect_equal(val, "01000000000")
-  expect_no_warning({val <- fips_lead_zero(1000000001)}) # numeric
+  expect_no_warning({val <- fips_lead_zero(1000000001, quiet = FALSE)}) # numeric
   expect_equal(val, "01000000001")
-  expect_no_warning({val <- fips_lead_zero("0000000000")}) # zero string
+  expect_no_warning({val <- fips_lead_zero("0000000000", quiet = FALSE)}) # zero string
   expect_equal(val, "00000000000")
 
   options(scipen = 0)
@@ -1729,13 +1735,13 @@ test_that('12 digit', {
   options(scipen = 999)
   on.exit({options(scipen = 0)})
 
-  expect_no_warning({val <- fips_lead_zero("000000000001")}) # leading zero
+  expect_no_warning({val <- fips_lead_zero("000000000001", quiet = FALSE)}) # leading zero
   expect_equal(val, "000000000001")
-  expect_no_warning({val <- fips_lead_zero(100000000000)}) # numeric
+  expect_no_warning({val <- fips_lead_zero(100000000000, quiet = FALSE)}) # numeric
   expect_equal(val, "100000000000")
-  expect_no_warning({val <- fips_lead_zero(100000000001)}) # numeric
+  expect_no_warning({val <- fips_lead_zero(100000000001, quiet = FALSE)}) # numeric
   expect_equal(val, "100000000001")
-  expect_no_warning({val <- fips_lead_zero("000000000000")}) # zero string
+  expect_no_warning({val <- fips_lead_zero("000000000000", quiet = FALSE)}) # zero string
   expect_equal(val, "000000000000")
 
   options(scipen = 0)
@@ -1747,13 +1753,13 @@ test_that('13 digit', {
   options(scipen = 999)
   on.exit({options(scipen = 0)})
 
-  expect_warning({val <- fips_lead_zero("0000000000001")}) # leading zero
+  expect_warning({val <- fips_lead_zero("0000000000001", quiet = FALSE)}) # leading zero
   expect_true(is.na(val))
-  expect_warning({val <- fips_lead_zero(1000000000000)}) # numeric
+  expect_warning({val <- fips_lead_zero(1000000000000, quiet = FALSE)}) # numeric
   expect_true(is.na(val))
-  expect_warning({val <- fips_lead_zero(1000000000001)}) # numeric
+  expect_warning({val <- fips_lead_zero(1000000000001, quiet = FALSE)}) # numeric
   expect_true(is.na(val))
-  expect_warning({val <- fips_lead_zero("0000000000000")}) # zero string
+  expect_warning({val <- fips_lead_zero("0000000000000", quiet = FALSE)}) # zero string
   expect_true(is.na(val))
 
   options(scipen = 0)
@@ -1765,13 +1771,13 @@ test_that('14 digit', {
   options(scipen = 999)
   on.exit({options(scipen = 0)})
 
-  expect_no_warning({val <- fips_lead_zero("00000000000001")}) # leading zero
+  expect_no_warning({val <- fips_lead_zero("00000000000001", quiet = FALSE)}) # leading zero
   expect_equal(val, "000000000000001")
-  expect_no_warning({val <- fips_lead_zero(10000000000000)}) # numeric
+  expect_no_warning({val <- fips_lead_zero(10000000000000, quiet = FALSE)}) # numeric
   expect_equal(val, "010000000000000")
-  expect_no_warning({val <- fips_lead_zero(10000000000001)}) # numeric
+  expect_no_warning({val <- fips_lead_zero(10000000000001, quiet = FALSE)}) # numeric
   expect_equal(val, "010000000000001")
-  expect_no_warning({val <- fips_lead_zero("00000000000000")}) # zero string
+  expect_no_warning({val <- fips_lead_zero("00000000000000", quiet = FALSE)}) # zero string
   expect_equal(val, "000000000000000")
 
   options(scipen = 0)
@@ -1783,13 +1789,13 @@ test_that('15 digit', {
   options(scipen = 999)
   on.exit({options(scipen = 0)})
 
-  expect_no_warning({val <- fips_lead_zero("000000000000001")}) # leading zero
+  expect_no_warning({val <- fips_lead_zero("000000000000001", quiet = FALSE)}) # leading zero
   expect_equal(val, "000000000000001")
-  expect_no_warning({val <- fips_lead_zero(100000000000000)}) # numeric
+  expect_no_warning({val <- fips_lead_zero(100000000000000, quiet = FALSE)}) # numeric
   expect_equal(val, "100000000000000")
-  expect_no_warning({val <- fips_lead_zero(100000000000001)}) # numeric
+  expect_no_warning({val <- fips_lead_zero(100000000000001, quiet = FALSE)}) # numeric
   expect_equal(val, "100000000000001")
-  expect_no_warning({val <- fips_lead_zero("000000000000000")}) # zero string
+  expect_no_warning({val <- fips_lead_zero("000000000000000", quiet = FALSE)}) # zero string
   expect_equal(val, "000000000000000")
 
   options(scipen = 0)
@@ -1801,13 +1807,13 @@ test_that('16 digit +', {
   options(scipen = 999)
   on.exit({options(scipen = 0)})
 
-  expect_warning({val <- fips_lead_zero("0000000000000001")}) # leading zero
+  expect_warning({val <- fips_lead_zero("0000000000000001", quiet = FALSE)}) # leading zero
   expect_true(is.na(val))
-  expect_warning({val <- fips_lead_zero(1000000000000000)}) # numeric
+  expect_warning({val <- fips_lead_zero(1000000000000000, quiet = FALSE)}) # numeric
   expect_true(is.na(val))
-  expect_warning({val <- fips_lead_zero(1000000000000001)}) # numeric
+  expect_warning({val <- fips_lead_zero(1000000000000001, quiet = FALSE)}) # numeric
   expect_true(is.na(val))
-  expect_warning({val <- fips_lead_zero("0000000000000000")}) # zero string
+  expect_warning({val <- fips_lead_zero("0000000000000000", quiet = FALSE)}) # zero string
   expect_true(is.na(val))
 
   options(scipen = 0)

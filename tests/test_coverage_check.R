@@ -118,18 +118,24 @@ test_coverage_check <- function(loadagain = FALSE, quiet = TRUE) {
   tdat$notes[grepl("functionality.R$|ui_and_server.R$|test1.R$|test2.R$", tdat$testfile)] <- "ok, test file is for app functionality not a function"
   tdat$notes[!is.na(tdat$testfile) & is.na(tdat$codefile) & tdat$utils_object_is_in_pkg & grepl("test-utils_", tdat$testfile)] <- "ok, testfile prefixed with utils_ but otherwise matches object, though .R filename differs"
   justdata <- "R/data_" == substr(tdat$codefile, 1,7) & !is.na(tdat$codefile)
-  tdat$notes[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata  ] <- "cant find testfile"
+  tdat$notes[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata  ] <- "cant find testfile of exact name,"
   tdat$notes[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata & !tdat$utils_object_is_in_pkg ] <- "cant match this .R filename to a single (exported?) object or testfile - coverage unclear"
 
   funcs_not_in_txt_of_testfiles_at_all = NULL
-  func2searchfor = tdat$object[!is.na(tdat$object) & tdat$notes == "cant find testfile"]
+  func2searchfor = tdat$object[!is.na(tdat$object) & tdat$notes == "cant find testfile of exact name,"]
+  #browser()
   for (i in seq_along(func2searchfor)) {
-    x = find_in_files(paste0(func2searchfor[i], ""), ignorecomments = TRUE)
-    if (length(x) > 1) {
-      tdat$notes[tdat$object %in% func2searchfor[i]] <- paste0("cant find testfile, BUT at least obj appears in uncommented full txt of ", length(x), " testfile(s)")
+    x = EJAM:::find_in_files(paste0(func2searchfor[i], ""), ignorecomments = TRUE)
+    if (length(x) > 0) {
+      y = EJAM:::find_in_files(paste0("test_that.*", func2searchfor[i], ""), ignorecomments = TRUE)
+      if (length(y) > 0) {
+        tdat$notes[tdat$object %in% func2searchfor[i]] <- paste0("OK? no fname match, but test_that found in ", length(y), " testfile(s)")
+      } else {
+      tdat$notes[tdat$object %in% func2searchfor[i]] <- paste0("no fname match, but name found in uncommented lines of ", length(x), " testfile(s)")
+      }
     } else {
       funcs_not_in_txt_of_testfiles_at_all = c(funcs_not_in_txt_of_testfiles_at_all, func2searchfor[i])
-      tdat$notes[tdat$object %in% func2searchfor[i]] <- paste0("cant find testfile, and obj not even used within any testfile (ignoring comments)")
+      tdat$notes[tdat$object %in% func2searchfor[i]] <- paste0("NO TESTS - no fname match, and not in any uncommented lines of testfiles")
     }
   }
   ################################ #
@@ -166,6 +172,18 @@ test_coverage_check <- function(loadagain = FALSE, quiet = TRUE) {
   x <- tdat[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata, ]
   x[order(x$object), ] |> print(n = 500)
 
+  cat('
+      -----------------------------------------------\n\n')
+
+  cat("   CERTAINLY NO TESTS \n\n")
+
+  zz = x[order(x$object), ]
+zz[substr(zz$notes,1,8) == "NO TESTS", c("object", "notes")] |> print(n = 500)
+
+cat('
+      -----------------------------------------------\n\n')
+
+
   ################################ #
   cat('
       -----------------------------------------------\n\n')
@@ -188,21 +206,22 @@ test_coverage_check <- function(loadagain = FALSE, quiet = TRUE) {
       "or ", length(funcs_not_in_txt_of_testfiles_at_all), "where the function does not even appear at all in full text of any test file:", '\n\n'
   )
   #  cat(paste0(funcs_not_in_txt_of_testfiles_at_all, collapse = ", "), "\n\n")
-  (dput(funcs_not_in_txt_of_testfiles_at_all))
+  (dput(sort(funcs_not_in_txt_of_testfiles_at_all)))
   cat("\n\n")
   junk = capture.output({
-    freq = found_in_N_files_T_times(funcs_not_in_txt_of_testfiles_at_all, path = "./R", ignorecomments = TRUE)
+    freq = EJAM:::found_in_N_files_T_times(funcs_not_in_txt_of_testfiles_at_all, path = "./R", ignorecomments = TRUE)
   })
   freq = freq[order(freq$nfiles, decreasing = T), ]
   rownames(freq) <- NULL
   cat("
 
-These dont seem to have tests but are
+These dont appear in testfiles at all, but are
 used (or mentioned) by the most R/*.R files
 (excluding commented-out lines):
 
       ")
-  print(head(freq, 20))
+
+  print(head(as.data.frame(freq), 30))
   cat("\n\n")
   cat("Also see https://devtools.r-lib.org/reference/test.html and https://covr.r-lib.org/ and ?devtools::test_coverage() which computes test coverage for your package.\nIt's a shortcut for covr::package_coverage() plus covr::report().\n")
 

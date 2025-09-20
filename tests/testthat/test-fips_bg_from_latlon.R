@@ -29,3 +29,18 @@ test_that("fips_bg_from_latlon ok if 1", {
   expect_equal(fips2state_abbrev(x[1]), state_from_latlon(testpoints_10[1,])$ST)
 
 })
+
+test_that("fips_bg_from_latlon if no valid latlon", {
+ expect_no_error({
+  x = fips_bg_from_latlon(data.frame(lat=NA, lon=NA))
+ })
+
+})
+
+test_that("fips_bg_from_latlon if some valid latlon", {
+  expect_no_error({
+
+    fips_bg_from_latlon(data.frame(lat=c(35,NA), lon= c(-100,NA)))
+  })
+})
+

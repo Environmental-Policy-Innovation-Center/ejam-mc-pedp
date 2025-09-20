@@ -21,6 +21,28 @@ testthat::test_that("latlon_from_anything works with data.frames", {
 })
 ################################################ #
 
+testthat::test_that("latlon_from_anything() ok if only NA,NA pts", {
+
+  expect_no_error({
+    expect_warning({
+    x <- latlon_from_anything(data.frame(lat=NA, lon=NA))
+    })
+  })
+  expect_equal(NROW(x), 1)
+})
+################################################ #
+
+testthat::test_that("latlon_from_anything() ok if some NA,NA pts", {
+
+  expect_no_error({
+    expect_warning({
+      x = latlon_from_anything(data.frame(lat=c(35,NA), lon=c(-100,NA)))
+    })
+  })
+  expect_equal(NROW(x), 2)
+})
+################################################ #
+
 testthat::test_that("latlon_from_anything returns lat,lon as colnames even if aliases provided and order differs", {
   suppressWarnings({
     x <- latlon_from_anything(data.frame(n = 1, Longitude = -110, other = 1, latitude = 33))

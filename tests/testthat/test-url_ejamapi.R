@@ -137,9 +137,9 @@ if (FALSE) {
   ## params1 = rlang::list2(sitepoints=pts1, radius=3.14)
   ## out1 <- ejamit(params1)
 
-  out1 <- ejamit(sitepoints=pts1, radius=3.14)
-  ejam2report(out1)
-  ejamreport(sitepoints=pts1, radius=3.14)
+#  out1 <- ejamit(sitepoints=pts1, radius=3.14)
+#  ejam2report(out1)
+#  ejamreport(sitepoints=pts1, radius=3.14)
 
   fips1 <- "050014801001"
   fips2 <- testinput_fips_mix
@@ -157,6 +157,6 @@ if (FALSE) {
   z1
   z2
   browseURL(z1)
-  ejam2report(ejamit(shapefile=shp1, radius=0))
+# ejam2report(ejamit(shapefile=shp1, radius=0))
 
 }
