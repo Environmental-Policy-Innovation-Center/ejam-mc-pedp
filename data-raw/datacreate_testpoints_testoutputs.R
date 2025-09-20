@@ -361,6 +361,10 @@ pkg_update_testpoints_testoutputs <- function(
         # already exists presumably. use get(out_varname_ejamit) to access the object
       }
 
+      # testoutput_ejamit_10pts_1miles <- ejamit(testpoints_10, radius = 1)
+      # testoutput_ejamit_100pts_1miles <- ejamit(testpoints_100, radius = 1)
+      # testoutput_ejamit_1000pts_1miles <- ejamit(testpoints_1000, radius = 1)
+
       ## save as DATA IN PACKAGE ####
       if (resaving_ejamit_rda) {
         metadata_add_and_use_this(out_varname_ejamit)
@@ -371,6 +375,15 @@ pkg_update_testpoints_testoutputs <- function(
         # text_to_do = paste0("usethis::use_data(", out_varname_ejamit, ", overwrite=TRUE)")
         # eval(parse(text = text_to_do))                                             ############# #
       }
+
+      # metadata_add_and_use_this("testoutput_ejamit_10pts_1miles")
+      # metadata_add_and_use_this("testoutput_ejamit_100pts_1miles")
+      # metadata_add_and_use_this("testoutput_ejamit_1000pts_1miles")
+
+      # testoutput_ejamit_10pts_1miles$results_bysite[1:3, 1:12]
+      # testoutput_ejamit_100pts_1miles$results_bysite[1:3, 1:12]
+      # testoutput_ejamit_1000pts_1miles$results_bysite[1:3, 1:12]
+
 
       # save as DOCUMENTATION ####
       if (resaving_ejamit_helpdocs) {
