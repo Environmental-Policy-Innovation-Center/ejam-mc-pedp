@@ -85,6 +85,8 @@ pkg_dir_loaded_from = function(pkg="EJAM") {find.package(pkg, lib.loc = NULL)}
 
 ## searching text in source files ####
 
+# helper for find_in_files()
+
 grab_hits = function(pattern, x, ignore.case = TRUE, ignorecomments = FALSE, value = TRUE) {
 
   # use grepl to find all members of character vector z where the character string "h" appears in the string
@@ -116,13 +118,36 @@ grab_hits = function(pattern, x, ignore.case = TRUE, ignorecomments = FALSE, val
 }
 ################################ #
 
-# search for one query term in a list of files
 
-
+#' utility to do global search/find in full text of the files in a folder, like source code files or unit tests
+#'
+#' @param pattern regular expression to look for
+#' @param path can change it to e.g., "./R"
+#' @param filename_pattern query regex on file names, default is R code files
+#' @param ignorecomments omit hits from commented out lines
+#' @param ignore.case as in grep
+#' @param value logical as in [grep()] if TRUE returns matching text;
+#'    if FALSE, returns logical vectors like [grepl()]
+#' @param whole_line set it to FALSE to see only the matching fragments
+#'   vs entire line of text that has a match in it
+#' @param quiet whether to print results or just invisibly return
+#' @returns list of named vectors,
+#'   where names are file paths with hits, elements are vectors of text with hits
+#' @examples
+#' EJAM:::find_in_files("[^_]logo_....",    path = "./R", whole_line = FALSE, quiet = F)
+#' EJAM:::find_in_files("report_logo.....", path = "./R", whole_line = FALSE, quiet = F)
+#' EJAM:::find_in_files("app_logo......",   path = "./R", whole_line = FALSE, quiet = F)
+#'
+#' EJAM:::find_in_files("latlon_from_.{18}", quiet = FALSE, whole_line = F)
+#' EJAM:::find_in_files("latlon_from_s.{9}", quiet = FALSE, whole_line = F)
+#' EJAM:::find_in_files("latlon_from_mact.{9}", quiet = FALSE, whole_line = F)
+#'
+#' @keywords internal
+#'
 find_in_files <- function(pattern, path = "./tests/testthat", filename_pattern = "\\.R$|\\.r$",
                           ignorecomments = FALSE,
                           ignore.case = TRUE,
-                          value = TRUE, quiet=TRUE) {
+                          value = TRUE, whole_line = TRUE, quiet=TRUE) {
   if (!quiet) {
     cat("\nSearching in ", path, ' to find files containing ', pattern, '\n')
     # or e.g., find_in_files(pattern = "^#'.*[^<]http", path = "./R")
@@ -139,11 +164,24 @@ find_in_files <- function(pattern, path = "./tests/testthat", filename_pattern =
                  ignorecomments = ignorecomments)
     ) |>
     purrr::keep(~length(.x) > 0)
+  if (!whole_line) {
+    # return just the matching part, not text before or after that on a given line of text
+    found <- lapply(found, function(z) as.vector(gsub(paste0(".*(", pattern, ").*"), "\\1",  z)))
+  }
   if (!quiet) {
     if (length(found) > 0) {
+      if (!whole_line) {
+        print(sapply(found, cbind))
+      } else {
       print(sapply(found, function(y) cbind(linenumber = names(y), text = y)))
+}
       cat("\n------------------------------------------------------------------------- \n")
       cat("------------------------------------------------------------------------- \n")
+    }
+    if (value == TRUE) {
+      print(cbind(hits_in_file = sort(sapply(found[sapply(found, NROW) > 0], NROW))))
+    } else {
+      print(cbind(hits_in_file = sort(sapply(found[sapply(found, sum) > 0], sum))) )
     }
   }
   invisible(found)
