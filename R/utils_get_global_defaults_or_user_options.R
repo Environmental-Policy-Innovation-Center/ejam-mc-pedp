@@ -1,3 +1,43 @@
+######################## # ######################## #
+
+app_logo_HTML_global_or_param = function(app_logo_now = EJAM:::global_or_param("app_logo")) {
+
+  # This is a workaround/hack that should allow user to set app logo as either a
+  # app_logo or app_logo_html parameter to ejamapp()
+  # but otherwise create it based on global default value of app_logo:
+
+  # if nothing passed to ejamapp(), html is created here based on default app_logo
+  # if app_logo_html is passed to ejamapp(), that is used and app_logo is ignored
+  # if app_logo but not app_logo_html is passed to ejamapp(), makes html from app_logo passed.
+
+  # And note if global_defaults_*.* ever did set the value of
+  #  app_logo_html, that html would
+  #  override any app_logo parameter passed to ejamapp() as parameter!
+
+  # And note Wwhen this function gets called from global_defaults_shiny.R during app startup,
+  # default input param app_logo_now is as app_logo set by global_defaults_package.R during attach OR
+  #  as passed to ejamapp() as parameter.
+  # but if app_logo setting were somehow later controlled via an input$ in app via advanced tab,
+  # that cannot be checked by defaults here
+  # and this would need to be called from server using input$xyz for that to work.
+
+  # This below should be "" from global_defaults_shiny.R or could be something user passed to ejamapp()
+  app_logo_html = EJAM:::global_or_param("app_logo_html")
+
+  if (is.null(app_logo_html) || app_logo_html == "") {
+    return(
+      app_logo_html = paste0(
+        ' <img id="titleLogo" src=',
+        app_logo_now,
+        ' alt="logo" title="logo" style="margin: 0px; padding-bottom: 4px; padding-top: 4px; padding-left: 4px; padding-right: 4px; width: 40px; height: 40px">'
+      )
+    )
+  } else {
+    return(app_logo_html)
+  }
+}
+######################## # ######################## # ######################## # ######################## #
+
 
 #' utility that reconciles/ consolidates user-defined params passed via ejamapp() and settings from global_defaults_ files
 #'

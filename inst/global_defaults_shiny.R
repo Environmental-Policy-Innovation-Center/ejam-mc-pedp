@@ -1004,7 +1004,7 @@ html_fmts <- list(
 ',
                   ### >> app_logo_html ####
 
-                  EJAM:::global_or_param("app_logo_html") # which was built from app_logo
+               app_logo_HTML_global_or_param()  #  # built from app_logo unless set in call to ejamapp()
                   ,'
         </td>
 

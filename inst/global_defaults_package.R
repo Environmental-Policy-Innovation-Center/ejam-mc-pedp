@@ -109,11 +109,8 @@ global_defaults_package <- c(
   # could also say probably  'report/community_report/ejamhex4.png'
 
   app_logo = app_logo,
-  app_logo_html = paste0(
-    ' <img id="titleLogo" src=', app_logo,
-    ' alt="logo" title="logo" style="margin: 0px; padding-bottom: 4px; padding-top: 4px; padding-left: 4px; padding-right: 4px; width: 40px; height: 40px">'
-  )
-
+  app_logo_html = "" # later, html logo gets calculated as app starts, based on app_logo (that is here or was passed to ejamapp)
+# setting it here would override any app_logo_html parameter passed to ejamapp()
 )
 # clean up
 rm(report_logo, app_logo)
