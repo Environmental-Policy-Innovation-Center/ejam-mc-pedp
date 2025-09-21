@@ -122,8 +122,8 @@ To include specific columns provides those as a character vector of varnames.")
 
     ## folder OK? ####
     if (interactive() && !shiny::isRunning()) {
-      if (missing(folder)) {
-        folder <- rstudioapi::selectDirectory("Select/confirm Folder to Save in", path = folder)
+      if (!dir.exists(folder)) {
+        folder <- rstudioapi::selectDirectory("Select valid Folder to Save in", path = folder)
       }
     }
     if (!dir.exists(folder)) {stop("folder does not exist")}
@@ -160,7 +160,7 @@ To include specific columns provides those as a character vector of varnames.")
       }
 
       if (ftype %in% c("geojson", "json")) {
-        # junk = capture.output({
+        junk = capture.output({
         sf::st_write(
           obj = bysite_shp,
           dsn = finalpath,
@@ -170,9 +170,9 @@ To include specific columns provides those as a character vector of varnames.")
           quiet = quiet,
           ...
         )
-        # })
+        })
       } else {
-        # junk = capture.output({
+        junk = capture.output({
         sf::st_write(
           obj = bysite_shp,
           dsn = finalpath,
@@ -182,7 +182,7 @@ To include specific columns provides those as a character vector of varnames.")
           quiet = quiet,
           ...
         )
-        # })
+        })
       }
     }
     ##################################### #
@@ -216,7 +216,7 @@ To include specific columns provides those as a character vector of varnames.")
         message("File by that name already exists, but will overwrite it.")
         file.remove(file.path(tds, file))
       }
-      # junk = capture.output({
+      junk = capture.output({
       sf::st_write(
         obj = bysite_shp,
         dsn = file.path(tds, file),
@@ -225,7 +225,7 @@ To include specific columns provides those as a character vector of varnames.")
         quiet = quiet,
         ...
       )
-      # })
+      })
       if (!file.exists(file.path(tds, file))) {stop('could not write to file at ', file.path(tds, file))}
 
       # now make it a zip file
