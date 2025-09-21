@@ -517,7 +517,7 @@ shapefile_from_gdbzip <- function(fname, layer = NULL, ...) {
 #'
 shapefile_from_folder <- function(folder = NULL, cleanit = TRUE, crs = 4269, ...) {
 
-  if (is.null(folder)) {
+  if (is.null(folder) || !dir.exists(folder)) {
     if (interactive() && !shiny::isRunning()) {
       folder <- rstudioapi::selectDirectory(caption = "Select a folder that contains the files (.shp, .shx, .dbf, and .prj)", path = getwd())
       # and cpg is ok but not essential?
@@ -655,7 +655,7 @@ shapefile_from_filepaths <- function(filepaths = NULL, cleanit = TRUE, crs = 426
 #'
 shapefile_filepaths_from_folder <- function(folder = NULL) {
 
-  if (is.null(folder)) {
+  if (is.null(folder) || !dir.exists(folder)) {
     if (interactive() && !shiny::isRunning()) {
       folder <- rstudioapi::selectDirectory(caption = "Select a folder that contains the files (.shp, .shx, .dbf, and .prj)", path = getwd())
       # and cpg is ok but not essential?
@@ -967,8 +967,8 @@ latlon_from_shapefile <- function(shp, include_only_latlon = TRUE) {
     }
   }
   pts <- data.table::data.table(sf::st_coordinates(shp))
-  data.table::setnames(pts, old = "X", new = "lat")
-  data.table::setnames(pts, old = "Y", new = "lon")
+  data.table::setnames(pts, old = "X", new = "lon")
+  data.table::setnames(pts, old = "Y", new = "lat")
   if (include_only_latlon) {
     # done
   } else {
