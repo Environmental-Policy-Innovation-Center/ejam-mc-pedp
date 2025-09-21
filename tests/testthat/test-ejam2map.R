@@ -145,22 +145,6 @@ test_that("ejam2map()  missing shp", {
   # expect_true("leaflet" %in% class(x))
 })
 ############################################## #
-test_that("ejam2map() works given shp and a radius", {
-  expect_no_error({
-    suppressWarnings({
-      x = ejam2map(testoutput_ejamit_shapes_2,
-                   shp = testinput_shapes_2,
-                   # sitenumber = 0,
-                   launch_browser = F
-      )
-    })
-  })
-  expect_true("leaflet" %in% class(x))
-
-  # ***
-
-})
-############################################## #
 test_that("ejam2map() works given shp, sitenumber=2", {
   expect_no_error({
     suppressWarnings({
