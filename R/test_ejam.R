@@ -1,6 +1,4 @@
 
-#  test_ejam() had been called test_interactively() in prior versions of EJAM
-
 #' run group(s) of unit tests for EJAM package
 #' run tests of local source pkg EJAM, by group of functions, quietly, interactively or not, with compact summary of test results
 #'
@@ -397,21 +395,22 @@ and all filenames listed there actually exist as in that folder called `test`.\n
     cat("\n")
     {
       #          groupnames shortgroupnames filecount
-      # 1         test_fips            fips         3 or 4?
+      # 1         test_fips            fips         8
       # 2        test_naics           naics         8
-      # 3          test_frs             frs         6
+      # 3          test_frs             frs         7
       # 4       test_latlon          latlon        10
-      # 5         test_maps            maps         1
-      # 6        test_shape           shape         3
-      # 7    test_getblocks       getblocks         5
+      # 5         test_maps            maps         2
+      # 6        test_shape           shape         6
+      # 7    test_getblocks       getblocks         9
       # 8  test_fixcolnames     fixcolnames         6
-      # 9         test_doag            doag         2
-      # 10      test_ejamit          ejamit         6
-      # 11 test_ejscreenapi     ejscreenapi         5
-      # 12         test_mod             mod         3
-      # 13         test_app             app         5
-      # 14        test_test            test         1
-      # 15       test_golem           golem         2
+      # 9         test_doag            doag         5
+      # 10      test_ejamit          ejamit         8
+      # 11        test_misc            misc         7
+      # 12 test_ejscreenapi     ejscreenapi         5
+      # 13         test_mod             mod         3
+      # 14         test_app             app         8
+      # 15        test_test            test         2
+      # 16       test_golem           golem         2
       # fnames = unlist(testlist)
     }
 
@@ -455,7 +454,8 @@ and all filenames listed there actually exist as in that folder called `test`.\n
         "test-naics_from_code.R", "test-naics_from_name.R", "test-naics_subcodes_from_code.R",
         "test-naics_validation.R", "test-ejam2shapefile.R", "test-shape2geojson.R",
         "test-shape2zip.R", "test-shapefile_xyz.R", "test-shapes_from_fips.R",
-        "test-test1.R", "test-test2.R"),
+        "test-test1.R", "test-test2.R",
+        "test-latlon_from_shapefile.R"),
       seconds_byfile = c(
         258.375,
         5.51800000000003, 7.27299999999991, 5.529, 19.4390000000001,
@@ -476,7 +476,9 @@ and all filenames listed there actually exist as in that folder called `test`.\n
         2.99700000000001, 5.233, 3.79700000000003, 3.214, 3.22799999999995,
         2.93099999999998, 3.09199999999998, 3.46399999999994, 3.05799999999999,
         3.04399999999998, 7.79999999999995, 13.968, 1.68599999999992,
-        1.83199999999988)
+        1.83199999999988,
+        20
+        )
     )
 
     #     # other names for tests that did not get run when dput used
@@ -504,6 +506,11 @@ and all filenames listed there actually exist as in that folder called `test`.\n
     )
 
     timebyfile$seconds_byfile <- round(timebyfile$seconds_byfile, 0)
+
+    testgroup_from_fname <- function(fname) {names(testlist)[as.vector(sapply(testlist, function(z) fname %in% z))]}
+    timebyfile$testgroup <-  as.vector( sapply(timebyfile$file, testgroup_from_fname) )
+
+
     # timebyfile
     #
     #                                         <char>          <num>
@@ -593,52 +600,60 @@ and all filenames listed there actually exist as in that folder called `test`.\n
 
     ################# #
 
-    # sum(timebyfile[timebyfile$file %in% testlist[['test_app']], ]$seconds_byfile)
-
     # timebygroup
 
+## old way
     # dput(x$bygroup[, .(testgroup, seconds_bygroup)])
     # biglist$bygroup[, .(testgroup, seconds_bygroup)]
+#
+    # timebygroup <- data.table::data.table(
+    #
+    #   testgroup = c("test_getblocks", "test_fips", "test_ejamit",
+    #                 "test_maps", "test_latlon", "test_doag", "test_misc", "test_fixcolnames",
+    #                 "test_frs", "test_golem", "test_mod", "test_naics", "test_shape",
+    #                 "test_test"),
+    #   seconds_bygroup = c(350, 128, 229, 92, 78, 158,
+    #                       167, 41, 65, 8, 13, 51, 44, 8)
+    # )
+    # timebygroup = rbind(timebygroup, cbind(testgroup = 'test_app', seconds_bygroup = 1006))
+    # timebygroup = rbind(timebygroup, cbind(testgroup = 'test_ejscreenapi', seconds_bygroup = 0))
+    # timebygroup$seconds_bygroup = as.numeric(timebygroup$seconds_bygroup)
+    # timebygroup$minutes_bygroup = round(as.numeric(timebygroup$seconds_bygroup) / 60, 1)
+    # data.table::setDT(timebygroup)
 
-    timebygroup <- data.table::data.table(
-      testgroup = c("test_getblocks", "test_fips", "test_ejamit",
-                    "test_maps", "test_latlon", "test_doag", "test_misc", "test_fixcolnames",
-                    "test_frs", "test_golem", "test_mod", "test_naics", "test_shape",
-                    "test_test"),
-      seconds_bygroup = c(350, 128, 229, 92, 78, 158,
-                          167, 41, 65, 8, 13, 51, 44, 8)
-    )
+    ## now just sum files by group to update this info:
+    timebygroup <- timebyfile[ , .(seconds_bygroup = sum(seconds_byfile)), by = "testgroup"]
+    timebygroup[, seconds_bygroup := as.numeric(seconds_bygroup)]
+    timebygroup[, minutes_bygroup := round(as.numeric(seconds_bygroup) / 60, 1)]
 
-    timebygroup = rbind(timebygroup, cbind(testgroup = 'test_app', seconds_bygroup = 1006))
-    timebygroup = rbind(timebygroup, cbind(testgroup = 'test_ejscreenapi', seconds_bygroup = 0))
-    timebygroup$seconds_bygroup = as.numeric(timebygroup$seconds_bygroup)
-    timebygroup$minutes_bygroup = round(as.numeric(timebygroup$seconds_bygroup) / 60, 1)
-    data.table::setDT(timebygroup)
+    cat("\n   Approximate time predicted per group of tests: \n\n")
+     print(timebygroup[order(seconds_bygroup), ])
 
     # > timebygroup
     #           testgroup    seconds_bygroup     minutes_bygroup
-    #              <char>           <num>           <num>
-    # 1:   test_getblocks             350             5.8 ###
-    # 2:        test_fips             128             2.1 #
-    # 3:      test_ejamit             229             3.8 #
-    # 4:        test_maps              92             1.5
-    # 5:      test_latlon              78             1.3
-    # 6:        test_doag             158             2.6 #
-    # 7:        test_misc             167             2.8 #
-    # 8: test_fixcolnames              41             0.7
-    # 9:         test_frs              65             1.1
-    # 10:       test_golem               8             0.1
-    # 11:         test_mod              13             0.2
-    # 12:       test_naics              51             0.8
-    # 13:       test_shape              44             0.7
-    # 14:        test_test               8             0.1
-    # 15:         test_app            1006            16.8 ###
-    # 16: test_ejscreenapi               0             0.0
+    #               <char>           <num>           <num>
+    # 1:   test_getblocks             323             5.4
+    # 2:        test_fips             111             1.9
+    # 3:      test_ejamit             209             3.5
+    # 4:        test_maps              87             1.4
+    # 5:      test_latlon              49             0.8
+    # 6:        test_doag             144             2.4
+    # 7:        test_misc             151             2.5
+    # 8: test_fixcolnames              23             0.4
+    # 9:         test_frs              37             0.6
+    # 10:       test_golem               6             0.1
+    # 11:         test_mod               6             0.1
+    # 12:       test_naics              27             0.4
+    # 13:       test_shape              51             0.8
+    # 14:        test_test               4             0.1
+    # 15:         test_app            1008            16.8
+    # 16: test_ejscreenapi             109             1.8  make it zero now?
 
     ########################### #  ########################################## #
 
     ## check time est. avail. for each test ####
     # confirm we have the time estimate for each group and test
+     timing_needed <- FALSE
 
     if (y_runsome || y_runall) {
       timing_needed <- FALSE
@@ -665,126 +680,27 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       ##     TO TEST 1 GROUP  (WITH SUCCINCT SUMMARY)
 
       ## examples
-      # x1 = test1group(c("test-test1.R", "test-test2.R"), groupname = 'test', print4group = F   )
-      # x2 = test1group(c("test-test1.R", "test-test2.R"), groupname = 'test', print4group = TRUE)
+      # x1 = test_ejam_1group(c("test-test1.R", "test-test2.R"), groupname = 'test', print4group = F   )
+      # x2 = test_ejam_1group(c("test-test1.R", "test-test2.R"), groupname = 'test', print4group = TRUE)
       # print(x1)
       # print(x2)
-
-      test1group <- function(fnames = test_all, groupname = "",
-                             reporter = "minimal", # some of the code below now only works if using this setting
-                             load_helpers = TRUE,
-                             print4eachfile = FALSE, # useless - keep it FALSE
-                             print4group = TRUE,
-                             add_seconds_bygroup = TRUE,
-                             stop_on_failure = FALSE
-      ) {
-
-        xtable <- list()
-        # tfile <- tempfile("junk", fileext = "txt")
-        # timing = system.time({
-        for (i in 1:length(fnames)) {
-          seconds_byfile = system.time({
-            cat(paste0("#", i, ' '))
-            # cat(".") ## like a counter, one dot per file
-
-            suppressWarnings(suppressMessages({
-              junk <- testthat::capture_output_lines({
-                x <- try(
-                  testthat::test_file(
-                    file.path("./tests/testthat/", fnames[i]),
-                    load_helpers = load_helpers,
-                    load_package = 'none',
-                    # or else  Helper, setup, and teardown files located in the same directory as the test will also be run. See vignette("special-files") for details.
-                    reporter = reporter,
-                    stop_on_failure = stop_on_failure
-                  )
-                )
-                if (inherits(x, "try-error")) {cat("Stopped on failure in ", fnames[i], "\n")}
-              }
-              , print = print4eachfile) # here it is a useless param of capture_output_lines()
-            }))
-
-            x <- as.data.frame(x)
-            if (NROW(x) == 0) {
-              # at one point it was having trouble around here
-              # browser()
-              cat("\n\n ********** FAILED TO GET ANY RESULTS TRYING TO RUN TESTS IN", file.path("./tests/testthat/", fnames[i]), '\n\n')
-              xtable[[i]] <- NULL
-              next
-            }
-            x$tests <- x$nb
-            x$nb <- NULL
-            x$flag <- x$tests - x$passed
-            x$err  <- x$tests - x$passed - x$warning
-            x$error_cant_test <- ifelse(x$error > 0, 1, 0)  ## a problem with counting this?
-            x$error <- NULL
-            x$skipped <- ifelse(x$skipped, 1, 0)
-
-            x$err = NULL
-            x$untested_skipped <- x$skipped; x$skipped = NULL
-            x$untested_cant <- x$error_cant_test;  x$error_cant_test = NULL
-            x$tested = x$tests - x$untested_skipped; x$tests = NULL
-            x$total = x$untested_skipped + x$untested_cant + x$tested
-            x$warned = x$warning; x$warning = NULL
-            x$failed = x$tested - x$passed - x$warned
-            x$flagged = x$untested_skipped + x$untested_cant + x$warned + x$failed; x$flag = NULL
-            if (sum(x$total) != sum(x$passed + x$flagged)) {stop('math error in counts!')}
-
-            x <- x[, c('file',  'test',
-                       'total', 'passed', 'flagged',
-                       'untested_cant', 'untested_skipped', 'warned', 'failed'
-            )]
-
-            # x <- x[, c('file',  'test',
-            #            'tests', 'passed', 'failed',  'err',
-            #            'warning', 'flag', 'skipped', 'error_cant_test'
-            # )]
-
-            x$test <- substr(x$test, 1, 50) # some are long
-            xtable[[i]] <- data.table::data.table(x)
-          })
-          xtable[[i]]$seconds_byfile <- seconds_byfile['elapsed']
-        }
-        # })
-        xtable <- data.table::rbindlist(xtable)
-
-        seconds_bygroup <- round(sum(xtable[ , seconds_byfile[1], by = 'file'][,V1]), 0)
-        ## can add this shorter time estimate to the results instead of relying on
-        ## the slightly longer time estimate that can be done in testbygroup()
-        if (add_seconds_bygroup) {
-          xtable[ , seconds_bygroup := seconds_bygroup]
-        }
-        cat('done. ')
-        cat(' Finished test group', groupname, 'in', seconds_bygroup, 'seconds.\n')
-        if (print4group) {
-          # print a table of counts
-          print(c(
-            colSums(xtable[, .(total, passed, flagged,
-                               untested_cant, untested_skipped, warned, failed)]),
-            seconds_bygroup = seconds_bygroup
-          ))
-        }
-
-        return(xtable)
-      }
-      ########################### #      ########################### #
 
       ##     TO LOOP THROUGH GROUPS of tests
 
       ## examples
       #
-      # y1 <- testbygroup( list(
+      # y1 <- test_ejam_bygroup( list(
       # test_test  = c("test-test1.R", "test-test2.R"),
       # test_golem = c("test-golem_utils_server.R", "test-golem_utils_ui.R")),
       # testing = TRUE
       # )
-      # y2 <- testbygroup( list(
+      # y2 <- test_ejam_bygroup( list(
       #   test_test  = c("test-test1.R", "test-test2.R"),
       #   test_golem = c("test-golem_utils_server.R", "test-golem_utils_ui.R")),
       #   testing = FALSE,
       #   print4group = FALSE
       # )
-      # y3 <- testbygroup( list(
+      # y3 <- test_ejam_bygroup( list(
       #   test_test  = c("test-test1.R", "test-test2.R"),
       #   test_golem = c("test-golem_utils_server.R", "test-golem_utils_ui.R")),
       #   testing = FALSE,
@@ -793,98 +709,8 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       # print(y1)
       # print(y2)
       # print(y3)
-
-
-      testbygroup <- function(testlist,
-                              print4group = FALSE,
-                              testing = FALSE,
-                              stop_on_failure = FALSE,
-                              reporter = "minimal" # this may be the only option that works now
-      ) {
-        # probably cannot now, but used to be able to use  reporter=default_compact_reporter()
-
-        xtable <- list()
-
-        i <- 0
-        for (tgroupname in names(testlist)) {
-          seconds_bygroup_viasystemtime = system.time({
-            i <- i + 1
-            if (i == 1) {load_helpers <- TRUE} else {load_helpers <- FALSE}
-            fnames = unlist(testlist[[tgroupname]])
-            cat("", tgroupname, "group has", length(fnames), "test files. Starting ")
-
-            xtable[[i]] <- data.table::data.table(
-
-              testgroup = tgroupname,
-
-              test1group(testlist[[tgroupname]],
-                         groupname = tgroupname,
-                         load_helpers = load_helpers,
-                         print4group = print4group,
-                         stop_on_failure = stop_on_failure,
-                         add_seconds_bygroup = TRUE, #   can be done here by testbygroup() not by test1group()
-                         reporter = reporter)
-            )
-          })
-
-          ## time elapsed
-          ##
-          ## This is the total time including overhead of looping, using test1group() for each group, and compiling.
-          secs1 <- round(seconds_bygroup_viasystemtime['elapsed'], 0)
-          if (testing) {
-            cat('Seconds elapsed based on testbygroup() using system.time() is', secs1, '\n')
-            # other ways fail if no test happened in a file like for group golem:
-            ## This is a slightly shorter timing estimate could be done in test1group() by using add_seconds_bygroup=T
-            secs2 <- round(xtable[[i]]$seconds_bygroup[1], 0)
-            cat('Seconds elapsed based on testbygroup() reporting total reported by test1group() is', secs2, '\n')
-            ## or, a similar estimate could be done here, but just like it would be in test1group() :
-            secs3 <- round(sum(xtable[[i]][ , seconds_byfile[1], by = 'file'][,V1]), 0)
-            cat('Seconds elapsed based on testbygroup() summing seconds_byfile once per file is', secs3, '\n')
-          }
-          secs <- secs1
-          xtable[[i]]$seconds_bygroup <- secs # replaces any estimate done by test1group()
-
-          # cat(paste0( '', round(secs, 0), ' seconds elapsed.\n'))
-          ## That appears on same line where test1group() had already said "Finished test group xyz"
-          ## or, previously, complete phrase here: # cat(paste0(' ', tgroupname, ' group finished, in ', round(secs, 0), ' seconds.\n\n'))
-
-          ## Show table of counts for this group of files of tests:
-          print(c(
-            colSums(xtable[[i]][, .(total, passed, flagged,
-                                    untested_cant, untested_skipped, warned, failed)]),
-            seconds = secs
-
-          ))
-
-          if (sum(xtable[[i]]$flagged) > 0) {
-            # using beepr::beep() since utils::alarm() may not work
-            # using :: might create a dependency but prefer that pkg be only in Suggests in DESCRIPTION
-            if (interactive() && beepr_available) {beepr::beep(10)}
-            if (sum(xtable[[i]]$failed) > 0) {
-              cat(paste0("     ***      Some FAILED in ", tgroupname, ": ",
-                         paste0(unique(xtable[[i]]$file[xtable[[i]]$failed]), collapse = ","), "\n"))
-            } else {
-              cat(paste0("     ***      Some UNTESTED or WARNED in ", tgroupname, ": ",
-                         paste0(unique(xtable[[i]]$file[xtable[[i]]$flagged]), collapse = ","), "\n"))
-            }
-          }
-
-        } # looped over groups of test files
-
-        xtable <- data.table::rbindlist(xtable)
-        time_minutes <-   round(sum(xtable[ , (seconds_bygroup[1]) / 60, by = "testgroup"][, V1]) , 1)
-        cat(paste0('\n', time_minutes[1], ' minutes total for all groups\n\n'))
-
-        xtable[ , flagged_byfile := sum(flagged), by = "file"]
-        xtable[ , failed_byfile  := sum(failed),  by = "file"]
-        xtable[ , flagged_bygroup := sum(flagged), by = "testgroup"]
-        xtable[ , failed_bygroup  := sum(failed),  by = "testgroup"]
-        setorder(xtable, -failed_bygroup, -flagged_bygroup, testgroup, -failed, -flagged, file)
-        setcolorder(xtable, neworder = c('seconds_bygroup', 'seconds_byfile'), after = NCOL(xtable))
-
-        return(xtable)
-      }
-    }   #   done defining functions
+#
+         }   #   done defining functions
     ########################### #  ########################################## #
     # . ###
     # >> ASK WHAT TO DO << ####
@@ -1049,16 +875,15 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       suppressPackageStartupMessages(    devtools::load_all()   )
     })
   } else {
-    cat("useloadall=F WILL FAIL TO FIND THE UNEXPORTED FUNCTIONS WHEN IT TRIES TO TEST THEM !! \n")
-    junk <- capture.output({
-      suppressPackageStartupMessages({   library(EJAM)   })
-    })
+    cat("useloadall=F WILL FAIL TO FIND THE UNEXPORTED FUNCTIONS WHEN IT TRIES TO TEST THEM without load_all() !! \n")
+    # junk <- capture.output({
+    #   suppressPackageStartupMessages({   library(EJAM)   })
+    # })
   }
   cat("Downloading all large datasets that might be needed...\n")
   dataload_dynamic("all")
   ##
   if (file.exists("./tests/testthat/setup.R")) {
-    # rstudioapi::navigateToFile("./tests/testthat/setup.R")
     source("./tests/testthat/setup.R")
   } else {
     cat("Need to source the setup.R file first \n")
@@ -1276,7 +1101,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
     # print(Sys.time() + secs2)
     # cat("\n\n")
 
-    x <- testbygroup(testlist = partial_testlist, stop_on_failure = y_stopif)
+    x <- test_ejam_bygroup(testlist = partial_testlist, stop_on_failure = y_stopif, timebyfile=timebyfile, timebygroup=timebygroup)
     bytest <- x
 
     junk = loggable(file = logfilename, x = {
@@ -1290,7 +1115,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       if (any(x$flagged  > 0)) {
         # print(as.data.frame(x)[x$flagged  > 0, !grepl("byfile|bygroup", names(x))])
       } else {
-        cat("All selected tests ran and passed.")
+        cat("\nAll selected tests ran and passed.")
       }
       cat("\n")
     })
@@ -1300,7 +1125,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       # will do save of everything after summarizing results
     } else {
       if (y_save) {
-        fname <- paste0("results_of_some_unit_testing_", as.character(Sys.Date()), ".rda")
+        fname <- paste0("results_of_some_unit_testing_", as.character(gsub(":| ", "_", Sys.time())), ".rda")
         fname = (  file.path(mydir, fname) )
         save(bytest, file = fname)
         junk = loggable(file = logfilename, x = {
@@ -1341,7 +1166,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
 
       rm(shownlist)
 
-      x <- testbygroup(testlist = partial_testlist, stop_on_failure = y_stopif)
+      x <- test_ejam_bygroup(testlist = partial_testlist, stop_on_failure = y_stopif, timebyfile=timebyfile, timebygroup=timebygroup)
       bytest <- x
 
     })
@@ -1368,7 +1193,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       # y_save = askYesNo("Save results of unit testing?")
       if (is.na(y_save)) {stop("canceled")}
       if (y_save) {
-        fname <- paste0("results_of_unit_testing_", as.character(Sys.Date()), ".rda")
+        fname <- paste0("results_of_unit_testing_", as.character(gsub(":| ", "_", Sys.time())), ".rda")
         fname = (  file.path(mydir, fname) )
         save(bytest, file = fname)
         junk = loggable(file = logfilename, x = {
@@ -1411,7 +1236,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
 
       bygroup <- x[ , .(total = sum(total), passed = sum(passed), flagged = sum(flagged),
                         untested_cant = sum(untested_cant), untested_skipped = sum(untested_skipped), warned = sum(warned), failed = sum(failed),
-                        seconds_bygroup = seconds_bygroup[1]),
+                        seconds_bygroup = seconds_bygroup[1], seconds_bygroup_predicted = seconds_bygroup_predicted[1]),
                     by = "testgroup"]
       cat("\n")
 
@@ -1434,7 +1259,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       setorder(byfile, -failed_bygroup, -flagged_bygroup, testgroup, failed_byfile, -flagged_byfile, file)
       setcolorder(byfile, neworder = c("testgroup", "failed_bygroup", "flagged_bygroup", "file", "failed_byfile", "flagged_byfile"))
       byfile_key <- byfile[flagged_byfile > 0, ]
-      cat("\n\n")
+      cat("\n")
       if (NROW(byfile_key) == 0) {
         cat("No files had any tests with issues\n\n")
       } else {
@@ -1465,7 +1290,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
         cat("\n")
       } else {
         cat("\n")
-        cat("No tests had issues\n\n")
+        cat("No tests had issues\n")
         bytest_key = NA
         bytest_key_niceview = NA
       }
@@ -1516,7 +1341,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
   )
   # SAVE results  ####
   if (y_save) {
-    fname <- paste0("results_SUMMARY_of_unit_testing_", as.character(Sys.Date()), ".rda")
+    fname <- paste0("results_SUMMARY_of_unit_testing_", as.character(gsub(":| ", "_", Sys.time())), ".rda")
     fname = (file.path(mydir, fname))
     save(biglist, file = fname)
 
