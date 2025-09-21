@@ -7,7 +7,9 @@ testthat::test_that("latlon_from_shapefile() ok", {
   })
   expect_no_error({suppressWarnings({ suppressMessages({
     junk <- capture.output({
+      suppressMessages({
       x <- latlon_from_shapefile(testshape_points)
+  })
     })
   })  })})
   expect_true(
@@ -20,8 +22,12 @@ testthat::test_that("latlon_from_shapefile() ok", {
     check.attributes = FALSE
   )
   )
-  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
-  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
+  expect_true(
+    all(sapply(x[,c("lat","lon")], is.numeric))
+    )
+  expect_true(
+    all(latlon_is.valid(lat=x$lat,lon = x$lon))
+              )
 })
 ################################################################ #
 
