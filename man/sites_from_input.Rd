@@ -34,4 +34,7 @@ fips would be a vector of Census FIPS codes or NULL
 helps other functions have flexible input parameters - can provide points in a table, points as lat,lon vectors, polygons in a spatial data.frame, or Census units as a fips code vector
 figures out which type of inputs were provided, and returns them
 }
+\seealso{
+\code{\link[=sites_from_file]{sites_from_file()}}
+}
 \keyword{internal}
