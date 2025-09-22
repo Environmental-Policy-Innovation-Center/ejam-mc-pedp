@@ -283,7 +283,8 @@ x <- EJAM:::test_ejam(
         "test-URL_FUNCTIONS_part1.R",
         "test-URL_FUNCTIONS_part2.R",
         "test-url_columns_bysite.R",
-        "test-is.numericish.R"
+        "test-is.numericish.R",
+        "test-create_filename.R"
       ),
       ### skip ejscreenapi tests - do not work / get skipped WHILE EJSCREEN API IS DOWN MID 2025  ####
       test_ejscreenapi = c(
@@ -455,7 +456,8 @@ and all filenames listed there actually exist as in that folder called `test`.\n
         "test-naics_validation.R", "test-ejam2shapefile.R", "test-shape2geojson.R",
         "test-shape2zip.R", "test-shapefile_xyz.R", "test-shapes_from_fips.R",
         "test-test1.R", "test-test2.R",
-        "test-latlon_from_shapefile.R"),
+        "test-latlon_from_shapefile.R",
+        "test-create_filename.R"),
       seconds_byfile = c(
         258.375,
         5.51800000000003, 7.27299999999991, 5.529, 19.4390000000001,
@@ -477,7 +479,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
         2.93099999999998, 3.09199999999998, 3.46399999999994, 3.05799999999999,
         3.04399999999998, 7.79999999999995, 13.968, 1.68599999999992,
         1.83199999999988,
-        20
+        20, 5
         )
     )
 
