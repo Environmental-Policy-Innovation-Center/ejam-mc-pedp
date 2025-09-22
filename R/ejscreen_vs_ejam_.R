@@ -1544,7 +1544,7 @@ ejscreen_vs <- function(defdir = '.',
 
   # where to save results? ####
 
-  timetxt =  substr(gsub(':','.',Sys.time()), 1, 16)
+  timetxt = Sys.time_txt()
 
   ## note save_ejscreen_output is NOT the same as savedejscreentableoutput !
   save_ejscreen_output <- file.path(mydir, "ejscreenapi_plus_out.rda")

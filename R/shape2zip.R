@@ -3,15 +3,15 @@
 #' Save spatial data.frame as shapefile.zip
 #'
 #' @param shp a spatial data.frame as from [shapefile_from_any()] or [sf::st_read()]
-#' @param file full path to and name of the .zip file to create
+#' @param filename optional, full path to and name of the .zip file to create
 #'
-#' @return normalized path of the cleaned up file param (path and name of .zip)
+#' @return normalized path of the cleaned up filename param (path and name of .zip)
 #' @examples
 #' # shp <- shapes_from_fips(fips = name2fips(c('tucson,az', 'tempe, AZ')))
 #' shp <- testshapes_2
 #' \donttest{
 #' fname <- file.path(tempdir(), "myfile.zip")
-#' fpath <- shape2zip(shp = shp, file = fname)
+#' fpath <- shape2zip(shp = shp, filename = fname)
 #' file.exists(fpath)
 #' zip::zip_list(fpath)
 #' # read it back in
@@ -20,10 +20,10 @@
 #'
 #' @export
 #'
-shape2zip <- function(shp, file = "shapefile.zip") {
+shape2zip <- function(shp, filename = create_filename(file_desc = "shapefile", ext = ".zip")) {
 
-  folder = dirname(file)
-  fname = basename(file)
+  folder = dirname(filename)
+  fname = basename(filename)
   fname_noext <- gsub( paste0("\\.", tools::file_ext(fname), "$"), "", fname)
   if (tools::file_ext(fname_noext) == "shp") {
     warning("file name cannot end in x.shp.zip for example, so just x.zip will be used")
@@ -37,24 +37,21 @@ shape2zip <- function(shp, file = "shapefile.zip") {
   for (fil in file.path(tds, fnames.all)) {
     if (file.exists(fil)) {file.remove(fil)}
   }
-  # if (file.exists(file.path(tds, fname.shp))) {file.remove(file.path(tds, fname.shp))}
-  sf::st_write(
-    obj = shp,
-    dsn = file.path(tds, fname = fname.shp),
-    append = FALSE, delete_layer = TRUE
-  )
-  ## fname_noext_found <- gsub( paste0("\\.", tools::file_ext(fname), "$"), "", dir(tds, pattern = fname))  # this would be the version found
-  ## fnames <- dir(tds, pattern = fname_noext_found)
-  # fnames <- dir(tds, pattern = fname_noext)
-  # fnames <- fnames[!grepl("zip$", fnames)]
-  fnames <- fnames.all
-
+  junk = capture.output({
+    suppressMessages({
+      sf::st_write(
+        obj = shp,
+        dsn = file.path(tds,  fname.shp),
+        append = FALSE, delete_layer = TRUE, quiet = TRUE
+      )
+    })
+  })
   suppressWarnings({
     zipfullpath <- normalizePath(paste0(normalizePath(folder), "/", fname.zip))
     if (file.exists(zipfullpath)) {file.remove(zipfullpath)}
   })
   junk <- capture.output({
-    zip(zipfullpath, files = file.path(tds, fnames), extras = c('-j', '-D'))
+    zip(zipfullpath, files = file.path(tds, fnames.all), extras = c('-j', '-D'))
   })
   # unzip from tempdir to folder specified by parameter.
   # -D should prevent storing Directory info,

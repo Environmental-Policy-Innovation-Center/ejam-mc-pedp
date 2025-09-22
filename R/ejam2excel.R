@@ -92,8 +92,7 @@ ejam2excel <- function(ejamitout,
   # if (community_reportadd && is.null(community_html)) {
   #   community_html <- ejam2report(ejamitout = ejamitout, )
   # }
-
-  x <- table_xls_from_ejam(
+  x <-  table_xls_from_ejam(
     ejamitout = ejamitout,
     fname = fname,
     save_now = save_now,
@@ -108,7 +107,6 @@ ejam2excel <- function(ejamitout,
     buffer_desc = buffer_desc,
     radius_or_buffer_description = radius_or_buffer_description,
 
-    # hyperlink_colnames = hyperlink_colnames,
     reports = reports,
 
     site_method = site_method,
@@ -120,5 +118,7 @@ ejam2excel <- function(ejamitout,
     shp = shp,
     ...
   )
+# tips on how to see the file are printed to console by helpers already
+
   invisible(x)
 }

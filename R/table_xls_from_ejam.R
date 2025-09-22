@@ -287,7 +287,7 @@ table_xls_from_ejam <- function(ejamitout,
     # if (is.null(pathname) || pathname == "" || grepl("[<>:\"/\\?*]", pathname)) { #perform a more robust check of the pathname here.
     if (is.null(pathname) || pathname == "" || !dir.exists(dirname(pathname))) { #perform a more robust check of the pathname here.
 
-      cat('Invalid path/file,', pathname, ',so using default instead: ', default_pathname, '\n')
+      cat('Invalid path/file,', pathname, ', so using default instead: ', default_pathname, '\n')
       pathname <- default_pathname
     }
 

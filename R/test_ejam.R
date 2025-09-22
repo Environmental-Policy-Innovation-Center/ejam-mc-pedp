@@ -147,7 +147,7 @@ x <- EJAM:::test_ejam(
   # Setup ####
 
   logfilename_only = paste0("testresults-",
-                            gsub(" ", "_", gsub("\\.[0-9]{6}$", "", gsub(":", ".", as.character(Sys.time())))),
+                            Sys.time_txt(),  # gsub(" ", "_", gsub("\\.[0-9]{6}$", "", gsub(":", ".", as.character(Sys.time()))))   ,
                             ".txt")
   if (y_skipbasic) {
 
@@ -931,7 +931,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       ejam2table_tall(x3)
       ejam2barplot(x3)
       ejam2barplot_sites(x3)
-      ejam2tableviewer(x3 , fname = file.path(tempdir(), "ejam2tableviewer_3polygon_test.html")) # should be able to pick name
+      ejam2tableviewer(x3 , filename = file.path(tempdir(), "ejam2tableviewer_3polygon_test.html")) # should be able to pick name
       junk = ejam2excel(x3, save_now = F, launchexcel = T)
 
       ejam2report(x3, analysis_title = "3 polygon portland example", shp = shp)
@@ -1090,16 +1090,8 @@ and all filenames listed there actually exist as in that folder called `test`.\n
     secs1 = sum(timebygroup$seconds_bygroup[timebygroup$testgroup %in% shownlist[, 'testgroup']])
     mins1 = round(secs1 / 60, 1)
     cat("Predicted time to run tests is roughly", mins1, "minutes. Very rough estimate of ETA: ")
-
-    print(Sys.time() + secs1)
+    print(time_plus_x_seconds(secs1))
     cat("\n\n")
-    #
-    # fnames = as.vector(unlist(shownlist))
-    # secs2 = 1.3 * sum(timebyfile$seconds_byfile[timebyfile$file %in% fnames])
-    # mins2 = round(secs2 / 60, 1)
-    # cat("Predicted time to run tests is roughly", mins2, "minutes. Very rough estimate of ETA: ")
-    # print(Sys.time() + secs2)
-    # cat("\n\n")
 
     x <- test_ejam_bygroup(testlist = partial_testlist, stop_on_failure = y_stopif, timebyfile=timebyfile, timebygroup=timebygroup)
     bytest <- x
@@ -1125,7 +1117,9 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       # will do save of everything after summarizing results
     } else {
       if (y_save) {
-        fname <- paste0("results_of_some_unit_testing_", as.character(gsub(":| ", "_", Sys.time())), ".rda")
+        fname <- paste0("results_of_some_unit_testing_",
+                        Sys.time_txt(), # as.character(gsub(":| ", "_", Sys.time())),
+                        ".rda")
         fname = (  file.path(mydir, fname) )
         save(bytest, file = fname)
         junk = loggable(file = logfilename, x = {
@@ -1154,16 +1148,8 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       secs1 = sum(timebygroup$seconds_bygroup[timebygroup$testgroup %in% shownlist[, 'testgroup']])
       mins1 = round(secs1 / 60, 1)
       cat("Predicted time to run tests is roughly", mins1, "minutes. Very rough estimate of ETA: ")
-      print(Sys.time() + secs1)
+      print(time_plus_x_seconds(secs1))
       cat("\n\n")
-      #
-      # fnames = as.vector(unlist(shownlist))
-      # secs2 = 1.3 * sum(timebyfile$seconds_byfile[timebyfile$file %in% fnames])
-      # mins2 = round(secs2 / 60, 1)
-      # cat("Predicted time to run tests is roughly", mins2, "minutes. Very rough estimate of ETA: ")
-      # print(Sys.time() + secs2)
-      # cat("\n\n")
-
       rm(shownlist)
 
       x <- test_ejam_bygroup(testlist = partial_testlist, stop_on_failure = y_stopif, timebyfile=timebyfile, timebygroup=timebygroup)
@@ -1407,7 +1393,7 @@ loggable <- function(x, file = 'will be created using timestamp if not provided 
       } else {
         mydir = tempdir()
         file = paste0("testresults-",
-                      gsub(" ", "_", gsub("\\.[0-9]{6}$", "", gsub(":", ".", as.character(Sys.time())))),
+                      Sys.time_txt(), #  gsub(" ", "_", gsub("\\.[0-9]{6}$", "", gsub(":", ".", as.character(Sys.time())))),
                       ".txt")
         file = (  file.path(mydir, file) )
       }
