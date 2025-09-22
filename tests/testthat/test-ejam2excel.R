@@ -88,12 +88,32 @@ test_that("ejam2excel saves key tables, tabs, saved numbers match original", {
   zz = data.frame(sapply(testin, class), sapply(testout, class))
   zz = zz[zz[,1] != zz[,2], ]
 
+  # colnames match
   expect_equal(
-     testout[, !(names(testout) %in% rownames(zz))] ,
-     testin[, !(names(testin) %in% rownames(zz))]
+    names(testout),
+    names(testin)
   )
+
+  # contents match where they should -
+  # the URL /links cannot be read from excel in same format easily so omit those here
+  #   and some NA values - invalid_msg mainly
+  report_colnames = sapply(EJAM:::global_or_param("default_reports") , function(z) z$header)
+  ok_column = !(names(testout) %in% report_colnames)
+  ok_column <- ok_column & as.vector(!is.na(testout[1,])) & as.vector(!is.na(testin[1,]))
+  x = t(rbind(
+    testout[, ok_column],
+    testin[, ok_column]
+  ))
+  x=data.frame(x)
+  colnames(x) <- c("testout", "testin")
+  expect_equal(
+    x$testout, x$testin
+    )
+
   ############## #
-  # bysite data in excel matches original data, except some columns that are logical vs integer, NA vs ""
+  # bysite data in excel matches original data,
+  # except some columns that are logical vs integer, NA vs ""
+# and report URL/links cannot be read back the same way easily
 
   testin = as.data.frame(testoutput_ejamit_10pts_1miles$results_bysite)[, common_names_r]
   testout = tab_bysite[, common_names_long]
@@ -102,8 +122,8 @@ test_that("ejam2excel saves key tables, tabs, saved numbers match original", {
   zz = zz[zz[,1] != zz[,2], ]
 
   expect_equal(
-    testout[, !(names(testout) %in% rownames(zz))] ,
-    testin[, !(names(testin) %in% rownames(zz))]
+    testout[, !(names(testout) %in% c(report_colnames, rownames(zz)))] ,
+    testin[, !(names(testin) %in% c(report_colnames, rownames(zz)))]
   )
   ############## #
 

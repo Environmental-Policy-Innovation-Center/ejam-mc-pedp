@@ -1494,7 +1494,7 @@ test_that('1 digit', {
   expect_no_warning({val <- fips_lead_zero(1, quiet = FALSE)})
   expect_equal(val, "01")
 
-  expect_no_warning({val <- fips_lead_zero("0, quiet = FALSE")})
+  expect_no_warning({val <- fips_lead_zero("0", quiet = FALSE)})
   expect_equal(val, "00")
   expect_no_warning({val <- fips_lead_zero(0, quiet = FALSE)})
   expect_equal(val, "00")
@@ -1548,7 +1548,7 @@ test_that('3 digit', {
 test_that('4 digit', {
   suppressWarnings({
     expect_no_error({val <- fips_lead_zero("0001")}) # leading zero
-    expect_no_warning({val <- fips_lead_zero("0001, quiet = FALSE")}) # leading zero # zero string ### LENGTH SEEMS OK AND IT DOES NOT KNOW 00001 IS NO COUNTY'S FIPS
+    expect_no_warning({val <- fips_lead_zero("0001", quiet = FALSE)}) # leading zero # zero string ### LENGTH SEEMS OK AND IT DOES NOT KNOW 00001 IS NO COUNTY'S FIPS
   })
   expect_equal(val, "00001")
   #expect_true(is.na(val))
@@ -1821,16 +1821,6 @@ test_that('16 digit +', {
 
 options(scipen = 0)
 #################### # #################### #
-# test with invalid text input
-test_that('warn on invalid text- cant coerce to numeric FIPS', {
-  suppressWarnings({
-    expect_warning({
-      val <- fips_lead_zero("blue")
-      ## revised that function so it now does warn in this case, but does return something like "0blue" still.
-    })
-  })
-  expect_true(TRUE) # or it warns the test is empty
-})
 
 ################################################################### #
 ################################################################### #

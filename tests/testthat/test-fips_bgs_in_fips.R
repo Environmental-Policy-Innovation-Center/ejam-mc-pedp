@@ -135,8 +135,11 @@ test_that('fips_bgs_in_fips1() same result as fips_bgs_in_fips()', {
 #       CANNOT use fips_bgs_in_fips() with city fips SINCE CDP IS NOT BROKEN INTO BGS EXACTLY
 
 test_that('fips_bgs_in_fips - by CITY', {
+  suppressWarnings({
+
   expect_warning({val <- fips_bgs_in_fips(3651000)})
   expect_warning({val <- fips_bgs_in_fips("3651000")})
+  })
   #expect_equal(length(val), 1)
   # check it's the same as the subset of state codes
   # x <- fips_bgs_in_fips("36")
