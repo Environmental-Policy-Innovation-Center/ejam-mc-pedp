@@ -163,13 +163,13 @@ url_frs_facility <- function(regid = NULL,
                              as_html = FALSE,
                              linktext = "FRS",
                              ifna = "https://www.epa.gov/frs",
-                             baseurl = "https://frs-public.epa.gov/ords/frs_public2/fii_query_dtl.disp_program_facility?p_registry_id=",
+                             baseurl = "https://frs-public.epa.gov/ords/frs_public2/fii_query_detail.disp_program_facility?p_registry_id=",
                              ...) {
   if (is.null(linktext)) {linktext <- paste0("FRS")}
 
   # both of these URLs seem to work:
-  #baseurl <- "https://ofmpub.epa.gov/frs_public2/fii_query_dtl.disp_program_facility?p_registry_id="
-  # baseurl = "https://frs-public.epa.gov/ords/frs_public2/fii_query_dtl.disp_program_facility?p_registry_id="
+  #baseurl <- "https://ofmpub.epa.gov/frs_public2/fii_query_detail.disp_program_facility?p_registry_id="
+  # baseurl = "https://frs-public.epa.gov/ords/frs_public2/fii_query_detail.disp_program_facility?p_registry_id="
 
   ## regid ####
   if (is.null(regid) || length(regid) == 0) {
