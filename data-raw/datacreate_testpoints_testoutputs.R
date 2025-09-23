@@ -297,7 +297,7 @@ pkg_update_testpoints_testoutputs <- function(
       if (recreating_doaggregate_output) {
         ## NOTE THE DEFAULTS:    args(EJAM::doaggregate)
         out_data_doagg <- doaggregate(out_data_getblocks, sites2states_or_latlon = testpoints_data, radius = myrad, silentinteractive = TRUE,
-                                      include_ejindexes = TRUE) # not the default but want to test this way
+                                      include_ejindexes = TRUE)
         assign(out_varname_doagg, out_data_doagg)
       }
 
