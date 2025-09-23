@@ -1293,6 +1293,9 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   valid_state_vars <- varsneedpctiles[varsneedpctiles %in% colnames(statestats) & myvars_to_use %in% colnames(results_bysite)]
   valid_state_pctl_names <- varnames.state.pctile[varsneedpctiles %in% colnames(statestats) & myvars_to_use %in% colnames(results_bysite)]
   valid_state_vars_to_use <- myvars_to_use[varsneedpctiles %in% colnames(statestats) & myvars_to_use %in% colnames(results_bysite)]
+               # "Demog.Index",                  "Demog.Index.Supp"       are in valid_state_vars
+  # "state.pctile.Demog.Index"      "state.pctile.Demog.Index.Supp"       are in valid_state_pctl_names
+               # "Demog.Index.State"             "Demog.Index.Supp.State" are in valid_state_vars_to_use
 
   if (is.function(updateProgress)) {
     boldtext <- paste0('Computing results')

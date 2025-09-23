@@ -152,7 +152,7 @@ testthat::test_that("latlon_from_address_table works on testinput_address_table"
 })
 ###################### #
 
-testthat::test_that("odd case- latlon_from_address_table works on testinput_address_table_withfull", {
+testthat::test_that("odd case for latlon_from_address_table", {
 
   testthat::skip_if_offline()
   skip_if_not_installed("AOI")

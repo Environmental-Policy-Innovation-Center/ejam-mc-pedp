@@ -6,7 +6,8 @@ test_ejam_1group <- function(fnames,
                              print4eachfile = FALSE, # useless - keep it FALSE
                              print4group = TRUE,
                              add_seconds_bygroup = TRUE,
-                             stop_on_failure = FALSE, timebyfile = NULL, timebygroup = NULL
+                             stop_on_failure = FALSE, timebyfile = NULL, timebygroup = NULL,
+                             truncate_test_name_nchar = 60
 ) {
   xtable <- list()
   for (i in 1:length(fnames)) {
@@ -57,7 +58,7 @@ test_ejam_1group <- function(fnames,
         'file',  'test',
         'total', 'passed', 'flagged', 'untested_cant', 'untested_skipped', 'warned', 'failed'
       )]
-      x$test <- substr(x$test, 1, 50) # some are long
+      x$test <- substr(x$test, 1, truncate_test_name_nchar) # some are long
       xtable[[i]] <- data.table::data.table(x)
     })
     xtable[[i]]$seconds_byfile <- seconds_byfile['elapsed']
@@ -154,10 +155,10 @@ test_ejam_bygroup <- function(testlist,
       if (interactive() && beepr_available) {beepr::beep(10)}
       if (sum(xtable[[i]]$failed) > 0) {
         cat(paste0("     ***      Some FAILED in ", tgroupname, ": ",
-                   paste0(unique(xtable[[i]]$file[xtable[[i]]$failed]), collapse = ","), "\n"))
+                   paste0(unique(xtable[[i]]$file[xtable[[i]]$failed > 0]), collapse = ","), "\n"))
       } else {
         cat(paste0("     ***      Some UNTESTED or WARNED in ", tgroupname, ": ",
-                   paste0(unique(xtable[[i]]$file[xtable[[i]]$flagged]), collapse = ","), "\n"))
+                   paste0(unique(xtable[[i]]$file[xtable[[i]]$flagged > 0]), collapse = ","), "\n"))
       }
     }
   } # looped over groups of test files

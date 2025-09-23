@@ -417,9 +417,30 @@ and all filenames listed there actually exist as in that folder called `test`.\n
 
     shortgroupnames = gsub("^test_(.*)","\\1", names((testlist)))
     ########################### #  ########################################## #
+    ########################### #  ########################################## #
+    ## note overly long test names ####
+    # report on test names that seem too long to be useful
+
+    xx = EJAM:::find_in_files(pattern = "_that[^,]*,", ignorecomments = T, whole_line = FALSE, quiet = T)
+    xx = lapply(xx, function(y) gsub("t_that\\(", "", y))
+    z = (lapply(xx, function(y) cbind(y[nchar(y) > 80])))
+    z = z[lapply(z, length) > 0]
+    z = data.frame(long_unit_test_names = unlist(z))
+    z$long_unit_test_names <- gsub(",$", "", z$long_unit_test_names)
+    z$file = rownames(z)
+    z$file <- gsub("\\.R[0-9]*", ".R", z$file)
+    rownames(z) <- NULL
+    z$nchar = nchar(z$long_unit_test_names)
+    z = z[order(z$nchar), ]
+
+    cat("\nNote these test names seem longer that useful: \n\n")
+    print(z)
+    cat("\n\n")
+    rm(xx, z)
+    ########################### #  ########################################## #
 
     # TIME the tests, predict ETA ####
-
+{
     ## from output of having run them all to update the timing estimates:
     ## after e.g., #    biglist <- test_ejam(ask = F, y_save = T, mydir = "~/Desktop/ejamtests")
     # timebyfile_new <- biglist$bytest_all[, .(seconds_byfile = (seconds_byfile[1]) ), by = "file"]
@@ -511,7 +532,6 @@ and all filenames listed there actually exist as in that folder called `test`.\n
 
     testgroup_from_fname <- function(fname) {names(testlist)[as.vector(sapply(testlist, function(z) fname %in% z))]}
     timebyfile$testgroup <-  as.vector( sapply(timebyfile$file, testgroup_from_fname) )
-
 
     # timebyfile
     #
@@ -674,6 +694,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       }
       cat('\n')
     }
+     }
     ########################### #  ########################################## #
 
     # FUNCTIONS that will run tests by group ####

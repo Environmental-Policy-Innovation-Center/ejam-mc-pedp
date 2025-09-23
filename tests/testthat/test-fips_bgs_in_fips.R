@@ -33,7 +33,7 @@
 # Also see fips_bgs_in_fips1() and maybe add tests for that variant?
 ############################################################################# #
 
-testthat::test_that("fips_bgs_in_fips() finds all bgs in each fipstype", {
+testthat::test_that("fips_bgs_in_fips gets all bgs in each fipstype", {
 
   testfipslist <- list(
     blockgroup = testinput_fips_blockgroups,
@@ -88,7 +88,7 @@ testthat::test_that("fips_bgs_in_fips() finds all bgs in each fipstype", {
 ############################################################################# #
 ## fips_bgs_in_fips1() ####
 
-test_that('fips_bgs_in_fips1() same result as fips_bgs_in_fips()', {
+test_that('fips_bgs_in_fips1 same result as fips_bgs_in_fips', {
 
   testfipslist <- list(
     blockgroup = testinput_fips_blockgroups,
@@ -151,7 +151,7 @@ test_that('fips_bgs_in_fips - by CITY', {
 # even if 2 inputs contain or are inside same bg (turn into same bgid)
 #  - do we want that to be the behavior? yes since we already do not expect a 1-to-1 in-out mapping.
 
-test_that("fips_bgs_in_fips - returns only UNIQUE BGS in and/or containing the(se) fips", {
+test_that("fips_bgs_in_fips get only UNIQUE BGS in/w the fips", {
   expect_true({
     length(fips_bgs_in_fips(c("36071010801"))) == 3 # contains 3 unique blockgroups
   })
@@ -166,7 +166,7 @@ test_that("fips_bgs_in_fips - returns only UNIQUE BGS in and/or containing the(s
   })
 })
 ################## #
-test_that('fips_bgs_in_fips - by BLOCK - uniques only - is that behavior we want?', {
+test_that('fips_bgs_in_fips by BLOCK get uniques only', {   ### NOTE ONE MIGHT NOT EXPECT OR NEED UNIQUE ONLY ?
   expect_true( {
     length(fips_bgs_in_fips(rep("360710108011", 5))) == 1
   })

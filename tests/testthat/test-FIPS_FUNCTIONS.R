@@ -640,7 +640,7 @@ test_that("name2fips() works on city/town/cdp", {
   })
 })
 #################################################################### #
-test_that("fips_from_name aka name2fips() works on state or county", {
+test_that("fips_from_name/name2fips ok if state or county", {
   junk = capture_output({
 
     suppressWarnings({
@@ -687,7 +687,7 @@ test_that("fips_from_table() works", {
       other = c("ok", "ok", "ok", "not ok, na", "not fips, text")
     )
     expect_no_error({
-        x = EJAM:::fips_from_table(fips_table = mydat)
+        x =  fips_from_table(fips_table = mydat)
 
     })
     expect_true(
@@ -698,7 +698,7 @@ test_that("fips_from_table() works", {
       countyfips = c("10001", 1, 10, NA, "text"),
       other = c("ok", "ok", "ok", "not ok, na", "not fips, text")
     )
-      y = EJAM:::fips_from_table(mydat_y)
+      y =  fips_from_table(mydat_y)
 
     expect_identical(x, y)
 
@@ -709,11 +709,11 @@ test_that("fips_from_table() works", {
       statefips = "10"
     )
     expect_true(
-      EJAM:::fips_from_table(mydat_z) == "10"
+       fips_from_table(mydat_z) == "10"
     )
     expect_warning(
-      # no suitable colname found
-      EJAM:::fips_from_table(data.frame(x = 1:3, y = 1:3))
+      # no suitable colname found, so warn and return NULL
+     fips_from_table(data.frame(x = 1:3, y = 1:3))
     )
 
   })
@@ -1439,7 +1439,7 @@ test_that("fips2name() works", {
 # [16,] NA           NA                "1234567890123456"
 
 
-test_that("fips_lead_zero correct for 1 through 16 digits long", {
+test_that("fips_lead_zero ok 1 to 16 digits", {
   testfips16 = c(
     "1", "12",                      # 1 or 2 digits becomes 2 digit state fips
     "123",
@@ -1474,7 +1474,7 @@ test_that("fips_lead_zero correct for 1 through 16 digits long", {
 })
 
 #################### # #################### #
-test_that("negative, decimal, space, any non-digit means NA is returned", {
+test_that("negative, decimal, space, non-digit returns NA", {
   junk = c(1, -1, 1.1, "-1", "1.1", "  1", "text", NA)
   suppressWarnings({
     expect_identical(
