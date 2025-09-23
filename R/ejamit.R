@@ -279,7 +279,7 @@ ejamit <- function(sitepoints = NULL,
     ## . check shp ####
 
     # something like this could replace similar code in server: ***
-    shp <- shapefile_from_any(shapefile, cleanit = FALSE) # this includes shapefix()
+    shp <- shapefile_from_any(shapefile, cleanit = FALSE, silentinteractive=TRUE) # this includes shapefix()
     # shp <- cbind(ejam_uniq_id = 1:nrow(shp), shp) # assign id to ALL even empty or invalid inputs
 
     # RETAIN ORIGINAL SORT ORDER OF SITES

@@ -43,6 +43,7 @@
 #'    default is crs = 4269 or Geodetic CRS NAD83
 #' @param layer optional layer name passed to [sf::st_read()]
 #' @param inputname vector of shiny fileInput uploaded filenames
+#' @param silentinteractive set to TRUE to NOT prompt for a file/folder when one is not specified
 #' @param ... passed to [sf::st_read()]
 #'
 #' @return a simple feature [sf::sf] class object using [sf::st_read()]
@@ -50,7 +51,7 @@
 #'
 #' @export
 #'
-shapefile_from_any <- function(path = NULL, cleanit = TRUE, crs = 4269, layer = NULL, inputname = NULL, ...) {
+shapefile_from_any <- function(path = NULL, cleanit = TRUE, crs = 4269, layer = NULL, inputname = NULL, silentinteractive = FALSE, ...) {
 
   # and see app_ui.R text and latlon_from_ and global_defaults_*.R
   oktypes_shp4 <- c("shp", "shx", "dbf", "prj") # ".sbn", ".sbx",".cpg" # others to possibly allow
@@ -94,7 +95,7 @@ shapefile_from_any <- function(path = NULL, cleanit = TRUE, crs = 4269, layer = 
 
   # if path invalid/not provided, ask RStudio user to specify a file or folder
   if (any(is.null(path)) || any(is.na(path)) || any(length(path)) == 0 || any(!is.character(path)) || !is.atomic(path)) {
-    if (interactive() && !shiny::isRunning()) {
+    if (interactive() && !shiny::isRunning() && !silentinteractive) {
 
       # This lets RStudio user point to file OR folder   # gdb does not quite work in the filter since it is a folder not file really
       path <- rstudioapi::selectFile(caption = caption_text,

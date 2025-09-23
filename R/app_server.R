@@ -379,7 +379,7 @@ app_server <- function(input, output, session) {
         #   ###################################### #
         # if the file or object (spatial data.frame) was provided as shapefile param in ejamapp()
         if (input$testing) {cat("trying to read shapefile parameter\n")}
-        shp <- try( shapefile_from_any(xshp, cleanit = FALSE), silent = TRUE)
+        shp <- try( shapefile_from_any(xshp, cleanit = FALSE, silentinteractive=TRUE), silent = TRUE)
         if (inherits(shp, "try-error")) {
           req(FALSE, cancelOutput = TRUE)
         }
@@ -410,7 +410,7 @@ app_server <- function(input, output, session) {
         error_message(paste("Not an allowed file type. Must be one of these:", paste(allowed_extensions, collapse = ", ")))
         disable_buttons[['SHP']] <- TRUE
       }
-      shp <- shapefile_from_any(infiles, cleanit = FALSE, inputname = input$ss_upload_shp$name)
+      shp <- shapefile_from_any(infiles, cleanit = FALSE, inputname = input$ss_upload_shp$name, silentinteractive=TRUE)
     }
     #   ###################################### #
     # do the rest whether it was uploaded or came via ejamapp()

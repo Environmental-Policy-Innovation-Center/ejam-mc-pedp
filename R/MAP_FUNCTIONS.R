@@ -73,7 +73,7 @@ map_ejam_plus_shp <- function(shp, out, radius_buffer = NULL, circle_color = '#0
     # This just adds id, may change crs, and
     #  drops polygons if not valid, but may leave empty. see shapefile_clean()
     # numbers them before dropping invalid ones
-    shp <- shapefile_from_any(shp, cleanit = TRUE) # this might not be exactly what happens in server or ejamit?    # returns NULL if none valid
+    shp <- shapefile_from_any(shp, cleanit = TRUE, silentinteractive=TRUE) # this might not be exactly what happens in server or ejamit?    # returns NULL if none valid
   }
 }
   shp <- shp[, c("ejam_uniq_id", "geometry")] # the "valid" column is in out$results_bysite, not in shp, and shp should have even invalid rows.

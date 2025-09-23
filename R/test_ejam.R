@@ -913,7 +913,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       ejam2map(x) # no sitenumber param available
       # convert to shapefile of circles at points
       fname = ejam2shapefile(x, folder = tempdir())
-      shpin = shapefile_from_any(fname)
+      shpin = shapefile_from_any(fname, silentinteractive=TRUE)
       ejam2map(x, shp = shpin) # if shp is provided
       map_shapes_leaflet(shpin) # does not use nice EJAM popups
       cat("\n\n DONE WITH latlon CHECKS \n\n")
@@ -926,7 +926,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       shp <- shape_buffered_from_shapefile( shapefile_from_sitepoints(testpoints_5[1:2,]), radius.miles = 1)
       # or use test data  shp <- shapefile_from_any()
       shp <- shapefile_from_any(
-        system.file("testdata/shapes/portland_folder_shp/Neighborhoods_regions.shp", package = "EJAM")
+        system.file("testdata/shapes/portland_folder_shp/Neighborhoods_regions.shp", package = "EJAM"), silentinteractive=TRUE
       )[1:3, ]
       x3 <- ejamit( shapefile = shp, radius = 0 )
       names(x3)

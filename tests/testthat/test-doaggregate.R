@@ -27,9 +27,11 @@ test_that("still same exact results_overall as previously saved", {
     x <- doaggregate(testoutput_getblocksnearby_10pts_1miles,
                      sites2states_or_latlon = testpoints_10,
                      radius = 1, include_ejindexes = TRUE)
-    overall_has_changed <- !isTRUE(all.equal(
+    overall_has_changed <- !isTRUE(
+      all.equal(
       testoutput_doaggregate_10pts_1miles$results_overall,
-      x$results_overall))
+      x$results_overall)
+      )
   })
   expect_equal(
     testoutput_doaggregate_10pts_1miles$results_overall,

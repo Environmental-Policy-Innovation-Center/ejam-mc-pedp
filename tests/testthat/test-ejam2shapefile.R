@@ -60,7 +60,7 @@ test_that("ejam2shapefile ok if folder=tempdir()", {
 
         junk = capture_output({
 
-          shp <- shapefile_from_any(x)
+          shp <- shapefile_from_any(x, silentinteractive=TRUE)
           # shp[1:3,4:8]
 
         })
@@ -92,7 +92,7 @@ test_that("ejam2shapefile ok if folder and file both specified", {
         # x = ejam2shapefile(testoutput_ejamit_10pts_1miles, file = 'test.shp', folder = tempdir())
         # zip::zip_list(x) # not required by EJAM pkg
         junk = capture_output({
-          shp <- shapefile_from_any(x)
+          shp <- shapefile_from_any(x, silentinteractive=TRUE)
         })
 
 
