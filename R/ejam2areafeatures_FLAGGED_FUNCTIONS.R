@@ -42,7 +42,6 @@
 #' @param main optional title for plot
 #' @param ylab optional y axis label
 #' @param shortlabels optional alternative labels for the bars
-#' @param caption left blank to avoid default caption used in [plot_barplot_ratios()]
 #' @seealso [ejam2areafeatures()] [batch.summarize()]
 #' @examples
 #' out <- testoutput_ejamit_1000pts_1miles

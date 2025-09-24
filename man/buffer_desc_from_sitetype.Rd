@@ -18,4 +18,7 @@ text string
 \description{
 helper to pick text phrase to use in excel report notes tab, for Locations analyzed: _____
 }
+\seealso{
+\code{\link[=report_residents_within_xyz]{report_residents_within_xyz()}}
+}
 \keyword{internal}

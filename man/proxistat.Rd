@@ -2,7 +2,7 @@
 % Please edit documentation in R/PROXIMITY_FUNCTIONS.R
 \name{proxistat}
 \alias{proxistat}
-\title{DRAFT - Create a custom proximity score for every block group, representing count and proximity of specified points
+\title{DRAFT - Create a custom proximity score for every blockgroup, representing count and proximity of specified points
 Indicator of proximity of residents in each US blockgroup to a custom set of facilities or sites}
 \usage{
 proxistat(
@@ -27,16 +27,16 @@ such as \link{blockpoints}, the centroid/internal point of every block in the US
 a data.table of Census block points lat lon, representing where residents are,
 for the entire US (or at least a whole State, for example -- it should be all blocks for which you need a proximity score).
 The score is calculated for a given block based on all topoints near the block,
-and then summarized over all blocks in a given block group to create a score for that block group.}
+and then summarized over all blocks in a given blockgroup to create a score for that blockgroup.}
 
 \item{blocks_per_batch}{number of blocks to process in each batch, defaults to 1000}
 
 \item{countradius}{distance within in which nearby sites are counted to create proximity score.
 In miles, and default is 5 km (5000 / meters_per_mile = 3.106856 miles)
-which is the EJScreen zone for proximity scores based on counts.}
+which is the EJSCREEN zone for proximity scores based on counts.}
 
 \item{maxradius}{max distance in miles to search for nearest single facility,
-if none found within countradius. EJScreen seems to use 1,000 km as the max to search,
+if none found within countradius. EJSCREEN seems to use 1,000 km as the max to search,
 since the lowest scores for proximity scores of RMP, TSDF, or NPL are ROUGHLY 0.001,
 (exactly 0.000747782)
 meaning approx. 1/1000 km and km_per_mile = 1.609344 = meters_per_mile / 1000
@@ -54,10 +54,10 @@ built during use of EJAM package. create_quaddata()}
 created by create_quaddata() utility, and used to create quadtree}
 }
 \value{
-data.table of block groups, with proximityscore, bgfips, lat, lon, etc.
+data.table of blockgroups, with proximityscore, bgfips, lat, lon, etc.
 }
 \description{
-DRAFT - Create a custom proximity score for every block group, representing count and proximity of specified points
+DRAFT - Create a custom proximity score for every blockgroup, representing count and proximity of specified points
 Indicator of proximity of residents in each US blockgroup to a custom set of facilities or sites
 }
 \details{
@@ -76,17 +76,17 @@ blockgroup gets a higher proximity score.
 The formula for this proximity score is the sum of (1/d)
 where each d is distance of a given site in kilometers,
 summed over all sites that are within 5 km (or the single
-closest site if none are within 5 km), just as in EJScreen proximity scores
+closest site if none are within 5 km), just as in EJSCREEN proximity scores
 like the TSDF or RMP scores.
 
 Any custom user-provided set of points can be turned into a proximity score,
 such as locations of all industrial sites of a certain type,
 or all grocery stores, or all schools. A proximity score can be
-created for all blocks and block groups in the US (or just one State or Region).
+created for all blocks and blockgroups in the US (or just one State or Region).
 Then the proximity scores can be analyzed in a tool like EJAM, just as the
 existing pre-calculated proximity scores are analyzed to represent the
 number of nearby hazardous waste treatment storage and disposal facilities,
-weighted by how far away each one is, as provided in the EJScreen proximity
+weighted by how far away each one is, as provided in the EJSCREEN proximity
 score for TSDFs.
 
 A custom user-specified proximity score might focus on schools, for example.
@@ -95,7 +95,7 @@ or areas near regulated facilities, or any set of analyzed places.
 That would provide statistics demonstrating which places have more schools
 closer to them (or inside the areas defined by polygons or FIPS codes, for example).
 
-To create the proximity score, EJAM uses the same method EJScreen used
+To create the proximity score, EJAM uses the same method EJSCREEN used
 to create proximity scores. The specified points first get indexed
 by a utility function called indexpoints() and are searched for and counted near
 every block and blockgroup in the US via a function called getpointsnearby().

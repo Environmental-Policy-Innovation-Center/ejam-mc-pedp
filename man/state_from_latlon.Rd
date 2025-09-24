@@ -12,7 +12,7 @@ state_from_latlon(lat, lon)
 \item{lon}{longitudes vector}
 }
 \value{
-Returns data.frame: ST, statename, FIPS.ST, REGION, n
+unlike \code{\link[=fips_state_from_latlon]{fips_state_from_latlon()}}, returns data.frame: ST, statename, FIPS.ST, REGION, n
 as many rows as elements in lat or lon
 }
 \description{

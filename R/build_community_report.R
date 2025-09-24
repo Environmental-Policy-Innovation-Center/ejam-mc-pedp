@@ -13,15 +13,26 @@ report_setup_temp_files <- function(Rmd_name = 'community_report_template.Rmd',
   tempReport <- file.path(tempdir( ), Rmd_name)
   if (!file.exists(app_sys(paste0(Rmd_folder, Rmd_name))) ||
       !file.exists(app_sys(paste0(Rmd_folder, 'communityreport.css'))) ||
-      !file.exists(app_sys(file.path(Rmd_folder, 'main.css')))
+      !file.exists(app_sys(file.path(Rmd_folder, 'main.css'))) ||
+      !file.exists(app_sys(file.path(Rmd_folder, basename(EJAM:::global_or_param("report_logo")))))
+
       ## does not check for or handle logo .png
   ) {
     stop(paste0("Necessary files missing from ", app_sys(paste0(Rmd_folder))))
   }
   # ------------------------------------  maybe it still needs the logo file?
-  # file.copy(from = app_sys(paste0(Rmd_folder,
-  #### ???? ### EJAM:::global_or_param(".community_report_logo_file"))),
-  #           to = tempReport, overwrite = TRUE)
+  if (file.exists(app_sys(paste0(Rmd_folder, EJAM:::global_or_param("report_logo_file"))))) {
+  file.copy(
+    # from = EJAM:::global_or_param("report_logo"),
+    from = app_sys(paste0(Rmd_folder, EJAM:::global_or_param("report_logo_file"))),
+    to = tempReport, overwrite = TRUE)
+  } else {
+  if (file.exists(app_sys(EJAM:::global_or_param("report_logo")))) {
+  file.copy(
+    from = EJAM:::global_or_param("report_logo"),
+    # from = app_sys(paste0(Rmd_folder, EJAM:::global_or_param("report_logo_file"))),
+    to = tempReport, overwrite = TRUE)
+  }}
   # ------------------------------------ .Rmd template file ----------------------------------------- -
   file.copy(from = app_sys(paste0(Rmd_folder, Rmd_name)),
             to = tempReport, overwrite = TRUE)
@@ -77,7 +88,8 @@ report_setup_temp_files <- function(Rmd_name = 'community_report_template.Rmd',
 #' @param filename path to file to save HTML content to; if null, returns as string (used in Shiny app)
 #' @param report_title generic name of this type of report, to be shown at top, like "EJAM Multisite Report"
 #' @param logo_path optional relative path to a logo for the upper right of the overall header.
-#'   Ignored if logo_html is specified and not NULL, but otherwise uses default or param set in run_app()
+#'   Ignored if logo_html is specified and not NULL, otherwise uses default or param set in [ejamapp()],
+#'  except NULL means default logo, "" means omit logo entirely.
 #' @param logo_html optional HTML for img of logo for the upper right of the overall header.
 #'   If specified, it overrides logo_path. If omitted, gets created based on logo_path.
 #'
@@ -120,7 +132,7 @@ build_community_report <- function(output_df,
                                    in_shiny = FALSE,
                                    filename = NULL,
                                    report_title = NULL,
-                                   logo_path = NULL,
+                                   logo_path = NULL, # NULL means default logo, "" means omit logo
                                    logo_html = NULL
 ) {
 
@@ -152,7 +164,7 @@ build_community_report <- function(output_df,
 
     ############################################################# #
 
-    # 1. Report/analysis overall header ####
+    # 1. Report / analysis overall header ####
 
     generate_html_header(analysis_title = analysis_title,
                          totalpop = totalpop, locationstr = locationstr,
@@ -160,13 +172,13 @@ build_community_report <- function(output_df,
                          report_title = report_title,
                          logo_path = logo_path,
                          logo_html = logo_html
-    ), #   report_title if in shiny is .community_report_title or outside shiny is eg "EJAM Multisite Report"
+    ),
 
     ############################################################# #
 
     # 2. Envt & Demog table ####
 
-    generate_env_demog_header(), # title = 'Environmental and Residential Population Indicators'
+    generate_env_demog_header(),
 
     fill_tbl_full(output_df = output_df_rounded,
                   show_ratios_in_report = show_ratios_in_report
@@ -206,7 +218,7 @@ build_community_report <- function(output_df,
     # 5. footnote ####
 
     generate_report_footnotes(
-      # ejscreen_vs_ejam_caveat = "Note: Some numbers as shown on the EJScreen report for a single location will in some cases appear very slightly different than in EJScreen's multisite reports. All numbers shown in both types of reports are estimates, and any differences are well within the range of uncertainty inherent in the American Community Survey data as used in EJScreen. Slight differences are inherent in very quickly calculating results for multiple locations.",
+      # ejscreen_vs_ejam_caveat = "Note: Some numbers as shown on the EJSCREEN report for a single location will in some cases appear very slightly different than in EJSCREEN's multisite reports. All numbers shown in both types of reports are estimates, and any differences are well within the range of uncertainty inherent in the American Community Survey data as used in EJSCREEN. Slight differences are inherent in very quickly calculating results for multiple locations.",
       diesel_caveat = paste0("Note: Diesel particulate matter index is from the EPA's Air Toxics Data Update, which is the Agency's ongoing, comprehensive evaluation of air toxics in the United States. This effort aims to prioritize air toxics, emission sources, and locations of interest for further study. It is important to remember that the air toxics data presented here provide broad estimates of health risks over geographic areas of the country, not definitive risks to specific individuals or locations. More information on the Air Toxics Data Update can be found at: ",
                              url_linkify("https://www.epa.gov/haps/air-toxics-data-update", "https://www.epa.gov/haps/air-toxics-data-update"))
     ),

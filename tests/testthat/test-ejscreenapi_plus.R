@@ -2,6 +2,7 @@
 cat('\ntesting ejscreenapi_plus()\n')
 
 apiok = EJAM:::ejscreenapi_online()
+if (is.na(apiok)) {apiok <- FALSE}
 
 # pts <- data.frame(lat = test2lat, lon = test2lon)
 #

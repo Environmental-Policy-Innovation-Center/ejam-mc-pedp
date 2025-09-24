@@ -15,7 +15,7 @@
 ################################# ################################## #
 
 
-#' download ACS 5year data from Census API, at block group resolution (slowly if for entire US)
+#' download ACS 5year data from Census API, at blockgroup resolution (slowly if for entire US)
 #' @details
 #'
 #' Probably requires [getting and specifying an API key for Census Bureau](https://api.census.gov/data/key_signup.html) ! (at least if query is large).
@@ -56,13 +56,13 @@
 #'  # disability is by tract only:
 #'
 #'  cbind(unique(grep("disab", x$concept, value = T, ignore.case = T) ))
-#'  # x[substr(x$name,1,6) %in% "B18101" & x$geography == "block group", ] |> print(n=50) # none
+#'  # x[substr(x$name,1,6) %in% "B18101" & x$geography %in% "block group", ] |> print(n=50) # none
 #'  x[substr(x$name,1,7) %in% "B18101_"  , ] |> print(n=50)
 #'  ```
 #' @param variables Vector of variables - see get_acs from tidycensus package
 #' @param table  see get_acs from tidycensus package.
 #'
-#'   EJSCREEN-relevant key tables at block group resolution include these:
+#'   EJSCREEN-relevant key tables at blockgroup resolution include these:
 #'   acstabs <- c("B01001", "B03002", "B15002", "C16002", "C17002", "B25034", "B23025")
 #'   and at tract resolution:   "B18101"
 #'
@@ -80,12 +80,12 @@
 #' @param moe_level   see get_acs from tidycensus package
 #' @param survey   see get_acs from tidycensus package
 #' @param show_call   see get_acs from tidycensus package
-#' @param geography "block group"
+#' @param geography "block group" (note this needs the space between words)
 #' @param dropname whether to drop the column called NAME
 #' @param ...   see get_acs from tidycensus package
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' ## All states, full table
 #' # newvars <- acs_bybg(table = "B01001")
 #'
@@ -94,7 +94,7 @@
 #'
 #' ## Format new data to match rows of blockgroupstats
 #'
-#' setnames(newvars, "GEOID", "bgfips")
+#' data.table::setnames(newvars, "GEOID", "bgfips")
 #' dim(newvars)
 #' newvars <- newvars[blockgroupstats[,.(bgfips, ST)], ,  on = "bgfips"]
 #' dim(blockgroupstats)
@@ -102,12 +102,12 @@
 #' newvars
 #' newvars[ST == "DC", ]
 #'
-#' ## Calculate a new indicator for each block group, using ACS data
+#' ## Calculate a new indicator for each blockgroup, using ACS data
 #'
 #' mystates = c("DC", 'RI')
 #' newvars <- acs_bybg(variables = c("B01001_001", paste0("B01001_0", 31:39)),
 #'   state = mystates)
-#' setnames(newvars, "GEOID", "bgfips")
+#' data.table::setnames(newvars, "GEOID", "bgfips")
 #' newvars[, ST := fips2state_abbrev(bgfips)]
 #' names(newvars) <- gsub("E$", "", names(newvars))
 #'
@@ -138,7 +138,7 @@ acs_bybg <- function(
     cache_table = FALSE,
     year = NULL,
     output = "wide",
-    state = stateinfo$ST, # has DC,PR, but not "AS" "GU" "MP" "UM" "VI" # state.abb from datasets pkg would lack DC and PR # stateinfo2 would add "US"
+    state = stateinfo$ST, # has DC, PR, but not "AS" "GU" "MP" "UM" "VI" # state.abb from datasets pkg would lack DC and PR # stateinfo2 would add "US"
     county = NULL,
     zcta = NULL,
     geometry = FALSE,
@@ -213,7 +213,7 @@ acs_bybg <- function(
 
 # # EXAMPLE OF SCRIPT TO GET
 # # PERCENT OF POPULATION THAT IS WOMEN OF CHILD BEARING AGE
-# # FOR ALL US BLOCK GROUPS FROM ACS (but missing PR, VI, other Island Areas probably!)
+# # FOR ALL US BLOCKGROUPS FROM ACS (but missing PR, VI, other Island Areas probably!)
 # # Use ages 18-49, not the more widely used 16-49, since ages 15-17 are all in a single bin.
 #
 # library(data.table)

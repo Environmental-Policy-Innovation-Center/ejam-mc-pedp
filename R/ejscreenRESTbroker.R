@@ -1,7 +1,7 @@
 
-#' Low-level utility to query EJScreen API for one circular buffer - API may or may not be available
+#' Low-level utility to query EJSCREEN API for one circular buffer - API may or may not be available
 #'
-#' @description Use EJScreen API to get raw json-format response, ready to be
+#' @description Use EJSCREEN API to get raw json-format response, ready to be
 #' parsed by [ejscreenRESTbroker2table()]. This function underlies higher level
 #' functions like [ejscreenapi()] and overall [ejscreenit()]
 #'
@@ -57,7 +57,7 @@
 #'   where newer 2023 version is default, using ejscreenRESTbroker1.aspx,
 #'   and old style/mini version is at ejscreenRESTbroker.aspx
 #' @param ipurl fixed ip or domain/URL to try
-#' @param reportstyle EJscreen_SOE_report for the full community profile that was new as of 7/2023,
+#' @param reportstyle EJscreen_SOE_report for the full community profile that was new as of 7/2023, but went down 1/2025,
 #'   or EJSCREEN_report for the older style standard report (which has fewer indicators on it).
 #' @param fips If specified, lon and lat are ignored, and the one fips code must be the
 #'   FIPS code of a blockgroup or tract, or county (5 digits with leading zero)
@@ -125,7 +125,7 @@ ejscreenRESTbroker <- function(lon = NULL, lat = NULL, radius = 3,
 
   # shapefile ####
 
-  # Example of how theEJScreen API could be used to analyze a polygon, which must use POST not GET:
+  # Example of how the EJSCREEN API could be used to analyze a polygon, which must use POST not GET:
   # HTTP POST URL: https://ejscreen.epa.gov/mapper/ejscreenRESTbroker.aspx
   # HTTP POST Body:
   #   namestr=
@@ -187,18 +187,6 @@ ejscreenRESTbroker <- function(lon = NULL, lat = NULL, radius = 3,
                           '&unit=', unit,
                           '&f=', f
   )
-
-  ## Alternative method of crafting the request:
-  #
-  # url <- urltools  ::  param_set(url, key = "areatype", value = areatype)
-  # url <- urltools  ::  param_set(url, key = "areaid",   value = fips)
-  # url <- urltools  ::  param_set(url, key = "namestr",  value = namestr)
-  # url <- urltools  ::  param_set(url, key = "geometry", value = geometry)
-  # url <- urltools  ::  param_set(url, key = "distance", value = radius)
-  # url <- urltools  ::  param_set(url, key = "unit",     value = unit)
-  # url <- urltools  ::  param_set(url, key = "f",        value = f)
-  # this_request <- url
-
 
   if (f == 'report') {
 

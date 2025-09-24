@@ -30,7 +30,7 @@ e.g., as from \code{names2fips('DE')} or \code{ejamit(fips='01')$results_bysite}
 
 \item{radius}{in miles, converted to meters and passed to leaflet::addCircles() if appropriate}
 
-\item{column_names}{If "ej" then nice popup made based on just key EJScreen
+\item{column_names}{If "ej" then nice popup made based on just key EJSCREEN
 indicators. If "all" then every column in the entire mydf table is shown
 in the popup. If a vector of colnames, only those are shown in popups.}
 

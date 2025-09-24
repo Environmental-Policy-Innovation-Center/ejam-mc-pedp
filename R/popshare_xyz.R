@@ -9,8 +9,8 @@
 #' @param astext if TRUE, return text of description of results
 #' @param dig rounding digits for text output
 #' @return A fraction of 1 (or a vector of results) or text
-#' @examples 
-#'  x <- testdata_ejamit_output_100pts_1miles$results_bysite
+#' @examples
+#'  x <- testoutput_ejamit_100pts_1miles$results_bysite
 #'  popshare_p_lives_at_what_pct(x$pop, p = 0.50, astext=TRUE)
 #'  popshare_p_lives_at_what_n(  x$pop, p = c(0.50, 0.67, 0.80, 0.95))
 #'  popshare_at_top_x_pct(       x$pop, x = c(0.25, 0.50, .90))
@@ -53,8 +53,8 @@ popshare_at_top_x_pct = function(pop, x=0.20, astext=FALSE, dig=0) {
 #' @param astext if TRUE, return text of description of results
 #' @param dig rounding digits for text output
 #' @return A fraction of 1
-#' @examples 
-#'  x <- testdata_ejamit_output_100pts_1miles$results_bysite
+#' @examples
+#'  x <- testoutput_ejamit_100pts_1miles$results_bysite
 #'  popshare_p_lives_at_what_pct(x$pop, p = 0.50, astext=TRUE)
 #'  popshare_p_lives_at_what_n(  x$pop, p = c(0.50, 0.67, 0.80, 0.95))
 #'  popshare_at_top_x_pct(       x$pop, x = c(0.25, 0.50, .90))
@@ -96,8 +96,8 @@ popshare_at_top_n = function(pop, n=10, astext=FALSE, dig=0) {
 #' @param dig rounding digits for text output
 #'
 #' @return vector of numbers of sites, or text about that
-#' @examples 
-#'  x <- testdata_ejamit_output_100pts_1miles$results_bysite
+#' @examples
+#'  x <- testoutput_ejamit_100pts_1miles$results_bysite
 #'  popshare_p_lives_at_what_pct(x$pop, p = 0.50, astext=TRUE)
 #'  popshare_p_lives_at_what_n(  x$pop, p = c(0.50, 0.67, 0.80, 0.95))
 #'  popshare_at_top_x_pct(       x$pop, x = c(0.25, 0.50, .90))
@@ -151,8 +151,8 @@ popshare_p_lives_at_what_n <- function(pop, p, astext=FALSE, dig=0) {
 #' @param dig rounding digits for text output
 #'
 #' @return vector of fractions 0-1 of all sites, or text about that
-#' @examples 
-#'  x <- testdata_ejamit_output_100pts_1miles$results_bysite
+#' @examples
+#'  x <- testoutput_ejamit_10pts_1miles$results_bysite[4:9,]
 #'  popshare_p_lives_at_what_pct(x$pop, p = 0.50, astext=TRUE)
 #'  popshare_p_lives_at_what_n(  x$pop, p = c(0.50, 0.67, 0.80, 0.95))
 #'  popshare_at_top_x_pct(       x$pop, x = c(0.25, 0.50, .90))

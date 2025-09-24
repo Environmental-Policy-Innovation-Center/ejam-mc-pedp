@@ -3,13 +3,13 @@
 
 # state_from_s2b_bysite()   -     compare this to state_from_blockid_table() ***  -  formerly called  ST _by_site_from_sites2blocks()
 
-### in this source file:
 
 # state_from_nearest_block_bysite()
 # state_from_latlon()
 # state_from_blockid_table()   - compare this to state_from_s2b_bysite()   ***
 # state_from_blockid()
 # state_from_fips_bybg()    # confusing name
+
 
 # fips2state_abbrev() *** # this is the one to use for a single state per FIPS
 
@@ -18,6 +18,9 @@
 
 ## and see elsewhere states_as_sites()
 
+########################################### #
+# . ####
+#      state_from_ ####
 
 ########################################### #
 
@@ -42,6 +45,7 @@ state_from_nearest_block_bysite <- function(s2b) {
 }
 ########################################### #
 
+
 #' Find what state is where each point is located
 #'
 #' @details
@@ -56,7 +60,7 @@ state_from_nearest_block_bysite <- function(s2b) {
 #'
 #' @seealso [fips_bg_from_latlon()] might be faster??  [states_shapefile] [get_blockpoints_in_shape()] [state_from_sitetable()]
 #'
-#' @return Returns data.frame: ST, statename, FIPS.ST, REGION, n
+#' @return unlike [fips_state_from_latlon()], returns data.frame: ST, statename, FIPS.ST, REGION, n
 #'   as many rows as elements in lat or lon
 #' @examples
 #'  myprogram <- "CAMDBS" # 739 sites

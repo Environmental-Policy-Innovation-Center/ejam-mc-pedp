@@ -1,5 +1,5 @@
-#  This had been a 
-# Script to download .gdb file with 8/12/2024 version 2.32 EJScreen
+#  This had been a
+# Script to download .gdb file with 8/12/2024 version 2.32 EJSCREEN
 # gdb is one place to find the blockgroup data and also has lookup tables for US and State percentile cutoffs and means.
 # .gdb is not essential but good double-check on separately downloaded .csv versions of those.
 
@@ -8,34 +8,34 @@
 
 #  ######################################################################## #
 
-# data.table format is used below for the blockgroupstats starting point 
+# data.table format is used below for the blockgroupstats starting point
 # data.frame format is used below for all other files/info
 
 stop("see script for details")
 
 if (0 == 1) {
-  
+
 #################################################################### #
-   
+
    # OBSOLETE ALTERNATIVE SOURCE OF DATA ####
-  
-##___ SET WORKING DIRECTORY  to save EJAM data  
+
+##___ SET WORKING DIRECTORY  to save EJAM data
 # grep("mysource",  (Sys.getenv()), value = T)
-setwd(file.path(Sys.getenv("R_USER"), "EJAM")); getwd() 
+setwd(file.path(Sys.getenv("R_USER"), "EJAM")); getwd()
 # print(.packages()) # what is loaded (attached?)
-# golem::detach_all_attached() 
+# golem::detach_all_attached()
 # print(.packages()) #
 # rm(list = ls())
 
 downloadnow <- TRUE
 
-#################################################################################### # 
+#################################################################################### #
 
-#   PERCENTILE LOOKUP TABLES  
+#   PERCENTILE LOOKUP TABLES
 
-## GET GDB, EXTRACT LOOKUPS  
+## GET GDB, EXTRACT LOOKUPS
 
-# functions to download, unzip, and read  pctile lookup tables  from gdb file on ftp site 
+# functions to download, unzip, and read  pctile lookup tables  from gdb file on ftp site
 
 baseurl = "https://https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe/"
 
@@ -52,16 +52,16 @@ rm(blockgroupstats_source_state.gdb.zip)
 mydir = "~/../../OneDrive - Environmental Protection Agency (EPA)/EJ 2021/EJSCREEN 2024"
 if (!dir.exists(mydir)) {stop('mydir needed')}
 
-## note also this tool to download multiple files easily: 
+## note also this tool to download multiple files easily:
 # curl::multi_download(urls = file.path(baseurl, fnames), destfiles = file.path(td, fnames))
 
 options(timeout = max(300, getOption("timeout"))) # default of 60 seconds is not enough
 
 
 ejscreen_download_gdb <- function(
-    folder = tempdir(), 
+    folder = tempdir(),
     gdbzipname = blockgroupstats_source_usa.gdb.zip,
-    gdbname =    blockgroupstats_source_usa.gdb, 
+    gdbname =    blockgroupstats_source_usa.gdb,
     baseurl = baseurl) {
   cat("downloading gdb.zip\n")
   download.file(file.path(baseurl, gdbzipname), destfile = file.path(folder, gdbzipname))
@@ -73,30 +73,30 @@ ejscreen_unzip_gdb <- function(zipfilepath) {
   return( gsub(".zip", "", zipfilepath))
 }
 ejscreen_read_unzipped_lookups <- function(mypath) {
-  cat('reading percentile lookup tables from gdb\n')  
+  cat('reading percentile lookup tables from gdb\n')
   print(sf::st_layers(mypath))
   if ("USA" %in%  sf::st_layers(mypath)$name) {
-    usastats_gdb    <- sf::st_read(mypath, 'USA')  
+    usastats_gdb    <- sf::st_read(mypath, 'USA')
   } else {
     warning("USA is not a table in that gdb")
     usastats_gdb <- NULL
   }
  # 2024-07 version has only USA table in this gdb.
   if ("States" %in%  sf::st_layers(mypath)$name) {
-    statestats_gdb    <- sf::st_read(mypath, 'States')  
+    statestats_gdb    <- sf::st_read(mypath, 'States')
   } else {
     warning("States is not a table in that gdb")
     statestats_gdb <- NULL
   }
   # "FileGDB" or "OpenFileGDB" is the driver to use.
   return(list(
-    statestats_gdb = statestats_gdb, 
-    usastats_gdb    =  usastats_gdb 
+    statestats_gdb = statestats_gdb,
+    usastats_gdb    =  usastats_gdb
   ))
 }
 
-ejscreen_pctile_lookups_from_ftp <- function(folder = tempdir(), 
-                                             gdbzipname = blockgroupstats_source_usa.gdb.zip, 
+ejscreen_pctile_lookups_from_ftp <- function(folder = tempdir(),
+                                             gdbzipname = blockgroupstats_source_usa.gdb.zip,
                                              gdbname =    blockgroupstats_source_usa.gdb,
                                              baseurl = baseurl) {
 
@@ -129,8 +129,8 @@ names(statestats_gdb) <- fixcolnames(names(statestats_gdb), 'csv', 'r')
 
 dim(usastats_gdb)
 dim(statestats_gdb)
-all.equal(usastats_gdb,   usastats_new)   
-all.equal(statestats_gdb, statestats_new) 
+all.equal(usastats_gdb,   usastats_new)
+all.equal(statestats_gdb, statestats_new)
 
 rm(x, y)
 gc()
@@ -151,12 +151,12 @@ ls()
 # FINISH CREATING usastats, statestats ####
 
 
-# MAKE THE STATE summary INDICATORS (RAW SCORES) COLUMNS HAVE STATE PERCENTILE NAMES TO DISTINGUISH FROM US VERSIONS 
-# BUT BE SURE THAT LOOKUP CODE TURNING RAW STATE summary SCORES INTO PCTILES IS USING THE RIGHT NAMES 
+# MAKE THE STATE summary INDICATORS (RAW SCORES) COLUMNS HAVE STATE PERCENTILE NAMES TO DISTINGUISH FROM US VERSIONS
+# BUT BE SURE THAT LOOKUP CODE TURNING RAW STATE summary SCORES INTO PCTILES IS USING THE RIGHT NAMES
 
 setDT(statestats_new)
-data.table::setnames(statestats_new, 
-                     old = c(names_ej, names_ej_supp), 
+data.table::setnames(statestats_new,
+                     old = c(names_ej, names_ej_supp),
                      new = c(names_ej_state, names_ej_supp_state))
 setDF(statestats_new)
 # but later they will be data.table I think
@@ -167,11 +167,11 @@ setDF(statestats_new)
 # so make them match in USA one at least, but cannot same way for state one since they repeat for each state
 
 rownames(usastats_new)     <- usastats_new$PCTILE
-rownames(statestats_new) <- paste0(statestats_new$REGION, statestats_new$PCTILE) 
+rownames(statestats_new) <- paste0(statestats_new$REGION, statestats_new$PCTILE)
 
 ################################################################################ #
 
-# switch to usastats, statestats (from usastats_new, etc.)  #### 
+# switch to usastats, statestats (from usastats_new, etc.)  ####
 
 usastats   <- usastats_new
 statestats <- statestats_new
@@ -186,7 +186,7 @@ gc()
 # but that is OK, if the function looking up pctiles can handle NA values for a zone! and there is not a better way to indicate missing values.
 # pm and ozone had raw and EJ eo and EJ supp indicators in AK, HI, PR all NA values
 # also, NPDES all 3 vars all NA in AK only.
-# # also, lowlifex all NA in PR only. 
+# # also, lowlifex all NA in PR only.
 # statestats2.2[statestats2.2$REGION %in% 'AK', c("pm", "o3"  )] # etc.
 
 # also, no Island Areas here at all as rows - maybe add those but with only NA values for all pctiles and mean and all indicators?
@@ -219,12 +219,12 @@ gc()
 # if ("Demog.Index.State" %in% colnames(statestats)) {
 #   statestats$Demog.Index      <- statestats$Demog.Index.State
 # } else {
-#  warning("did not find statestats$Demog.Index.State so check that Demog.Index.State column is correct there") 
+#  warning("did not find statestats$Demog.Index.State so check that Demog.Index.State column is correct there")
 # }
 # if ("Demog.Index.Supp.State" %in% colnames(statestats)) {
 # statestats$Demog.Index.Supp <- statestats$Demog.Index.Supp.State
 # } else {
-#   warning("did not find statestats$Demog.Index.Supp.State so check that Demog.Index.State column is correct there") 
+#   warning("did not find statestats$Demog.Index.Supp.State so check that Demog.Index.State column is correct there")
 # }
 #  # these are ok and will not need state versions
 # usastats$Demog.Index.State      <- usastats$Demog.Index
@@ -245,7 +245,7 @@ print(ls())
 
 # NEXT SCRIPT HAS TO ADD DEMOG SUBGROUPS ####
 
-cat("Next we need to do 
+cat("Next we need to do
 EJAM/data-raw/datacreate_usastats_pctile_lookup_add_subgroups_demog.R \n")
 
 ######################################################################################## ################## #
