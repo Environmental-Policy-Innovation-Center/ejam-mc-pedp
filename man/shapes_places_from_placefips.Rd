@@ -4,12 +4,14 @@
 \alias{shapes_places_from_placefips}
 \title{Get shapefiles/ boundaries of census places like cities}
 \usage{
-shapes_places_from_placefips(fips, myservice = "tiger")
+shapes_places_from_placefips(fips, myservice = "tiger", year = 2024)
 }
 \arguments{
 \item{fips}{vector of 7-digit City/town/CDP codes as in \link{censusplaces$fips}}
 
 \item{myservice}{only 'tiger' is implemented as source of boundaries, using the tigris package}
+
+\item{year}{for \code{\link[tigris:places]{tigris::places()}}}
 }
 \value{
 spatial data.frame for mapping

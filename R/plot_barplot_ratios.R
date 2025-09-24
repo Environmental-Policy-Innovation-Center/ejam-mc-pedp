@@ -3,45 +3,45 @@
 #'
 #' @aliases plot_barplot_ratios_ez
 #' @param ejamitout like from [ejamit()]
-#' @param sitenumber default is all sites from ejamitout$results_overall, and 
+#' @param sitenumber default is all sites from ejamitout$results_overall, and
 #'   if an integer, it is the row number to show from ejamitout$results_bysite.
-#'   Important: note this is the row number which is 
+#'   Important: note this is the row number which is
 #'   NOT necessarily the same as the ejamitout$results_bysite$ejam_uniq_id
-#' @param varnames vector of indicator names that are ratios to avg, like 
+#' @param varnames vector of indicator names that are ratios to avg, like
 #'   c(names_d_ratio_to_avg , names_d_subgroups_ratio_to_avg)
 #'   but could be c(names_d_ratio_to_state_avg , names_d_subgroups_ratio_to_state_avg)
 #' @param main title of plot - must change to note it vs. State if not comparing to US avg.
 #' @param ... passed to [plot_barplot_ratios_ez()]
-#' @examples 
-#' 
+#' @examples
+#'
 #' # Check a long list of indicators for any that are elevated
-#' 
+#'
 #' out <- testoutput_ejamit_100pts_1miles
-#' 
+#'
 #' ejam2barplot(out,
 #'   varnames = names_these_ratio_to_avg,
 #'   main = "Envt & Demog Indicators at Selected Sites Compared to State Averages")
-#'   
+#'
 #' ejam2barplot(out,
 #'   varnames = names_these_ratio_to_state_avg,
 #'   main = "Envt & Demog Indicators at Selected Sites Compared to State Averages")
-#' 
+#'
 #' # Residential population percentages only
-#' 
+#'
 #' # vs nationwide avg
 #' ejam2barplot(out)
-#' 
+#'
 #' # vs statewide avg
-#' ejam2barplot(out, 
+#' ejam2barplot(out,
 #'   varnames = c(names_d_ratio_to_state_avg, names_d_subgroups_ratio_to_state_avg),
 #'   main = "Residential Populations at Selected Sites Compared to State Averages")
-#' 
+#'
 #' # Environmental only
-#' 
+#'
 #' ejam2barplot(out,
 #'   varnames = c(names_e_ratio_to_avg, names_e_ratio_to_state_avg),
 #'   main = "Environmental Indicators at Selected Sites Compared to Averages")
-#'   
+#'
 #'  ## select your own ratio-type indicators that are available
 #'  ## -- and you could see the range of available ratio indicators like this:
 #'  \dontrun{
@@ -52,29 +52,29 @@
 #'    info = c("varlist", "shortname")
 #'  )
 #'    }
-#'  
+#'
 #'  # helper functions related to ejam2barplot()
-#'  
+#'
 #'   plot_barplot_ratios_ez(
-#'     out, 
+#'     out,
 #'     varnames = c(names_d_ratio_to_avg , names_d_subgroups_ratio_to_avg)
 #'   )
-#'   
+#'
 #'   # same plot but with function that would need more work to format inputs:
 #'   plot_barplot_ratios(
 #'       unlist(out$results_overall[ ,
 #'       c(..names_d_ratio_to_avg , ..names_d_subgroups_ratio_to_avg) ])
 #'       )
-#'       
+#'
 #' @return ggplot
 #'
 #' @export
 #'
 ejam2barplot = function(ejamitout, varnames = c(names_d_ratio_to_avg , names_d_subgroups_ratio_to_avg),
                         sitenumber = NULL,
-                        main = "Residential Populations at the Analyzed Locations Compared to US Overall", 
+                        main = "Residential Populations at the Analyzed Locations Compared to US Overall",
                         ...) {
-  
+
   if (is.null(sitenumber)) {
     # ejamitout <- ejamitout$results_overall
     single_location <- FALSE
@@ -88,7 +88,7 @@ ejam2barplot = function(ejamitout, varnames = c(names_d_ratio_to_avg , names_d_s
   plot_barplot_ratios_ez(out = ejamitout,
                          varnames = varnames,
                          single_location = single_location, row_index = row_index,
-                         main =  main, 
+                         main =  main,
                          ... = ...)
 }
 ############################################################################################# #
@@ -97,20 +97,20 @@ ejam2barplot = function(ejamitout, varnames = c(names_d_ratio_to_avg , names_d_s
 #' @rdname ejam2barplot
 #' @details
 #' Used by and similar to [ejam2barplot()], which is an easier way to do this!
-#'   This function requires you to specify single_location = TRUE when 
+#'   This function requires you to specify single_location = TRUE when
 #'   using the row_index param. The [ejam2barplot()] function just uses a sitenumber parameter.
-#' 
+#'
 #' This function is more flexible than [plot_barplot_ratios()], which it relies on,
-#'   since this lets you specify 
+#'   since this lets you specify
 #'   whether to use overall results from ejamit()$results_overall
 #'   or just one site from ejamit()$results_bysite
-#' 
+#'
 #' @param out the list of tables that is the output of ejamit() or a related function
 #' @param single_location set to TRUE if using row_index to view one site,
 #'  set to FALSE to view overall results from out$results_overall
 #' @param row_index the number of the row to use from out$results_bysite
 #' @param ... passed to plot_barplot_ratios()
-#' 
+#'
 #' @export
 #' @keywords internal
 #'
@@ -120,21 +120,21 @@ plot_barplot_ratios_ez = function(out, varnames = c(names_d_ratio_to_avg, names_
   if (single_location && !is.null(row_index)) {
     ## check if data.table (SHP is data.frame)
     if (is.data.table(out$results_bysite)) {
-      data_to_plot <- unlist(out$results_bysite[row_index, varnames, with = FALSE])  
+      data_to_plot <- unlist(out$results_bysite[row_index, varnames, with = FALSE])
     } else {
       data_to_plot <- unlist(out$results_bysite[row_index, varnames])
     }
-    
+
   } else {
     ## check if data.table (SHP is data.frame)
     if (is.data.table(out$results_overall)) {
       data_to_plot <- unlist(out$results_overall[, varnames, with = FALSE])
     } else {
-      data_to_plot <- unlist(out$results_overall[, varnames])  
+      data_to_plot <- unlist(out$results_overall[, varnames])
     }
-    
+
   }
-  
+
   plot_barplot_ratios(data_to_plot, main = main, ...)
 }
 ############################################################################################# #
@@ -142,7 +142,7 @@ plot_barplot_ratios_ez = function(out, varnames = c(names_d_ratio_to_avg, names_
 
 #' helper - Barplot of ratios of residential population percentages (or other scores) to averages (or other references)
 #' @rdname ejam2barplot
-#' @details If the parameter called main has the word "State" in it, then the legend 
+#' @details If the parameter called main has the word "State" in it, then the legend
 #'   will refer to "State Average" instead of "US Average"
 #' @param ratio.to.us.d.overall named list of a few ratios to plot, but see [ejam2barplot()]
 #'   for an easier way to specify which indicator to show.
@@ -151,43 +151,43 @@ plot_barplot_ratios_ez = function(out, varnames = c(names_d_ratio_to_avg, names_
 #' @param main optional, title for plot, like "Stats at the Analyzed Locations Compared to US Overall"
 #' @param ylab optional, label for y axis
 #' @param caption text for a key defining some terms that are abbreviations
-#' 
-#' @seealso  [ejam2ratios()] [ejam2barplot()] [plot_barplot_ratios_ez()] [table_xls_format()]
+#'
+#' @seealso  [ejam2ratios()] [ejam2barplot()] [plot_barplot_ratios_ez()] [ejam2excel()]
 #' @return ggplot should be returned
-#' 
+#'
 #' @export
-#' 
+#'
 plot_barplot_ratios <- function(ratio.to.us.d.overall,
                                 shortlabels = NULL,
                                 mycolorsavailable = c("gray","yellow","orange","red"),
                                 main = "Residential Populations at the Analyzed Locations Compared to US Overall",
                                 ylab = "Ratio vs. Average",
                                 caption = "NH = \"non-Hispanic\"\nNHA = \"non-Hispanic alone, aka single race\"") {
-  
+
   if (is.null(main) || "" %in% main) {main <- "Residential Populations at the Analyzed Locations Compared to US Overall"}
   ########################################################## #
 # NOTES
-    # 
-    # 
+    #
+    #
     # **SOME GENERAL NOTES, DURING EJAM DEVELOPMENT**
-    # 
+    #
     # For plots in general, see:
-    # 
+    #
     # - <https://echarts4r.john-coene.com/articles/themes.html>
     # - <https://exts.ggplot2.tidyverse.org/gallery>
-    # 
-    # 
+    #
+    #
     # **For BARPLOTS, see/ merge/consolidate:**
-    # 
+    #
     # - output$view1_summary_plot <- renderPlot({v1_summary_plot()}) and v1_summary_plot <- reactive({ })
     #   in EJAM server for Short Report if  bar type
     # - output$summ_display_bar <- renderPlot({  }) contains its own plot code not a reactive
     #   in EJAM server for tab showing barplots in Detailed Results
     # - plot_barplot_ratios() drafted function in EJAM
-    # 
-    # 
+    #
+    #
     # **For BOXPLOTS, see:**
-    # 
+    #
     # - v1_summary_plot <- reactive({ })     and output$view1_summary_plot <- renderPlot({v1_summary_plot()})
     #    - in EJAM server for SHORT report if box type, and
     #    - in EJAM server for LONG report passed as a parameter
@@ -196,17 +196,17 @@ plot_barplot_ratios <- function(ratio.to.us.d.overall,
     # - ejscreenapi_script() code also relevant?
     # - box/scatter examples in ggplot, <https://r-graph-gallery.com/89-box-and-scatter-plot-with-ggplot2.html>
     # - boxplots in base R, <https://www.r-bloggers.com/2023/09/how-to-reorder-boxplots-in-r-a-comprehensive-guide>
-    # 
+    #
     # **For HISTOGRAMS, see:**
-    # 
+    #
     # - output$summ_display_hist <- renderPlot   in EJAM server for interactive views
   ########################################################## #
-  
+
   # ratio.to.us.d.overall <-   unlist(  out$results_overall[ , c(..names_d_ratio_to_avg, ..names_d_subgroups_ratio_to_avg )]  )
     # ratio.to.us.d.overall <- ratio.to.us.d()  # reactive already available
   # if (isTRUE(all.equal(names(ratio.to.us.d.overall), c(names_d_ratio_to_avg, names_d_subgroups_ratio_to_avg)))) {
   #
-  # 
+  #
   # }
   if (is.null(shortlabels)) {
     shortlabels <- fixcolnames(names(ratio.to.us.d.overall), oldtype = "r", newtype = "shortlabel")
@@ -287,7 +287,7 @@ thisplot <- thisdata %>%
     ggplot2::scale_y_continuous(limits = c(0, NA), expand = ggplot2::expansion(mult = c(0, 0.05), add = c(0, 0))) +
   ggplot2::theme(
     plot.title = ggplot2::element_text(size = 14, hjust = 0.5),
-    axis.text.x = ggplot2::element_text(size = 9, angle = 45, hjust = 1, vjust = 1), 
+    axis.text.x = ggplot2::element_text(size = 9, angle = 45, hjust = 1, vjust = 1),
     legend.title = ggplot2::element_text(size = 12),
     legend.text = ggplot2::element_text(size = 10),
     legend.position = "bottom"

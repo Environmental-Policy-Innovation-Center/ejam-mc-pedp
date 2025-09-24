@@ -5,7 +5,7 @@
 \alias{testinput_fips_cities}
 \title{testinput_fips_cities dataset}
 \format{
-An object of class \code{numeric} of length 2.
+An object of class \code{character} of length 2.
 }
 \usage{
 testinput_fips_cities

@@ -30,7 +30,7 @@ library(EJAM)
 
 # ejamit ####
 
-## JUST A DRAFT - NOT TESTED AT ALL 
+## JUST A DRAFT - NOT TESTED AT ALL
 
 #* json table of EJAM analysis summary results for all residents within X miles of a single point or in a polygon
 #*
@@ -100,7 +100,7 @@ function(lat = 40.81417, lon = -96.69963, radius = 1, shapefile = 0, names = "lo
 
 # ejamit_csv ####
 
-## JUST A DRAFT - NOT TESTED AT ALL 
+## JUST A DRAFT - NOT TESTED AT ALL
 
 #* csv table of EJAM analysis summary results for all residents within X miles of a single point defined by latitude and longitude.
 #*
@@ -149,7 +149,7 @@ function(lat = 40.81417, lon = -96.69963, radius = 1, names = "long", test = "fa
 
 # ejam2report ####
 
-## JUST A DRAFT - NOT TESTED AT ALL 
+## JUST A DRAFT - NOT TESTED AT ALL
 
 
 ##  We probably also want an API endpoint that combines ejamit() and ejam2report(),
@@ -165,11 +165,11 @@ function(lat = 40.81417, lon = -96.69963, radius = 1, names = "long", test = "fa
 #*
 #* Like EJAM::ejam2report()
 #*
-#* @serializer write_file
-#* @get /ejam2report
+#* @serializer html
+#* @post /ejam2report
 #*
 function(ejamitout = testoutput_ejamit_10pts_1miles, ...) {
-  
+
   # ejamitout = testoutput_ejamit_10pts_1miles,
   # sitenumber = NULL,
   # analysis_title = 'Summary of Analysis',
@@ -206,14 +206,14 @@ function(ejamitout = testoutput_ejamit_10pts_1miles, ...) {
   # ),
   # ## all the indicators that are in extratable_list_of_sections:
   # extratable_hide_missing_rows_for = as.vector(unlist(extratable_list_of_sections))
-  
+
   fname = "EJAM_results.html"
 
-  out <- ejam2report(out, launch_browser = FALSE, fileextension = "html", 
+  out <- ejam2report(out, launch_browser = FALSE, fileextension = "html",
                      return_html = FALSE, ## ???
                      filename = fname, ## or NULL ?
                      ...)
-  
+
   # if (attachment == "true") {
   plumber::as_attachment(
     value = out,
@@ -227,7 +227,7 @@ function(ejamitout = testoutput_ejamit_10pts_1miles, ...) {
 
 # ejam2excel ####
 
-## JUST A DRAFT - NOT TESTED AT ALL 
+## JUST A DRAFT - NOT TESTED AT ALL
 
 #* like ejam2excel(), returns xlsx file of EJAM analysis results for all residents within X miles of a single point defined by latitude and longitude.
 #*
@@ -240,7 +240,7 @@ function(ejamitout = testoutput_ejamit_10pts_1miles, ...) {
 #*
 #* Like EJAM::ejam2excel()
 #*
-#* @serializer write_file
+#* @serializer excel
 #* @get /ejam2excel
 #*
 function(lat = 40.81417, lon = -96.69963, radius = 1, test = "false", ...) {
@@ -277,7 +277,7 @@ function(lat = 40.81417, lon = -96.69963, radius = 1, test = "false", ...) {
 
 # getblocksnearby ####
 
-## JUST A DRAFT - NOT TESTED AT ALL 
+## JUST A DRAFT - NOT TESTED AT ALL
 
 #* json table of distances to all Census blocks near given point.
 #*
@@ -296,7 +296,7 @@ function(lat, lon, radius) {
   if (length(radius) != 1) {radius <- 1}
 
   # require(EJAM)
-  # if (!exists("blockwts"))  dataload_from_pins()
+  # if (!exists("blockwts")) {dataload_dynamic('blockwts)}
   # if (!exists("localtree")) indexblocks()
 
   # promises::future_promise({  #
@@ -315,7 +315,7 @@ function(lat, lon, radius) {
 
 # get_blockpoints_in_shape ####
 
-## JUST A DRAFT - NOT TESTED AT ALL 
+## JUST A DRAFT - NOT TESTED AT ALL
 
 #* json table of Census blocks in each polygon
 #*
@@ -336,7 +336,7 @@ function(polys,
   return("not working yet for shapefile inputs")
 
   # require(EJAM)
-  # if (!exists("blockwts"))  dataload_from_pins()
+  # if (!exists("blockwts"))  {dataload_dynamic('blockwts)}
   # if (!exists("localtree")) indexblocks()
 
   # promises::future_promise({  # })
@@ -355,7 +355,7 @@ function(polys,
 
 # doaggregate ####
 
-## JUST A DRAFT - NOT TESTED AT ALL 
+## JUST A DRAFT - NOT TESTED AT ALL
 
 #* List of tables and other info summarizing demog and envt based on sites2blocks table
 #*
@@ -371,7 +371,7 @@ function(sites2blocks, sites2states_or_latlon, countcols, popmeancols, calculate
   # promises::future_promise({
   if (!exists("blockgroupstats")) {library(EJAM)} # to use installed version only if not already attached
   # library(EJAM)
-    if (!exists("blockwts"))  dataload_from_pins()
+    if (!exists("blockwts"))  dataload_dynamic("blockwts")
     if (!exists("localtree")) indexblocks()
     EJAM::doaggregate(sites2blocks = sites2blocks,
                       sites2states_or_latlon = sites2states_or_latlon,

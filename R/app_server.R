@@ -50,6 +50,7 @@ app_server <- function(input, output, session) {
   ################################################################### #
   # testing/dev mode settings ####
   observe({
+    req(input$testing)
     if (input$testing) {cat("testing == TRUE \n ")} else {cat("testing == FALSE \n----------------------\n")}
   })
   observe({
@@ -66,6 +67,7 @@ app_server <- function(input, output, session) {
     }
   }, priority = 1)
   observe({
+    req(input$shiny.testmode)
     if (input$shiny.testmode) {
       options(shiny.testmode = TRUE)
       cat('shiny.testmode == TRUE\n')
@@ -282,11 +284,12 @@ app_server <- function(input, output, session) {
 
   # keep track of currently used method of site selection
   current_upload_method <- reactive({
+    req(input$testing)
     if (input$testing) {
       cat('\nThe input$ss_choose_method is ', input$ss_choose_method, '\n')
       if (input$ss_choose_method == "dropdown") {cat(' and input$ss_choose_method_drop is ', input$ss_choose_method_drop, '\n')}
       if (input$ss_choose_method == "upload")   {cat(' and input$ss_choose_method_upload is ', input$ss_choose_method_upload, '\n')}
-      }
+    }
     x <- switch(
       as.character(input$ss_choose_method),
       'dropdown' = switch(input$ss_choose_method_drop,
@@ -571,7 +574,7 @@ app_server <- function(input, output, session) {
   ## NOT YET IMPLEMENTED
 
   data_up_tablepassed_latlon <- reactive({
-
+    req(input$max_pts_upload)
     ################################# #
     prepare_table_from_run_app <- function(sitepoints, input_max_pts_upload, input_testing) {
 
@@ -1096,7 +1099,7 @@ app_server <- function(input, output, session) {
     ## copy of code used in data_up_fips()
 
     cat("COUNT OF ROWS IN FIPS FILE: ", NROW(fips_dt),"\n")
-    fips_vec <- fips_from_table(fips_table = fips_dt, addleadzeroes = TRUE, inshiny = TRUE)
+    fips_vec <- fips_from_table(fips_table = fips_dt, addleadzeroes = TRUE, in_shiny = TRUE)
     ftypeUpload <- fipstype(fips_vec)
     typesUpload <- c('blockgroup', 'tract', 'city', 'county', 'state')
 
@@ -1115,7 +1118,7 @@ app_server <- function(input, output, session) {
       disable_buttons[[placetype]] <- TRUE
       shiny::validate(errmsg)
     } else {
-      disable_buttons[['FIPS']] <- FALSE
+      disable_buttons[[placetype]] <- FALSE
       cat("COUNT OF FIPS via fips_from_table(): ", length(fips_vec), '\n')
       # now let ejamit() do the rest for the FIPS case
       # fips_vec # ??? this line was here but should have no effect?
@@ -1127,7 +1130,6 @@ app_server <- function(input, output, session) {
     if (sum(fips_is_valid) > 0) {
       numna <- sum(!fips_is_valid)
       num_notna <- length(fips_vec) - sum(!fips_is_valid)
-      #num_valid_pts_uploaded[['FIPS']] <- num_notna
       invalid_alert[[placetype]] <- numna # this updates the value of the reactive invalid_alert()
       cat("Number of FIPS codes:  "); cat(length(fips_vec), 'total,', num_notna, 'valid,', numna, ' invalid \n')
       # (fips_vec)
@@ -1171,7 +1173,7 @@ app_server <- function(input, output, session) {
     # fips_clean_shiny_input <- function(fips_dt, placetype) {
 
     cat("COUNT OF ROWS IN FIPS FILE: ", NROW(fips_dt),"\n")
-    fips_vec <- fips_from_table(fips_table = fips_dt, addleadzeroes = TRUE, inshiny = TRUE)
+    fips_vec <- fips_from_table(fips_table = fips_dt, addleadzeroes = TRUE, in_shiny = TRUE)
     ftypeUpload <- fipstype(fips_vec)
     typesUpload <- c('blockgroup', 'tract', 'city', 'county', 'state')
 
@@ -1296,8 +1298,8 @@ app_server <- function(input, output, session) {
     ## if >1 upload method used, use the one currently indicated by radio button ss_choose_method
 
     if        (current_upload_method() == 'latlon'         ) {data_up_latlon()
-   #} else if (current_upload_method() == 'latlontypedin'  ) {data_typedin_latlon() # enable if implemented/ready ***
-   #} else if (current_upload_method() == 'ECHO'           ) {data_up_echo()        # enable if implemented/ready ***
+      #} else if (current_upload_method() == 'latlontypedin'  ) {data_typedin_latlon() # enable if implemented/ready ***
+      #} else if (current_upload_method() == 'ECHO'           ) {data_up_echo()        # enable if implemented/ready ***
     } else if (current_upload_method() == 'FRS'            ) {data_up_frs()
 
     } else if (current_upload_method() == 'EPA_PROGRAM_sel') {data_up_epa_program_sel()
@@ -1357,7 +1359,7 @@ app_server <- function(input, output, session) {
       } else {
         removeNotification(id = 'radius_warning', session = session)
       }
-    } else {#else if (disable_buttons[[current_upload_method()]] == FALSE) {
+    } else {
       removeNotification(id = 'radius_warning', session = session)
     }
     if (NROW(data_uploaded()) > input$max_pts_run) {
@@ -1366,7 +1368,9 @@ app_server <- function(input, output, session) {
                        duration = NULL, type = 'error', closeButton = F,
                        paste0('Too many sites provided. This web app currently caps analyses at ', input$max_pts_run,' sites.'))
     } else {
-      shinyjs::enable(id = 'bt_get_results')
+      if (disable_buttons[[current_upload_method()]] == FALSE) {
+        shinyjs::enable(id = 'bt_get_results')
+      }
       removeNotification(id = 'max_pts_warning', session = session)
     }
     if (input$testing) {
@@ -1718,7 +1722,7 @@ app_server <- function(input, output, session) {
           if (inherits(xyz, "try-error")) {
             canmap <- FALSE
             validate("problem with map_shapes_leaflet() function")
-            } else {xyz}
+          } else {xyz}
         }
       }
 
@@ -1824,7 +1828,7 @@ app_server <- function(input, output, session) {
     progress_all$set(value = 0, message = 'Step 1 of 3', detail = 'Getting nearby census blocks')
 
     ################################################# #
-
+    # > ejamit() for FIPS  ####
     if (submitted_upload_method() %in% c('FIPS', 'FIPS_PLACE')) {  # if FIPS, do everything in 1 step right here.
 
       out <- ejamit(fips = data_uploaded(),              # unlike for SHP or latlon cases, this could include invalid FIPS!
@@ -1844,14 +1848,15 @@ app_server <- function(input, output, session) {
                     need_proximityscore = FALSE, #input$need_proximityscore, # not relevant for FIPS
                     # infer_sitepoints = FALSE,
                     # need_blockwt = TRUE,
-                    # updateProgress = ??? , # not sure this is needed or works here
+                    # updateProgress = ??? , # not used here - for noncity fips at least, it is very fast to find blocks
                     in_shiny = TRUE, # not sure this is needed or works here
                     progress_all = progress_all,
                     # quiet = TRUE,
                     silentinteractive = TRUE,
                     # called_by_ejamit = TRUE, # not sure this is needed or works here
                     testing = input$testing,
-                    download_fips_bounds_to_calc_areas = EJAM:::global_or_param("default_download_fips_bounds_to_calc_areas"), # SLOW IF TRUE, defined in global_defaults_*.R
+                    download_city_fips_bounds = EJAM:::global_or_param("default_download_city_fips_bounds"),
+                    download_noncity_fips_bounds = EJAM:::global_or_param("default_download_noncity_fips_bounds"),
                     thresholds   = list(input$an_thresh_comp1, input$an_thresh_comp2), # thresholds = list(90, 90), # or 80,80
                     threshnames  = list(input$an_threshnames1, input$an_threshnames2), # list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
                     threshgroups = list(sanitized_an_threshgroup1(), sanitized_an_threshgroup2()) # list("EJ-US-or-ST", "Supp-US-or-ST")
@@ -1870,7 +1875,7 @@ app_server <- function(input, output, session) {
     } else { # everything other than FIPS code analysis:
       #############################################################################  #
 
-      ## get blocks in POLYGONS / SHAPEFILES ####
+      # > ejamit() for POLYGONS / SHAPEFILES ####
 
       if (submitted_upload_method() == "SHP") {
 
@@ -1923,7 +1928,8 @@ app_server <- function(input, output, session) {
                       # called_by_ejamit = TRUE, # not sure this is needed or works here
                       progress_all = progress_all,
                       testing = input$testing,
-                      download_fips_bounds_to_calc_areas = default_download_fips_bounds_to_calc_areas, # SLOW IF TRUE, defined in global.R
+                      # download_city_fips_bounds = EJAM:::global_or_param("default_download_city_fips_bounds"), # not relevant in shapefile case
+                      # download_noncity_fips_bounds = EJAM:::global_or_param("default_download_noncity_fips_bounds"), # not relevant in shapefile case
                       thresholds   = list(input$an_thresh_comp1, input$an_thresh_comp2), # thresholds = list(90, 90), # or 80,80
                       threshnames  = list(input$an_threshnames1, input$an_threshnames2), # list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
                       threshgroups = list(sanitized_an_threshgroup1(), sanitized_an_threshgroup2()), # list("EJ-US-or-ST", "Supp-US-or-ST")
@@ -1935,7 +1941,7 @@ app_server <- function(input, output, session) {
       } # end of ejamit() for SHP type
       ################################################# #
 
-      ## get blocks near LAT/LON  POINTS  facilities/latlon # ####
+      # > ejamit() for LAT/LON  POINTS  ####
 
       if (!(submitted_upload_method() %in% c('SHP', 'FIPS', 'FIPS_PLACE'))) {  # if LATITUDE AND LONGITUDE (POINTS), find blocks nearby
 
@@ -2375,22 +2381,22 @@ app_server <- function(input, output, session) {
 
     full_page <- build_community_report(in_shiny = TRUE,
 
-      output_df = data_processed()$results_overall,
-      analysis_title =  sanitized_analysis_title(),
-      totalpop = popstr,
-      locationstr = residents_within_xyz,
-      include_ejindexes = (input$include_ejindexes == 'TRUE'),
-      show_ratios_in_report = (input$show_ratios_in_report == 'TRUE'),
-      extratable_show_ratios_in_report = (input$extratable_show_ratios_in_report == 'TRUE'),
-      extratable_title = input$extratable_title, # above the table, not in the upper left cell
-      extratable_title_top_row = input$extratable_title_top_row,
-      extratable_list_of_sections = EJAM:::global_or_param("default_extratable_list_of_sections"),
-      extratable_hide_missing_rows_for = input$extratable_hide_missing_rows_for, # c(names_d_language, names_health),
+                                        output_df = data_processed()$results_overall,
+                                        analysis_title =  sanitized_analysis_title(),
+                                        totalpop = popstr,
+                                        locationstr = residents_within_xyz,
+                                        include_ejindexes = (input$include_ejindexes == 'TRUE'),
+                                        show_ratios_in_report = (input$show_ratios_in_report == 'TRUE'),
+                                        extratable_show_ratios_in_report = (input$extratable_show_ratios_in_report == 'TRUE'),
+                                        extratable_title = input$extratable_title, # above the table, not in the upper left cell
+                                        extratable_title_top_row = input$extratable_title_top_row,
+                                        extratable_list_of_sections = EJAM:::global_or_param("default_extratable_list_of_sections"),
+                                        extratable_hide_missing_rows_for = input$extratable_hide_missing_rows_for, # c(names_d_language, names_health),
 
-      filename = NULL,
-      report_title = NULL, #
-      logo_path = NULL,
-      logo_html = NULL
+                                        filename = NULL,
+                                        report_title = NULL, #
+                                        logo_path = NULL,
+                                        logo_html = NULL
     )
     ## return generated HTML
     full_page
@@ -2744,11 +2750,23 @@ app_server <- function(input, output, session) {
     req(data_processed())
     req(input$summ_bar_ind)
     req(input$summ_bar_data)
-
-    ejam2barplot_indicators(ejamitout = data_processed(), indicator_type = input$summ_bar_ind, data_type = input$summ_bar_data)
-
+    ##  if allowing option of median ('med'), use thiS
+    if (input$allow_median_in_barplot_indicators) {
+      # if (global_or_param("default_allow_median_in_barplot_indicators")) {
+      mybarvars.stat <- input$summ_bar_stat
+    } else {
+      mybarvars.stat <- "avg"
+    }
+    mybarvars.sumstat <- switch(mybarvars.stat,
+                                'med' =  c('Median site', 'Median person'),
+                                'avg' = c('Average site', 'Average person')
+    )
+    ejam2barplot_indicators(ejamitout = data_processed(),
+                            indicator_type = input$summ_bar_ind, # D,E,EJ,EJS
+                            data_type = input$summ_bar_data,     # ratio or raw
+                            mybarvars.stat = mybarvars.stat, mybarvars.sumstat = mybarvars.sumstat # average or median
+    )
   }) # end of summ_display_bar  for barplot
-
   #############################################################################  #
   ## *HISTOGRAM interactive    ####
   #. ####

@@ -1905,7 +1905,7 @@ doaggregate_newscores <- function(
   if (missing(radius)) {radius.miles <- round(max(sites2blocks$distance, na.rm = TRUE), 1)}
   ### Infer lat,lon of each ejam_uniq_id if lat,lon not already provided in sites2states_or_latlon ? ####
   # use block lat,lon values to approximate the lat,lon of each site, if we were not given that
-  ## *** this is in doaggregate and not commented out but not used there:
+  ## BUT would need to confirm lat,lon still in output of getblocksnearby() and that they are block not blockgroup lat lon!!
   # if (infer_sitepoints & !all(c("lat","lon") %in% names(results_bysite))) {
   #   sitepoints <- sites2blocks[ , list(lat = mean(lat), lon = mean(lon)), by = "ejam_uniq_id"]
   #   # *** but sitepoints is never used. where should these lat lon values be put, and is this method so inaccurate that it is not worthwhile? trilaterate was not accurate either.

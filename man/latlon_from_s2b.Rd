@@ -2,7 +2,7 @@
 % Please edit documentation in R/latlon_from_s2b.R
 \name{latlon_from_s2b}
 \alias{latlon_from_s2b}
-\title{DRAFT - Estimate lat,lon of site(s) from sites2blocks output of getblocksnearby()
+\title{DRAFT - NOT WORKING YET - Estimate lat,lon of site(s) from sites2blocks output of getblocksnearby()
 trilateration -- Use lat,lon of nearby block points and distances to estimate original sitepoints}
 \usage{
 latlon_from_s2b(s2b)
@@ -14,7 +14,7 @@ latlon_from_s2b(s2b)
 data.table with columns ejam_uniq_id, lat, lon, one row per site
 }
 \description{
-DRAFT - Estimate lat,lon of site(s) from sites2blocks output of getblocksnearby()
+DRAFT - NOT WORKING YET - Estimate lat,lon of site(s) from sites2blocks output of getblocksnearby()
 trilateration -- Use lat,lon of nearby block points and distances to estimate original sitepoints
 }
 \details{
@@ -32,7 +32,7 @@ which needs to figure out what state each site is in to use the right state perc
  pts = testpoints_10
  #x = latlon_from_s2b(getblocksnearby(pts, quiet = T))
  x = latlon_from_s2b(testoutput_getblocksnearby_10pts_1miles)
- cbind(estimate = x, pts, 
+ cbind(estimate = x, pts,
    latratio = x$lat/pts$lat, lonratio = x$lon/pts$lon)
 
 }

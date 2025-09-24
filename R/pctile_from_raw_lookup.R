@@ -3,11 +3,16 @@
 #'
 #' @description This is used with a lookup table to
 #'   convert a raw indicator vector to percentiles in US or States.
-#' @details
+#' @details This function can handle 2 kinds of inputs right now:
+#'
+#'   - a vector of scores and vector of corresponding indicator names, in only 1 zone (e.g. 1 State)
+#'
+#'   - a vector of scores and vector of corresponding zones (States), for only 1 indicator (e.g., pctlowinc)
+#'
 #'
 #'   This could be recoded to be more efficient - could use data.table.
 #'
-#'
+#'s
 #'   The data.frame lookup table must have a field called "PCTILE" that has quantiles/percentiles
 #'   and other column(s) with values that fall at those percentiles.
 #'   [usastats] and [statestats] are such lookup tables.
@@ -62,7 +67,7 @@
 #'           3)
 #'       )
 #'
-#' data.frame(value = eg, 
+#' data.frame(value = eg,
 #'            pctile = t(testoutput_ejamit_10pts_1miles$results_overall[ , ..names_d_pctile]))
 #'
 #' data.frame(value = eg, pctile = lookup_pctile(eg, names_d))
@@ -85,7 +90,7 @@
 #'
 pctile_from_raw_lookup <- function(myvector, varname.in.lookup.table, lookup=usastats, zone = "USA", quiet=TRUE) {
 
-  #  similar code in ejanalysis package file was lookup.pctiles()
+
 
   # CHECK FOR FATAL PROBLEMS  ####
 
@@ -96,10 +101,9 @@ pctile_from_raw_lookup <- function(myvector, varname.in.lookup.table, lookup=usa
     } else {
       stop("lookup default usastats was not found, but should be available as usastats")
     }
-    }
+  }
   if (!is.data.frame(lookup)) {
     if (shiny::isRunning()) {
-
       warning("lookup must be a data.frame like usastats or statestats, with columns PCTILE, REGION, and the names of indicators like pctlowinc")
       return(rep(NA, length(myvector)))
 
@@ -113,39 +117,43 @@ pctile_from_raw_lookup <- function(myvector, varname.in.lookup.table, lookup=usa
       return(rep(NA, length(myvector)))
     } else {
       stop('lookup must have a field called "PCTILE" that contains quantiles/percentiles')
-
     }
-    }
+  }
   if (missing(zone) & any(lookup$REGION != 'USA')) {
     if (shiny::isRunning()) {
       warning('If no zone (like "NY") is specified, lookup table must have column called REGION that has "USA" in every row.')
       return(rep(NA, length(myvector)))
-
     } else {
       stop('If no zone (like "NY") is specified, lookup table must have column called REGION that has "USA" in every row.')
-
     }
-    }
-
+  }
+  ######################################################################################### #
   if (length(varname.in.lookup.table) > 1 )  {
     if (length(zone) == 1 & length(varname.in.lookup.table) == length(myvector) ) {
       ##   allow multiple indicators at once, for a vector of corresponding values, but only 1 zone, like this:
+
       message("checking each value for its corresponding indicator, such as c(12,40)  for  ('pm','o3')  ")
-      return( mapply(FUN = pctile_from_raw_lookup, myvector = myvector, varname.in.lookup.table = varname.in.lookup.table, MoreArgs = list(lookup = lookup, zone = zone)) )
+      return(
+        mapply(
+          FUN = pctile_from_raw_lookup,
+          myvector = myvector,
+          varname.in.lookup.table = varname.in.lookup.table,
+          MoreArgs = list(lookup = lookup, zone = zone)
+        )
+      )
     } else {
+      ##   CANNOT HANDLE multizone if not 1 score per indicator name vector
       ## check if being used in a running shiny app
       if (shiny::isRunning()) {
         warning("Can provide vectors of values and of zones like states, but then must specify only one variable (column name) as varname.in.lookup.table, like 'pctlowinc' -
            or can provide vectors of values and corresponding variables but only in 1 zone")
-
         ## return vector of all NAs, match length of input vector
         return(rep(NA, length(myvector)))
-
       } else{
         stop("Can provide vectors of values and of zones like states, but then must specify only one variable (column name) as varname.in.lookup.table, like 'pctlowinc' -
            or can provide vectors of values and corresponding variables but only in 1 zone")
+        #     can provide vectors of values and corresponding zones     but only for 1 variable (indicator type).
       }
-
     }
   }
 
@@ -166,7 +174,7 @@ pctile_from_raw_lookup <- function(myvector, varname.in.lookup.table, lookup=usa
     }
   }
 
-  # remove mean - too slow? *** ####
+  # remove mean - too slow?  this function gets called once for every single indicator that is reported as pctiles, so this is probably slowing it down *** ####
   lookup <- lookup[lookup$PCTILE != "mean", ]
 
   # CHECK FOR WARNINGS overall ####
@@ -182,32 +190,36 @@ pctile_from_raw_lookup <- function(myvector, varname.in.lookup.table, lookup=usa
   }
 
   ######################################################################### #
-  # loop over zones  ####
+  # loop over zones vector (groups of sites, grouped by zone)  ####
   # (States or just USA works too, but this code is a bit inefficient now for that case)
   ######################################################################### #
 
-  whichinterval        <- vector(length = NROW(myvector)) # empty, will store results zone by zone
-  match        <- vector(length = NROW(myvector)) # empty, will store results zone by zone
+  whichinterval        <- vector(length = NROW(myvector)) # empty, will store site results zone by zone, in vector as long as # of sites, where all sites in 1 unique zone get results at once
+  match                <- vector(length = NROW(myvector)) # empty, will store results zone by zone
   percentiles_reported <- vector(length = NROW(myvector)) # empty, will store results zone by zone
 
   for (z in unique(zone)) {
     ## WARN if zone does not exist in lookup table ####
+    if (is.na(z)) {
+      percentiles_reported[is.na(zone)] <- NA
+      next # skip sites where zone was NA, like ST (state) is unknown/unidentified, like for invalid input e.g.
+    }
     if (!(z %in% lookup$REGION)) {
       warning("zone = ", z, "was not found in the percentile lookup table column called REGION, so percentiles will be reported as NA, in zone = ", z, " for all indicators.") # but this msg will appear every single time you do this function on 1 indicator!!
-      percentiles_reported[zone == z] <- NA
+      percentiles_reported[zone %in% z] <- NA
       next # go to next zone (for this one indicator)
     }
 
-    myvector_selection <- myvector[zone == z]        # sort(myvector)
-    myvector_lookup <-   lookup[lookup$REGION == z, varname.in.lookup.table]  # this is probably slower than could be, if just USA or large number of zones (and many indicators)
+    myvector_selection <- myvector[zone %in% z]        # sort(myvector)
+    myvector_lookup <-   lookup[lookup$REGION %in% z, varname.in.lookup.table]  # this is probably slower than could be, if just USA or large number of zones (and many indicators)
 
     # WARN if all or just some values in myvector_selection are NA,  ####
     #  findInterval(x=myvector_selection, vec=myvector_lookup) returns NA for each is.na(x)
     if (all(is.na(myvector_selection))) {
       if (!quiet) {
-      message("Among these results, all raw scores were NA (so percentiles will be reported as NA) in zone = ", z, " for ", varname.in.lookup.table, ".")
+        message("Among these results, all raw scores were NA (so percentiles will be reported as NA) in zone = ", z, " for ", varname.in.lookup.table, ".")
       }
-        percentiles_reported[zone == z] <- NA
+      percentiles_reported[zone %in% z] <- NA
       next # go to next zone (for this one indicator)
     }
 
@@ -216,14 +228,14 @@ pctile_from_raw_lookup <- function(myvector, varname.in.lookup.table, lookup=usa
     # Just assume the lookup is useless for this indicator in this zone, probably because no blockgroupstats data at all for that indicator in that zone,
     # rather than figuring out why some percentiles in lookup are NA in this zone.
     if (any(is.na(myvector_lookup))) {
-      # whichinterval[zone == z] <- rep(NA, length(myvector_selection))
+      # whichinterval[zone %in% z] <- rep(NA, length(myvector_selection))
       message("In zone = ", z, " for ", varname.in.lookup.table, " indicator, ", "the lookup table lacks percentile information, so those percentiles will be reported as NA")
-      percentiles_reported[zone == z] <- NA
+      percentiles_reported[zone %in% z] <- NA
       next  # go to next zone (for this one indicator)
     }
 
     # findInterval ####
-    
+
     # 1.) Uses findInterval to bin each percentile vector value into unique percentile vectors; Results are a list of bin values rather than acutal percentiles
     # 2.) Percentile indices are calculated based on the first nonduplicate values (indices are based on 1-100 percentile location)
     # 3.) Percentile indices are applied to the bin values vector in step 1 to assign the appropriate percentile value to vector selection
@@ -232,43 +244,43 @@ pctile_from_raw_lookup <- function(myvector, varname.in.lookup.table, lookup=usa
 
     #nondupvec <- which(!duplicated(myvector_lookup,fromLast = FALSE))
     nondupvec <- which(!duplicated(myvector_lookup,fromLast = TRUE))
-    
+
     ## get list of duplicated values (ties)
     dupvals <- unique(myvector_lookup[which(duplicated(myvector_lookup,fromLast = TRUE))])
-   
-    whichinterval[zone == z] <- nondupvec[nondupe_interval]
-    
+
+    whichinterval[zone %in% z] <- nondupvec[nondupe_interval]
+
     ## check if any inputted values match tied
     if (any(dupvals %in% myvector_selection)) {
-     
+
       for (d in dupvals) {
         ## if they match a tied value, assign lowest of tied percentiles
-        whichinterval[zone == z][myvector_selection == d] <- min(which(myvector_lookup == d))
+        whichinterval[zone %in% z][myvector_selection == d] <- min(which(myvector_lookup == d))
       }
     }
-   
+
     # WARN if raw score < PCTILE 0, in lookup ! ####
     # WARN if a raw value < minimum raw value listed in lookup table (which should be percentile zero). Why would that table lack the actual minimum? when created it should have recorded the min of each indic in each zone as the 0 pctile for that indic in that zone.
     # *** COULD IT BE THAT UNITS ARE MISMATCHED?  e.g., QUERY IS FOR RAW VALUE OF 0.35 (FRACTION OF 1) BUT LOOKUP TABLE USES RAW VALUES LIKE 35 (PERCENT. FRACTION OF 100) ?
-    belowmin <- (myvector_selection < min(myvector_lookup)) 
+    belowmin <- (myvector_selection < min(myvector_lookup))
     if (any(belowmin, na.rm = TRUE)) {
-      whichinterval[zone == z][!is.na(belowmin) & belowmin]  <- 1 # which means 0th percentile
+      whichinterval[zone %in% z][!is.na(belowmin) & belowmin]  <- 1 # which means 0th percentile
       warning("Some raw values were < min (0th PCTILE) seen in the percentile lookup table (you should confirm myvector and lookup are in same units, like percents reported as 0.00 to 1.00 versus as 0 to 100!), so percentile will be reported as 0, in zone = ", z, " for ", varname.in.lookup.table, ".")
     }
     #print(zone)
     #print(z)
-    whichinterval[zone == z][is.na(belowmin)] <- 1 # will not be used but wont cause error. pctile reported will be NA in this case.
-    percentiles_reported[zone == z] <- as.numeric(lookup$PCTILE[lookup$REGION == z][whichinterval[zone == z]]) # this is just in case each zone has a different number of or set of PCTILE values.
+    whichinterval[zone %in% z][is.na(belowmin)] <- 1 # will not be used but wont cause error. pctile reported will be NA in this case.
+    percentiles_reported[zone %in% z] <- as.numeric(lookup$PCTILE[lookup$REGION %in% z][whichinterval[zone %in% z]]) # this is just in case each zone has a different number of or set of PCTILE values.
     # returns NA if belowmin is NA
-    percentiles_reported[zone == z][is.na(belowmin)] <- NA
-    
-    
+    percentiles_reported[zone %in% z][is.na(belowmin)] <- NA
+
+
     #set percentile to zero if myvector_selection <= 0
-    percentiles_reported[zone == z][myvector_selection <= 0] <- 0
+    percentiles_reported[zone %in% z][myvector_selection <= 0] <- 0
     # set first nonzero percentile to second value
 
-   #percentiles_reported[zone == z][(myvector_selection > 0 & myvector_selection < unique_vlookup[1])] <- nondupvec[2]-1
-    #percentiles_reported[zone == z][(myvector_selection > 0 & myvector_selection < unique_vlookup[2])] <- high_pctiles_tied_with_min[[z]][[varname.in.lookup.table]]#nondupvec[2]-1
+    #percentiles_reported[zone %in% z][(myvector_selection > 0 & myvector_selection < unique_vlookup[1])] <- nondupvec[2]-1
+    #percentiles_reported[zone %in% z][(myvector_selection > 0 & myvector_selection < unique_vlookup[2])] <- high_pctiles_tied_with_min[[z]][[varname.in.lookup.table]]#nondupvec[2]-1
   } # end of loop over zones ####
 
   return(percentiles_reported)

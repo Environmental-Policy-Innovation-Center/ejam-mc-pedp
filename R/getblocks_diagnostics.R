@@ -193,9 +193,10 @@ getblocks_diagnostics <- function(x, detailed=FALSE, see_pctiles=FALSE, see_dist
   # Distances ####
 
   cat("\n   DISTANCES FROM BLOCKS (AND RESIDENTS) TO SITES (AND FOR CLOSEST SITE) \n")
+  cat("\n NOTE: This only analyzes the sites that had at least 1 block, since those with zero blocks are not in the output of getblocksnearby() or related functions get_blockpoints_in_shape() or getblocksnearby_from_fips()\n")
   if (see_pctiles) {
     cat("\n")
-    print(cbind(percentiles.of.distance = quantile(x$distance, probs = (0:20)/20)))
+    print(cbind(percentiles.of.distance = quantile(x$distance, probs = (0:20)/20, na.rm = TRUE)))
   }
   cat("\n")
   cat(max(x$distance_unadjusted, na.rm = TRUE), "miles is max. distance to block internal point (distance_unadjusted)  ", "\n")

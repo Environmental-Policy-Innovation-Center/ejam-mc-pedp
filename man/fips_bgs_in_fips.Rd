@@ -30,27 +30,40 @@ or are contained within any provided tract/county/state FIPS.
 }
 \examples{
 
-  # all blockgroups in one state
-  fips_counties_from_state_abbrev("DE")
+  # all blockgroups in one state (as a single vector)
+  fips_counties_from_state_abbrev("DE") # there are 3 counties
   fips_bgs_in_fips( fips_counties_from_state_abbrev("DE") )
 
   blockgroupstats[,.N,by=substr(bgfips,1,2)]
-  length(fips_bgs_in_fips("72"))
+  length(fips_bgs_in_fips("72")) # finds all that blockgroupstats has
 
   # all blockgroups in this one county
   fips_bgs_in_fips(30001)
-  fips_bgs_in_fips("30001")
-  fips_bgs_in_fips(fips_counties_from_statename("Rhode Island")[1])
 
-  # all blockgroups that contain any of these 6 blocks (i.e., just one bg)
-  ## dataload_dynamic("blockid2fips") # very large file to avoid using unless essential
-  ## x = blockid2fips$blockfips[1:6] 
+  # all blockgroups for (that contain any of) these 6 blocks (i.e., just one bg)
   x = c("010010201001000", "010010201001001", "010010201001002",
    "010010201001003", "010010201001004", "010010201001005")
   fips_bgs_in_fips(x)
 
-  # 2 counties
-  fips_bgs_in_fips(c(36009,36011))
+testfipslist <- list(
+  blockgroup = testinput_fips_blockgroups,
+  tract = testinput_fips_tracts,
+  city = testinput_fips_cities, # for cities, must use getblocksnearby_from_fips()
+  county = testinput_fips_counties,
+  state = testinput_fips_states,
+  mix = c(testinput_fips_blockgroups[1],
+          testinput_fips_tracts[3],
+          testinput_fips_cities[1],
+          "53023",
+          56) # name2fips('WY')
+)
+testfipslist = lapply(testfipslist, function(z) {attributes(z) <- NULL; z}) # drop distracting metadata
+
+x  = sapply(testfipslist, function(v) sapply(v, fips_bgs_in_fips ))
+x1 = sapply(testfipslist, function(v) sapply(v, fips_bgs_in_fips1))
+all.equal(x, x1)
+x['tract']
+x['county']
 
 }
 \seealso{

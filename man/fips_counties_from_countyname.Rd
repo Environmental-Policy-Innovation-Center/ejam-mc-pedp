@@ -35,5 +35,5 @@ get FIPS for a county based on part of the countyname and state abbrev
  fips_counties_from_countyname("Harris County, Texas", "TX") # finds 0 if state spelled out
  fips_counties_from_countyname("harris county, tx") # can omit ST param like this
  fips_counties_from_countyname("Harris County TX")  # needs comma
- 
+
 }

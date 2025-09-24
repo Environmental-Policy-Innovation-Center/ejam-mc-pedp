@@ -132,10 +132,7 @@ the workbook will be saved locally at that path and name. Warning: it will overw
 a workbook, ready to be saved in spreadsheet format, with tabs like "Overall" and "Each Site"
 }
 \description{
-Used by table_xls_from_ejam()
-}
-\details{
-Already took and put here most or all of code from table_xls_format() or table_xls_format_api()
+Used by table_xls_from_ejam(), and see ejam2excel()
 }
 \examples{
 \donttest{
@@ -150,6 +147,6 @@ Already took and put here most or all of code from table_xls_format() or table_x
 
 }
 \seealso{
-\code{\link[=table_xls_from_ejam]{table_xls_from_ejam()}}
+\code{\link[=ejam2excel]{ejam2excel()}} and related functions like \code{\link[=table_xls_from_ejam]{table_xls_from_ejam()}}
 }
 \keyword{internal}

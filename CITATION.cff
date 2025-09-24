@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: The July 2025 version of EJAM is an updated package that was created starting from a fork detached from the original USEPA/EJAM-open v2.32.4. If you use or refer to this software, please cite it as follows:
+authors:
+- family-names: Mark A.
+  given-names: Corrales
+  email: ejam@ejanalysis.com
+  orcid: https://orcid.org/0000-0002-1696-5638
+title: Environmental and Residential Population Analysis Multisite tool (EJAM) (non-EPA version)
+version: 2.32.5
+year: 2025
+date-released: 2025-07-23
+url: https://ejanalysis.github.io/EJAM/index.html, https://ejanalysis.com
+repository-code: https://github.com/ejanalysis/EJAM

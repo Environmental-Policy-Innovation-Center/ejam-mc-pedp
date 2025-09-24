@@ -79,6 +79,27 @@ z = shapefile_from_any(zcta2)
 mapfast(z)
 ```
 
+## Another source of zip code polygons (esri service)
+
+```{r arcgis zip service, eval=FALSE, include=TRUE}
+
+# Download spatial bounds for all zipcodes in Delaware
+ST1 <- "DE"
+url1 <- paste0("https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2022/FeatureServer/3/query?",
+  "where=STATE%3D%27", ST1, "%27",
+  "&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&units=esriSRUnit_Meter&relationParam=&returnGeodetic=false",
+  "&outFields=*",
+  "&returnGeometry=true",
+  "&f=json")
+require(httr2); require(sf); require(mapview)
+response1 <- httr2::req_perform(httr2::request(url1))
+text1 <- httr2::resp_body_string(response1)
+shp1 <- sf::st_read(text1)
+mapview::mapview(shp1)
+```
+
+
+
 ## analyzing zip codes in EJAM
 
 The EJScreen API does not handle zip codes, but you can analyze them in EJAM like this:

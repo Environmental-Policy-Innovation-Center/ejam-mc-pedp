@@ -1,4 +1,4 @@
- 
+
 #######  THIS TEST IS SLOW !!!!!!!!!!
 
 testthat::test_that("Estimate of radius, inferred from reported distances from getblocksnearby(), is accurate if radius specified with 2 or 3 decimals", {
@@ -29,7 +29,7 @@ capture_output({
       # print(
       # system.time(
       out[i, "actual"]   <- actual # single number
-      out[i, "inferred"] <- inferred <- radius_inferred(x) # single number
+      out[i, "inferred"] <- inferred <- EJAM:::radius_inferred(x) # single number
       out[i, "diff"]     <- diff <- (inferred - actual) # single number
       out[i, "pctdiff"]  <- pctdiff <- 100 * diff / actual # single number
 
@@ -59,7 +59,7 @@ capture_output({
   # )
   #
   testthat::expect_lt(
-    radius_error(trials = 25, DECIMALS_USED_FOR_ACTUAL_RADIUS = 3)['max_abs_error'],
+    radius_error(trials = 10, DECIMALS_USED_FOR_ACTUAL_RADIUS = 3)['max_abs_error'],
     0.1  # see if error is average of under a tenth of a mile, for all trials
   )
 

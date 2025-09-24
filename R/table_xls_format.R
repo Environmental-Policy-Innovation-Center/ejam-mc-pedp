@@ -1,8 +1,7 @@
 #' Format EJAM tabular outputs for saving as Excel spreadsheet
 #'
-#' Used by table_xls_from_ejam()
+#' Used by table_xls_from_ejam(), and see ejam2excel()
 #'
-#' @details  Already took and put here most or all of code from table_xls_format() or table_xls_format_api()
 #' @param overall  table to save in one tab, from ejamit()$results_overall, EJAM analysis of indicators overall (one row),
 #'   but if entire output of ejamit() is passed as if it were overall, function figures out eachsite, etc.
 #' @param eachsite table to save in one tab, from ejamit()$results_bysite, EJAM analysis site by site (one row per site)
@@ -54,7 +53,7 @@
 #' @param ejscreen_ejam_caveat optional text if you want to change this in the notes tab
 #' @param ... other params passed along to [openxlsx::writeData()]
 #'
-#' @seealso [table_xls_from_ejam()]
+#' @seealso [ejam2excel()] and related functions like [table_xls_from_ejam()]
 #' @return a workbook, ready to be saved in spreadsheet format, with tabs like "Overall" and "Each Site"
 #' @examples \donttest{
 #'   table_xls_format(

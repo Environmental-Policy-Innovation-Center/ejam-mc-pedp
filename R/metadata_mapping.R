@@ -42,7 +42,7 @@ default_metadata <- list(
 
 # metadata_mapping ####
 
-# x = datapack("EJAM")
+# x = pkg_data("EJAM")
 # # Not included here yet:
 # cbind(sort(setdiff(x$Item, cbind(names(metadata_mapping)))))
 
@@ -99,14 +99,14 @@ metadata_mapping <- list(
   stateinfo  =	list(), ##########  just the date it was updated is what matters for this
   stateinfo2 =  list(), ##########  just the date it was updated is what matters for this
 
-  # TEST DATA SETS 
-  
+  # TEST DATA SETS
+
   # datacreate_testpoints_testoutputs.R
-  
-  ## see   cbind(data.in.package  = sort(grep("test", datapack()$Item, value = T)))
-  
+
+  ## see   cbind(data.in.package  = sort(grep("test", pkg_data()$Item, value = T)))
+
   ## etc. inputs ####
-  
+
   testshapes_2 = list(),
 
   testpoints_10 =	list(),
@@ -119,52 +119,51 @@ metadata_mapping <- list(
   testpoints_500 =	list(),
   testpoints_bad =	list(),
   testpoints_overlap3 =	list(),
-  
+
   # datacreate_testinput_address_table.R
-  testinput_address_table = list(), ######### #  
+  testinput_address_table = list(), ######### #
   testinput_address_table_goodnames = list(),
   testinput_address_table_withfull = list(),
-  
+
   # datacreate_testinput_program_sys_id.R
-  testinput_program_sys_id = list(), ##########  just the date it was updated is what matters for this
-  
+  # testinput_program_sys_id = list(), ##########  just the date it was updated is what matters for this, but omitting metadata so it can remain a vector per is.vector()
+
   # datacreate_testinput_registry_id.R
-  testinput_registry_id = list(), ##########  just the date it was updated is what matters for this
-  testinput_regid = list(),
-  testinput_xtrac = list(),
-  
+  # testinput_registry_id = list(), ##########  just the date it was updated is what matters for this, but omitting metadata so it can remain a vector per is.vector()
+  # testinput_regid = list(), # , but omitting metadata so it can remain a vector per is.vector()
+
   ## etc. outputs ####
-  
-  # [4,] "testoutput_ejamit_1000pts_1miles"         
-  # [5,] "testoutput_ejamit_100pts_1miles"          
-  # [6,] "testoutput_ejamit_10pts_1miles"      
-  
+
+  # [4,] "testoutput_ejamit_1000pts_1miles"
+  # [5,] "testoutput_ejamit_100pts_1miles"
+  # [6,] "testoutput_ejamit_10pts_1miles"
+
   # [13,] "testoutput_getblocksnearby_1000pts_1miles"
-  # [14,] "testoutput_getblocksnearby_100pts_1miles" 
-  # [15,] "testoutput_getblocksnearby_10pts_1miles"  
-  
-  # [1,] "testoutput_doaggregate_1000pts_1miles"    
-  # [2,] "testoutput_doaggregate_100pts_1miles"     
-  # [3,] "testoutput_doaggregate_10pts_1miles"    
-  
-  # [7,] "testoutput_ejscreenapi_1pts_1miles"       
-  # [8,] "testoutput_ejscreenapi_plus_5"            
-  # [9,] "testoutput_ejscreenit_5"                  
-  # [10,] "testoutput_ejscreenit_50"                 
-  # [11,] "testoutput_ejscreenit_500"                
+  # [14,] "testoutput_getblocksnearby_100pts_1miles"
+  # [15,] "testoutput_getblocksnearby_10pts_1miles"
+
+  # [1,] "testoutput_doaggregate_1000pts_1miles"
+  # [2,] "testoutput_doaggregate_100pts_1miles"
+  # [3,] "testoutput_doaggregate_10pts_1miles"
+
+  # [7,] "testoutput_ejscreenapi_1pts_1miles"
+  # [8,] "testoutput_ejscreenapi_plus_5"
+  # [9,] "testoutput_ejscreenit_5"
+  # [10,] "testoutput_ejscreenit_50"
+  # [11,] "testoutput_ejscreenit_500"
   # [12,] "testoutput_ejscreenRESTbroker_1pts_1miles"
-  
+
   testoutput_ejamit_10pts_1miles = default_metadata,
   testoutput_ejamit_100pts_1miles = default_metadata,
   testoutput_ejamit_1000pts_1miles = default_metadata,
 
   # skip most of them
-  
+
   testoutput_ejscreenRESTbroker_1pts_1miles = default_metadata,
 
   ejscreenRESTbroker2table_na_filler = default_metadata,
 
-  
+
   test_metadata_custom = list(
     custominfo = 0,
     moreinfo = "oldvalue",

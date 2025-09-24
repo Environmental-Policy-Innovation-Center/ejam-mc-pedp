@@ -28,6 +28,9 @@ metadata_update_attr()
 
 This utility would be used in scripts in EJAM/data-raw/ to
 add metadata to objects like x before use_data(x, overwrite=T)
+
+Note that by adding attributes, this function changes a vector
+so that is.vector() will no longer be true!
 }
 \examples{
   # metadata_check() # internal function
