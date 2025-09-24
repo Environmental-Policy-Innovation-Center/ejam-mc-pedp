@@ -156,8 +156,9 @@ calc_byformula <- function(mydf, formulas = NULL, keep = formula_varname(formula
   #  cat('\n formulas: ', formulas,'\n\n')
   #  cat('\n keep: ', keep,'\n\n')
 
-  attach(mydf)
-  on.exit(detach(mydf))
+  warning("attach() cannot be done here or it fails CRAN checks like devtools::check() ") # look at envt etc.
+  # attach(mydf)
+  # on.exit(detach(mydf))
 
   for (thisformula in formulas) {
 
@@ -185,6 +186,7 @@ calc_byformula <- function(mydf, formulas = NULL, keep = formula_varname(formula
     # y <- try(source_this_codetext(thisformula), silent = FALSE)
 
     y <- try(source_this_codetext(thisformula), silent = TRUE)
+
     # tries to evaluate formula in THIS environment (the one that called the function source_this... )
     suppressWarnings(
       if (inherits(y, "try-error")) {
