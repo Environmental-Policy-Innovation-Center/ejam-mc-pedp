@@ -20,6 +20,7 @@
 #'
 #' @param shapefile  see [ejamit()], but each polygon is encoded as geojson string
 #'   which might get too long for encoding in a URL for the API using GET
+#' @param dTolerance number of meters tolerance to use in [sf::st_simplify()] to simplify polygons to fit as url-encoded text geojson
 #'
 #' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
 #' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
@@ -102,6 +103,7 @@ url_ejamapi = function(
 
   fips = NULL,
   shapefile = NULL,
+  dTolerance = 100, # 100 meters tolerance to simplify polygons to fit as url-encoded text geojson
 
   ## unused so far:
   # countcols = NULL,
@@ -266,7 +268,9 @@ url_ejamapi = function(
         # overall 1 URL: provide all the sites in one URL, and pass sitenumber=0 to the API
         # remove empty geography rows first
         if (any(!bad)) {
-        geotxt <- shape2geojson(shapefile[!bad,], combine_in_one_string = TRUE) # overall summary multisite report
+        geotxt <- shape2geojson(
+          sf::st_simplify(shapefile[!bad,], dTolerance = dTolerance), # SIMPLIFY POLYGONS to fit as url-encoded text
+          combine_in_one_string = TRUE) # overall summary multisite report
         } else {
           geotxt <- NA
         }
@@ -276,13 +280,17 @@ url_ejamapi = function(
         if (bad[sitenumber]) {
           geotxt <- NA
         } else {
-          geotxt <- shape2geojson(shapefile[sitenumber, ], combine_in_one_string = FALSE) # 1-site report
+          geotxt <- shape2geojson(
+            sf::st_simplify(shapefile[sitenumber, ], dTolerance = dTolerance), # SIMPLIFY POLYGONS to fit as url-encoded text
+            combine_in_one_string = FALSE) # 1-site report
         }
         sitenumber <- "" # now omit this from the URL used in API
       }
       if (!is.null(sitenumber) && -1 %in% sitenumber) {
         # "each" site's URL: provide vector of urls, 1 site in each, and do not pass any sitenumber parameter to the API (since saying sitenumber=1 for each would be confusing)
-        geotxt <- shape2geojson(shapefile, combine_in_one_string = FALSE) # 1-site reports as a vector
+        geotxt <- shape2geojson(
+          sf::st_simplify(shapefile, dTolerance = dTolerance), # SIMPLIFY POLYGONS to fit as url-encoded text
+          combine_in_one_string = FALSE) # 1-site reports as a vector
         if (any(bad)) {
         geotxt[bad] <- NA
         }
