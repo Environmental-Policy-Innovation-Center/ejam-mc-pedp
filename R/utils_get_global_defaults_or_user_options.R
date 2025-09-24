@@ -41,7 +41,7 @@ app_logo_HTML_global_or_param = function(app_logo_now = EJAM:::global_or_param("
 
 #' utility that reconciles/ consolidates user-defined params passed via ejamapp() and settings from global_defaults_ files
 #'
-#' @param user_specified_options named list of any optonal arguments that were in the call to [ejamapp()]
+#' @param user_specified_options named list of any optional arguments that were in the call to [ejamapp()]
 #' @param bookmarking_allowed same as [shiny::shinyApp] enableBookmarking param
 #'
 #' @returns a list of global defaults or user options that [ejamapp()]

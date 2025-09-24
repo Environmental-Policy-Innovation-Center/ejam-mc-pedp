@@ -85,7 +85,7 @@
 #' @param ...   see get_acs from tidycensus package
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' ## All states, full table
 #' # newvars <- acs_bybg(table = "B01001")
 #'
@@ -94,7 +94,7 @@
 #'
 #' ## Format new data to match rows of blockgroupstats
 #'
-#' setnames(newvars, "GEOID", "bgfips")
+#' data.table::setnames(newvars, "GEOID", "bgfips")
 #' dim(newvars)
 #' newvars <- newvars[blockgroupstats[,.(bgfips, ST)], ,  on = "bgfips"]
 #' dim(blockgroupstats)
@@ -107,7 +107,7 @@
 #' mystates = c("DC", 'RI')
 #' newvars <- acs_bybg(variables = c("B01001_001", paste0("B01001_0", 31:39)),
 #'   state = mystates)
-#' setnames(newvars, "GEOID", "bgfips")
+#' data.table::setnames(newvars, "GEOID", "bgfips")
 #' newvars[, ST := fips2state_abbrev(bgfips)]
 #' names(newvars) <- gsub("E$", "", names(newvars))
 #'
