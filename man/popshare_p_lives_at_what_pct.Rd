@@ -23,7 +23,7 @@ vector of fractions 0-1 of all sites, or text about that
 what percent of sites account for P percent of residents?
 }
 \examples{
- x <- testdata_ejamit_output_100pts_1miles$results_bysite
+ x <- testoutput_ejamit_10pts_1miles$results_bysite[4:9,]
  popshare_p_lives_at_what_pct(x$pop, p = 0.50, astext=TRUE)
  popshare_p_lives_at_what_n(  x$pop, p = c(0.50, 0.67, 0.80, 0.95))
  popshare_at_top_x_pct(       x$pop, x = c(0.25, 0.50, .90))

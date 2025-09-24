@@ -55,7 +55,8 @@ test_that("ejamit() still returns results_overall identical to what it used to r
           (saved as testoutput_ejamit_10pts_1miles$results_overall)", {
             suppressWarnings({
               suppressMessages({
-                ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE)  #  - takes roughly 5-10 seconds
+                if (!exists("ejamitoutnow")) {stop("ejamitoutnow is missing but should have been created by EJAM/tests/testthat/setup.R")}
+                # ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE)  #  - takes roughly 5-10 seconds
 
                 expect_equal(
                   ejamitoutnow$results_overall,
@@ -72,7 +73,8 @@ test_that("ejamit() still returns results_bysite identical to expected numbers i
           (saved as testoutput_ejamit_10pts_1miles$results_bysite)", {
             suppressWarnings({
               suppressMessages({
-                ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE) # see setup.R - takes roughly 5-10 seconds
+                if (!exists("ejamitoutnow")) {stop("ejamitoutnow is missing but should have been created by EJAM/tests/testthat/setup.R")}
+                # ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE) # see setup.R - takes roughly 5-10 seconds
                 expect_equal(
                   ejamitoutnow$results_bysite,
                   testoutput_ejamit_10pts_1miles$results_bysite,
@@ -86,7 +88,8 @@ test_that("ejamit() still returns results_bysite identical to expected numbers i
 ########################################################## #
 
 test_that("ejamit() returns same exact colnames() in both results_bysite and results_overall", {
-  ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE) # see setup.R - takes roughly 5-10 seconds
+  if (!exists("ejamitoutnow")) {stop("ejamitoutnow is missing but should have been created by EJAM/tests/testthat/setup.R")}
+  # ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE) # see setup.R - takes roughly 5-10 seconds
   expect_identical(
     colnames(ejamitoutnow$results_bysite),
     colnames(ejamitoutnow$results_overall)

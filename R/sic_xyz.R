@@ -4,10 +4,10 @@
 #' @param ... passed to [sic_from_any()]
 #' @return relevant rows of the data.table called frs, which has column names that are
 #'   "lat" "lon" "REGISTRY_ID" "PRIMARY_NAME" "NAICS" "SIC" "PGM_SYS_ACRNMS"
-#'   
+#'
 #'  The EPA also provides a [FRS Facility Industrial Classification Search tool](https://www.epa.gov/frs/frs-query#industrial)
 #'  where you can find facilities based on NAICS or SIC.
-#'  
+#'
 #' @seealso [regid_from_sic()] [sic_from_any()] [latlon_from_sic()]
 #' @export
 #'
@@ -26,14 +26,14 @@ frs_from_sic <- function(sic_code_or_name, ...) {
   if (!exists("frs_arrow")) {
     dataload_dynamic("frs", return_data_table = FALSE)
   }
-  
+
   regid <- regid_from_sic(sic_from_any(sic_code_or_name, ...)$code, id_only = TRUE)
-  
+
   res <- frs_arrow %>%
     filter(.data$REGISTRY_ID %in% regid) %>%
-    collect() %>% 
+    collect() %>%
     data.table::as.data.table()
-  
+
   return(res)
 }
 ############################################################################## #
@@ -44,10 +44,10 @@ frs_from_sic <- function(sic_code_or_name, ...) {
 #' @description Get lat lon, Registry ID, given SIC industry code(s)
 #' Find all EPA Facility Registry Service (FRS) sites with this exact SIC code (not subcategories)
 #' @details
-#'   
+#'
 #'  The EPA also provides a [FRS Facility Industrial Classification Search tool](https://www.epa.gov/frs/frs-query#industrial)
 #'  where you can find facilities based on NAICS or SIC.
-#' 
+#'
 #'  NOTE: many FRS sites lack SIC code!
 #'
 #'   Also, this function does not find the sites
@@ -59,7 +59,7 @@ frs_from_sic <- function(sic_code_or_name, ...) {
 #' @param sic a vector of SIC codes, or
 #'   a data.table with column named code, as with output of [EJAM::sic_from_any()]
 #' @param id_only logical optional, set TRUE to get only the vector of REGISTRY_ID
-#'   values back instead of a data.frame with lat,lon,SIC columns too. 
+#'   values back instead of a data.frame with lat,lon,SIC columns too.
 #' @return A data.table (not just data.frame) with columns called
 #'   lat, lon, REGISTRY_ID, SIC (unless the id_only parameter is set to TRUE)
 #' @aliases regid_from_sic
@@ -84,7 +84,7 @@ latlon_from_sic <- function(sic, id_only=FALSE) {
 
   if (!exists("frs_by_sic")) dataload_dynamic("frs_by_sic")
 
-  if (data.table::is.data.table(sic) & "code" %in% names(sic)) {sic <- sic$code} # flexible in case it was given output of EJAM::sic_from_any() which is a table not just code
+  if (data.table::is.data.table(sic) & "code" %in% names(sic)) {sic <- sic$code} # flexible in case it was given output of sic_from_any() which is a table not just code
 
 
   df <- frs_by_sic[SIC %in% sic]

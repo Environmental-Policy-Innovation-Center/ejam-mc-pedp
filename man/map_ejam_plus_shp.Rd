@@ -36,10 +36,10 @@ used by server, \code{\link[=ejam2map]{ejam2map()}}, and \code{\link[=mapfast]{m
 \dontrun{
 shp1 <- shapefile_from_any(file.path(
   testdatafolder(), "shapes/portland_shp.zip"))
-ejam2map(ejamit(shapefile = shp1, radius = 0), shp = shp1)
+ejam2map(ejamit(shapefile = shp1), shp = shp1)
 shp2 <- testshapes_2
-ejam2map(ejamit(shapefile = shp2, radius = 0), shp = shp2)
-ejam2map(ejamit(shapefile = shp2, radius = 2), shp = shp2)
+ejam2map(ejamit(shapefile = shp2), shp = shp2)
+ejam2map(ejamit(shapefile = shp2), shp = shp2)
 
 }
 

@@ -29,6 +29,7 @@ ejamit(
   threshnames = list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile,
     names_ej_supp_state_pctile)),
   threshgroups = list("EJ-US-or-ST", "Supp-US-or-ST"),
+  reports = EJAM:::global_or_param("default_reports"),
   updateProgress = NULL,
   updateProgress_getblocks = NULL,
   progress_all = NULL,
@@ -55,16 +56,7 @@ ejamit(
 
 \item{avoidorphans}{logical If TRUE, then where not even 1 BLOCK internal point is within radius of a SITE,
 it keeps looking past radius, up to maxradius, to find nearest 1 BLOCK.
-What EJScreen does in that case is report NA, right?
-So, does EJAM really need to report stats on residents presumed to be within radius,
-if no block centroid is within radius?
-Best estimate might be to report indicators from nearest block centroid
-which is probably almost always the one your site is sitting inside of,
-but ideally would adjust total count to be a fraction of blockwt
-based on what is area of circular buffer as fraction of area of block it is apparently inside of.
-Setting this to TRUE can produce unexpected results, which will not match EJScreen numbers.
-Note that if creating a proximity score, by contrast, you
-instead want to find nearest 1 SITE if none within radius of this BLOCK.}
+EJSCREEN would just report NA in that situation.}
 
 \item{quadtree}{(a pointer to the large quadtree object) created using \code{\link[=indexblocks]{indexblocks()}} which uses the \href{https://github.com/gmbecker/SearchTrees}{SearchTree} package.
 Takes about 2-5 seconds to create this each time it is needed.
@@ -121,7 +113,11 @@ at each site. (see default)}
 
 \item{threshgroups}{list of text names of the groups (see default)}
 
-\item{updateProgress}{progress bar function passed to \code{\link[=doaggregate]{doaggregate()}} in shiny app}
+\item{reports}{optional list of lists specifying which report types to include --
+see the file "global_defaults_package.R" or source code for this function for how this is defined.}
+
+\item{updateProgress}{CURRENTLY UNUSED - was a progress bar function passed to \code{\link[=doaggregate]{doaggregate()}} in shiny app,
+but not actually used in ejamit().}
 
 \item{updateProgress_getblocks}{progress bar function passed to \code{\link[=getblocksnearby]{getblocksnearby()}} in shiny app}
 
@@ -136,7 +132,7 @@ which is relevant only if a user saved the output of this function.}
 passed to \code{\link[=doaggregate]{doaggregate()}} also. app server sets this to TRUE when calling \code{\link[=doaggregate]{doaggregate()}} but
 \code{\link[=ejamit]{ejamit()}} default is to set this to FALSE when calling \code{\link[=doaggregate]{doaggregate()}}.}
 
-\item{called_by_ejamit}{Set to TRUE by \code{\link[=ejamit]{ejamit()}} to suppress some outputs even if ejamit(silentinteractive=F)}
+\item{called_by_ejamit}{passed to doaggregate(). Set to TRUE by \code{\link[=ejamit]{ejamit()}} to suppress some outputs even if ejamit(silentinteractive=F)}
 
 \item{testing}{used while testing this function, passed to \code{\link[=doaggregate]{doaggregate()}}}
 
@@ -164,7 +160,7 @@ dim(testoutput_ejamit_10pts_1miles$results_summarized$keyindicators)
 \item \strong{results_overall}  a data.table with one row that provides the summary across all sites, the aggregated results for all unique residents.
 \item \strong{results_bysite}   results for individual sites (buffers) - a data.table of results,
 one row per ejam_uniq_id (i.e., each site analyzed), one column per indicator
-\item \strong{results_bybg_people}  results for each block group, to allow for
+\item \strong{results_bybg_people}  results for each blockgroup, to allow for
 showing the distribution of each
 indicator across everyone, including the distribution within a
 single residential population group, for example. This table is essential

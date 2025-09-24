@@ -15,9 +15,9 @@
 #'   residents live.
 #'
 #'   Finding which blocks have their internal points in a circle provides
-#'   a way to quickly estimate what fraction of a block group is
+#'   a way to quickly estimate what fraction of a blockgroup is
 #'   inside the circular buffer more accurately and more quickly than
-#'   areal apportionment of block groups would provide.
+#'   areal apportionment of blockgroups would provide.
 #'
 #' @details
 #'  See [ejamit()] for examples.
@@ -53,7 +53,7 @@ getblocksnearby  <- function(sitepoints, radius = 3, maxradius = 31.07, radius_d
                              use_unadjusted_distance = TRUE,
                              # a new approach that just uses the distance between site and block when determining which blocks (residents) are within radius
                              # relevant if a block is huge relative to the radius or a block contains a site
-                             # might match EJScreen better?
+                             # might match EJSCREEN better?
                              # and might be a bit faster,
                              # and might find different pop and block count nearby a site
                              # and might give smaller estimates of distance of site to avg person, etc.

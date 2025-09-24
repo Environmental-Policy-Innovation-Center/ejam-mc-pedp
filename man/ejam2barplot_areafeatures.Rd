@@ -20,8 +20,6 @@ ejam2barplot_areafeatures(
 \item{ylab}{optional y axis label}
 
 \item{shortlabels}{optional alternative labels for the bars}
-
-\item{caption}{left blank to avoid default caption used in \code{\link[=plot_barplot_ratios]{plot_barplot_ratios()}}}
 }
 \value{
 ggplot2 plot

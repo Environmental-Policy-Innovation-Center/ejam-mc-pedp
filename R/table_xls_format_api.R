@@ -16,7 +16,6 @@
 #' @return A workbook via openxlsx::writeData() ready to be saved via openxlsx::saveWorkbook()
 #'
 #' @keywords internal
-#' @export
 #'
 table_xls_format_api <- function(df, hyperlink_cols=NULL,
                            heatmap_colnames=NULL,
@@ -32,25 +31,7 @@ table_xls_format_api <- function(df, hyperlink_cols=NULL,
   #
   ########################################################  #
   # pre-prep for excel (was in app_server.R of former ejscreenapi-related package)
-  #
-  ### need to test this, but it should id which columns in results_table() are pctile type according to map_headernames
-  ### and it assumes that right here the colnames are the type that can be found in map_headernames$oldnames
-  #
-  # pctile_colnums <- which('pctile' == map_headernames$jsondoc_shortvartype[match(names(table_as_displayed), map_headernames$oldnames)])
-  #
-  ### fix URLs to work in csv pulled into Excel or in Excel files (as opposed to datatable shown in browser)
-  #
-  # table_as_displayed$`EJScreen Report` <- gsub('.*(http.*)\", target=.*', '\\1', table_as_displayed$`EJScreen Report`)
-  # table_as_displayed$`EJScreen Map` <- gsub('.*(http.*)\", target=.*', '\\1', table_as_displayed$`EJScreen Map`)
-  #
-  #   wb <- table_xls_format_api(df=table_as_displayed,
-  #                        hyperlink_cols=c('EJScreen Report', 'EJScreen Map'),
-  #                        heatmap_colnames=names(table_as_displayed)[pctile_colnums],
-  #                        heatmap_cuts=c(80, 90, 95),
-  #                        heatmap_colors=c('yellow', 'orange', 'red'))
-  #   openxlsx::saveWorkbook(wb, file = file)       # like  openxlsx::write.xlsx(table_as_displayed, file = file)
-  #
-  # ########################################################  #
+   ### fix URLs to work in csv pulled into Excel or in Excel files (as opposed to datatable shown in browser) ?
 
   ######################################################################## #
   # CREATE WORKBOOK ####
@@ -67,8 +48,8 @@ table_xls_format_api <- function(df, hyperlink_cols=NULL,
   # special names for the pdf and map links ####
   ######################################################################## #
 
-  hyperlink_text <- hyperlink_cols # gsub('EJScreenPDF', 'EJScreen Report', hyperlink_cols) # should be obsolete/ fixed
-  hyperlink_text <- hyperlink_cols # gsub('EJScreenMAP', 'EJScreen Map',    hyperlink_cols) # should be obsolete/ fixed
+  hyperlink_text <- hyperlink_cols
+  hyperlink_text <- hyperlink_cols
 
   for (i in 1:length(hyperlink_cols)) {
 
@@ -76,9 +57,9 @@ table_xls_format_api <- function(df, hyperlink_cols=NULL,
     names(df[ , hyperlink_cols[i]]) <- paste(hyperlink_text[i], rownames(df)) #
     }
   # note this does not work if just use write.xlsx and df already had "=hyperlink(...)"
-  # class(df$`EJScreen Report` )  <- "hyperlink" '   # # class(df$`EJScreen Map`)   <- "hyperlink"
-  # names(df$`EJScreen Report`) <- paste("EJScreen Report", rownames(df)) # EJScreen Report 1, EJScreen Report 2, etc.
-  # names(df$`EJScreen Map`) <- paste("EJScreen Map",    rownames(df)) # EJScreen Map 1,    EJScreen Map 2,    etc.
+  # class(df$`EJSCREEN Report` )  <- "hyperlink" '   # # class(df$`EJSCREEN Map`)   <- "hyperlink"
+  # names(df$`EJSCREEN Report`) <- paste("EJSCREEN Report", rownames(df)) # EJSCREEN Report 1, EJSCREEN Report 2, etc.
+  # names(df$`EJSCREEN Map`) <- paste("EJSCREEN Map",    rownames(df)) # EJSCREEN Map 1,    EJSCREEN Map 2,    etc.
 
   hypercolnums <- match(hyperlink_cols, names(df))
   for (i in 1:length(hyperlink_cols)) {

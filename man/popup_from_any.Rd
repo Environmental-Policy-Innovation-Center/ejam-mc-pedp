@@ -39,7 +39,6 @@ Each popup is made from one row of the data.frame.
 Each popup has one row of text per column of the data.frame
 }
 \examples{
- 
  dat <- data.table(
    RegistryId = c("110071102551", "110015787683"),
    FacilityName = c("USDOI FWS AK MARITIME NWR etc", "ADAK POWER PLANT"),
@@ -51,15 +50,15 @@ Each popup has one row of text per column of the data.frame
    FIPSCode = c("02010", "02016"),
    lat = c(51.671389,51.8703), lon = c(-178.051111, -176.659),
    SupplementalLocation = c(NA_character_,NA_character_))
- 
+
  ## add popups only
  leaflet::leaflet(dat) |> leaflet::addTiles() |> leaflet::addPopups(popup = popup_from_any(dat))
- 
+
  ## add circles with clickable popups
  leaflet::leaflet(dat) |> leaflet::addTiles() |> leaflet::addCircles(popup = popup_from_any(dat))
- 
- ## convert to data frame, works the same way 
+
+ ## convert to data frame, works the same way
  dat_df <- as.data.frame(dat_df)
  leaflet::leaflet(dat) |> leaflet::addTiles() |> leaflet::addCircles(popup = popup_from_any(dat))
-  
+
 }

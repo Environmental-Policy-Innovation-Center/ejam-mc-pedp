@@ -1,64 +1,39 @@
 ################################################### #################################################### #
 
+# This file has generic url-related functions/helpers/utilities
+#
 # LIST OF FUNCTIONS HERE ####
 #
 #   see outline via ctrl-shift-O
-#   see also URL_FUNCTIONS_part2.R
+#
+#   also see URL_*.R and url_*.R
 
-
-# ECHO reports on facilities:
-# [url_echo_facility_webpage()]
-# <https://echo.epa.gov/tools/web-services>
-# browseURL("https://echo.epa.gov/tools/web-services")
-# browseURL("https://echo.epa.gov/detailed-facility-report?fid=110068700043#")
-# paste0("https://echo.epa.gov/detailed-facility-report?fid=", regid, "#")
-
-# FRS reports on facilities:
-# [url_frs_report()]
-# see also  https://www.epa.gov/frs/frs-rest-services  or https://www.epa.gov/frs
-# browseURL("https://www.epa.gov/frs/frs-physical-data-model")
-# browseURL("https://frs-public.epa.gov/ords/frs_public2/fii_query_detail.disp_program_facility?p_registry_id=110035807259")
-# browseURL("https://www.epa.gov/frs/frs-query#industrial naics")
-
-# EnviroMapper app webpage:
-# [url_enviromapper()]
-
-# Envirofacts API, data on facilities:
-# [url_envirofacts_data()]
-# browseURL("https://www.epa.gov/enviro/web-services")
-# browseURL("https://www.epa.gov/enviro/envirofacts-data-service-api")
-# <https://www.epa.gov/enviro/web-services> and
-# <https://www.epa.gov/enviro/envirofacts-data-service-api>
-
-# EJScreen report on a location
-
-# [url_ejscreen_report()] or [url_ejscreen_acs_report()]
 ################################################### #################################################### #
-
-#' utility - check if EJScreen API seems to be online or offline
-#' @param url DEFAULT is the 2024 base url of the EJScreen API
-#' @returns TRUE or FALSE (but NA if no internet connection seems to be available at all)
-#'
-#' @keywords internal
-#'
-ejscreenapi_online <- function(url = "https://ejscreen.epa.gov") {
-  url_online(url)
-}
-######################################## #
 
 #' utility - check if URL available, such as if an API is online or offline
 #' @param url the URL to check
 #' @returns TRUE or FALSE (but NA if no internet connection seems to be available at all)
+#' @details
+#' Also see EJAM:::global_or_param("ejamapi_is_down") and EJAM:::global_or_param("ejscreenapi_is_down")
+#'    as set in global_defaults_package.R
 #'
 #' @keywords internal
 #'
-url_online <- function(url) {
+url_online <- function(url = "ejscreen.epa.gov") {
+
   if (missing(url)) {stop("must specify a URL")}
   if (length(url) > 1) {stop("can only check one URL at a time using url_online()")}
   if (offline()) {
     warning("Cannot check URL when offline -- internet connection does not seem to be available")
     return(NA)
   }
+
+  ############## #
+  ## simpler would be:
+  # url_200 <- function(urlx) {200 %in% (httr::HEAD(urlx))$status_code}
+  # url_200(url)
+  ############## #
+  ## more careful
   x <- httr2::request(url)
   junk <- capture.output({x <- try(httr2::req_perform(x), silent = TRUE)})
   if (inherits(x, "try-error")) {
@@ -72,118 +47,9 @@ url_online <- function(url) {
   } else {
     return(TRUE)
   }
+  ############## #
 }
 ################################################### #################################################### #
-
-
-#' Add Links to ejscreenapi output, to launch EJScreen report for given point(s)
-#'
-#' @description Add or update, and reorder, columns with results
-#' @details Was used for [ejscreenapi_plus()] not for [ejamit()], to create weblinks to maps, for output table.
-#'
-#' 1. Adds weblinks in column.
-#' 2. Adds a column to flag sites that are close to other sites, and
-#' 3. Puts certain columns first.
-#'
-#' @param results_table from [ejscreenapi()] function for example
-#' @seealso [url_4table()] for the EJAM version. [url_ejscreenmap()] [distance_near_eachother()]
-#' @return the input table but with extra columns
-#'
-#' @keywords internal
-#'
-urls_clusters_and_sort_cols <- function(results_table) {
-
-  if (is.data.table(results_table)) {
-    setDF(results_table)
-    on.exit(setDT(results_table))
-  }
-  ########################################### #
-  # Add columns with hyperlinks to site reports
-  #
-  ## 1. EJSCREEN REPORT URL = pdfurl ####
-  #
-  ## Fix existing link to pdf-like report
-  # to make URL clickable in table, move to near 1st column,
-  # NOTE: browser can print that report to pdf with margins = c(0.3, 0.3, 0.3, 1.75) # Left Top Right Bottom
-
-  if ("areaid" %in% names(results_table)) {
-    areaid   <- results_table$areaid
-    lat = NULL
-    lon = NULL
-  } else {
-    lon = results_table$lon
-    lat = results_table$lat
-    areaid   <- ""
-  }
-  if ("areatype" %in% names(results_table)) {
-    areatype <- results_table$areatype
-  } else {
-    areatype <- ""
-  }
-  if ("namestr" %in% names(results_table)) {
-    namestr  <- results_table$namestr
-  } else {
-    namestr  <- ""
-  }
-  pdfurl <- url_ejscreen_report(lon = lon, lat = lat, radius = results_table$distance,
-                                areaid = areaid, areatype = areatype, namestr = namestr,
-                                as_html = FALSE, linktext = "EJScreen Report")
-  encodedlink <- URLencode( pdfurl)
-  pdfurl <- paste0('<a href=\"', encodedlink, '\", target=\"_blank\">EJScreen Report ', rownames(results_table), '</a>')
-  # (but does not work like that for csv/excel download)
-  if ("pdfurl" %in% names(results_table) ) results_table$pdfurl <- NULL # gets recreated later below
-
-  ## 2. EJSCREEN MAP URL = mapurl ####
-  if (!all(areaid == '')) {
-     mapurl <- url_ejscreenmap(wherestr = fips2name(areaid) )  # e.g.,  "https://ejscreen.epa.gov/mapper/index.html?wherestr=35.3827475,-86.2464592"
-  } else {
-    mapurl <- url_ejscreenmap(lat = lat, lon = lon  )  # e.g.,  "https://ejscreen.epa.gov/mapper/index.html?wherestr=35.3827475,-86.2464592"
-  }
-
-  mapurl  <- paste0('<a href=\"', mapurl, '\", target=\"_blank\">EJScreen Map ', rownames(results_table), '</a>')
-  # (but does not work like that for csv/excel download)
-
-  ## 3. ACS REPORT URL = acsurl or EJScreenACS  - NOW OBSOLETE IN 7/2023 ##  ##
-  #
-  # acsurl <- url_ejscreen_acs_report(lat = results_table$lat, lon = results_table$lon, radius = results_table$distance)   # e.g.,  "https://ejscreen.epa.gov/mapper/demogreportpdf.aspx?feattype=point&radius=3&coords=-77.029851,38.895902"
-  # acsurl  <- paste0('<a href=\"', acsurl, '\", target=\"_blank\">EJScreen ACS report ', rownames(results_table), '</a>')
-  # (but does not work like that for csv/excel download)
-
-  ########################################### #
-  # Add column to flag sites that are near each other ####
-  #
-  # want this to reflect radius in this data run, not whatever user may have just changed it to for the next run, so do not use is_clustered()
-  if (!is.null(lat)) {
-  results_table$overlaps_another <- distance_near_eachother(lon = lon, lat = lat,
-                                                   distance = 2 * results_table$distance) # not radius_miles() !
-  } else {
-    results_table$overlaps_another <- NA
-  }
-  ########################################### #
-  # Re-order Columns ####
-  #
-  # "id"  "RAW_D_MINOR" "RAW_D_INCOME"  "totalPop" "distance" etc. are the output names at this point
-  #  something like  "siteid"  "sitename"  "lon" "lat" may be uploaded
-
-  firstcols <- c('id', 'distance', 'overlaps_another', 'totalPop') # these after the input points;  then the rest of the outputs
-
-  results_table <- data.frame(
-
-    a = pdfurl, #
-    b = mapurl, #
-
-    results_table[ , firstcols],
-    results_table[, !(names(results_table) %in% firstcols)],
-    stringsAsFactors = FALSE)
-  names(results_table) <- gsub("^a$", "EJScreen Report", names(results_table))
-  names(results_table) <- gsub("^b$", "EJScreen Map", names(results_table))
-
-  ########################################### #
-
-  return(results_table)
-}
-########################################### #  ########################################### #
-
 
 #' utility to make html link from URL
 #'
@@ -191,23 +57,51 @@ urls_clusters_and_sort_cols <- function(results_table) {
 #'
 #' @param url string that is URL
 #' @param text string that is label
-#'
+#' @param newtab unless set to FALSE, link opens in a new browser tab
+#' @param encode unless set to FALSE, it uses [utils::URLencode()] first
+#' @param reserved if encode=T, this parameter is passed to [utils::URLencode()]
 #' @return url_linkify('epa.gov','EPA') returns `"<a href=\"epa.gov\", target=\"_blank\">EPA</a>"`
+#' @seealso [enurl()]
+#' @details
+#'   Consider also the golem utility enurl() as modified in this pkg,
+#'   except that enurl()
+#'
+#'   1. does not make a link that would open in new tab,
+#'
+#'   2. skips [utils::URLencode()] and
+#'
+#'   3. returns "shiny.tag" class
+#'
+#'   4. now sets text=url, while url_linkify() uses a shorter text
+#'
+#'   `enurl("https://google.com", "click here")`
+#'   `url_linkify("https://google.com")`
+#'
+#'   `enurl("https://google.com")`
+#'
+#'   `url_linkify("https://google.com", "click here")`
 #'
 #' @keywords internal
-#' @export
 #'
-url_linkify <- function(url, text) {
+url_linkify <- function(url, text, newtab = TRUE, encode = TRUE, reserved = FALSE) {
 
   if (missing(text)) {text = gsub(pattern = "http[s]?://","",url)}
-  paste0('<a href=\"', URLencode(url), '\", target=\"_blank\">', text, '</a>')
 
-  # Consider instead using something like golem utility enurl()
-  #
-  #   enurl <- function(url, text) {tags$a(href = url, text)}
+  if (encode) {
+    url <- URLencode(url, reserved = reserved)
+  } else {
+    url <- url
+  }
+  if (newtab) {
+    paste0('<a href=\"', url, '\"',
+           ', target=\"_blank\"',
+           '>', text, '</a>')
+  } else {
+    paste0('<a href=\"', url, '\"',
+           '>', text, '</a>')
+  }
 }
 ################################################### #################################################### #
-
 
 # convert EJAM html versions of weblinks back to simple URLs
 # in the output tables from ejamit or doaggregate
@@ -224,7 +118,7 @@ unlinkify = function(x) {
   if (is.data.frame(x)) {return(data.frame(fixed))}
   return(fixed)
 }
-# test_vec = testoutput_ejamit_10pts_1miles$results_bysite$`EJScreen Report`
+# test_vec = testoutput_ejamit_10pts_1miles$results_bysite$`Report`
 # test_df1 = as.data.frame(testoutput_ejamit_10pts_1miles$results_bysite[ , 1])
 # test_df2 = as.data.frame(testoutput_ejamit_10pts_1miles$results_bysite[ , 1:2])
 # test_dt1 = testoutput_ejamit_10pts_1miles$results_bysite[ , 1]
@@ -240,411 +134,348 @@ unlinkify = function(x) {
 
 #' utility to prep URLs for being written to Excel
 #'
-#' @param urls vector of urls such as from [url_ejscreen_report()]
-#'
+#' @param urls vector of urls such as from [url_ejamapi()]
 #' @param urltext The text to appear in Excel cells instead of just the URL showing
+#'
 #' @details
-#'   ## works best if using [openxlsx::writeData()] not [openxlsx::write.xlsx()]
-#'   ## to write this column of urls to a worksheet
+#'   See table_xls_format()
+#'
+#'   Works best if using [openxlsx::writeData()] not [openxlsx::write.xlsx()]
+#'
+#'   To write this column of urls to a worksheet:
+#'   ```
 #'   lat <- c(30.977402, 32.515813); lon = c(-83.368997, -86.377325)
 #'   radius <- 1
-#'   urlejtest <- function(lat,lon,radius) {
-#'   paste0('https://ejscreen.epa.gov/mapper/EJscreen_SOE_report.aspx',
-#'     '?&geometry={\"spatialReference\":{\"wkid\":4326},\"x\":',
-#'     lon,  ',\"y\":', lat, '}&distance=', radius,'&unit=9035&areatype=&areaid=&namestr=&f=report')
-#'   }
-#'   urls <- urlejtest(lat, lon, radius)
+#'   urls <- url_ejscreenmap(lat=lat, lon=lon, radius=radius)
 #'
-#'   urlx <- url_xl_style(urls, urltext = paste0("Report ", 1:2))
+#'   urlx <- EJAM:::url_xl_style(urls, urltext = paste0("Report ", 1:2))
 #'
 #'   wb <- openxlsx::createWorkbook()
 #'   openxlsx::addWorksheet(wb, sheetName = 'tab1')
-#'   writeData(wb, sheet = 1, x = urlx, startCol = 1, startRow = 2)
-#'   openxlsx::saveWorkbook(wb, file = 'test1.xlsx', overwrite = TRUE)
+#'   openxlsx::writeData(wb, sheet = 1, x = urlx, startCol = 1, startRow = 2)
+#'   openxlsx::saveWorkbook(wb, file = '~/test1.xlsx', overwrite = TRUE)
 #'
-#'   # using just [write.xlsx()] is simpler but ignores the urltext param:
+#'   # using just [openxlsx::write.xlsx()] is simpler but ignores the urltext param:
 #'   openxlsx::write.xlsx(data.frame(lat = lat, lon = lon, urlx), file = 'test2.xlsx')
+#'   ```
 #'
 #' @keywords internal
-#' @noRd
 #'
 url_xl_style <- function(urls, urltext = urls) {
 
   x <- urls
+  x <- unlinkify(x) # if it was an HTML tag, convert back to just the URL
+  if (length(urltext) == 1) {urltext <- rep(urltext, length(urls))}
   names(x) <- urltext
   class(x) <- 'hyperlink'
   return(x)
-
 }
-################################################### #################################################### #
+################## #  ################## #  ################## #  ################## #
+
+########################################################### #
+# helpers to construct URL(s) based on parameters in a key list of query terms
+# ## for a more full featured approach, see  ?httr2::url_modify_query()
+########################################################### #
+
+# url_and_other_query_terms <- function(..., baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?") {
+#
+#   # etc will look something like "&x=1,a=hello,y=3"
+#
+#   etc <- unlist(rlang::list2(...))
+#   qterms <- names(etc)
+#   qvalues <- as.vector(etc)
+#   if (length(etc) == 0) {
+#     etc <- ""
+#   } else {
+#     etc <- URLencode(
+#       paste0("&",
+#              paste0(
+#                paste0(qterms, "=", qvalues),
+#                collapse = "&"
+#              )
+#       )
+#     )
+#   }
+#   return(paste0(baseurl, etc))
+# }
+########################################################### #
+
+# ... lets you pass params like a=1:2, b=101:102, c="word"
+# keylist lets you pass params like list(a=1:2, b=101:102, c="word")
+# this also drops any keys whose value is NA, NULL, or ""
+
+url_from_keylist <- function(..., keylist = NULL,
+                             baseurl = "https://ejamapi-84652557241.us-central1.run.app/report?",
+                             ifna = "https://ejamapi-84652557241.us-central1.run.app",
+                             encode = TRUE
+) {
+  # klist <- rlang::list2(...) # error if empty key like  (a=1, , b=2)  - so use .ignore_empty = "all" (but still errors on  b=,c=3)
+  klist <- rlang::dots_list(..., .ignore_empty = "all", .homonyms = "error")
+  if (length(klist) == 0) {klist <- NULL}
+
+  # if ("keylist" %in% names(klist)) {
+  # }
+
+  if (!is.null(keylist)) {
+    # but note # unlist(list(a=2,b=3:4)) # turns b into b1, b2
+    stopifnot(is.list(keylist), !is.data.frame(keylist))
+    #etc checks
+  }
+
+  klist <- c(klist, keylist) # but how to do .ignore_empty = "all"
+
+  klist <- drop_empty_keys_from_list(klist)
+  klist <- collapse_each_vector_keyval(klist)
+  klist_string <- collapse_keylist(klist, encode = encode)
+  if (is.null(klist_string)) {
+    baseurl <- ifna
+  }
+  urlx <- paste0(baseurl, klist_string)
+  return(urlx)
+}
+# ########################################################### #
+
+# ... lets you pass params like a=1:2, b=101:102, c="word"
+# keylist lets you pass params like list(a=1:2, b=101:102, c="word")
+# this also drops any keys whose value is NA, NULL, or ""
+
+# vector length 1 applies to every site
+# vectors length N are vectorized over N sites and should all be N long!!
+# the ... param lets you provide vectors over sites and single values that apply to all sites
+# without putting those all in keylist_bysite = list(...)
+# keylist_4all is not really needed - could just use parameters of length 1 for those
 
 
-#' Get URLs of EJScreen reports
-#'
-#' Get URL(s) for EJScreen standard report on residents near given point(s)
-#'
-#' @details Also see [ejscreenRESTbroker()] and [ejscreenapi1()]
-#'
-#'   and (https://ejscreen.epa.gov/mapper/EJAPIinstructions.pdf)
-#'
-#'   and (https://ejscreen.epa.gov/mapper/ejscreenapi1.html)
-#'
-#' @param lat one or more latitudes (or a table with lat, lon columns, or filepath with that, or omit to interactively select file)
-#' @param lon one or more longitudes (or omitted -- see lat parameter details)
-#' @param radius miles radius
-#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
-#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
-#' @param mobile If TRUE, provides URL for the mobile browser version, not desktop version
-#' @param areatype passed as areatype= in API, inferred if not provided but areaid is provided
-#' @param areaid fips codes if used,  passed as areaid=  in API, can be FIPS for blockgroups, tracts, counties.
-#'   Not zip code! For example, "10001" will report on that county, not that zip code.
-#'   Note that nearly half of all county fips codes are impossible to distinguish from
-#'   5-digit zipcodes because the same numbers are used for both purposes.
-#'
-#'   For county FIPS 10001, use `url_ejscreen_report(areaid =  '10001')`
-#'
-#'   For zipcode 10001, you cannot use `url_ejscreen_report()` for zip codes
-#'    since the API does not support zip codes.
-#'   You can still at least try `url_ejscreenmap(wherestr =  '10001')`
-#'
-#' @param namestr The character string text to show on the report as the name of the place
-#' @param shapefile not implemented
-#' @param wkid default is 4326 -WGS84 - World Geodetic System 1984, used in GPS - see (https://epsg.io/4326)
-#' @param unit default is 9035 which means miles; for kilometers use 9036
-#' @param f can be "report" or "pjson" or "json"
-#' @param interactiveprompt passed to [sitepoints_from_any()]
-#' @seealso  [url_ejscreen_report()]  [url_ejscreen_acs_report()]   [url_ejscreenmap()]
-#'   [url_echo_facility_webpage()] [url_frs_report()]  [url_enviromapper()]  [url_envirofacts_data()]
-#' @return URL(s)
-#'
-#' @export
-#'
-url_ejscreen_report <- function(lat='', lon='', radius='', as_html=FALSE, linktext, mobile=FALSE,
-                                areatype="", areaid = "", namestr = "",
-                                shapefile = NULL,  # would require POST not just a simple url-encoded GET API call?
-                                wkid = 4326, unit = 9035, f = "report",
-                                interactiveprompt = FALSE) {
+urls_from_keylists <- function(..., keylist_bysite=NULL, keylist_4all=NULL,
+                               baseurl = "https://example.com/q?", encode = TRUE,
+                               pass_null_as = "" # or null ?
+                               ) {
 
-  if (!any(areaid == "") && !any(is.null(areaid))) {
+  if (is.null(keylist_4all) || length(keylist_4all) == 0 || !is.list(keylist_4all)) {
+    keylist_4all <- NULL
+  }
+  if (is.null(keylist_bysite) || length(keylist_bysite) == 0 || !is.list(keylist_bysite)) {
+    keylist_bysite <- NULL
+  }
+  # ...
+  klist <- rlang::dots_list(..., .ignore_empty = "all", .homonyms = "error")
+  if (length(klist) == 0) {klist <- NULL}
+  keylist_bysite <- c(keylist_bysite, klist)
 
-    fips <- areaid
-    if (missing(areatype)) {
-      areatype <- fipstype(fips)
-    }
-    if (!(all(areatype %in% c("blockgroup", "tract", "city", "county", 'state')))) {warning("FIPS must be one of 'blockgroup', 'tract', 'city', 'county', 'state' for the EJScreen API")}
-    if (!(length(areatype) %in% c(1, length(areaid)))) {warning("must provide either 1 areatype value for all or exactly one per areaid")}
-
-    # namestr <- fips   # user could specify something else here
-    if (is.null(namestr)) {namestr <- ''}
-    # The FIPS can be displayed as the name of the place on the EJScreen report since it already looks up and displays the actual name of a county or city
-    # namestr <- rep("", length(areatype))
-    # namestr[namestr == "county"] <- fips2countyname(fips[namestr == "county"])
-    # # namestr[namestr == "state"] <- fips2statename(fips[namestr == "state"])
-
+  if (is.null(keylist_bysite)) {
+    keylist_bysite <- ""
   } else {
+    # assemble these so each url has one of each parameter
 
-    # Flexibly allow for user to provide latlon as 1 table or as 2 vectors or 1 filename or 1 interactively selected file
-    if (!(!missing(lat) && all(is.na(lat)))) {
-    latlon_table <- sitepoints_from_anything(lat, lon, interactiveprompt = interactiveprompt)[ , c("lat","lon")]
-    lat <- latlon_table$lat
-    lon <- latlon_table$lon
-    }
-    # error checking lat lon radius
+    # NULL will cause error in as.data.frame
+    ## so how pass a parameter value of NULL ??
+    keylist_bysite[sapply(keylist_bysite, is.null)] <- pass_null_as # actually it will turn into "" and then get dropped entirely by url_from_keylist() now
 
-    latlon_radius_validate_lengths <- function(lat, lon, radius) {
-      if (!is.numeric(radius) || !is.numeric(lat) || !is.numeric(lon)) {warning("lat or lon or radius is not numeric")}
-      # but that is OK in url_ejscreen_report context where areaid can be used instead and lat default is ""
-      if (length(radius) == 0 || length(lat) == 0 || length(lon) == 0) {warning("lat or lon or radius missing entirely (length of a vector is zero")}
-      if (is.null(radius)     || is.null(lat)     || is.null(lon))     {warning("lat or lon or radius is NULL")}
-      if (anyNA(radius)       || anyNA(lat)       || anyNA(lon))       {warning("lat or lon or radius contain NA value(s)")}
-      if (length(lat)  != length(lon)) {warning("did not find exactly one lat for each lon value (lengths of vectors differ)")}
-      if (!(length(radius) %in% c(1, length(lat), length(lon)))) {warning("must provide either 1 radius value for all sites or exactly one per site")}
-      if (!( "" %in% lat | "" %in% lon ) & (any(is.na(radius)) | "" %in% radius)) {warning('radius is missing but needed when lat/lon specified')} # ??
-    }
-    latlon_radius_validate_lengths(lat = lat, lon = lon, radius = radius)
-  }
-  if (( "" %in% lat | "" %in% lon ) & ("" %in% areaid)) {
-    warning('at least some of lat or lon are empty and at least one areaid is empty as well - must use one or the other')
+    keylist_bysite <- paste0(
+      # "&",
+      apply(as.data.frame(keylist_bysite) , 1,
+            # function(z) {paste0(names(z) , "=", z, collapse = "&")}
+            function(z) {
+              url_from_keylist(keylist = as.list(z), baseurl = "", encode = encode) # should drop empties
+            }
+      ))
   }
 
-  # ejscreenRESTbroker works only for one url at a time:
-  #  ejscreenRESTbroker(lon = lon, lat = lat, radius = radius, f = "report" )
-  # 'https://ejscreen.epa.gov/mapper/EJscreen_SOE_report.aspx?namestr=&geometry={"spatialReference":{"wkid":4326},"x":-100.11715256086383,"y":36.65046624822855}&distance=1&unit=9035&areatype=&areaid=&f=report'
-  if (mobile) {
-    baseurl <- "https://ejscreen.epa.gov/mapper/mobile/EJSCREEN_mobile.aspx?"   # ok 7/23/23
-  } else {
-    baseurl <- 'https://ejscreen.epa.gov/mapper/EJscreen_SOE_report.aspx?'  # ok 7/23/23
+  forallpart <- url_from_keylist(keylist = keylist_4all, baseurl = "", encode = encode, ifna = "") # should drop empties
+  if (length(forallpart) > 0 &&  !(all(forallpart %in% "")) &&
+      length(keylist_bysite) > 0 && !(all(keylist_bysite %in% ""))) {
+    forallpart <- paste0("&", forallpart)
   }
 
-  xytext <- paste0('"x":', lon, ',"y":', lat, '}')
-  # f = "report"
-  # wkid = 4326
-  # unit = 9035
-  url <-  paste0(baseurl,
-                 '&geometry={"spatialReference":{"wkid":',wkid,'},',
-                 # '"x":', lon, ',"y":', lat, '}',
-                 xytext,
-                 '&distance=', radius,
-                 '&unit=', unit,
-                 "&areatype=", areatype,
-                 "&areaid=", areaid,
-                 "&namestr=", namestr,
-
-                 '&f=', f
+  urlx <- paste0(baseurl,
+                 keylist_bysite,
+                 forallpart
   )
-
-  if (as_html) {
-    if (missing(linktext)) {linktext <- paste0("EJScreen Report")}
-    url <- url_linkify(url, text = linktext)
-  }
-
-  ### disable ejscreen report links while the site is down
-
-  if ("ejscreen_is_down" == "ejscreen_is_down") {
-    url <- rep(NA, length(url))
-  }
-
-  return(url)
+  return(urlx)
 }
-################################################### #################################################### #
+########################################################### #
+if (FALSE ) {
+
+  # examples or tests
+
+  url_from_keylist(lat = 35, lon = -100, radius = 3.2)
+  url_from_keylist(lat = c(35,36), lon = c(-100,-99), radius = 3.14)
+
+  lat = c(35,36)
+  lon = c(-100,-99)
+  radius = 3.14
+  url_from_keylist(lat = lat, lon = lon, radius = radius)
+
+  keys = list(lat = c(35,36), lon = c(-100,-99), radius = 3.14)
+  url_from_keylist(keylist = keys)
 
 
-#' Get URLs of EJScreen older ACS reports - will be phased out
-#'
-#' Get URL(s) for EJScreen ACS report on residents near given point(s)
-#'
-#' @details  NOT USED BY APP NOW THAT COMMUNITY REPORT EXISTS
-#'
-#' @param lon one or more longitudes
-#' @param lat one or more latitudes
-#' @param radius miles radius
-#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
-#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
-#' @seealso  [url_ejscreen_report()]  [url_ejscreen_acs_report()]   [url_ejscreenmap()]
-#'   [url_echo_facility_webpage()] [url_frs_report()]  [url_enviromapper()]  [url_envirofacts_data()]
-#' @return URL(s)
-#'
-#' @keywords internal
-#' @export
-#'
-url_ejscreen_acs_report <- function(lon, lat, radius, as_html=FALSE, linktext) {
 
-  baseurl <- "https://ejscreen.epa.gov/mapper/demogreportpdf.aspx?feattype=point&radius="
-  part2 <- "&coords="
-  url <- paste0(baseurl, radius, part2, paste(lon,lat,sep = ",")) # it has to be lon then lat in this URL
-  if (as_html) {
-    if (missing(linktext)) {linktext <- paste0("ACS report")}
-    url <- url_linkify(url, text = linktext)
-  }
-  return(url)
-  # "https://ejscreen.epa.gov/mapper/demogreportpdf.aspx?feattype=point&radius=3.1&coords=-81.978358,30.296344"
-  #  dd=3.1; lon=-81.978358; lat=30.296344
-  # url_ejscreen_acs_report(lat=lat, lon = lon, radius = dd)
-  # browseURL(url_ejscreen_acs_report(lat = testpoints_50$lat, lon = testpoints_50$lon, radius = 3.1)[1])
+  # might want NULL to be encoded as empty parameter but that gets removed anyway
+  url_from_keylist(lat = c(35,36), lon = c(-100,-99), radius = 3.14, xyz = NULL, abc = NULL)
+
+  url_from_keylist(sitepoints=testpoints_10)
+
+
+  # bad:
+
+  url_from_keylist(keylist = list(a = 1, ))
+  url_from_keylist(a=, b=1)
+  url_from_keylist(keylist = list(a=, b=1 ))
+
 }
-################################################### #################################################### #
+# ########################################################### #
+# simplify by removing unused / empty parameters, but only if it is empty for all in the vector of values for that key
+#
+# drops ""
+# drops NA
+# drops NULL
+#
+drop_empty_keys_from_list <- function(klist) {
 
+  # if a key is empty like "" in the 1 URL or all of the URLs if vector of values for that key
+  emptykeys <- sapply(klist, function(v) {all(nchar(v)  %in% 0 )})
+  klist <- klist[!emptykeys]
 
-#' Get URL(s) for EJScreen map centered at given point(s)
-#'
-#' @param lon one or more longitudes
-#' @param lat one or more latitudes
-#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
-#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
-#' @param wherestr Name of place to center on (not FIPS code!).
-#'   Note that nearly half of all county fips codes are impossible to distinguish from
-#'   5-digit zipcodes because the same numbers are used for both purposes.
-#'
-#'   For zipcode 10001, use url_ejscreenmap(wherestr =  '10001')
-#'
-#'   For County FIPS code 10001, use url_ejscreenmap(wherestr =  fips2name('10001'))
-#'
-#'   This parameter is passed to the API as wherestr= , if lat/lon not specified.
-#'   Can be State abbrev like "NY" or full state name,
-#'   or city like "New Rochelle, NY" as from fips2name() -- using fips2name()
-#'   works for state, county, or city FIPS code converted to name.
-#'   Also wherestr can be street address or zipcode.
-#'   Not sure that part of the EJScreen URL-encoded map request is documented.
-#' @param shapefile not implemented
-#' @return URL(s)
-#' @seealso  [url_ejscreen_report()]  [url_ejscreen_acs_report()]   [url_ejscreenmap()]
-#'   [url_echo_facility_webpage()] [url_frs_report()]  [url_enviromapper()]  [url_envirofacts_data()]
-#'
-#' @export
-#'
-url_ejscreenmap <- function(lon, lat, as_html=FALSE, linktext,
-                            wherestr = "",
-                            shapefile = NULL) {
+  # if a key is NULL (it would always be NULL in all URLs)
+  emptykeys <- sapply(klist, is.null)
+  klist <- klist[!emptykeys]
 
-  # https://ejscreen.epa.gov/mapper/index.html?wherestr=30.450000,-91.090000
-  baseurl <- 'https://ejscreen.epa.gov/mapper/index.html?wherestr='
-  if (!missing(wherestr) && any(missing(lat) & missing(lon)) || ((is.null(lat) & is.null(lon)) ) ) {
-    where <- wherestr
-  }  else {
-    where <- paste( lat,  lon, sep = ',')
-  }
-  url <- URLencode(paste0(baseurl, where))
-  if (as_html) {
-    if (missing(linktext)) {linktext <- "EJScreen Map"}  #   paste0("EJScreen Map ", 1:length(lon))
-    url <- url_linkify(url, text = linktext)
-  }
+  # if a key is NA in the 1 URL or all of the URLs if vector of values for that key
+  emptykeys <- sapply(klist, function(v) {all(is.na(v))})
+  klist <- klist[!emptykeys]
 
-  ### disable ejscreen report links while the site is down
-
-  if ("ejscreen_is_down" == "ejscreen_is_down") {
-    url <- rep(NA, length(url))
-  }
-
-  return(url)
+  return(klist)
 }
-################################################### #################################################### #
+#################################################### #
+# drops if ""
+# does NOT do anything about NA or "NA"
+# does NOT check for NULL or null
 
+drop_empty_keys_from_url = function(quer) {
 
-#' Get URLs of ECHO reports
-#'
-#' Get URL(s) for EPA ECHO webpage with facility information
-#'
-#' @param regid EPA FRS Registry ID
-#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
-#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
-#' @seealso  [url_ejscreen_report()]  [url_ejscreen_acs_report()]   [url_ejscreenmap()]
-#'   [url_echo_facility_webpage()] [url_frs_report()]  [url_enviromapper()]  [url_envirofacts_data()]
-#'
-#' @seealso  [url_ejscreen_report()]  [url_ejscreen_acs_report()]   [url_ejscreenmap()]
-#'   [url_echo_facility_webpage()] [url_frs_report()]  [url_enviromapper()]  [url_envirofacts_data()]
-#' @return URL(s)
-#' @examples  \donttest{
-#'  browseURL(url_echo_facility_webpage(110070874073))
-#'  }
-#'
-#' @export
-#'
-url_echo_facility_webpage <- function(regid, as_html=FALSE, linktext) {
-
-  # do error checking here
-
-  baseurl <- "https://echo.epa.gov/detailed-facility-report?fid="
-  url <-  paste0(baseurl, regid)
-  if (as_html) {
-    if (missing(linktext)) {linktext <- regid}
-    url <- url_linkify(url, text = linktext)
-  }
-  return(url)
+  # simplify by removing unused / empty parameters
+  quer =  gsub("[^=&]*=&", "", x = quer) # drop any empty one except first or last param
+  quer = gsub("?[^&=]*=&", "?", x = quer) # drop any empty one at start
+  quer = gsub("&[^&=]*=$", "", x = quer) # drop any empty one at end
+  return(quer)
 }
-################################################### #################################################### #
-
-
-#' Get URLs of FRS reports
-#'
-#' Get URL(s) for reports on facilities from EPA FRS (facility registry service)
-#'
-#' @param regid one or more EPA FRS Registry IDs.
-#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
-#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
-#'
-#' @seealso  [url_ejscreen_report()]  [url_ejscreen_acs_report()]   [url_ejscreenmap()]
-#'   [url_echo_facility_webpage()] [url_frs_report()]  [url_enviromapper()]  [url_envirofacts_data()]
-#'
-#' @return URL(s)
-#' @examples \donttest{
-#' browseURL(url_frs_report(testinput_regid)[1])
-#' }
-#' url_frs_report(testinput_registry_id)
-#'
-#' @export
-#'
-url_frs_report <- function(regid, as_html=FALSE, linktext ) {
-
-  # both of these URLs seem to work:
-  #baseurl <- "https://ofmpub.epa.gov/frs_public2/fii_query_dtl.disp_program_facility?p_registry_id="
-  baseurl <- "https://frs-public.epa.gov/ords/frs_public2/fii_query_dtl.disp_program_facility?p_registry_id="
-
-  url <- paste0(baseurl, regid)
-  if (as_html) {
-    if (missing(linktext)) {linktext <- paste0("Envirofacts")}
-    url <- url_linkify(url, text = linktext)
-  }
-  return(url)
+# ########################################################### #
+collapse_each_vector_keyval <- function(klist) {
+  # like the .multi="comma" parameter in ?httr2::url_modify_query()
+  klist <- lapply(klist, function(z) {
+    if (is.vector(z)) {
+      paste0(z, collapse = ",")
+    } else {
+      z
+    }
+  })
+  if (length(klist) == 0) {klist <- NULL}
+  return(klist)
 }
-################################################### #################################################### #
-
-
-#' Get URLs of EnviroMapper reports
-#'
-#' Get URL(s) for EnviroMapper web-based tool, to open map at specified point location(s)
-#'
-#' @details EnviroMapper lets you view EPA-regulated facilities and other information on a map, given the lat,lon
-#' @param lon one longitude
-#' @param lat one latitude
-#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
-#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
-#' @param zoom initial map zoom extent, with smaller numbers if zoomed in closer
-#' @seealso  [url_ejscreen_report()]  [url_ejscreen_acs_report()]   [url_ejscreenmap()]
-#'   [url_echo_facility_webpage()] [url_frs_report()]  [url_enviromapper()]  [url_envirofacts_data()]
-#'
-#' @return URL of one webpage (that launches the mapping tool)
-#'
-#' @export
-#'
-url_enviromapper <- function(lon, lat, as_html=FALSE, linktext, zoom=13) {
-
-  # "https://geopub.epa.gov/myem/efmap/index.html?ve=13,38.895237,-77.029145"
-
-  baseurl <- "https://geopub.epa.gov/myem/efmap/index.html?ve="
-
-  url <- paste0(baseurl, zoom, ",", lat, ",", lon)
-  if (as_html) {
-    if (missing(linktext)) {linktext <- paste0("EnviroMapper")}
-    url <- url_linkify(url, text = linktext)
+# ########################################################### #
+collapse_keylist <- function(klist, encode=TRUE) {
+  if (is.null(klist)) {return(NULL)}
+  if (any(sapply(klist, length) > 1)) {stop("any vector value must be already collapsed")}
+  knames <- names(klist)
+  kvals <- as.vector(klist)
+  if (encode) {
+    if (!is.null(kvals)) {
+      kvals <- URLencode(kvals)
+    }
   }
-  return(url)
+  return(
+    paste0( paste0(knames, "=", kvals), collapse = "&")
+  )
 }
-################################################### #################################################### #
+# ########################################################### #
 
+# notes on vector of urls vs 1 url with query values that are vectors ####
+#
+# Question:
+## some url_xyz() functions try to create a vector of URLs, 1 per key value, like   "d.com?q=1", "d.com?q=2"
+## but in other cases you want to pass a vector within 1 URL, like    "d.com?q=1,2"
+## question is how to best distinguish those?
+# how to vectorize so a parameter that is a vector creates a query string that is a CSV list:   d.com?q=1,2
+# versus
+# how to vectorize so a parameter that is a vector creates multiple URLs:  d.com?q=1, d.com?q=2
+# or both of those options.
 
-#' Get URLs of EPA EnviroFacts API queries - DRAFT INCOMPLETE WORK IN PROGRESS
-#'
-#' Get URL(s) to query and get data on facilities from Envirofacts, in XML,JSON,CSV, or EXCEL format
-#'
-#' @details
-#'   see <https://www.epa.gov/enviro/web-services> and
-#'
-#'   <https://www.epa.gov/enviro/envirofacts-data-service-api>
-#'
-#'   (https://data.epa.gov/efservice/multisystem/minLatitude/35.465158/maxLatitude/52.912225/minLongitude/-104.387994/maxLongitude/-69.231744/count) ???
-#'
-#'   WORK IN PROGRESS .... need to look at the documentation more closely but what it returns is not what is expected for some attempts
-#'
-#'   WEBPAGE URL (returns a webpage)
-#'   e.g., <https://enviro.epa.gov/enviro/efsystemquery.multisystem?fac_search=primary_name&fac_value=&fac_search_type=Beginning+With&postal_code=&location_address=&add_search_type=Beginning+With&city_name=&county_name=&state_code=&TribalLand=0&TribeType=selectTribeALL&selectTribe=noselect&tribedistance1=onLand&sic_type=Equal+to&sic_code_to=&naics_type=Beginning+with&naics_to=326&chem_name=&chem_search=Beginning+With&cas_num=&page_no=1&output_sql_switch=FALSE&report=1&database_type=Multisystem>
-#'   https://enviro.epa.gov/enviro/efsystemquery.multisystem?state_code=DE&naics_type=Beginning+with&naics_to=326&database_type=Multisystem
-#'
-#'   API URL (returns data)
-#'   https://data.epa.gov/efservice/multisystem/minLatitude/35.465158/maxLatitude/52.912225/minLongitude/-104.387994/maxLongitude/-69.231744/naics_type/Beginning+with/naics_to/32611
-#'   https://data.epa.gov/efservice/multisystem/minLatitude/35.465158/maxLatitude/52.912225/minLongitude/-104.387994/maxLongitude/-69.231744/EXCEL
-#'
-#' @param regid EPA-regulated facility registry identification (ID), vector
-#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
-#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
-#'
-#' @seealso  [url_ejscreen_report()]  [url_ejscreen_acs_report()]   [url_ejscreenmap()]
-#'   [url_echo_facility_webpage()] [url_frs_report()]  [url_enviromapper()]  [url_envirofacts_data()]
-#'
-#' @return URL(s)
-#'
-#' @keywords internal
-#' @export
-#'
-url_envirofacts_data <- function(regid, as_html=FALSE, linktext ) {
+# keylist that is list of vectors works in url_from_keylist()
 
-  stop("work in progress")
-  baseurl <- "https://"
+# list of vectors that are all same length or length 1 would work for making vector of urls.
+#  but what if some keys should be vectors within each url?
+#    then a list of lists makes sense?
+#  pick an approp data structure.
+#  and write a function
+## or just use loop over url_from_keylist()
+## where keylist[[i]] <- list(lat = lats[i, lon = lon[i], radius = 3.1, xyz=7:8])
 
-  url <- paste0(baseurl, regid)
-  if (as_html) {
-    if (missing(linktext)) {linktext <- paste0("Envirofacts")}
-    url <- url_linkify(url, text = linktext)
-  }
-  return(url)
-}
-################################################### #################################################### #
+########################################################### #
+
+#   has flexible input, so input can be
+## 1) a list of settings defined earlier:
+##   keys = list(key=value, key=value)  ## but not list(a=1:2,b=0)
+##  url_from_arglist(keylist=keys)
+## or
+## 2) explicit:
+##   url_from_keylist(key=value, key=value)
+
+## other tools
+# klist <- c(klist,
+#            .url = baseurl,
+#            .multi = "comma") # breaks vector key value into csv key value like d.com?q=1,2
+# ## see  ?httr2::url_modify_query()
+# rlang::exec("url_modify_query", !!!klist)  # note the url_modify_query function here cannot be prefixed with, say, httr2::
+# ########################################################## #
+
+##   linktext could also} be numbered:
+# linktext = paste0("EJSCREEN Map ", 1:NROW(sitepoints))
+
+########################################################### #
+
+# flexible in what is the named vector of query values,
+# BUT only returns 1 URL... non vectorized, via loop
+#  cannot flexibly create one parameter based on other  parameters
+
+# url1 = function(
+    #     keyvector = c(
+#       baseurl="https://example.com",
+#       areatype = "county",
+#       areaid = "10001",
+#       # v=1 # v = 1:2 # not possible as vector
+#       namestr = "here",
+#
+#       geometry = paste0('{"spatialReference":{"wkid":', 0, '},','"x":', -100, ',"y":', 34, '}'),
+#       ## cannot flexibly create one parameter based on other  parameters:
+#       # paste0('{"spatialReference":{"wkid":',wkid, '},','"x":', lon, ',"y":', lat, '}'),
+#
+#       radius = 3.1,
+#       unit = "",
+#       f = "report"
+#     )
+# ) {
+#   url1 <- baseurl
+#   for (i in seq_along(keyvector)) {
+#     url1 <- urltools::param_set(urls = url1, key = names(keyvector)[ i], value = keyvector[i])  # ????
+#   }
+#   url1
+# }
+########################################################### #
+#
+# ### how ejscreenRESTbroker.R  used to do it
+# areatype <- ''
+# fips     <- ''
+# geometry <- paste0('{"spatialReference":{"wkid":',wkid, '},','"x":', lon, ',"y":', lat, '}')
+# geotext <- paste0(
+#   '&geometry=', geometry,
+#   '&distance=', radius
+# )
+# this_request <-  paste0(url,
+#                         '&areatype=', areatype,
+#                         '&areaid=',   fips,
+#                         '&namestr=',  namestr,
+#                         geotext,
+#                         '&unit=', unit,
+#                         '&f=', f
+# )

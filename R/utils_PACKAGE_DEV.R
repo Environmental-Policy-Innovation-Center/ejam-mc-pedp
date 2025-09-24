@@ -1,12 +1,240 @@
 
 # Functions related to managing the EJAM package, names of its functions and datasets, etc.
 
+################################ ################################# #
+# . ####
+# Notes on finding/counting global functions  ####
+## different ways of finding pkg functions:
+## 614-622 global functions found ####
+
+# one way - using  getNamespace() within pkg_functions_and_data()
+#
+## 622 exported? or total global?
+# y <- EJAM:::pkg_functions_and_data('EJAM', internal_included = F, data_included = F, alphasort_table = T, vectoronly = T)
+# length(y)
+##[1] 622
+### yy <- pkg_functions_and_data(); table(yy[!yy$data,]$exported) # about 622 but maybe because after load_all()
+### yy <- yy[!yy$data,]$object
+
+# second way - by searching for text in source files:
+#
+### 249 exported + 365 global internal = 614 ####
+## 614 global functions?
+##
+# find names of functions with @export or other tag
+
+#  exported_functions <- pkg_functions_by_roxygen_tag()
+####################################################### #
+
+##   look for those tagged as export, or keywords internal
+#
+# pkg_functions_export_tag <-
+#  exported_functions <- pkg_functions_by_roxygen_tag()
+#
+# pkg_functions_internal_tag <-
+#  keywords_internal  <- pkg_functions_by_roxygen_tag(tagpattern = "#' @keywords internal")
+#
+#   length(unique(union(exported_functions, keywords_internal)))
+## [1] 430 functions have 1 or both of those tags
+## 56 have both.
+#     length(exported_functions)
+## [1] 249
+#  length(keywords_internal)
+## [1] 237
+#  length(
+#    intersect(exported_functions, keywords_internal)
+#   )
+## [1] 56
+#
+## pkg_functions_found_in_files() ### #
+#
+################################ #
+
+# any_functions = pkg_functions_found_in_files()
+# length(z)
+# # [1] 614 total
+#
+# length(exported_functions)
+## [1] 249  exported
+#
+# unexported_functions <- sort(unique(setdiff(any_functions, exported_functions)))
+# length(unexported_functions)
+## ## 365  unexported (of which 237 tagged as keywords internal)
+##
+# length(unique(union(c(exported_functions, keywords_internal), any_functions)))
+# untagged = setdiff(any_functions, unique(union(exported_functions, keywords_internal)))
+# length(untagged)
+## [1] 184
+# length(setdiff(c(exported_functions, keywords_internal), any_functions) )
+## 0
+# . ####
+################################ ################################# #
 
 
-# GET FUNCTIONS, DATA, SOURCEFILES, ETC. ####
+# LISTING PKG  FUNCTIONS, DATA, SOURCEFILES, ETC. ####
 
 ##################################################################################### #
 # . ####
+
+## package directory ####
+
+pkg_dir_installed = function(pkg="EJAM") {find.package(pkg, lib.loc = .libPaths())}
+pkg_dir_loaded_from = function(pkg="EJAM") {find.package(pkg, lib.loc = NULL)}
+
+##################################################################################### #
+
+## searching text in source files ####
+
+# helper for find_in_files()
+
+grab_hits = function(pattern, x, ignore.case = TRUE, ignorecomments = FALSE, value = TRUE) {
+
+  # use grepl to find all members of character vector z where the character string "h" appears in the string
+  # but the string does not start with zero or more spaces followed by the character "#"
+  # ## example
+  #   xx = c("   ej", "ej", "#ej", "   #ej", "asdf#ej", "   asdf#ej", "#   ej", "#   xej", "x#  ej", "  x#ej")
+  #
+  # cbind(xx, grab_hits("ej", xx, ignorecomments = TRUE,  value = F))
+  # cbind(xx, grab_hits("ej", xx, ignorecomments = FALSE, value = F))
+  #
+  # cbind(  grab_hits("ej", xx, ignorecomments = TRUE,    value = T))
+  # cbind(  grab_hits("ej", xx, ignorecomments = FALSE,   value = T))
+
+  hit_line = grepl(pattern = pattern, x = x, ignore.case = ignore.case)
+  commented_line = grepl("^\\s*#", x = x)
+  if (ignorecomments) {
+    hits  = hit_line & !commented_line
+  } else {
+    hits = hit_line
+  }
+  which_hit = which(hits)
+  if (value) {
+    out = x[hits]
+  } else {
+    out = hits # like grepl
+  }
+  names(out) <- which_hit # names(out) are the file's line numbers if looking in a file via find_in_files()
+  return(out)
+}
+################################ #
+
+
+#' utility to do global search/find in full text of the files in a folder, like source code files or unit tests
+#'
+#' @param pattern regular expression to look for
+#' @param path can change it to e.g., "./R"
+#' @param filename_pattern query regex on file names, default is R code files
+#' @param ignorecomments omit hits from commented out lines
+#' @param ignore.case as in grep
+#' @param value logical as in [grep()] if TRUE returns matching text;
+#'    if FALSE, returns logical vectors like [grepl()]
+#' @param whole_line set it to FALSE to see only the matching fragments
+#'   vs entire line of text that has a match in it
+#' @param quiet whether to print results or just invisibly return
+#' @returns list of named vectors,
+#'   where names are file paths with hits, elements are vectors of text with hits
+#' @examples
+#' EJAM:::find_in_files("[^_]logo_....",    path = "./R", whole_line = FALSE, quiet = F)
+#' EJAM:::find_in_files("report_logo.....", path = "./R", whole_line = FALSE, quiet = F)
+#' EJAM:::find_in_files("app_logo......",   path = "./R", whole_line = FALSE, quiet = F)
+#'
+#' EJAM:::find_in_files("latlon_from_.{18}", quiet = FALSE, whole_line = F)
+#' EJAM:::find_in_files("latlon_from_s.{9}", quiet = FALSE, whole_line = F)
+#' EJAM:::find_in_files("latlon_from_mact.{9}", quiet = FALSE, whole_line = F)
+#'
+#' @keywords internal
+#'
+find_in_files <- function(pattern, path = "./tests/testthat", filename_pattern = "\\.R$|\\.r$",
+                          ignorecomments = FALSE,
+                          ignore.case = TRUE,
+                          value = TRUE, whole_line = TRUE, quiet=TRUE) {
+  if (!quiet) {
+    cat("\nSearching in ", path, ' to find files containing ', pattern, '\n')
+    # or e.g., find_in_files(pattern = "^#'.*[^<]http", path = "./R")
+  }
+  x <- list.files(path = path, pattern = filename_pattern, recursive = TRUE, full.names = TRUE)
+  names(x) <- x
+  if (ignorecomments) {
+    pattern <- paste0("(^|[^#])", pattern) # ignore comments, so only match if not preceded by a #
+  }
+  found <- x |>
+    purrr::map(
+      # ~grep(    pattern, readLines(.x, warn = FALSE), value = value, ignore.case = ignore.case)
+      ~grab_hits(pattern, readLines(.x, warn = FALSE), value = value, ignore.case = ignore.case,
+                 ignorecomments = ignorecomments)
+    ) |>
+    purrr::keep(~length(.x) > 0)
+  if (!whole_line) {
+    # return just the matching part, not text before or after that on a given line of text
+    found <- lapply(found, function(z) as.vector(gsub(paste0(".*(", pattern, ").*"), "\\1",  z)))
+  }
+  if (!quiet) {
+    if (length(found) > 0) {
+      if (!whole_line) {
+        print(sapply(found, cbind))
+      } else {
+      print(sapply(found, function(y) cbind(linenumber = names(y), text = y)))
+}
+      cat("\n------------------------------------------------------------------------- \n")
+      cat("------------------------------------------------------------------------- \n")
+    }
+    if (value == TRUE) {
+      print(cbind(hits_in_file = sort(sapply(found[sapply(found, NROW) > 0], NROW))))
+    } else {
+      print(cbind(hits_in_file = sort(sapply(found[sapply(found, sum) > 0], sum))) )
+    }
+  }
+  invisible(found)
+}
+################################ #
+
+# search for vector of query terms, to see which ones are found in any of the files
+# ... passed to find_in_files() can be ignore.case, filename_pattern
+# ignorecomments = TRUE IS NOT DEFAULT IN find_in_files() but is here
+
+found_in_files <- function(pattern_vector, path = "./R", ignorecomments = TRUE, ...) {
+
+  found = vector(length = length(pattern_vector))
+  for (i in seq_along(pattern_vector)) {
+    hits = find_in_files(pattern_vector[i], path = path, ignorecomments=ignorecomments, ...)
+    found[i] <- length(hits) > 0
+  }
+  foundones = pattern_vector[found]
+  print(foundones)
+  return(found) # logical vector
+}
+################################ #
+
+# frequency of occurrences of each term within a list of files
+# actually how many lines of code does it appear in so counts as 1 each line where it appears even if it appears >1x in that line
+# ignorecomments = TRUE IS NOT DEFAULT IN find_in_files() but is here
+
+found_in_N_files_T_times <- function(pattern_vector, path = "./R", ignorecomments = TRUE, ...) {
+
+  nfiles <- vector(length = length(pattern_vector))
+  nhits <- vector(length = length(pattern_vector))
+  for (i in seq_along(pattern_vector)) {
+    hits <- find_in_files(pattern_vector[i], path = path, ignorecomments = ignorecomments, ...)
+    nfiles[i] <- length(hits)
+    nhits[i] <- length(as.vector(unlist(hits)))
+    # found[i] <- length(hits) > 0
+  }
+  # foundones <- pattern_vector[found]
+  out <- data.frame(term = pattern_vector,
+                    nfiles = nfiles,
+                    nhits = nhits
+  )
+  print(head(
+    out[order(out$nfiles, out$nhits, decreasing = TRUE), ]
+  ), 10)
+  invisible(out)
+}
+################################ ################################# #
+# . ####
+## package's functions & datasets####
+
+
+
 # get functions, datasets, filenames - exported & internal
 
 #' utility to see which objects in a loaded/attached package are functions or datasets, exported or not (internal)
@@ -33,12 +261,16 @@
 #'
 #' @keywords internal
 #'
-pkg_functions_and_data <- function(pkg,
+pkg_functions_and_data <- function(pkg = "EJAM",
                                    alphasort_table = FALSE,
                                    internal_included = TRUE,
                                    exportedfuncs_included = TRUE,
                                    data_included = TRUE,
                                    vectoronly = FALSE) {
+
+  if (!paste0("package:", pkg) %in% search()) {
+    stop(paste0("package:", pkg), " is not found in search() -- this function needs the package attached via library() or require() or possibly via devtools::load_all()")
+  }
 
   ## (helpers) ### #
   if (!internal_included) {
@@ -312,6 +544,7 @@ pkg_data <- function(pkg = 'EJAM', len=30, sortbysize=TRUE, simple = TRUE) {
   }
 }
 ##################################################################################### #
+# . ####
 
 # # utility to get the filename where a function is defined PLUS other info
 # #
@@ -337,7 +570,7 @@ pkg_functions_and_sourcefiles <- function(pkg = "EJAM",
   if (basename(getwd()) != pkg) {stop("working directory must be the source package folder for pkg", pkg)}
   x <- pkg_functions_with_keywords_internal_tag(loadagain = loadagain, quiet = quiet) # DOES load_all() again if loadagain==TRUE
   fnames <- x$func
-  fnames <- fnames[match(funcnames, fnames)] # match to ensure same order as info$object, but check how extra or missing ones are handled
+  fnames <- x$file[match(funcnames, fnames)] # match to ensure same order as info$object, but check how extra or missing ones are handled
   if (vectoronly) {
     return(fnames)
   } else {
@@ -412,7 +645,11 @@ pkg_functions_and_sourcefiles2 <- function(funcnames, pkg = "EJAM", full.names =
 
 # NOTE THIS IS SLOW SINCE by default IT LOADS THE PACKAGE (AND PARSES ALL ROXYGEN TAGS)
 
-pkg_functions_with_keywords_internal_tag <- function(package.dir = ".", loadagain = TRUE, quiet = FALSE) {
+## compare this to   pkg_functions_by_roxygen_tag()
+
+pkg_functions_with_keywords_internal_tag <- function(
+
+    package.dir = ".", loadagain = TRUE, quiet = FALSE) {
 
   # Does load_all() first if loadagain==TRUE so even unexported functions will seem exported, fyi
   #
@@ -511,6 +748,68 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".", loadagai
   # return(list(blocks = blocks, results = results) ) # for troubleshooting
 }
 ##################################################################### #
+
+################################ #
+
+
+pkg_functions_by_roxygen_tag <- function(
+    tagpattern = "#' @export",
+    path="./R"
+) {
+
+  x = find_in_files(tagpattern, path = path)
+  n = length(x)
+  fname = vector(length = n); rownums = list()
+  funcname <- NULL
+
+  for (i in seq_along(x)) {
+    fname[i] = names(x[i])
+    rownums[[i]] = names(x[[i]] )
+    taglinenumbers = as.numeric(rownums[[i]])
+    txt = readLines(fname[i])
+    for (ii in 1:length(taglinenumbers)) {
+      nextfuncname <-
+        grep(pattern = "^([^# ]*) .*function\\(",
+             x = txt[   taglinenumbers[ii]:(4 + taglinenumbers[ii]) ],
+             value = TRUE)
+      nextfuncname <- gsub("^([^ #]*) .*function\\(.*", "\\1", nextfuncname)
+      if (is.null(nextfuncname)
+          # || (0 %in% length(nextfuncname) )
+      ) {
+        cat("no function definition found just after line ", taglinenumbers[ii], " in file ", fname[i])
+        nextfuncname <- NULL
+      } else {
+        if ("" %in% nextfuncname) { nextfuncname <- NULL} else {
+          if (length(nextfuncname) == 0) { nextfuncname <- NULL}
+        }
+      }
+      funcname <- c(funcname, nextfuncname)
+    }
+  }
+  return(funcname)
+}
+################################ #
+
+## Roughly  how many internal global functions are loaded with no @keywords internal tag?
+## This just counts source code lines where a function definition seems to start on
+## a line with no leading spaces or # signs (not a commented line)
+## so it probably avoids functions defined within other functions
+##
+pkg_functions_found_in_files <- function(
+
+  pattern = "^([^# ]*) .*function\\(",
+  pattern_gsub =  "^([^# ]*) .*function\\(.*",
+  path= "./R") {
+
+  z = find_in_files( pattern = pattern, path = path)
+  z = as.vector(unlist(z))
+  z = gsub(pattern_gsub,  "\\1", z)
+  z = z[!(z %in% "")]
+  return(z)
+}
+################################ ################################# #
+# . ####
+################################ ################################# #
 
 # conflicting sourcefile names ####
 
@@ -684,7 +983,7 @@ pkg_functions_all_equal <- function(fun="latlon_infer", package1="EJAM", package
 
   # 1) Normally it checks the first two cases of dupe named functions from 2 packages,
   # and answers with FALSE or TRUE (1 value).
-  # But it returns FALSE 3 times only in the case of run_app (but not latlon_is.valid)
+  # But it returns FALSE 3 times for some?
   # pkg_dupenames(ejampackages) # or just pkg_dupenames()
 
   # 2) ### error when checking a package that is loaded but not attached.

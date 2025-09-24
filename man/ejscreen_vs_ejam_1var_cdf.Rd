@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs_ejam_1var_cdf}
 \alias{ejscreen_vs_ejam_1var_cdf}
-\title{EJAM/EJSCREEN comparisons - see cumulative distribution for 1 variable after using ejscreen_vs_ejam()
+\title{EJAM / EJSCREEN comparisons - see cumulative distribution for 1 variable after using ejscreen_vs_ejam()
 Plot distribution of absolute values of Percent Differences in 1 indicator at tested sites}
 \usage{
 ejscreen_vs_ejam_1var_cdf(vs, varname = "pop")
@@ -18,7 +18,7 @@ that are among those in
 CDF plot
 }
 \description{
-EJAM/EJSCREEN comparisons - see cumulative distribution for 1 variable after using ejscreen_vs_ejam()
+EJAM / EJSCREEN comparisons - see cumulative distribution for 1 variable after using ejscreen_vs_ejam()
 Plot distribution of absolute values of Percent Differences in 1 indicator at tested sites
 }
 \keyword{internal}

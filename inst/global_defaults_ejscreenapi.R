@@ -34,7 +34,7 @@ warning( " work in progress - this global.... file must be sourced only inside a
 # bookmarking_allowed <- TRUE  # https://mastering-shiny.org/action-bookmark.html
 # if (bookmarking_allowed) {enableBookmarking(store = "url")}
 #
-# default_hide_advanced_settings <- FALSE
+# default_show_advanced_settings <- FALSE
 # default_testing        <- TRUE
 # default_shiny.testmode <- TRUE  # If TRUE, then various features for testing Shiny applications are enabled.
 # default_print_uploaded_points_to_log <- TRUE
@@ -84,9 +84,9 @@ maxmax_pts_run      <- 15 * 1000 # absolute max you can analyze here, even with 
 
 ## ------------------------ Options for Radius  #####
 
-# input$default_miles
-default_default_miles <- 1
-max_default_miles <- 50 * 1000 / meters_per_mile # 50 km
+# input$radius_default
+radius_default <- 1
+max_radius_default <- 50 * 1000 / meters_per_mile # 50 km
 # input$max_miles
 default_max_miles     <- 10
 maxmax_miles     <- 50 * 1000 / meters_per_mile # 50 km

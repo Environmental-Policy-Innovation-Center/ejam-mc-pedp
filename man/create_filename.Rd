@@ -6,41 +6,62 @@
 \usage{
 create_filename(
   file_desc = "",
+  filename_base = "EJAM",
+  with_datetime = TRUE,
+  ext = NULL,
   title = "",
   buffer_dist = 0,
   site_method = "",
-  with_datetime = TRUE,
-  ext = NULL
+  replace_spaces_with = " ",
+  maxchar = 50,
+  maxchar_total = 150
 )
 }
 \arguments{
 \item{file_desc}{file description, such as "short report", "long report", "results_table"}
 
-\item{title}{analysis title}
-
-\item{buffer_dist}{buffer distance}
-
-\item{site_method}{site selection method, such as SHP, latlon, FIPS, NAICS, FRS, EPA_PROGRAM, SIC, MACT}
+\item{filename_base}{optional word to start the file name}
 
 \item{with_datetime}{boolean to include date and time}
 
-\item{ext}{optional file extension. will check for '.' and add if not provided}
+\item{ext}{optional file extension, like ".html" etc. Will check for '.' and add if not provided.}
+
+\item{title}{analysis title (capped at 100 characters)}
+
+\item{buffer_dist}{buffer distance, to follow "Miles from"}
+
+\item{site_method}{site selection method, such as SHP, latlon, FIPS, NAICS, FRS, EPA_PROGRAM, SIC, MACT, or anything to follow "places by"}
+
+\item{replace_spaces_with}{substitutes this in place of each space in file_desc, title, "places by", "Miles from",
+and used to separate from text for buffer_dist and site_method
+@param maxchar optional max characters for each component of the name
+@param maxchar_total optional max for the entire filename, truncated at end if necessary}
 }
 \value{
-Returns string of pasted filename with specified components
+Returns string of file name (with extension but no path) with specified components
 }
 \description{
 Builds filename from file description, analysis title, buffer distance, and site selection method. Values are pulled from Shiny app if used there.
 }
 \examples{
-# specify all arguments
-create_filename(
-  file_desc = 'results_table', title = 'My Title', 
-  buffer_dist = 1, site_method = 'NAICS', 
-  with_datetime=TRUE, ext = '.xlsx'
-)
 # specify title only
-create_filename(title = 'Summary of Analysis')
+create_filename(title = 'Summary of Analysis', ext=".txt")
+
+# test / see how it works for various combinations of input parameters
+parameters_table = expand.grid(
+  file_desc=c("", "FILE DESCRIPTION"),
+  title = c("", "My Title"),
+  buffer_dist = c(0, 3.2),
+  site_method = c("", "latlon"),
+  ext = c(NULL, ".html"),
+  stringsAsFactors = F
+)
+cbind(output_filename =
+  cbind(
+    purrr::pmap(parameters_table, create_filename)
+  ),
+  parameters_table
+)
 
 }
 \keyword{internal}

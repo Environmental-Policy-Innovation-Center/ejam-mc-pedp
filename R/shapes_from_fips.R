@@ -27,7 +27,6 @@
 #' When using tigris package ("tiger" as service-related parameter here),
 #' it uses the year that is the default in the version of the tigris package that is installed.
 #' You can use options(tigris_year = 2022) for example to specify it explicitly.
-#' This function also sets options(tigris_use_cache = TRUE), but each individual shapes_xyz_from_ function may not specify.
 #'
 #'  Blocks are not implemented yet here. For info on blocks bounds, see  [tigris::block_groups()]
 #'  Also note the [blockwts] dataset had a placeholder column block_radius_miles that as of
@@ -35,9 +34,11 @@
 #'  If it were used, it could be a way to quickly get the area of each block,
 #'  using the formula  area = pi * (block_radius_miles^2)
 #'
+#'  For zip code boundaries, see the [EJAM documentation](ejanalysis.org/ejamdocs) article on zipcodes.
+#'
 #' @return spatial data.frame with one row per fips (assuming any fips are valid)
 #' @examples
-#'  # shp2 = shapes_from_fips("10001", "10005")
+#'  # shp2 = shapes_from_fips("10001", "10005") # Counties not zip codes!
 #'
 #'  fipslist = list(
 #'   statefips = name2fips(c('DE', 'RI')),
@@ -79,7 +80,10 @@ shapes_from_fips <- function(fips,
   ########################## #
   # validation of input fips types ####
 
-  oktypes <- c("blockgroup", "tract", "city", "county", "state") # NOT block
+  oktypes <- c("blockgroup", "tract", "city", "county", "state") # NOT block - but maybe we should return at least lat,lon of blocks?
+
+  # in shapes_from_fips() try to either get block bounds via API or substitute a point/circle using blockpoints lat,lon info for block fips ***
+  # or else ensure other functions like map_ejam_plus_shp() can handle an empty geometry row better
 
   suppressWarnings({
     ftype <- fipstype(fips) # NULL or NA or one of oktypes or "block"
@@ -124,7 +128,7 @@ shapes_from_fips <- function(fips,
   }
   ########################## #
 
-  options(tigris_use_cache = TRUE) # But it seems to use cache anyway?
+  options(tigris_use_cache = TRUE) # done in .onAttach() now
   # options(tigris_year = 2022) # uses default of the tigris package version installed
 
   error_downloading <- function(shp) {
@@ -394,7 +398,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     if (myservice[1] == 'cartographic') {usecb = TRUE}
     if (myservice[1] == 'tiger') {usecb = FALSE}
 
-    options(tigris_use_cache = TRUE) # But it seems to use cache anyway?
+    options(tigris_use_cache = TRUE) # done in .onAttach() now
 
     # get_acs() can get all counties for a list of states, or selected counties from 1 state,
     #  but is not able to get just selected counties from more than 1 state in a single function call,
@@ -490,7 +494,6 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     #            ## using tidycensus pkg
     # library(tidycensus)
     # library(tidyverse)
-    # options(tigris_use_cache = TRUE) # But it seems to use cache anyway?
     # mystates = stateinfo$ST # 50+DC+PR
     # ## checked speeds:
     ## About 1-4 seconds for all counties faster cartographic bounds
@@ -600,7 +603,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
 #' Get tract boundaries, via API, to map them
 #'
 #' @details This is useful mostly for small numbers of tracts.
-#'   The EJScreen map services provide other ways to map tracts and see EJScreen data.
+#'   The EJSCREEN map services provide other ways to map tracts and see EJSCREEN data.
 #' @param fips one or more FIPS codes as 11-character strings in a vector
 #' @param outFields can be "*" for all, or can be
 #'   just a vector of variables that particular service provides, like FIPS, SQMI, POPULATION_2020, etc.
@@ -688,7 +691,7 @@ shapes_tract_from_tractfips <- function(fips, outFields = c("FIPS", "STATE_ABBR"
 #' Get blockgroups boundaries, via API, to map them
 #'
 #' @details This is useful mostly for small numbers of blockgroups.
-#'   The EJScreen map services provide other ways to map blockgroups and see EJScreen data.
+#'   The EJSCREEN map services provide other ways to map blockgroups and see EJSCREEN data.
 #' @param bgfips one or more blockgroup FIPS codes as 12-character strings in a vector
 #' @param outFields can be "*" for all, or can be
 #'   just a vector of variables that particular service provides, like FIPS, SQMI, POPULATION_2020, etc.
@@ -697,7 +700,7 @@ shapes_tract_from_tractfips <- function(fips, outFields = c("FIPS", "STATE_ABBR"
 #'   "https://services.arcgis.com/cJ9YHowT8TU7DUyn/ArcGIS/rest/services/
 #'   EJScreen_2_21_US_Percentiles_Block_Groups/FeatureServer/0/query"
 #'
-#'   for example provides EJScreen indicator values, NPL_CNT, TSDF_CNT, EXCEED_COUNT_90, etc.
+#'   for example provides EJSCREEN indicator values, NPL_CNT, TSDF_CNT, EXCEED_COUNT_90, etc.
 #' @seealso [shapes_from_fips()]
 #' @return spatial object via [sf::st_read()] # sf-data.frame, not sf-tibble like [sf::read_sf()]
 #'
@@ -1057,7 +1060,7 @@ shapefile_addcols <- function(shp, addthese = c('fipstype', 'pop', 'NAME', 'STAT
   }
   if ('SQMI' %in% addthese) {
     shp$SQMI <- area_sqmi_from_fips(fipsvector, download_city_fips_bounds = FALSE, download_noncity_fips_bounds = FALSE)
-    shp$SQMI[ftype == "city" & !is.na(ftype)] <- area_sqmi_from_shp(shp[ftype == "city" & !is.na(ftype), ]) # *** check the numbers
+    shp$SQMI[ftype %in% "city" & !is.na(ftype)] <- area_sqmi_from_shp(shp[ftype %in% "city" & !is.na(ftype), ]) # *** check the numbers
     shp$SQMI <- round(shp$SQMI, 2)
   }
 

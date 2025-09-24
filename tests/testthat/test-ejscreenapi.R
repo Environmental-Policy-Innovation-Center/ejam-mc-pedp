@@ -3,6 +3,7 @@ cat('\ntesting ejscreenapi()\n')
 
 test_that("ejscreenapi() works at all", {
   apiok = EJAM:::ejscreenapi_online()
+  if (is.na(apiok)) {apiok <- FALSE}
   skip_if_not(apiok, message = "ejscreen API not available")
   expect_no_error(
     suppressWarnings(

@@ -33,7 +33,7 @@ test_that("one state", {
 
 
 
-test_that("Calculate a new indicator for each block group, using ACS data", {
+test_that("Calculate a new indicator for each blockgroup, using ACS data", {
 
   # this requires having set up a census api key - see ?tidycensus::census_api_key
   skip_if(nchar(Sys.getenv("CENSUS_API_KEY")) == 0, message = "missing census API key so cannot test where tidycensus package is used")

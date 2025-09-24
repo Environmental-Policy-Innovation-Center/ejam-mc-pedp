@@ -165,7 +165,7 @@ cat("\n\n")
 
 **LARGE DATASETS USED BY THE PACKAGE**
 
-Note that the largest files used by the package are mostly the block-related datasets with info about population size and location of US blocks, the facility datasets with info about EPA-regulated sites, and the blockgroup-related datasets with EJScreen indicators. 
+Note that the largest files used by the package are mostly the block-related datasets with info about population size and location of US blocks, the facility datasets with info about EPA-regulated sites, and the blockgroup-related datasets with EJSCREEN indicators. 
 
 Some datasets get downloaded by the package at installation or launch or as needed. See the article on [Updating EJAM Datasets](dev-update-datasets.html) for more information on these. 
 

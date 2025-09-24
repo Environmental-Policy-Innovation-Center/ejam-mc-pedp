@@ -144,7 +144,7 @@ plot_vs_us <- function(bysite = NULL, # ejamit()$results_bysite,
   sites <- cbind(bysite[ , c("pop", varname, 'ejam_uniq_id'), with = FALSE], Locations = siteslabel)
   rm(bysite)
 
-  # refdata -- If no reference area is specified, use all US block groups
+  # refdata -- If no reference area is specified, use all US blockgroups
   if (is.null(refdata)) {
     if (!(varname %in% names(blockgroupstats))) {stop(varname, "must be a column name in refdata (which is blockgroupstats by default)")}
     if (is.data.table(blockgroupstats)) {

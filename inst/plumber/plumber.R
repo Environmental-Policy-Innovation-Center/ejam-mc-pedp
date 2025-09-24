@@ -6,8 +6,8 @@
 ############################# #
 #* @apiTitle EJAM API
 #*
-#* @apiDescription Provides EJAM/EJScreen batch analysis summary results.
-#* See the EJAM package for technical documentation on functions powering the API, at <https://usepa.github.io/EJAM/index.html>
+#* @apiDescription Provides EJAM / EJSCREEN batch analysis summary results.
+#* See the EJAM package for technical documentation on functions powering the API, at <https://ejanalysis.org/ejamdocs>
 
 # future::plan("multisession")  # did not seem to work
 
