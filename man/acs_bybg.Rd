@@ -117,7 +117,7 @@ x[substr(x$name,1,7) \%in\% "B18101_", ] |> print(n=50)
 }\if{html}{\out{</div>}}
 }
 \examples{
-\donttest{
+\dontrun{
 ## All states, full table
 # newvars <- acs_bybg(table = "B01001")
 
@@ -126,7 +126,7 @@ newvars <- acs_bybg(c(pop = "B01001_001", y = "B01001_002"), state = "DC")
 
 ## Format new data to match rows of blockgroupstats
 
-setnames(newvars, "GEOID", "bgfips")
+data.table::setnames(newvars, "GEOID", "bgfips")
 dim(newvars)
 newvars <- newvars[blockgroupstats[,.(bgfips, ST)], ,  on = "bgfips"]
 dim(blockgroupstats)
@@ -139,7 +139,7 @@ newvars[ST == "DC", ]
 mystates = c("DC", 'RI')
 newvars <- acs_bybg(variables = c("B01001_001", paste0("B01001_0", 31:39)),
   state = mystates)
-setnames(newvars, "GEOID", "bgfips")
+data.table::setnames(newvars, "GEOID", "bgfips")
 newvars[, ST := fips2state_abbrev(bgfips)]
 names(newvars) <- gsub("E$", "", names(newvars))
 

@@ -10,7 +10,7 @@ get_global_defaults_or_user_options(
 )
 }
 \arguments{
-\item{user_specified_options}{named list of any optonal arguments that were in the call to \code{\link[=ejamapp]{ejamapp()}}}
+\item{user_specified_options}{named list of any optional arguments that were in the call to \code{\link[=ejamapp]{ejamapp()}}}
 
 \item{bookmarking_allowed}{same as \link[shiny:shinyApp]{shiny::shinyApp} enableBookmarking param}
 }

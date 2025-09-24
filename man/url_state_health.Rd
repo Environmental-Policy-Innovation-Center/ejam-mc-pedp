@@ -38,7 +38,7 @@ url_state_health(
 
 \item{baseurl}{do not change unless endpoint actually changed}
 
-\item{statereport}{Do not use directly here. passed here by u\code{\link[=rl_countyhealth]{rl_countyhealth()}}}
+\item{statereport}{Do not use directly here. passed here by \code{\link[=url_countyhealth]{url_countyhealth()}}}
 
 \item{...}{unused}
 }
