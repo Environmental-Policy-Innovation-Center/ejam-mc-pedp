@@ -1,902 +1,994 @@
 ################################################### #################################################### #
 
+# This file has functions that generate URLs that are links to useful info like reports via API
+# or at a webpage (usually via "deep-linking" like a specific place on a map or page with a report on one site or county).
+
+# Check for which API is available within each url_xyz function?
+
 # LIST OF FUNCTIONS HERE ####
-# 
+#
 #   see outline via ctrl-shift-O
-#   see also URL_FUNCTIONS_part1.R
+#   also see URL_*.R and url_*.R
 
+## site-specific reports ####
+################################################### #################################################### #
+## NOTES ON URL LINKS/ SITES / REPORTS:
 
+# > reportinfo = EJAM:::global_or_param("default_reports")
+# data.frame(header = sapply(reportinfo, function(x) x$header), text = sapply(reportinfo, function(x) x$text))
+#                header         text
+# 1         EJAM Report       Report
+# 2        EJSCREEN Map     EJSCREEN
+# 3         ECHO Report         ECHO
+# 4          FRS Report          FRS
+# 5 EnviroMapper Report EnviroMapper
+# 6       County Health Report       County
+# 7       State Health Report       State
 
-######################################################################### #
+# > rm(reportinfo)
 
-#' URL functions - Create URLs in columns, for EJAM
-#' 
-#' Could start to use this in server and ejamit(), and already used in table_xls_format() 
-#' @details used in [table_xls_format()] 
-#' 
-#' @param lat vector of latitudes
-#' @param lon vector of longitudes
-#' 
-#' @param radius vector of values for radius in miles
-#' 
-#' @param regid optional vector of FRS registry IDs if available to use to create links
-#'   to detailed ECHO facility reports
-#'   
-#' @param fips vector of FIPS codes if relevant, to use instead of lat lon,
-#'   Passed to [url_ejscreen_report()] as areaid
-#'   Note that nearly half of all county fips codes are impossible to distinguish from 
-#'   5-digit zipcodes because the same numbers are used for both purposes.
-#'   
-#' @param wherestr optional because inferred from fips if provided.
-#'   Passed to [url_ejscreenmap()] and can be name of city, county, state like
-#'   from fips2name(201090), or "new rochelle, ny" or "AK"
-#'   or even a zip code, but NOT a fips code! (for FIPS, use the fips parameter instead).
-#'   Note that nearly half of all county fips codes are impossible to distinguish from 
-#'   5-digit zipcodes because the same numbers are used for both purposes.
-#' @param namestr passed to [url_ejscreen_report()]
-#' 
-#' @param shapefile not implemented
-#' 
-#' @param as_html logical, optional.
-#'   passed to [url_ejscreen_report()] and [url_ejscreenmap()]
-#' @param ... passed to [url_ejscreen_report()] such as areaid="0201090" for a city fips
-#' 
-#' @seealso  [url_ejscreen_report()] [url_ejscreenmap()] [url_echo_facility_webpage()] [urls_clusters_and_sort_cols()]
-#' @return list of data.frames to append to the list of data.frames created by
-#'   [ejamit()] or [doaggregate()],
-#'   
-#'  `list(results_bysite = results_bysite, `
-#'  `    results_overall = results_overall,`
-#'  `      newcolnames=newcolnames)`
+# ECHO reports on facilities:
+# [url_echo_facility()]
+# <https://echo.epa.gov/tools/web-services>
+# browseURL("https://echo.epa.gov/tools/web-services")
+# browseURL("https://echo.epa.gov/detailed-facility-report?fid=110068700043#")
+# paste0("https://echo.epa.gov/detailed-facility-report?fid=", regid, "#")
+
+# FRS reports on facilities:
+# [url_frs_facility()]
+# see also  https://www.epa.gov/frs/frs-rest-services  or https://www.epa.gov/frs
+# browseURL("https://www.epa.gov/frs/frs-physical-data-model")
+# browseURL("https://frs-public.epa.gov/ords/frs_public2/fii_query_detail.disp_program_facility?p_registry_id=110035807259")
+# browseURL("https://www.epa.gov/frs/frs-query#industrial naics")
+
+# EnviroMapper app webpage:
+# [url_enviromapper()]
+
+# Envirofacts API, data on facilities:
+# browseURL("https://www.epa.gov/enviro/web-services")
+# browseURL("https://www.epa.gov/enviro/envirofacts-data-service-api")
+# <https://www.epa.gov/enviro/web-services> and
+# <https://www.epa.gov/enviro/envirofacts-data-service-api>
+
+################################################### #################################################### #
+# . ---------------------------------------------------- ####
+# functions using facility registry ID ####
+# . ####
+
+#' Get URLs of ECHO reports
+#'
+#' Get URL(s) for EPA ECHO webpage with facility information
+#'
+#' @details
+#' Additional details...
+#'
+#' @param regid EPA FRS Registry ID
+#' @param validate_regids if set TRUE, returns NA where a regid is not found in the FRS dataset that is
+#'   currently being used by this package (which might not be the very latest from EPA).
+#'   If set FALSE, faster since avoids checking but some links might not work and not warn about bad regid values.
+#'
+#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
+#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
+#' @param ifna URL shown for missing, NA, NULL, bad input values
+#' @param baseurl do not change unless endpoint actually changed
+#' @param ... unused - allows it to ignore things like lat, lon, if called from [url_columns_bysite()]
+#'
+#' @seealso  [url_ejamapi()]  [url_ejscreenmap()]
+#'   [url_echo_facility()] [url_frs_facility()]  [url_enviromapper()]
+#'
+#' @seealso  [url_ejamapi()]  [url_ejscreenmap()]
+#'   [url_echo_facility()] [url_frs_facility()]  [url_enviromapper()]
+#' @return URL(s)
+#' @examples  \donttest{
+#'  browseURL(url_echo_facility(110070874073))
+#'  }
 #'
 #' @export
-#' @keywords internal
 #'
-url_4table <- function(lat, lon, radius=NULL, regid = NULL, 
-                       fips, wherestr = "", namestr = NULL, 
-                       shapefile = NULL,
-                       as_html = TRUE, ...) {
-  
-  # add error checking***
-  
-  if (!missing(fips) & !is.null(fips) & !all(is.na(fips))) {
-    if (missing(wherestr)) {
-    wherestr <- fips2name(fips)
-    }
-    if (!missing(lat) & !is.null(lat) & !all(is.na(fips))) {warning('should provide lat,lon or fips but both were provided')}
-    lat = NULL
-    lon = NULL
+url_echo_facility <- function(regid = NULL,
+                              validate_regids = TRUE,
+                              as_html = FALSE,
+                              linktext = "ECHO", # regid,
+                              ifna = "https://echo.epa.gov",
+                              baseurl = "https://echo.epa.gov/detailed-facility-report?fid=",
+                              ...) {
+  if (is.null(linktext)) {linktext <- paste0("ECHO")}
+
+  ## regid ####
+  if (is.null(regid) || length(regid) == 0) {
+    urlx <- ifna
+    return(urlx) # length is 0
   }
-  
-  # Also could add other links such as these:
-  #   url_frs_report()
-  #   url_enviromapper()
-  #   url_envirofacts_data()  ?
-  # url_countyhealthrankings() ?
-  
-  if (!is.null(regid)) {
-    echolink <- url_echo_facility_webpage(regid, as_html = as_html)
+  if (!is.vector(regid)) {
+    warning("regid should be a vector")
+    urlx <- rep(ifna, NROW(regid))
   } else {
-    echolink <- rep(NA, max(NROW(lat), NROW(fips))) # server used 'N/A' instead of NA -- which do we want to use?
+    ok <- regids_seem_ok(regid)
+    urlx <- rep(ifna, NROW(regid))
+
+    ## MAKE URL ### #
+
+    urlx[ok] <- paste0(baseurl, regid[ok])
   }
-  
-  newcolnames <- c(
-    # "EJScreen Report",
-    # "EJScreen Map",
-    # "ACS Report",
-    "ECHO Report"
-  )
-  
-  results_bysite <- data.table(
-   # `EJScreen Report` = ,#url_ejscreen_report(lat = lat, lon = lon, radius = radius, as_html = as_html, 
-                              #              areaid = fips, namestr = namestr, 
-                              #              shapefile = shapefile, interactiveprompt = FALSE, ...), # linktext = 
-    
-  #  `EJScreen Map`    = #url_ejscreenmap(    lat = lat, lon = lon,                  as_html = as_html, 
-                              #              wherestr = wherestr,              
-                              #              shapefile = shapefile),  # linktext =   would need to be different than for report
-   #`ACS Report`      = 'N/A',#url_ejscreen_acs_report(lat = lat, lon = lon, radius = radius, as_html = as_html),
-   `ECHO Report` = echolink
-  )
-  results_overall <- data.table(
-    # `EJScreen Report` = NA,
-    # `EJScreen Map`    = NA,
-    # `ACS Report` = NA,
-    `ECHO Report`     = NA
-  )
-  
-  # setcolorder(out$results_bysite,  neworder = newcolnames)
-  # setcolorder(out$results_overall, neworder = newcolnames)
-  # out$longnames <- c(newcolnames, out$longnames)
-  
-  return(list(
-    results_bysite  = results_bysite,
-    results_overall = results_overall,
-    newcolnames = newcolnames
-  ))
+  ok <- !is.na(regid)
+
+  if (validate_regids) {
+    bad_id <- !regids_valid(regid) # warns if any bad
+    urlx[bad_id] <- ifna
+  }
+
+  urlx[!ok] <- ifna
+  ok <- !is.na(urlx)  # now !ok mean it was a bad input and also  ifna=NA
+  if (as_html) {
+    urlx[ok] <- URLencode(urlx[ok]) # consider if we want  reserved = TRUE
+    urlx[ok] <- url_linkify(urlx[ok], text = linktext)
+  }
+  urlx[!ok] <- ifna # only use non-linkified ifna for the ones where user set ifna=NA and it had to use ifna
+  return(urlx)
 }
-######################################################################### #
+################################################### #################################################### #
+# . ####
 
 
-#' URL functions - Get URLs of useful report(s) on Counties from countyhealthrankings.org
+#' Get URLs of FRS reports
 #'
-#' @param fips vector of fips codes of counties, 5 characters each, like "10003"
-#' @param year e.g., 2025
+#' Get URL(s) for reports on facilities from EPA FRS (facility registry service)
 #'
-#' @return vector of URLs
-#' @examples 
-#'  url_countyhealthrankings(fips_counties_from_state_abbrev("DE"))
-#'  # browseURL(url_countyhealthrankings(fips_counties_from_state_abbrev("DE"))[1])
-#' 
+#' @param regid one or more EPA FRS Registry IDs.
+#' @param validate_regids if set TRUE, returns NA where a regid is not found in the FRS dataset that is
+#'   currently being used by this package (which might not be the very latest from EPA).
+#'   If set FALSE, faster since avoids checking but some links might not work and not warn about bad regid values.
+#'
+#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
+#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
+#' @param ifna URL shown for missing, NA, NULL, bad input values
+#' @param baseurl do not change unless endpoint actually changed
+#' @param ... unused
+#'
+#' @seealso  [url_ejamapi()]  [url_ejscreenmap()]
+#'   [url_echo_facility()] [url_frs_facility()]  [url_enviromapper()]
+#'
+#' @return URL(s)
+#' @examples
+#' x = url_frs_facility(testinput_regid)
+#' \donttest{
+#' browseURL(x[1])
+#' }
+#' url_frs_facility(testinput_registry_id)
+#'
 #' @export
 #'
-url_countyhealthrankings <- function(fips, year = 2025) {
-  
+url_frs_facility <- function(regid = NULL,
+                             validate_regids = FALSE,
+                             as_html = FALSE,
+                             linktext = "FRS",
+                             ifna = "https://www.epa.gov/frs",
+                             baseurl = "https://frs-public.epa.gov/ords/frs_public2/fii_query_detail.disp_program_facility?p_registry_id=",
+                             ...) {
+  if (is.null(linktext)) {linktext <- paste0("FRS")}
+
+  # both of these URLs seem to work:
+  #baseurl <- "https://ofmpub.epa.gov/frs_public2/fii_query_detail.disp_program_facility?p_registry_id="
+  # baseurl = "https://frs-public.epa.gov/ords/frs_public2/fii_query_detail.disp_program_facility?p_registry_id="
+
+  ## regid ####
+  if (is.null(regid) || length(regid) == 0) {
+    urlx <- ifna
+    return(urlx) # length is 0
+  }
+  if (!is.vector(regid)) {
+    warning("regid should be a vector")
+    urlx <- rep(ifna, NROW(regid))
+  } else {
+    ok <- regids_seem_ok(regid)
+    urlx <- rep(ifna, NROW(regid))
+    urlx[ok] <- paste0(baseurl, regid[ok])
+  }
+  ok <- !is.na(regid)
+
+  if (validate_regids) {
+    bad_id <- !regids_valid(regid) # warns if any bad
+    urlx[bad_id] <- ifna
+  }
+
+  urlx[!ok] <- ifna
+  ok <- !is.na(urlx)  # now !ok mean it was a bad input and also  ifna=NA
+  if (as_html) {
+    urlx[ok] <- URLencode(urlx[ok]) # consider if we want  reserved = TRUE
+    urlx[ok] <- url_linkify(urlx[ok], text = linktext)
+  }
+  urlx[!ok] <- ifna # only use non-linkified ifna for the ones where user set ifna=NA and it had to use ifna
+  return(urlx)
+}
+################################################### #################################################### #
+# . ---------------------------------------------------- ####
+# functions using lat,lon (sometimes from regid) ####
+# . ####
+
+#' Get URL(s) for (new) EJSCREEN app with map centered at given point(s)
+#'
+#' @param sitepoints data.frame with colnames lat, lon (or lat, lon parameters can be provided separately)
+#' @param lat,lon vectors of coordinates, ignored if sitepoints provided, can be used otherwise, if shapefile and fips not used
+#' @param fips The FIPS code of a place to center map on (blockgroup, tract, city/cdp, county, state FIPS).
+#'   It gets translated into the right wherestr parameter if fips is provided.
+#'
+#' @param wherestr If fips and sitepoints (or lat and lon) are not provided,
+#'   wherestr should be the street address, zip code, or place name (not FIPS code!).
+#'
+#'   Note that nearly half of all county fips codes are impossible to distinguish from
+#'   5-digit zipcodes because the same numbers are used for both purposes.
+#'
+#'   For zipcode 10001, use url_ejscreenmap(wherestr =  '10001')
+#'
+#'   For County FIPS code 10001, use url_ejscreenmap(fips = "10001")
+#'
+#'   This parameter is passed to the API as wherestr= , if point and fips are not specified.
+#'
+#'   Can be State abbrev like "NY" or full state name,
+#'   or city like "New Rochelle, NY" as from fips2name() -- using fips2name()
+#'   works for state, county, or city FIPS code converted to name,
+#'   but using the fips parameter is probably a better idea.
+#'
+#' @param shapefile shows URL of a EJSCREEN app map centered on the centroid of a given polygon,
+#'   but does not actually show the polygon.
+#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
+#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
+#' @param ifna URL shown for missing, NA, NULL, bad input values
+#' @param baseurl do not change unless endpoint actually changed
+#' @param ... unused
+#'
+#' @return URL(s)
+#' @seealso  [url_ejamapi()]  [url_ejscreenmap()]
+#'   [url_echo_facility()] [url_frs_facility()]  [url_enviromapper()]
+#' @examples
+#' # browseURL(url_ejscreenmap(fips = '10001'))
+#' # browseURL(url_ejscreenmap(sitepoints = testpoints_10[1,]))
+#' # shp = shapefile_from_any(  testdata("portland.*zip")[1])[1, ]
+#' shp = testinput_shapes_2[1,]
+#'  url_ejscreenmap(shapefile = shp)
+#'
+#'
+#' @export
+#'
+url_ejscreenmap <- function(sitepoints = NULL, lat = NULL, lon = NULL,
+                            shapefile = NULL,
+                            fips = NULL, wherestr = NULL,
+                            as_html = FALSE,
+                            linktext = "EJSCREEN",
+                            ifna = "https://pedp-ejscreen.azurewebsites.net/index.html",
+                            baseurl = "https://pedp-ejscreen.azurewebsites.net/index.html",
+                            ...) {
+
+  if (is.null(linktext)) {linktext <- paste0("EJSCREEN")}
+
+  ##   linktext could also} be numbered:
+  # linktext = paste0("EJSCREEN Map ", 1:NROW(sitepoints))
+
+  ######################## #  ######################## #  ######################## #
+  ######################## #  ######################## #  ######################## #
+
+  # GET SITEPOINTS OR APPROX SITEPOINTS FROM FIPS/SHAPEFILE/SITEPOINTS/LAT,LON
+  ## sites_from_input ####
+  sites <- sites_from_input(sitepoints = sitepoints, lon = lon, lat = lat, shapefile = shapefile, fips = fips)
+  sitetype <- sites$sitetype
+
+  # regid_from_input ####
+  # handle case where only regid is provided, not the actual sitepoints,
+  # so use regid as a last resort way to get latlon
+  if (is.null(sites$sitepoints)) {
+    dotsargs = rlang::list2(...)
+    if ("regid" %in% names(dotsargs)) {regid <- dotsargs$regid} else {regid = NULL}
+    if  ("sitepoints" %in% names(dotsargs)) {sitepoints <- dotsargs$sitepoints} else {sitepoints = NULL}
+    regid <- regid_from_input(regid=regid, sitepoints=sitepoints) # here we only want it as a way to get lat,lon not to use the regid as in echo or frs report
+    # latlon_from_regid ####
+    if (!is.null(regid)) {
+      sites <- list(
+        sitepoints =  latlon_from_regid(regid),
+        sitetype = "latlon"
+      )
+      sitetype <- sites$sitetype
+    }
+  }
+
+  # GET lat,lon at EACH SITE ### #
+
+  if ("fips" %in% sitetype) {
+    ##  latlon_from_fips ####
+    sitepoints <- latlon_from_fips(sites$fips) # draft
+  }
+  if ("shp" %in% sitetype) {
+    ## latlon_from_shapefile_centroids ####
+    # at least get points that are coordinates of centroids of polygons if cannnot open ejscreen app showing the actual polygon
+    sitepoints = latlon_from_shapefile_centroids(sites$shapefile)
+  }
+  if ("latlon" %in% sitetype) {
+    ## points ####
+    sitepoints <- sites$sitepoints
+  }
+  lat = sitepoints$lat
+  lon = sitepoints$lon
+
+  if (is.null(lat) || is.null(lon) || length(lat) == 0 || length(lon) == 0) {
+    ## handle NA or length 0 ####
+    urlx <- ifna
+    return(urlx) # length is 0   # or # return(NULL)  ??
+  }
+  ######################## #  ######################## #  ######################## #
+  ######################## #  ######################## #  ######################## #
+
+  ## if both APIs are down, return NAs ### #
+  if (EJAM:::global_or_param("ejscreen_is_down")) {
+    if (EJAM:::global_or_param("ejamapi_is_down")) {
+      urlx <- rep('https://ejanalysis.org', length(urlx))
+      if (as_html) {
+        urlx <- URLencode(urlx)
+        urlx <- url_linkify(urlx, text = linktext)
+      }
+      return(urlx)
+    }
+  }
+  ######################## #  ######################## #  ######################## #
+  ######################## #  ######################## #  ######################## #
+
+  ## > MAKE URL ####
+
+  baseurl_query <- paste0(baseurl, "?wherestr=")
+  whereq <- ""
+  if (!is.null(lat)) {
+    whereq <- paste( lat,  lon, sep = ',') # points (or centroids of polygons)
+    whereq[is.na(lat) | is.na(lon)] <- NA
+  }
+  if (!is.null(fips) && is.null(wherestr)) {
+    wherestr <- fips2name(fips) # fips-based
+    wherestr[is.na(fips)] <- NA
+  }
+  if (!is.null(wherestr) && is.null(lat)) {
+    whereq <- wherestr # name-based not latlon-based
+  }
+  urlx <- paste0(baseurl_query, whereq)
+
+  ######################## #
+  ### NAs ####
+  ok <- !is.na(whereq)
+  ######################## #
+  urlx[!ok] <- ifna
+  ok <- !is.na(urlx)  # now !ok mean it was a bad input and also  ifna=NA
+  ######################## #
+
+  ### as_html ####
+  if (as_html) {
+    urlx[ok] <- URLencode(urlx[ok]) # consider if we want  reserved = TRUE
+    urlx[ok] <- url_linkify(urlx[ok], text = linktext)
+  }
+  ## use generic URL if site is NA, ifna  again in case linkified an NA
+  urlx[!ok] <- ifna # only use non-linkified ifna for the ones where user set ifna=NA and it had to use ifna
+  return(urlx)
+}
+################################################### #################################################### #
+################################################### #################################################### #
+# . ####
+
+#' Get URLs of EnviroMapper reports
+#'
+#' Get URL(s) for EnviroMapper web-based tool, to open map at specified point location(s)
+#'
+#' @details EnviroMapper lets you view EPA-regulated facilities and other information on a map, given the lat,lon
+#'
+#' @param sitepoints data.frame with colnames lat, lon (or lat, lon parameters can be provided separately)
+#' @param lat,lon ignored if sitepoints provided, can be used otherwise, if shapefile and fips not used
+#' @param shapefile if provided function uses centroids of polygons for lat lon
+#' @param fips ignored
+#' @param zoom initial map zoom extent
+#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
+#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
+#' @param ifna URL shown for missing, NA, NULL, bad input values
+#' @param baseurl do not change unless endpoint actually changed
+#' @param ... unused
+#'
+#' @seealso  [url_ejamapi()]  [url_ejscreenmap()]
+#'   [url_echo_facility()] [url_frs_facility()]  [url_enviromapper()]
+#'
+#' @return URL of one webpage (that launches the mapping tool)
+#' @examples
+#' x = url_enviromapper(testpoints_10[1,])
+#' \dontrun{
+#'  browseURL(x)
+#'  browseURL(url_enviromapper(lat = 38.895237, lon = -77.029145, zoom = 17))
+#' }
+#'
+#' @export
+#'
+url_enviromapper <- function(sitepoints = NULL, lon = NULL, lat = NULL, shapefile = NULL, fips = NULL,
+                             zoom = 13,
+                             as_html = FALSE,
+                             linktext = "EnviroMapper",
+                             ifna = "https://geopub.epa.gov/myem/efmap/",
+                             baseurl = "https://geopub.epa.gov/myem/efmap/index.html?ve=",
+                             ...) {
+
+  if (is.null(linktext)) {linktext <- paste0("EnviroMapper")}
+
+  # "https://geopub.epa.gov/myem/efmap/index.html?ve=13,38.895237,-77.029145"
+
+  # see url_ejscreenmap() too
+
+  ######################## #  ######################## #  ######################## #
+  ######################## #  ######################## #  ######################## # #  this chunk is copied from url_ejscreenmap()
+
+  # GET SITEPOINTS OR APPROX SITEPOINTS FROM FIPS/SHAPEFILE/SITEPOINTS/LAT,LON
+  ## sites_from_input ####
+  sites <- sites_from_input(sitepoints = sitepoints, lon = lon, lat = lat, shapefile = shapefile, fips = fips)
+  sitetype <- sites$sitetype
+
+  # regid_from_input ####
+  # handle case where only regid is provided, not the actual sitepoints,
+  # so use regid as a last resort way to get latlon
+  if (is.null(sites$sitepoints)) {
+    dotsargs = rlang::list2(...)
+    if ("regid" %in% names(dotsargs)) {regid <- dotsargs$regid} else {regid = NULL}
+    if  ("sitepoints" %in% names(dotsargs)) {sitepoints <- dotsargs$sitepoints} else {sitepoints = NULL}
+    regid <- regid_from_input(regid=regid, sitepoints=sitepoints) # here we only want it as a way to get lat,lon not to use the regid as in echo or frs report
+    # latlon_from_regid ####
+    if (!is.null(regid)) {
+      sites <- list(
+        sitepoints =  latlon_from_regid(regid),
+        sitetype = "latlon"
+      )
+      sitetype <- sites$sitetype
+    }
+  }
+
+  # GET lat,lon at EACH SITE ### #
+
+  if ("fips" %in% sitetype) {
+    ##  latlon_from_fips ####
+    sitepoints <- latlon_from_fips(sites$fips) # draft
+  }
+  if ("shp" %in% sitetype) {
+    ## latlon_from_shapefile_centroids ####
+    # at least get points that are coordinates of centroids of polygons if cannnot open ejscreen app showing the actual polygon
+    sitepoints = latlon_from_shapefile_centroids(sites$shapefile)
+  }
+  if ("latlon" %in% sitetype) {
+    ## points ####
+    sitepoints <- sites$sitepoints
+  }
+  lat = sitepoints$lat
+  lon = sitepoints$lon
+
+  if (is.null(lat) || is.null(lon) || length(lat) == 0 || length(lon) == 0) {
+    ## handle NA or length 0 ####
+    urlx <- ifna
+    return(urlx) # length is 0   # or # return(NULL)  ??
+  }
+  ######################## #  ######################## #  ######################## #
+  ######################## #  ######################## #  ######################## #
+
+  ## > MAKE URL ####
+
+  urlx <- paste0(baseurl, zoom, ",", lat, ",", lon)
+
+  ######################## #
+  ### NAs ####
+  ok <- !(is.na(lat) | is.na(lon))
+  ######################## #
+  urlx[!ok] <- ifna
+  ok <- !is.na(urlx)  # now !ok mean it was a bad input and also  ifna=NA
+  ######################## #
+
+  ### as_html ####
+  if (as_html) {
+    urlx[ok] <- URLencode(urlx[ok]) # consider if we want  reserved = TRUE
+    urlx[ok] <- url_linkify(urlx[ok], text = linktext)
+  }
+  ## use generic URL if site is NA, ifna  again in case linkified an NA
+  urlx[!ok] <- ifna # only use non-linkified ifna for the ones where user set ifna=NA and it had to use ifna
+  return(urlx)
+}
+################################################### #################################################### #
+################################################### #################################################### #
+# . ---------------------------------------------------- ####
+# functions using FIPS (sometimes from shp or latlon) ####
+# . ####
+
+#' URL functions - Get URLs of useful report(s) on Counties containing the given fips, from countyhealthrankings.org
+#'
+#' @param fips vector of fips codes
+#' @param year e.g., 2025
+#' @param sitepoints if provided and fips is NULL, gets county fips from lat,lon columns of sitepoints
+#' @param lat,lon ignored if sitepoints provided, can be used otherwise, if shapefile and fips not used
+#' @param shapefile if provided and fips is NULL, gets county fips from lat,lon of polygon centroid
+#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
+#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
+#' @param ifna URL shown for missing, NA, NULL, bad input values
+#' @param baseurl do not change unless endpoint actually changed
+#'
+#' @param statereport can be passed here by [url_state_health()]
+#'   if FALSE, returns NA when given a State fips, otherwise return report on enclosing county.
+#'   if TRUE, gets report on enclosing State/DC/PR (not county).
+#' @param ... unused
+#'
+#' @return vector of URLs to reports on enclosing counties (or generic link if necessary, like when input was a state fips)
+#' @examples
+#'  url_county_health(fips_counties_from_state_abbrev("DE"))
+#'  # browseURL(url_county_health(fips_counties_from_state_abbrev("DE"))[1])
+#'
+#' @export
+#'
+url_county_health <- function(fips = NULL, year = 2025,
+                              sitepoints = NULL, lat = NULL, lon = NULL,
+                              shapefile = NULL,
+                              as_html = FALSE,
+                              linktext = "County",   # "County Health Report",
+                              ifna = "https://www.countyhealthrankings.org",
+                              baseurl = "https://www.countyhealthrankings.org/health-data/",
+                              statereport = FALSE,
+                              ...) {
+  if (is.null(linktext)) {linktext <- paste0("County")}
+  # at least get points that are coordinates of centroids of polygons if cannnot open ejscreen app showing the actual polygon
+
+  ################ #
+  ## convert each fips, polygon, or point
+  ## into  a statefips or countyfips or NA
+
+  ######################## #  ######################## #  ######################## #
+  ######################## #  ######################## #  ######################## # #
+
+  # GET SITES FROM FIPS/SHAPEFILE/SITEPOINTS/LAT,LON
+  ## sites_from_input ####
+
+  sites <- sites_from_input(sitepoints = sitepoints, lon = lon, lat = lat, shapefile = shapefile, fips = fips)
+  sitetype <- sites$sitetype
+
+  ######################## #  ######################## #  ######################## #
+  ######################## #  ######################## #  ######################## #
+
+  # GET FIPS at EACH SITE ### #
+
+  # polygons
+  if ("shp" %in% sitetype) {
+    ## latlon_from_shapefile_centroids ####
+    ## then get fips from latlon ####
+    sitepoints = latlon_from_shapefile_centroids(sites$shapefile)
+    if (statereport) {
+      fips = fips_state_from_latlon(sitepoints = sitepoints)
+    } else {
+      fips = fips_county_from_latlon(sitepoints = sitepoints)
+    }
+  }
+  # points
+  if ("latlon" %in% sitetype) {
+    sitepoints = sites$sitepoints
+    if (statereport) {
+      fips = fips_state_from_latlon(sitepoints = sitepoints)
+    } else {
+      fips = fips_county_from_latlon(sitepoints = sitepoints)
+    }
+  }
+  # fips
+  # (as input or now have it from latlon or shp - redundant if latlon or shp but ok)
+  if (statereport) {
+    # all will be state fips (or NA)
+    fips <- fips2state_fips(fips)
+  } else {
+    ## want only enclosing county report, so where state was submitted, we want to return NA
+    ## this will return NA if input fips was a state fips:
+    # all will be county fips (or NA)
+    fips <- fips2countyfips(fips)
+    # but it is already the county if !statereport
+  }
+  # now all should be state (or NA); or else all are county (or NA)
+  #    county fips (or NA if state was input), if want county report
+  #    state fips (or NA if invalid ), if want state report
+  # is.state <- fipstype(fips) %in% "state" # not needed actually since they are all one or other depending on statereport param
+
+  ######################## #  ######################## #  ######################## #
+  ######################## #  ######################## #  ######################## #
+
+  if (is.null(fips) || length(fips) == 0) {
+    ## handle NA or length 0 ####
+    urlx <- ifna
+    return(urlx) # length is 0   # or # return(NULL)  ??
+  }
+  ####### #
   if (missing(year) && year != as.numeric(substr(Sys.Date(), 1, 4))) {
     warning("default year is ", year, " but newer data might be available")
   }
-  if (missing(fips)) {
-    return("https://www.countyhealthrankings.org")
+
+  ## > MAKE URL ####
+
+  ################ #
+  url_ch_county_in_county_out  = function(fips, year = 2025, as_html = FALSE,
+                                          baseurl = "https://www.countyhealthrankings.org/health-data/") {
+    if (is.null(fips) || length(fips) == 0) {return(NA)}
+    statename  <- tolower(fips2statename( fips))
+    suppressWarnings({
+      countyname <- tolower(fips2countyname(fips, includestate = ""))
+    })
+    countyname <- trimws(gsub(" county", "", countyname))
+    countyname <- gsub(" ", "-", countyname)
+    # https://www.countyhealthrankings.org/health-data/maryland/montgomery?year=2023
+    urlx <- paste0(baseurl, statename, "/", countyname, "?year=", year)
+    urlx[is.na(fips) | is.na(countyname)] <- NA
+    return(urlx)
   }
-  statename  <- tolower(EJAM::fips2statename( fips))
-  countyname <- tolower(EJAM::fips2countyname(fips, includestate = ""))
-  countyname <- trimws(gsub(" county", "", countyname))
-  countyname <- gsub(" ", "-", countyname)
-  # https://www.countyhealthrankings.org/explore-health-rankings/maryland/montgomery?year=2023
-  baseurl <- "https://www.countyhealthrankings.org/explore-health-rankings/"
-  url <- paste0(baseurl, statename, "/", countyname, "?year=", year)
-  return(url)
+  ################ #
+  url_ch_state_in_state_out <- function(fips, year = 2025, as_html = FALSE,
+                                        baseurl = "https://www.countyhealthrankings.org/health-data/") {
+    if (is.null(fips) || length(fips) == 0) {return(NA)}
+    statename <- tolower(fips2statename(fips))
+    statename <- gsub(" ", "-", statename)
+    urlx <- paste0(baseurl, statename, "?year=", year)
+    urlx[is.na(statename)] <- NA
+    return(urlx)
+  }
+  ################ #
+
+  urlx <- rep(ifna, length(fips))
+  if (statereport) {
+    urlx <- url_ch_state_in_state_out(fips, year = year, as_html = as_html, baseurl = baseurl)
+  } else {
+    urlx  <- url_ch_county_in_county_out(fips, year = year, as_html = as_html, baseurl = baseurl)
+  }
+  ### NAs ####
+  ok <- !is.na(fips)
+  urlx[!ok] <- ifna
+  ok <- !is.na(urlx)  # now !ok mean it was a bad input and also  ifna=NA
+  ### as_html ####
+  if (as_html) {
+    urlx[ok] <- URLencode(urlx[ok]) # consider if we want  reserved = TRUE
+    urlx[ok] <- url_linkify(urlx[ok], text = linktext)
+  }
+  urlx[!ok] <- ifna # only use non-linkified ifna for the ones where user set ifna=NA and it had to use ifna
+  return(urlx)
 }
+######################################################################### #
+
+#' URL functions - Get URLs of useful report(s) on STATES containing the given fips, from countyhealthrankings.org
+#'
+#' @inheritParams url_county_health
+#' @param statereport Do not use directly here. passed here by [url_countyhealth()]
+#' @return vector of URLs to reports on enclosing states (or generic link if fips invalid)
+#' @examples
+#' x = url_state_health(fips_state_from_state_abbrev(c("DE", "GA", "MS")))
+#' url_state_health(testinput_fips_mix)
+#' \dontrun{
+#' browseURL(x)
+#' }
+#'
+#' @export
+#'
+url_state_health = function(fips = NULL, year = 2025,
+                            sitepoints = NULL, lat = NULL, lon = NULL,
+                            shapefile = NULL,
+                            as_html = FALSE,
+                            linktext = "County", # "County Health Report",
+                            ifna = "https://www.countyhealthrankings.org",
+                            baseurl = "https://www.countyhealthrankings.org/health-data/",
+                            statereport = TRUE,
+                            ...) {
+
+  url_county_health(
+    fips = fips, year = year,
+    sitepoints = sitepoints, lat = lat, lon = lon,
+    shapefile = shapefile,
+    as_html = as_html,
+    linktext = linktext,
+    ifna = ifna,
+    baseurl = baseurl,
+    statereport = statereport,
+    ...)
+}
+######################################################################### #
+######################################################################### #
+# . -------------------  ####
+
+# national equity atlas - county report fips 42003
+# "https://nationalequityatlas.org/research/data_summary?geo=04000000000042003"
+# "https://nationalequityatlas.org/research/data_summary?geo=02000000000042000"
+
+
+#' URL functions - Get URLs of useful report(s) on County containing the given fips, from countyhealthrankings.org
+#'
+#' @param fips vector of fips codes
+#' @param sitepoints if provided and fips is NULL, gets county fips from lat,lon columns of sitepoints
+#' @param lat,lon ignored if sitepoints provided, can be used otherwise, if shapefile and fips not used
+#' @param shapefile if provided and fips is NULL, gets county fips from lat,lon of polygon centroid
+#' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
+#' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
+#' @param ifna URL shown for missing, NA, NULL, bad input values
+#' @param baseurl do not change unless endpoint actually changed
+#'
+#' @param statereport Do not use directly. Used by [url_state_equityatlas()].
+#'   if TRUE, gets report on enclosing State/DC/PR, not county.
+#'   if FALSE, returns NA when given a State fips, otherwise return report on enclosing county.
+#'
+#' @param ... unused
+#'
+#' @return vector of URLs to reports on enclosing counties (or generic link if necessary, like when input was a state fips)
+#' @examples
+#'  url_county_equityatlas(fips_counties_from_state_abbrev("DE"))
+#'  # browseURL(url_county_equityatlas(fips_counties_from_state_abbrev("DE"))[1])
+#'
+#' @export
+#'
+url_county_equityatlas <- function(fips = NULL, # year = 2025,
+                                   sitepoints = NULL, lat = NULL, lon = NULL,
+                                   shapefile = NULL,
+                                   as_html = FALSE,
+                                   linktext = "County (Equity Atlas)",
+                                   ifna    = "https://nationalequityatlas.org",
+                                   baseurl = "https://nationalequityatlas.org/research/data_summary",
+                                   statereport = FALSE,
+                                   ...) {
+  if (is.null(linktext)) {linktext <- paste0("County (Equity Atlas)")}
+
+  ######################## #  ######################## #  ######################## #
+  ######################## #  ######################## #  ######################## # #
+
+  # GET SITES FROM FIPS/SHAPEFILE/SITEPOINTS/LAT,LON
+  ## sites_from_input ####
+
+  sites <- sites_from_input(sitepoints = sitepoints, lon = lon, lat = lat, shapefile = shapefile, fips = fips)
+  sitetype <- sites$sitetype
+
+  ######################## #  ######################## #  ######################## #
+  ######################## #  ######################## #  ######################## #
+
+  # GET FIPS at EACH SITE ### #
+  ## convert each fips, polygon, or point
+  ## into  a statefips or countyfips or NA
+
+  # polygons
+  if ("shp" %in% sitetype) {
+    ## latlon_from_shapefile_centroids ####
+    ## then get fips from latlon ####
+    sitepoints = latlon_from_shapefile_centroids(sites$shapefile)
+    if (statereport) {
+      fips = fips_state_from_latlon(sitepoints = sitepoints)
+    } else {
+      fips = fips_county_from_latlon(sitepoints = sitepoints)
+    }
+  }
+  # points
+  if ("latlon" %in% sitetype) {
+    sitepoints = sites$sitepoints
+    if (statereport) {
+      fips = fips_state_from_latlon(sitepoints = sitepoints)
+    } else {
+      fips = fips_county_from_latlon(sitepoints = sitepoints)
+    }
+  }
+  # fips
+  # (as input or now have it from latlon or shp - redundant if latlon or shp but ok)
+  if (statereport) {
+    # all will be state fips (or NA)
+    fips <- fips2state_fips(fips)
+  } else {
+    ## want only enclosing county report, so where state was submitted, we want to return NA
+    ## this will return NA if input fips was a state fips:
+    # all will be county fips (or NA)
+    fips <- fips2countyfips(fips)
+  }
+  # now all should be state (or NA); or else all are county (or NA)
+  #    county fips (or NA if state was input), if want county report
+  #    state fips (or NA if invalid ), if want state report
+  # is.state <- fipstype(fips) %in% "state" # not needed actually since they are all one or other depending on statereport param
+
+  ######################## #  ######################## #  ######################## #
+  ######################## #  ######################## #  ######################## #
+
+  if (is.null(fips) || length(fips) == 0) {
+    ## handle NA or length 0 ####
+    urlx <- ifna
+    return(urlx) # length is 0   # or # return(NULL)  ??
+  }
+  ################ #
+
+  if (  is.null(fips) || length(fips) == 0) {
+    return(ifna)
+    # return(NULL)
+  }
+  # Could check if site or API is available?
+
+  # if (missing(year) && year != as.numeric(substr(Sys.Date(), 1, 4))) {
+  #   warning("default year is ", year, " but newer data might be available")
+  # }
+  ######################## #  ######################## #
+
+  ## > MAKE URL ####
+
+  url_eq_county_in_county_out = function(fips,  as_html) {
+    if (is.null(fips) || length(fips) == 0) {return(NA)}
+
+    #statename  <- tolower(fips2statename( fips))
+    #countyname <- tolower(fips2countyname(fips, includestate = ""))
+    # countyname <- trimws(gsub(" county", "", countyname))
+    #  countyname <- gsub(" ", "-", countyname)
+
+    urlx <- paste0(baseurl, "/?geo=040000000000", fips) #, "?year=", year)
+    urlx[is.na(fips)  ] <- NA
+    return(urlx)
+  }
+  ################ #
+  url_eq_state_in_state_out <- function(fips, as_html) {
+    if (is.null(fips) || length(fips) == 0) {return(NA)}
+    #statename <- tolower(fips2statename(fips))
+    # statename <- gsub(" ", "-", statename)
+
+    urlx <- paste0(baseurl, "/?geo=040000000000", fips, "000") #, "?year=", year)
+    urlx[is.na(fips)] <- NA
+    return(urlx)
+  }
+  ################ #
+
+  urlx <- rep(ifna, length(fips))
+  # now all should be state (or NA); or else all are county (or NA)
+
+  if (statereport) {
+    urlx <- url_eq_state_in_state_out(fips, as_html = as_html)
+  } else {
+    urlx <- url_eq_county_in_county_out(fips, as_html = as_html)
+  }
+  ######################## #  ######################## #
+
+  ### NAs ####
+  ok <- !is.na(fips)
+  urlx[!ok] <- ifna
+  ok <- !is.na(urlx)  # now !ok mean it was a bad input and also  ifna=NA
+  ### as_html ####
+  if (as_html) {
+    urlx[ok] <- URLencode(urlx[ok]) # consider if we want  reserved = TRUE
+    urlx[ok] <- url_linkify(urlx[ok], text = linktext)
+  }
+  urlx[!ok] <- ifna # only use non-linkified ifna for the ones where user set ifna=NA and it had to use ifna
+  return(urlx)
+}
+######################################################################### #
+
+
+#' URL functions - Get URLs of useful report(s) on STATE containing the given fips, from equity atlas
+#'
+#' @inheritParams url_county_equityatlas
+#' @param statereport Do not use directly. passed to [url_county_equityatlas()].
+#'
+#' @param ... unused
+#'
+#' @return vector of URLs to reports on enclosing states (or generic link if fips invalid)
+#' @examples
+#'  url_county_equityatlas(fips_counties_from_state_abbrev("DE"))
+#'  # browseURL(url_county_equityatlas(fips_counties_from_state_abbrev("DE"))[1])
+#'
+#' @export
+#'
+url_state_equityatlas <- function(fips = NULL,
+                                  sitepoints = NULL, lat = NULL, lon = NULL,
+                                  shapefile = NULL,
+                                  as_html = FALSE,
+                                  linktext = "State (Equity Atlas)",
+                                  ifna    = "https://nationalequityatlas.org",
+                                  baseurl = "https://nationalequityatlas.org/research/data_summary",
+
+                                  statereport = TRUE,
+                                  ...) {
+  url_county_equityatlas(
+    fips = fips,
+    sitepoints = sitepoints, lat = lat, lon = lon,
+    shapefile = shapefile,
+    as_html =  as_html,
+    linktext = linktext,
+    ifna    = ifna,
+    baseurl = baseurl,
+
+    statereport = statereport,
+    ...)
+}
+################################################################################################################################################# #
+
+# . ---------------------------------------------------- ####
+
+
+######################################################################### #
+## not site-specific ####
 ######################################################################### #
 
 
 #' URL functions - url_naics.com - Get URL for page with info about industry sectors by text query term
-#' 
-#' See (https://naics.com) for more information on NAICS codes
-#' 
+#' @details
+#' See (https://naics.com) for more information on NAICS codes.
+#'
+#' Unlike url_xyz() functions, which provide a unique link for each site,
+#' this url_ function provides just a link for a whole industry or set of industries based on a query,
+#' so it is not meant to be used in a column of site by site results the way the other url_xyz() functions are.
+#'
 #' @param query string query term like "gasoline" or "copper smelting"
+#'
 #' @param as_html Whether to return as just the urls or as html hyperlinks to use in a DT::datatable() for example
 #' @param linktext used as text for hyperlinks, if supplied and as_html=TRUE
+#' @param ifna URL shown for missing, NA, NULL, bad input values
+#' @param baseurl do not change unless endpoint actually changed
+#' @param ... unused
+#'
 #' @return URL as string
-#' 
+#'
 #' @export
-#' 
-url_naics.com <- function(query, as_html=FALSE, linktext) {
-  
+#'
+url_naics.com <- function(query = "",
+                          as_html = FALSE,
+                          linktext = query, # "NAICS.com",
+                          ifna = "https://www.naics.com",
+                          baseurl = "https://www.naics.com/code-search/?trms=",
+                          ...) {
+
+  if (is.null(query) || length(query) == 0) {return(ifna)}
+
+  # Could check if site or API is available?
+
   query <- gsub(" ", "+", query)
-  urlout = paste0("https://www.naics.com/code-search/?trms=", query, "&v=2017&styp=naics")
+  urlx = paste0(baseurl, query, "&v=2017&styp=naics")
+
   if (as_html) {
-    if (missing(linktext)) {linktext <- query}  #   paste0("EJScreen Map ", 1:length(lon)) 
-    urlout <- url_linkify(urlout, text = linktext)
-  }   
-  return(urlout)
+    if (is.null(linktext)) {linktext <- query}
+    urlx <- url_linkify(urlx, text = linktext)
+  }
+  urlx[query %in% "" | is.na(query)] <- ifna
+  return(urlx)
 }
 ######################################################################### #
 
 
-#' URL functions - url_get_via_url - helper function work in progress: GET json via url of ejscreen ejquery map services
+#' utility to view rendered .html file stored in a github repo
 #'
-#' @param url the url for an EJScreen ejquery request
+#' @param ghurl URL of HTML file in a github repository
+#' @param launch_browser set FALSE to get URL but not launch a browser
 #'
-#' @return json
-#' 
-#' @export
+#' @returns URL
+#' @examples
+#' url_github_preview(fold = "docs", file = "index.html", launch_browser = F)
+#' url_github_preview(fold = "docs/reference", file = "ejam2excel.html", launch_browser = F)
+#'
+#' #   Compare versions of the HTML summary report:
+#'
+#' myfile = "testoutput_ejam2report_100pts_1miles.html"
+#' \dontrun{
+#' # in latest main branch on GH (but map does not render using this tool)
+#' url_github_preview(file = myfile)
+#'
+#' # from a specific release on GH (but map does not render using this tool)
+#' url_github_preview(ver = "v2.32.5", fold = "inst/testdata/examples_of_output", file = myfile)
+#'
+#' # local installed version
+#' browseURL( system.file(file.path("testdata/examples_of_output", myfile), package="EJAM") )
+#'
+#' # local source package version in checked out branch
+#' browseURL( file.path(testdatafolder(installed = F), "examples_of_output", myfile) )
+#' }
+#'
 #' @keywords internal
+#' @export
 #'
-url_get_via_url <- function(url) { 
-  
-  # function to GET json via url of ejscreen ejquery map services ### #
-  
-  x <- httr::GET(url)
-  if (x$status_code == 400) {
-    warning('Query failed with status code 400: ', url)
+url_github_preview = function(ghurl = NULL,
+                              repo = "https://github.com/ejanalysis/EJAM",
+                              blob = "blob",
+                              ver = "main", # or "v2.32.5"
+                              fold = "inst/testdata/examples_of_output", # or "docs/reference"
+                              file = "testoutput_ejam2report_10pts_1miles.html",
+                              launch_browser = TRUE
+) {
+
+  if (is.null(ghurl)) {
+    # repo = "https://github.com/ejanalysis/EJAM"
+    # blob = "blob"
+    # ver = "main" # or "v2.32.5"
+    # fold = "inst/testdata/examples_of_output" # or "docs/reference"
+    # file = "testoutput_ejam2report_10pts_1miles.html"
+
+    ghurl <- file.path(repo, blob, ver, fold, file)
   }
-  if (x$status_code == 404) {
-    warning('Query failed with status code 404, possibly requesting too many locations at once: ', url)
-  }
-  x <- try(rawToChar(x$content))
-  x <- try(jsonlite::fromJSON(x))
-  alldata <- x$features$attributes
-  # print(str(x)) # nothing else useful except possible x$features$geometry data.frame
-  return(alldata)
+  urlx <- paste0("http://htmlpreview.github.io/?", ghurl)
+
+  if (launch_browser) {browseURL(urlx[1])}
+  return(urlx)
+
 }
 ######################################################################### #
-
-
-#' URL functions - url_get_eparest_chunked_by_id - experimental/ work in progress: in chunks, get ACS data or Block weights nearby via EPA API
-#'
-#' @param objectIds see API
-#' @param chunksize see API
-#' @param ... passed to url_getacs_epaquery()
-#'
-#' @return a table
-#' 
-#' @export
-#' @keywords internal
-#'
-url_get_eparest_chunked_by_id <- function(objectIds, chunksize=200, ...) {
-  
-  #  to get ACS data or Block weights nearby from EPA server via API  ###   #
-  
-  ############################################################## #
-  # generic function to break request into chunks ####
-  ############################################################## #
-  
-  if (missing(objectIds)) {
-    warning('this only works for objectIds so far, breaking up into groups of 200 or so objectIds.')
-    return(NULL)
-    # could write it to check if >1000 would be returned and then request in chunks in that case.
-  }
-  x <- list()
-  n <- length(objectIds)
-  extrachunk <- ifelse((n %/% chunksize) * chunksize == n, 0, 1) 
-  
-  for (chunk in 1:(extrachunk + (n %/% chunksize))) {
-    istart <- 1 + (chunk - 1) * chunksize
-    iend <- chunksize + istart - 1
-    iend <- min(iend, n)
-    idchunk <- objectIds[istart:iend]
-    
-    x[[chunk]] <- url_getacs_epaquery(objectIds = idchunk,  ...)
-  }
-  return(do.call(rbind, x))
-}
-############################################################## #  ############################################################## #
-
-
-
-#' URL functions - url_getacs_epaquery_chunked - experimental/ work in progress: in chunks, get ACS data via EPA API
-#'
-#' @param servicenumber see API
-#' @param objectIds see API
-#' @param outFields see API
-#' @param returnGeometry  see API
-#' @param justurl  see API
-#' @param chunksize eg 200 for chunks of 200 each request
-#' @param ... passed to url_getacs_epaquery()
-#'
-#' @return table
-#' 
-#' @export
-#' @keywords internal
-#'
-#' @examples \donttest{
-#'  # x <- list() # chunked chunks. best not to ask for all these:
-#'  # x[[1]] <- url_getacs_epaquery_chunked(   1:1000, chunksize = 100)
-#'  # x[[2]] <- url_getacs_epaquery_chunked(1001:5000, chunksize = 100)
-#'  # xall <- do.call(rbind, x)
-#'  } 
-url_getacs_epaquery_chunked <- function(objectIds=1:3, 
-                                        servicenumber=7,
-                                        outFields=NULL, 
-                                        returnGeometry=FALSE, 
-                                        justurl=FALSE, 
-                                        chunksize=200, ...) {
-  
-  ############################################################## #
-  # generic function to break request into chunks 
-  ############################################################## #
-  
-  if (missing(objectIds)) {
-    warning('this only works for objectIds so far, breaking up into groups of 200 or so objectIds.')
-    return(NULL)
-    # could write it to check if >1000 would be returned and then request in chunks in that case.
-  }
-  
-  # warning('check if still has a bug to fix where it duplicates the last row of each chunk')
-  x <- list()
-  n <- length(objectIds)
-  extrachunk <- ifelse((n %/% chunksize) * chunksize == n, 0, 1) 
-  
-  for (chunk in 1:(extrachunk + (n %/% chunksize))) {
-    istart <- 1 + (chunk - 1) * chunksize
-    iend <- chunksize + istart - 1
-    iend <- min(iend, n)
-    idchunk <- objectIds[istart:iend]
-    # # TESTING:
-    #   x[[chunk]] <- data.frame(id=idchunk, dat=NA)
-    #   print(idchunk); print(x) # cumulative so far
-    
-    x[[chunk]] <- url_getacs_epaquery(objectIds = idchunk, outFields = outFields, servicenumber = servicenumber, ...)
-  }
-  return(do.call(rbind, x))  
-} 
-############################################################## ############################################################### #
-
-
-
-#' URL functions - url_getacs_epaquery - experimental/ work in progress: get ACS data via EPA API (for <200 places)
-#'
-#' @description  uses ACS2019 rest services ejscreen ejquery MapServer 7
-#' 
-#'   Documentation of format and examples of input parameters:
-#'   
-#'   <https://geopub.epa.gov/arcgis/sdk/rest/index.html#/Query_Map_Service_Layer/02ss0000000r000000/>
-#' 
-#' @param objectIds see API
-#' @param servicenumber see API
-#' @param outFields see API. eg "STCNTRBG","TOTALPOP","PCT_HISP",
-#' @param returnGeometry see API
-#' @param justurl if TRUE, returns url instead of default making API request
-#' @param ... passed to url_getacs_epaquery_chunked()
-#' @examples  url_getacs_epaquery(justurl=TRUE)
-#' 
-#' @return table
-#' 
-#' @export
-#' @keywords internal
-#'
-url_getacs_epaquery <- function(objectIds=1:3, 
-                                servicenumber=7,
-                                outFields=NULL, 
-                                returnGeometry=FALSE, 
-                                justurl=FALSE, 
-                                ...) {
-  
-  # Documentation of format and examples of input parameters:
-  # https://geopub.epa.gov/arcgis/sdk/rest/index.html#/Query_Map_Service_Layer/02ss0000000r000000/
-  
-  print('this uses ACS2019 rest services ejscreen ejquery MapServer 7')
-  
-  
-  # if (length(objectIds) < 1 | !all(is.numeric(objectIds))) {stop('no objectIds specified or some are not numbers')}
-  if (any(objectIds == '*')) {
-    warning('Trying to specify all objectIds will not work')
-    return(NULL)
-  }
-  if (length(objectIds) > 200) {
-    warning('seems to crash if more than about 211 requested per query - chunked version not yet tested')
-    
-    # return(url_get_eparest_chunked_by_id(objectIds=objectIds, 
-    #                                   servicenumber=servicenumber,
-    #                                   outFields=outFields, 
-    #                                   returnGeometry=returnGeometry, 
-    #                                   justurl=justurl, 
-    #                                   ...))
-    return(url_getacs_epaquery_chunked(objectIds = objectIds, 
-                                       servicenumber = servicenumber,
-                                       outFields = outFields, 
-                                       returnGeometry = returnGeometry, 
-                                       justurl = justurl, 
-                                       ...))
-  }
-  
-  # use bestvars default outFields if unspecified ### #
-  if (is.null(outFields)) {
-    bestvars <- c( ## bestvars ### #
-      # outFields
-      "OBJECTID",  # unique id 1 onwards
-      "STCNTRBG",  # blockgroup fips
-      "AREALAND", "AREAWATER",
-      
-      "TOTALPOP",   # population count 
-      
-      "LOWINC", "POV_UNIVERSE_FRT", "PCT_LOWINC",
-      
-      "HH_BPOV", "HSHOLDS", "PCT_HH_BPOV",
-      
-      "EDU_LTHS", "EDU_UNIVERSE", "PCT_EDU_LTHS",
-      
-      "LINGISO", "PCT_LINGISO",
-      
-      "EMP_STAT_UNEMPLOYED",
-      "EMP_STAT_UNIVERSE",
-      "PCT_EMP_STAT_UNEMPLOYED",
-      
-      "AGE_LT5",      "PCT_AGE_LT5",
-      "AGE_GT64",     "PCT_AGE_GT64",
-      
-      "NUM_MINORITY", "PCT_MINORITY",
-      
-      "WHITE",        "PCT_WHITE",
-      "BLACK",        "PCT_BLACK",
-      "HISP" ,        "PCT_HISP",
-      "ASIAN",        "PCT_ASIAN",
-      "AMERIND",      "PCT_AMERIND",
-      "HAWPAC",       "PCT_HAWPAC",
-      "OTHER_RACE",   "PCT_OTHER_RACE",
-      "TWOMORE",      "PCT_TWOMORE",
-      "NHWHITE",      "PCT_NHWHITE",
-      "NHBLACK",      "PCT_NHBLACK",
-      "NHASIAN",      "PCT_NHASIAN",
-      "NHAMERIND",    "PCT_NHAMERIND",
-      "NHHAWPAC",     "PCT_NHHAWPAC",
-      "NHOTHER_RACE", "PCT_NHOTHER_RACE",
-      "NHTWOMORE",    "PCT_NHTWOMORE",
-      
-      "HOME_PRE60", "HSUNITS", "PCT_HOME_PRE60"
-    )
-    outFields <- bestvars
-  } # use default fields if none specified
-  # reformat the parameters - now done by url_... function 
-  # outFields <- paste(outFields, collapse = ',') # if a vector of values was provided, collapse them into one comma-separated string
-  # objectIds <- paste(objectIds, collapse = ',') # if a vector of values was provided, collapse them into one comma-separated string
-  
-  ################################################################### #
-  # assemble URL 
-  # url_to_get_ACS2019_rest_services_ejscreen_ejquery_MapServer_7()
-  url_to_use <- url_to_get_ACS2019_rest_services_ejscreen_ejquery_MapServer_7(
-    # servicenumber=servicenumber, 
-    objectIds = objectIds,
-    returnGeometry = returnGeometry,
-    outFields = outFields,         # make same name?
-    ...)
-  ################################################################### #
-  
-  # call GET function (submit the query 
-  
-  if (justurl) {return(url_to_use)}
-  return(url_get_via_url(url_to_use))
-}
-############################################################## #  ############################################################## #
-
-
-
-
-#' URL functions - DRAFT FRAGMENTS OF CODE - url_to_any_rest_services_ejscreen_ejquery
-#'
-#' @details 
-#'  # generic function wrapping ejscreen/ejquery API calls ####
-#'  
-#'  Disadvantage of this generic approach is it does not help you by showing
-#'   a list of parameters, since those are specific to the service like 7 vs 71. 
-#'  
-#'  see links to documentation on using APIs here: 
-#'  
-#'  EJAM/dev/intersect-distance/arcgis/ArcGIS REST API basics.txt
-#'  
-#' @param servicenumber na
-#'
-#' @return tbd
-#' @examples # na
-#' 
-#' @noRd
-#' @keywords internal
-#'
-url_to_any_rest_services_ejscreen_ejquery <- function(servicenumber=7) {
-  
-  ####################################### #
-  ## notes - examples 
-  if (1 == 0) {
-    url_getacs_epaquery(  objectIds = 1:4,                 outFields = 'STCNTRBG', justurl = TRUE)
-    t(url_getacs_epaquery(objectIds = sample(1:220000,2),  outFields = '*'))
-    t(url_getacs_epaquery(objectIds = sample(1:220000,2)))
-    url_getacs_epaquery(  objectIds = sample(1:220000,10), outFields = c('STCNTRBG', 'STATE', 'COUNTY', 'TRACT', 'BLKGRP'), justurl = FALSE)
-    y <- url_get_via_url(url_to_any_rest_services_ejscreen_ejquery(         servicenumber = 71))
-    x <- url_get_via_url(url_to_get_nearby_blocks_rest_services_ejscreen_ejquery_MapServer_71(lat = 30.494982, lon = -91.132107, miles = 1))
-    z <- url_get_via_url(url_to_get_ACS2019_rest_services_ejscreen_ejquery_MapServer_7())
-  }
-  ####################################### #
-  
-  params_with_NULL   <- c(as.list(environment()))
-  params_with_NULL <- subset(params_with_NULL, names(params_with_NULL) != 'servicenumber')
-  params_with_NULL <- lapply(params_with_NULL, function(x) paste(x, collapse = ','))
-  params_text_with_NULL <- paste(paste0(names(params_with_NULL), '=', params_with_NULL), collapse = '&')
-  
-  baseurl <- paste0(
-    'https://geopub.epa.gov/arcgis/rest/services/ejscreen/ejquery/MapServer/',
-    servicenumber,  # 7 is ACS 2019 block groups
-    '/query?'
-  )
-  queryurl <- paste0(
-    baseurl,  
-    params_text_with_NULL
-  )
-  return(queryurl)
-}
-################################################################################# # 
-
-
-
-#' URL functions - DRAFT FRAGMENTS OF AN URL FUNCTION url_to_get_ACS2019_rest_services_ejscreen_ejquery_MapServer_7
-#'
-#' @param objectIds na
-#' @param sqlFormat na
-#' @param text na
-#' @param where na
-#' @param havingClause na
-#' @param outFields na
-#' @param orderByFields na
-#' @param groupByFieldsForStatistics na
-#' @param outStatistics na
-#' @param f na
-#' @param returnGeometry na
-#' @param returnIdsOnly na
-#' @param returnCountOnly na
-#' @param returnExtentOnly na
-#' @param returnDistinctValues na 
-#' @param returnTrueCurves na
-#' @param returnZ na
-#' @param returnM na
-#' @param geometry na
-#' @param geometryType na
-#' @param featureEncoding na
-#' @param spatialRel na
-#' @param units na
-#' @param distance na 
-#' @param inSR na
-#' @param outSR na
-#' @param relationParam na
-#' @param geometryPrecision na
-#' @param gdbVersion na
-#' @param datumTransformation na
-#' @param parameterValues na
-#' @param rangeValues na
-#' @param quantizationParameters na
-#' @param maxAllowableOffset na
-#' @param resultOffset na
-#' @param resultRecordCount na
-#' @param historicMoment na
-#' @param time na
-#' @param timeRelation na
-#' 
-#' @examples #tbd
-#'
-#' @return tbd
-#' 
-#' @noRd
-#' 
-url_to_get_ACS2019_rest_services_ejscreen_ejquery_MapServer_7 <- function(
-    
-  objectIds=NULL, 
-  sqlFormat='none', 
-  text=NULL, 
-  where=NULL, 
-  havingClause=NULL, 
-  
-  # select what stats
-  
-  outFields=NULL, 
-  orderByFields=NULL, 
-  groupByFieldsForStatistics=NULL, 
-  outStatistics=NULL, 
-  f='pjson',
-  returnGeometry='true', 
-  returnIdsOnly='false', 
-  returnCountOnly='false', 
-  returnExtentOnly='false', 
-  returnDistinctValues='false', 
-  returnTrueCurves='false', 
-  returnZ='false', 
-  returnM='false', 
-  
-  # geoprocessing like buffer/intersect, etc.
-  
-  geometry=NULL, 
-  geometryType='esriGeometryEnvelope', 
-  featureEncoding='esriDefault', 
-  spatialRel='esriSpatialRelIntersects', 
-  units='esriSRUnit_Foot', 
-  distance=NULL, 
-  inSR=NULL, 
-  outSR=NULL, 
-  relationParam=NULL, 
-  geometryPrecision=NULL, 
-  gdbVersion=NULL, 
-  datumTransformation=NULL, 
-  parameterValues=NULL, 
-  rangeValues=NULL, 
-  quantizationParameters=NULL, 
-  maxAllowableOffset=NULL, 
-  resultOffset=NULL, 
-  resultRecordCount=NULL, 
-  historicMoment=NULL, 
-  time=NULL,
-  timeRelation='esriTimeRelationOverlaps'
-) {
-  
-  ## notes - examples 
-  if (1 == 0) {
-    url_getacs_epaquery(  objectIds = 1:4,                 outFields = 'STCNTRBG', justurl = TRUE)
-    t(url_getacs_epaquery(objectIds = sample(1:220000,2),  outFields = '*'))
-    t(url_getacs_epaquery(objectIds = sample(1:220000,2)))
-    url_getacs_epaquery(  objectIds = sample(1:220000,10), outFields = c('STCNTRBG', 'STATE', 'COUNTY', 'TRACT', 'BLKGRP'), justurl = FALSE)
-    y <- url_get_via_url(url_to_any_rest_services_ejscreen_ejquery(         servicenumber = 71))
-    x <- url_get_via_url(url_to_get_nearby_blocks_rest_services_ejscreen_ejquery_MapServer_71(lat = 30.494982, lon = -91.132107, miles = 1))
-    z <- url_get_via_url(url_to_get_ACS2019_rest_services_ejscreen_ejquery_MapServer_7())
-  }
-  
-  # Documentation of format and examples of input parameters:
-  # https://geopub.epa.gov/arcgis/sdk/rest/index.html#/Query_Map_Service_Layer/02ss0000000r000000/ 
-  
-  #  useful map services to query ####
-  
-  #https://geopub.epa.gov/arcgis/sdk/rest/index.html#/Query_Map_Service_Layer/02ss0000000r000000/
-  # https://geopub.epa.gov/arcgis/sdk/rest/index.html#/Query_Map_Service_Layer/02ss0000000r000000/
-  # https://geopub.epa.gov/arcgis/sdk/rest/index.html#/Map_Service/02ss0000006v000000/
-  # 'https://geopub.epa.gov/arcgis/rest/services/ejscreen/ejquery/MapServer/'
-  # MaxRecordCount: 1000
-  # https://geopub.epa.gov/arcgis/rest/services/ejscreen/ejquery/MapServer/7/2?f=pjson 
-  
-  
-  # ASSEMBLE URL BY PUTTING ALL THE PARAMETERS INTO ONE LONG STRING IN CORRECT FORMAT:
-  # params_with_NULL <- c(as.list(environment()), list(...))  # if ... was among function parameter options
-  params_with_NULL   <- c(as.list(environment()))
-  params_with_NULL <- lapply(params_with_NULL, function(x) paste(x, collapse = ','))
-  params_text_with_NULL <- paste(paste0(names(params_with_NULL), '=', params_with_NULL), collapse = '&')
-  
-  baseurl <- paste0(
-    'https://geopub.epa.gov/arcgis/rest/services/ejscreen/ejquery/MapServer/',
-    7,  # servicenumber 7 is ACS 2019 block groups
-    '/query?'
-  )
-  queryurl <- paste0(
-    baseurl,  
-    params_text_with_NULL
-  )
-  return(queryurl)  
-}
-############################################################## #  ############################################################## #
-
-
-#' URL functions - DRAFT FRAGMENTS OF CODE - url_to_get_nearby_blocks_rest_services_ejscreen_ejquery_MapServer_71
-#'
-#' @param lat na
-#' @param lon na
-#' @param miles na
-#' @param outFields na
-#' @param returnCountOnly na
-#' @examples #na
-#' @return na
-#' 
-#' @noRd
-#'
-url_to_get_nearby_blocks_rest_services_ejscreen_ejquery_MapServer_71 <- function(
-    lat, lon, miles, 
-    outFields='GEOID10,OBJECTID,POP_WEIGHT', returnCountOnly='false') {
-  
-  # function for service 71, nearby blockweights 
-  ## notes - examples 
-  if (1 == 0) {
-    url_getacs_epaquery(  objectIds = 1:4,                 outFields = 'STCNTRBG', justurl = TRUE)
-    t(url_getacs_epaquery(objectIds = sample(1:220000,2),  outFields = '*'))
-    t(url_getacs_epaquery(objectIds = sample(1:220000,2)))
-    url_getacs_epaquery(  objectIds = sample(1:220000,10), outFields = c('STCNTRBG', 'STATE', 'COUNTY', 'TRACT', 'BLKGRP'), justurl = FALSE)
-    y <- url_get_via_url(url_to_any_rest_services_ejscreen_ejquery(         servicenumber = 71))
-    x <- url_get_via_url(url_to_get_nearby_blocks_rest_services_ejscreen_ejquery_MapServer_71(lat = 30.494982, lon = -91.132107, miles = 1))
-    z <- url_get_via_url(url_to_get_ACS2019_rest_services_ejscreen_ejquery_MapServer_7())
-  }
-  # Documentation of format and examples of input parameters:
-  # https://geopub.epa.gov/arcgis/sdk/rest/index.html#/Query_Map_Service_Layer/02ss0000000r000000/
-  
-  
-  
-  baseurl <- "https://geopub.epa.gov/arcgis/rest/services/ejscreen/ejquery/MapServer/71/query?"
-  params <- paste0( 
-    'outFields=', outFields,
-    '&geometry=', lon, '%2C', lat, #  -91.0211604%2C30.4848044',
-    '&distance=', miles,
-    '&returnCountOnly=', returnCountOnly, 
-    '&where=',
-    '&text=',
-    '&objectIds=',
-    '&time=',
-    '&timeRelation=esriTimeRelationOverlaps',
-    '&geometryType=esriGeometryPoint',
-    '&inSR=',
-    '&spatialRel=esriSpatialRelContains',
-    '&units=esriSRUnit_StatuteMile',
-    '&relationParam=',
-    '&returnGeometry=false',
-    '&returnTrueCurves=false',
-    '&maxAllowableOffset=',
-    '&geometryPrecision=',
-    '&outSR=',
-    '&havingClause=',
-    '&returnIdsOnly=false',
-    '&orderByFields=',
-    '&groupByFieldsForStatistics=',
-    '&outStatistics=',
-    '&returnZ=false',
-    '&returnM=false',
-    '&gdbVersion=',
-    '&historicMoment=',
-    '&returnDistinctValues=false',
-    '&resultOffset=',
-    '&resultRecordCount=',
-    '&returnExtentOnly=false',
-    '&sqlFormat=none&datumTransformation=',
-    '&parameterValues=',
-    '&rangeValues=',
-    '&quantizationParameters=',
-    '&featureEncoding=esriDefault',
-    '&f=pjson')
-  url <- paste0(baseurl, params)
-  return(url)
-}
-############################################################## #  ############################################################## #
-
-
-
-#' URL functions - DRAFT FRAGMENTS OF CODE - url_bookmark_save
-#' 
-#' save bookmarked EJScreen session (map location and indicator)
-#' @details 
-#' WORK IN PROGRESS - NOT USED AS OF EARLY 2023. 
-#' You can use this function to create and save a json file that is a bookmark 
-#' for a specific place/ map view/ data layer in EJScreen. 
-#' You can later pull up that exact map in EJScreen by launching EJScreen, 
-#' clicking Tools, Save Session, Load from File.
-#' 
-#' ***Units are not lat lon: "spatialReference":{"latestWkid":3857,"wkid":102100}
-#' 
-#' Note: 
-#' (1) The number of sessions that can be saved depends on the browser cache size. 
-#' (2) Session files, if saved, are available from the default Downloads folder on your computer. 
-#' (3) Users should exercise caution when saving sessions that may contain sensitive or confidential data.
-#' 
-#' @param ... passed to [url_bookmark_text()]
-#' @param file path and name of .json file you want to save locally
-#'
-#' @return URL for 1 bookmarked EJScreen map location and variable displayed on map
-#' 
-#' @noRd
-#'
-url_bookmark_save <- function(..., file="ejscreenbookmark.json") {
-  mytext <- url_bookmark_text(...)
-  write(mytext, file = file)
-  return(mytext)
-  
-  # example, at EJAM/inst/testdata/Sessions_Traffic in LA area.json
-  # [{"extent":{"spatialReference":{"latestWkid":3857,"wkid":102100},"xmin":-13232599.178424664,"ymin":3970069.245971938,"xmax":-13085305.024919074,"ymax":4067373.5829790044},"basemap":"Streets","layers":[{"id":"digitizelayer","type":"graphics","title":"digitize graphics","visible":true,"graphics":[]},{"id":"ejindex_map","title":"Pollution and Sources","isDynamic":true,"layerType":"ejscreen","pctlevel":"nation","renderField":"B_PTRAF","renderIndex":4,"type":"map-image","url":"https://geopub.epa.gov/arcgis/rest/services/ejscreen/ejscreen_v2022_with_AS_CNMI_GU_VI/MapServer","visible":true,"opacity":0.5}],"graphics":[],"name":"Traffic in LA area"}]
-  #
-  # [{
-  #   "extent":{"spatialReference":{"latestWkid":3857,"wkid":102100},"xmin":-13232599.178424664,"ymin":3970069.245971938,"xmax":-13085305.024919074,"ymax":4067373.5829790044},
-  #   "basemap":"Streets",
-  #   "layers":[
-  #     {"id":"digitizelayer","type":"graphics","title":"digitize graphics","visible":true,"graphics":[]},
-  #     {"id":"ejindex_map",
-  #       "title":"Pollution and Sources",
-  #       "isDynamic":true,
-  #       "layerType":"ejscreen",
-  #       "pctlevel":"nation",
-  #       "renderField":"B_PTRAF",
-  #       "renderIndex":4,
-  #       "type":"map-image",
-  #       "url":"https://geopub.epa.gov/arcgis/rest/services/ejscreen/ejscreen_v2022_with_AS_CNMI_GU_VI/MapServer",
-  #       "visible":true,
-  #       "opacity":0.5
-  #     }
-  #   ],
-  #   "graphics":[],
-  #   "name":"Traffic in LA area"
-  # }]
-  
-}
-############################################################## #  ############################################################## #
-
-
-#' URL functions - DRAFT FRAGMENTS OF CODE - url_bookmark_text
-#' 
-#' URL for 1 bookmarked EJScreen session (map location and indicator)
-#' @details 
-#' WORK IN PROGRESS - NOT USED AS OF EARLY 2023. 
-#' You can use this function to create and save a json file that is a bookmark 
-#' for a specific place/ map view/ data layer in EJScreen. 
-#' You can later pull up that exact map in EJScreen by launching EJScreen, 
-#' clicking Tools, Save Session, Load from File.
-#' 
-#' Note: 
-#' (1) The number of sessions that can be saved depends on the browser cache size. 
-#' (2) Session files, if saved, are available from the default Downloads folder on your computer. 
-#' (3) Users should exercise caution when saving sessions that may contain sensitive or confidential data.
-#' 
-#' @param x vector of approx topleft, bottomright longitudes in some units EJScreen uses? 
-#'    Units are not lat lon: "spatialReference":{"latestWkid":3857,"wkid":102100}
-#' @param y vector of approx topleft, bottomright latitudes in some units EJScreen uses? 
-#'    Units are not lat lon: "spatialReference":{"latestWkid":3857,"wkid":102100}
-#' @param name Your name for the map bookmark
-#' @param title Your name for the map like Socioeconomic Indicators  or  Pollution and Sources
-#' @param renderField name of variable shown on map, like B_UNEMPPCT for map color bins of percent unemployed
-#'   or B_PTRAF for traffic indicator
-#' @param pctlevel nation or state
-#' @param xmin  calculated bounding box for map view
-#' @param xmax  calculated bounding box for map view
-#' @param ymin  calculated bounding box for map view
-#' @param ymax  calculated bounding box for map view
-#' @param urlrest Just use the default but it changes each year
-#' @seealso [url_bookmark_save()]
-#' @return URL for 1 bookmarked EJScreen map location and variable displayed on map
-#'
-#' @examples \donttest{
-#'   url_bookmark_text()
-#'   url_bookmark_save(
-#'     x=c(-10173158.179197036, -10128824.702791695), 
-#'     y=c(3548990.034736070,3579297.316451102), 
-#'     file="./mysavedejscreensession1.json")
-#'   }
-#'
-#' @noRd
-#'
-url_bookmark_text <- function(
-    x=c(-13232599.178424664, -13085305.024919074),
-    y=c(3970069.245971938, 4067373.5829790044),
-    # x=c(-172.305626, -59.454062),  # if longitude, zoomed way out to corners of USA plus some
-    # y=c(63.774548, 16.955558), # if latitude, zoomed way out to corners of USA plus some
-    name="BookmarkedEJScreenMap",
-    title="Socioeconomic Indicators", # Pollution and Sources
-    renderField="B_UNEMPPCT",   # B_PTRAF
-    pctlevel="nation",
-    xmin=1.1*min(x), # >1 because it is negative longitude in USA
-    xmax=0.9*min(x), # <1 because it is negative longitude in USA
-    ymin=0.9*min(y),
-    ymax=1.1*min(y),
-    urlrest=paste0("https://geopub.epa.gov/arcgis/rest/services", 
-                   "/ejscreen/ejscreen_v2022_with_AS_CNMI_GU_VI/MapServer")
-) {
-  
-  yrinurl <- gsub(".*v20(..).*", "20\\1", urlrest)
-  yrnow <- substr(Sys.time(),1,4)
-  if (yrnow > yrinurl + 1) {warning("Check that URL in url_bookmark_text() is updated to the latest dataset of EJScreen.")}
-  # example, at EJAM/inst/testdata/Sessions_Traffic in LA area.json
-  # [{"extent":{"spatialReference":{"latestWkid":3857,"wkid":102100},"xmin":-13232599.178424664,"ymin":3970069.245971938,"xmax":-13085305.024919074,"ymax":4067373.5829790044},"basemap":"Streets","layers":[{"id":"digitizelayer","type":"graphics","title":"digitize graphics","visible":true,"graphics":[]},{"id":"ejindex_map","title":"Pollution and Sources","isDynamic":true,"layerType":"ejscreen","pctlevel":"nation","renderField":"B_PTRAF","renderIndex":4,"type":"map-image","url":"https://geopub.epa.gov/arcgis/rest/services/ejscreen/ejscreen_v2022_with_AS_CNMI_GU_VI/MapServer","visible":true,"opacity":0.5}],"graphics":[],"name":"Traffic in LA area"}]
-  #
-  # [{
-  #   "extent":{"spatialReference":{"latestWkid":3857,"wkid":102100},"xmin":-13232599.178424664,"ymin":3970069.245971938,"xmax":-13085305.024919074,"ymax":4067373.5829790044},
-  #   "basemap":"Streets",
-  #   "layers":[
-  #     {"id":"digitizelayer","type":"graphics","title":"digitize graphics","visible":true,"graphics":[]},
-  #     {"id":"ejindex_map",
-  #       "title":"Pollution and Sources",
-  #       "isDynamic":true,
-  #       "layerType":"ejscreen",
-  #       "pctlevel":"nation",
-  #       "renderField":"B_PTRAF",
-  #       "renderIndex":4,
-  #       "type":"map-image",
-  #       "url":"https://geopub.epa.gov/arcgis/rest/services/ejscreen/ejscreen_v2022_with_AS_CNMI_GU_VI/MapServer",
-  #       "visible":true,
-  #       "opacity":0.5
-  #     }
-  #   ],
-  #   "graphics":[],
-  #   "name":"Traffic in LA area"
-  # }]
-  
-  # old urlrest was         "https://v18ovhrtay722.aa.ad.epa.gov/arcgis/rest/services/ejscreen/ejscreen_v2021/MapServer"  
-  
-  
-  
-  urltext <- paste0(
-    '[{"extent":{"spatialReference":{"latestWkid":3857,"wkid":102100},',
-    
-    '"xmin":',
-    xmin,                   ###########   PARAMETER ################ #### #-10173158.179197036, ##################### #
-    ',"ymin":',
-    ymin,                   ###########   PARAMETER ################ ##### #3548990.0347360703, ##################### #
-    ',"xmax":',
-    xmax,                   ###########   PARAMETER ################ ##### #-10128824.702791695, ##################### #
-    ',"ymax":',
-    ymax,                   ###########   PARAMETER ################ ##### #3579297.316451102, ##################### #
-    
-    '},"basemap":"Streets","layers":[{"id":"digitizelayer","type":"graphics","title":"digitize graphics","visible":true,"graphics":[]},{"id":',
-    '"', 
-    'ejindex_map',  ###########  ????????????  
-    '",',   
-    '"title":"',
-    title,                     ###########   PARAMETER ################ #
-    '",',
-    '"isDynamic":true,"layerType":',
-    '"',
-    'ejscreen',
-    '",',
-    '"pctlevel":"',
-    pctlevel,                      ###########   PARAMETER ################ #
-    '",',
-    '"renderField":"',
-    renderField,                  ###########   PARAMETER ################ #
-    '",',
-    '"renderIndex":4,"type":"map-image",',
-    '"url":"',
-    urlrest,                    ###########   PARAMETER ################ #
-    '",',
-    '"visible":true,"opacity":0.5}],"graphics":[],',
-    '"name":"',
-    name,
-    '"',
-    '}]'
-  )
-  return(urltext)
-}
-############################################################## #  ############################################################## #
-

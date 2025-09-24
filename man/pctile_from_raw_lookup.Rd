@@ -51,8 +51,15 @@ This is used with a lookup table to
 convert a raw indicator vector to percentiles in US or States.
 }
 \details{
+This function can handle 2 kinds of inputs right now:
+\itemize{
+\item a vector of scores and vector of corresponding indicator names, in only 1 zone (e.g. 1 State)
+\item a vector of scores and vector of corresponding zones (States), for only 1 indicator (e.g., pctlowinc)
+}
+
 This could be recoded to be more efficient - could use data.table.
 
+s
 The data.frame lookup table must have a field called "PCTILE" that has quantiles/percentiles
 and other column(s) with values that fall at those percentiles.
 \link{usastats} and \link{statestats} are such lookup tables.
@@ -88,7 +95,7 @@ eg <- dput(
           3)
       )
 
-data.frame(value = eg, 
+data.frame(value = eg,
            pctile = t(testoutput_ejamit_10pts_1miles$results_overall[ , ..names_d_pctile]))
 
 data.frame(value = eg, pctile = lookup_pctile(eg, names_d))

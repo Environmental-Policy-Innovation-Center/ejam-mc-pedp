@@ -299,8 +299,8 @@ change.fieldnames <- function(
 #' @title Clean raw output of doaggregate() from the EJAM package
 #' @description Takes the raw output version of batch buffer results and cleans it up
 #'   to make it ready for batch.summarize function
-#'   Note this drops rows with no pop data - assumes those lack EJScreen batch results 
-#' @param x Required. output of batch processor that runs EJScreen report once per site.
+#'   Note this drops rows with no pop data - assumes those lack EJSCREEN batch results 
+#' @param x Required. output of batch processor that runs EJSCREEN report once per site.
 #' @param namesfile Optional but must specify either namesfile, or both oldcolnames and newcolnames. 
 #'   A csv filename, of file that maps fieldnames from those in raw output of batch processor
 #'   to more useful and friendly names that make more sense. 
@@ -369,7 +369,7 @@ batch.clean <- function(x, namesfile = "keepnames", oldcolnames, newcolnames) {
   x[ , !charcol] <- makenum(x[ , !charcol])
   if (!('OBJECTID' %in% names(x))) {x$OBJECTID <- 1:NROW(x)} # required by map and probably elsewhere
   
-  # Remove rows where no results from ArcGIS since lat/lon in Guam, American Samoa, Mariana Islands, VI, etc. where EJScreen does not work.
+  # Remove rows where no results from ArcGIS since lat/lon in Guam, American Samoa, Mariana Islands, VI, etc. where EJSCREEN does not work.
   # It won't include those in any stats and also cannot map them since removed here, even though they had lat/lon data uploaded! 
   if (any(is.na(x$pop))) warning('Dropping the points where data were not available at all, such as in Guam, American Samoa, Mariana Islands, VI')
   if (all(is.na(x$pop))) warning('None of these points have batch buffer output results.')

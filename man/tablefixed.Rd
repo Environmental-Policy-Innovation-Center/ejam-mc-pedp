@@ -24,7 +24,7 @@ did not include all integers.
 There is likely a more efficient way to do this in some existing package,
 but this is useful and fast enough.
 
-When using a dataset like EJScreen with 13 indicators of interest,
+When using a dataset like EJSCREEN with 13 indicators of interest,
 and counting how many of the 13 are above various cutpoints,
 there may be zero rows that have exactly 8 above some cutoff, for example.
 

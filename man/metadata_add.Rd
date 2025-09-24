@@ -2,14 +2,25 @@
 % Please edit documentation in R/utils_metadata_add.R
 \name{metadata_add}
 \alias{metadata_add}
-\title{helper function for package to set metadata attributes of a dataset}
+\title{helper function for package to set metadata attributes of a dataset, used by scripts in /data-raw/}
 \usage{
-metadata_add(x, update_date_saved_in_package = TRUE)
+metadata_add(
+  x,
+  metadata = NULL,
+  update_date_saved_in_package = TRUE,
+  update_ejam_package_version = TRUE
+)
 }
 \arguments{
 \item{x}{dataset (or any object) whose metadata (stored as attributes) you want to update or create
-EJAM, EJScreen, and other dataset versions and release dates are tracked in DESCRIPTION
-@param update_date_saved_in_package set to FALSE to avoid changing this attribute}
+EJAM, EJSCREEN, and other dataset versions and release dates are tracked in DESCRIPTION}
+
+\item{metadata}{optional - when omitted, it checks metadata_mapping using get_metadata_mapping().
+Can provide a list of key=value attributes to add}
+
+\item{update_date_saved_in_package}{can set to FALSE to avoid changing this attribute}
+
+\item{update_ejam_package_version}{can set to FALSE to avoid changing this attribute}
 }
 \value{
 returns x but with new or altered attributes
@@ -24,10 +35,13 @@ to add new or update existing attributes.
 \details{
 to update only the ejam_package_version attribute of every data item:
 
-metadata_update_attr()
+\code{\link[=metadata_update_attr]{metadata_update_attr()}}
 
 This utility would be used in scripts in EJAM/data-raw/ to
 add metadata to objects like x before use_data(x, overwrite=T)
+
+Note that by adding attributes, this function changes a vector
+so that is.vector() will no longer be true!
 }
 \examples{
   # metadata_check() # internal function
@@ -37,6 +51,6 @@ add metadata to objects like x before use_data(x, overwrite=T)
 
 }
 \seealso{
-metadata_check()
+\code{\link[=metadata_check_print]{metadata_check_print()}} \code{\link[=metadata_check]{metadata_check()}} \code{\link[=metadata_add]{metadata_add()}} \code{\link[=metadata_update_attr]{metadata_update_attr()}}
 }
 \keyword{internal}

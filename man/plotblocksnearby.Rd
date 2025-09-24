@@ -9,7 +9,6 @@ plotblocksnearby(
   sitepoints,
   radius = 3,
   sites2blocks,
-  siteidvarname = "ejam_uniq_id",
   usemapfast = TRUE,
   returnmap = FALSE,
   overlay_blockgroups = FALSE,
@@ -30,10 +29,6 @@ If sites2blocks and sitepoints are both provided, it uses them both to plot bloc
 If sites2blocks not provided, but sitepoints alone is provided, checks if sitepoints is actually sites2blocks, and uses as such.
 If sites2blocks not provided, but sitepoints alone is provided, and sitepoints is really sitepoints, it runs getblocksnearby() to create sites2blocks.
 If sites2blocks is provided, but sitepoints is not, it could only do a bad approximation of sitepoints so it will not draw the circle or site at center of the circle.}
-
-\item{siteidvarname}{optional. specifies the column name in sites2blocks that is the unique site id, the values of which should
-also be the row numbers of the corresponding sites in sitepoints, with a site appearing once in sitepoints,
-and in sites2blocks appearing once per block that is near that site.}
 
 \item{usemapfast}{optional. simpler plot if FALSE}
 
@@ -65,30 +60,30 @@ and then displays a map of those blocks near the specified point.
   #  see all Census Blocks within 1 mile of 1 site, if already had run getblocksnearby()
   getblocks_output <- copy(testoutput_getblocksnearby_10pts_1miles)
   if ("siteid" \%in\% names(getblocks_output)) {
-  siteidvarname <- "siteid" # the old default
   eg <- getblocks_output[siteid == 1,]
   eg2 <- getblocks_output[siteid \%in\% c(4,10),]
   } else {
-  siteidvarname <- "ejam_uniq_id"
    eg <- getblocks_output[ejam_uniq_id == 1,]
    eg2 <- getblocks_output[ejam_uniq_id \%in\% c(4,10),]
   }
-   z <-  plotblocksnearby(sitepoints = testpoints_10, 
+   z <-  plotblocksnearby(sitepoints = testpoints_10,
      sites2blocks = eg, radius = 1)
    # see two sites if already had run getblocksnearby()
-   z2 <-  plotblocksnearby(sitepoints = testpoints_10[c(4,10),], 
+   z2 <-  plotblocksnearby(sitepoints = testpoints_10[c(4,10),],
      sites2blocks = eg2, radius = 1)
-  \donttest{
-  # See one randomly selected regulated facility from FRS and all Census Blocks within 2 miles:
-    plotblocksnearby(testpoints_n(1), 2) 
+  \dontrun{
+  # See one randomly selected regulated facility from FRS
+  and all Census Blocks and Blockgroups within 2 miles:
+    plotblocksnearby(testpoints_n(1), 2, overlay_blockgroups=T)
   # See two sites and all Census Blocks within 5 kilometers
-    plotblocksnearby(testpoints_2, radius = convert_units(5, from = "km", towhat = "miles"))
-  # See 100 sites and all blocks within 1 mile of each - 
-  # Note you have to specify radius here or it uses default that may not match intent 
+    plotblocksnearby(testpoints_10[c(3,10),], radius = convert_units(5, from = "km", towhat = "miles"))
+  # See 100 sites and all blocks within 1 mile of each -
+  # Note you have to specify radius here or it uses default that may not match intent
   # - and this is a bit slow
   plotblocksnearby(
-    testoutput_ejamit_100pts_1miles$results_bysite[, 
-        c(siteidvarname, "lat", "lon"), with=FALSE],
+    testoutput_ejamit_100pts_1miles$results_bysite[,
+        c("ejam_uniq_id", "lat", "lon"), with=FALSE],
    radius = 1)
   }
+
 }

@@ -57,12 +57,12 @@ The alias_list could be for example this:
   sqm = c('m2', 'meter2','meters2', 'sq meters', 'sq meter','sqmeters', 'sqmeter',
   'squaremeters', 'squaremeter', 'square meters', 'square meter'),
   mi = c('mile', 'miles'),
-  
+
   lat = lat_alias,
-  #[1]"lat" "latitude83" "latitude" "latitudes"  "faclat" "lats" "y" 
-  lon = lon_alias, 
+  #[1]"lat" "latitude83" "latitude" "latitudes"  "faclat" "lats" "y"
+  lon = lon_alias,
   #[1]"lon" "longitude83" "longitude" "longitudes" "faclong" "lons" "long" "longs" "lng" "x"
-  
+
 )
 }
 }
@@ -74,7 +74,7 @@ fixnames_aliases("LATITUDE", na_if_no_match = T)
 fixnames_aliases("LATITUDE", na_if_no_match = T, ignore.case = F)
 fixnames_aliases(c(NA, 1, "typo", 1:2, list()))
 
-fixnames_aliases(c(1:4, "na", "tbd"), 
+fixnames_aliases(c(1:4, "na", "tbd"),
   alias_list = list(upto1 = 0:1, company = 2, crowd = 3:10, other = c("na", "tbd")))
 
 }

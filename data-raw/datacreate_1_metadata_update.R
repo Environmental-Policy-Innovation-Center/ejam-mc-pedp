@@ -5,13 +5,16 @@
 
 ############################################################ #
 
+#   see EJAM:::metadata_check()
+
+# then
 #   see metadata_update_attr()
 
 ############################################################ #
 
 # update ALL metadata for datasets in EJAM/data/
 
-x = datapack('EJAM')
+x = pkg_data('EJAM')
 
 stop('to be continued - NOT TESTED/TRIED OUT YET JUST DRAFTED')
 
@@ -49,11 +52,6 @@ for (i in 1:length(x$Item))  {
   )
   assign(x = x$Item[i], value = val)
 }
-
-
-### this may be obsolete if not using pins now: see vignettes on how to update datasets
-  # EJAM:::datawrite_to_pins('all')
-
 
 rm(i)
 ############################################################ #

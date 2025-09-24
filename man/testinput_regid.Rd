@@ -3,14 +3,17 @@
 \docType{data}
 \name{testinput_regid}
 \alias{testinput_regid}
-\title{testinput_regid (DATA) test data, vector of EPA FRS Registry ID numbers}
+\title{test data, EPA Facility Registry ID numbers to try using}
+\format{
+An object of class \code{numeric} of length 8.
+}
+\usage{
+testinput_regid
+}
 \description{
-testinput_regid (DATA) test data, vector of EPA FRS Registry ID numbers
+test data, EPA Facility Registry ID numbers to try using
 }
 \details{
-For testing, e.g.,
-
-frs_from_regid(testinput_regid)
-
-mapfast(  frs_from_regid(testinput_regid)  )
+Just for convenience, installed with the package
 }
+\keyword{datasets}

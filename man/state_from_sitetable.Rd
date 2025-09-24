@@ -2,7 +2,9 @@
 % Please edit documentation in R/state_from_sitetable.R
 \name{state_from_sitetable}
 \alias{state_from_sitetable}
-\title{state_from_sitetable - Identify US State that each site is in (given ST, FIPS, or lat/lon)}
+\title{state_from_sitetable - Identify US State that each site is in (given ST, FIPS, or lat/lon)
+try ST, then FIPS, then latlon of site (not blocks), then polygon
+Identify US State that each site is in (given ST, lat/lon, or FIPS)}
 \usage{
 state_from_sitetable(sites, ignorelatlon = FALSE)
 }
@@ -21,6 +23,8 @@ new columns if ST was not already a column:
 ejam_uniq_id, ST, statename, FIPS.ST, REGION, n
 }
 \description{
+state_from_sitetable - Identify US State that each site is in (given ST, FIPS, or lat/lon)
+try ST, then FIPS, then latlon of site (not blocks), then polygon
 Identify US State that each site is in (given ST, lat/lon, or FIPS)
 }
 \examples{
@@ -28,7 +32,8 @@ Identify US State that each site is in (given ST, lat/lon, or FIPS)
   state_from_sitetable(testoutput_ejamit_10pts_1miles$results_bysite[, .(ejam_uniq_id, ST, pop)])
   state_from_sitetable(testoutput_ejamit_10pts_1miles$results_bysite[, .(ST, pop)])
   state_from_sitetable(testoutput_ejamit_10pts_1miles$results_bysite[, .(ST, lat, lon, pop)])
-  
+
+
 }
 \seealso{
 \code{\link[=state_from_blockid_table]{state_from_blockid_table()}} \code{\link[=state_per_site_for_doaggregate]{state_per_site_for_doaggregate()}}

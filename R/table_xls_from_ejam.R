@@ -5,7 +5,9 @@
 #' @param sitetype character string, one of "shp", "latlon", "fips" and to describe locations
 #' @param site_method string used in filename for saved report and to describe locations
 #'   site_method can be SHP, latlon, FIPS, NAICS, FRS, EPA_PROGRAM, SIC, or MACT
+#' @seealso [report_residents_within_xyz()]
 #' @returns text string
+#'
 #' @keywords internal
 #'
 buffer_desc_from_sitetype <- function(sitetype, site_method) {
@@ -99,11 +101,15 @@ table_xls_from_ejam <- function(ejamitout,
                                 in.testing = FALSE,
                                 in.analysis_title =  "EJAM analysis",
                                 react.v1_summary_plot = NULL,
-                                radius_or_buffer_in_miles = NULL,  #  input$bt_rad_buff
+                                radius_or_buffer_in_miles = NULL,  #  input$radius_now
                                 buffer_desc = "Selected Locations",
                                 radius_or_buffer_description = NULL, # 'Miles radius of circular buffer (or distance used if buffering around polygons)',
                                 # radius_or_buffer_description =   "Distance from each site (radius of each circular buffer around a point)",
-                                hyperlink_colnames = "ECHO Report",#c("EJScreen Report", "EJScreen Map","ACS Report","ECHO Report"),
+
+                                # hyperlink_colnames = EJAM:::global_or_param("default_hyperlink_colnames"),
+                                reports = EJAM:::global_or_param("default_reports"),
+                                # could change to be an input$ in advanced tab possibly # "ECHO Report",#c("EJSCREEN Report", "EJSCREEN Map", "ECHO Report"),
+
                                 site_method = "",
 
                                 mapadd = FALSE,
@@ -123,7 +129,11 @@ table_xls_from_ejam <- function(ejamitout,
   #   Note `ejamitout$sitetype` is not quite the same as the `site_method` parameter used in building reports.
   #   sitetype    can be shp, latlon, fips
   #   site_method can be SHP, latlon, FIPS, NAICS, FRS, EPA_PROGRAM, SIC, or MACT
-  sitetype <- ejamit_sitetype_from_output(ejamitout)
+  if (!("sitetype" %in% names(ejamitout))) {
+    sitetype <- ejamit_sitetype_from_output(ejamitout)
+  } else {
+    sitetype <- ejamitout$sitetype
+  }
   if (missing(site_method) || is.null(site_method)) {
     site_method <- sitetype
     if (site_method == 'shp' ) site_method <- 'SHP'
@@ -136,7 +146,7 @@ table_xls_from_ejam <- function(ejamitout,
   #  when shp param is redundant (sitetype == "shp" AND want report or map BUT ALREADY PROVIDED report/map) but shp provided,
   ## when shp param is nonessential but useful (sitetype == "fips" AND want report or map) to avoid a redundant download of FIPS bounds
 #
-  ### TO BE CONTINUED:
+  ### TO BE CONTINUED?
   #
   # if (!is.null(shp) && !community_reportadd && !mapadd) {
   #   message("ignoring shp since mapadd and community_reportadd are both FALSE")
@@ -157,7 +167,7 @@ table_xls_from_ejam <- function(ejamitout,
   # }
   # shp_for_report <- shp
   #
-# create report if requested but not provided
+# create report if requested but not provided (and that includes the map within the report)
 
   if (community_reportadd && is.null(community_html)) {
     # not provided so try to create it here, noting ejam2report() still requires shp to have FIPS or polygon map in report.
@@ -171,7 +181,8 @@ table_xls_from_ejam <- function(ejamitout,
 
 ### may need to pass more params here to build report just like server would have?
 ### ***
-
+   # but the excel version of the summary report is just a snapshot image without working map popups,
+  # so we do not have to pass a "reports" parameter, for example that normally would build links to reports.
 
 
       )
@@ -204,7 +215,7 @@ table_xls_from_ejam <- function(ejamitout,
     pathname <- fname
   }
 
-  # table_xls_format ####
+  # uses table_xls_format  ####
 
   # also see the defaults in ejamit() and in table_xls_format()
 
@@ -222,11 +233,15 @@ table_xls_from_ejam <- function(ejamitout,
     longnames = ejamitout$longnames,       #  1 row, but full plain English column names
     bybg      = ejamitout$results_bybg_people, # not entirely sure should provide bybg tab? it is huge and only for expert users but enables a plot
     formatted = ejamitout$formatted,
+    sitetype = sitetype,
+    # shp is not needed since now report already is here and has map, and hyperlinks are already in eachsite table.
 
     custom_tab = ejamitout$results_summarized$cols,
     custom_tab_name = "thresholds",
 
-    hyperlink_colnames = hyperlink_colnames,  # need to ensure these get formatted right to work as links in Excel
+    # hyperlink_colnames = hyperlink_colnames,  # need to ensure these get formatted right to work as links in Excel
+     reports = reports,
+
     # heatmap_colnames=names(table_as_displayed)[pctile_colnums], # can use defaults
     # heatmap_cuts=c(80, 90, 95), # can use defaults
     # heatmap_colors=c('yellow', 'orange', 'red') # can use defaults
@@ -274,7 +289,7 @@ table_xls_from_ejam <- function(ejamitout,
     # if (is.null(pathname) || pathname == "" || grepl("[<>:\"/\\?*]", pathname)) { #perform a more robust check of the pathname here.
     if (is.null(pathname) || pathname == "" || !dir.exists(dirname(pathname))) { #perform a more robust check of the pathname here.
 
-      cat('Invalid path/file,', pathname, ',so using default instead: ', default_pathname, '\n')
+      cat('Invalid path/file,', pathname, ', so using default instead: ', default_pathname, '\n')
       pathname <- default_pathname
     }
 

@@ -4,7 +4,9 @@
 ##  parameters and their default values
 ##  with one per row of text
 
-# examples: 
+# see also EJAM:::argument_combos()
+
+# examples:
 
 
 #  EJAM:::args2(ejamit)
@@ -15,7 +17,7 @@
 
 
 #  EJAM:::args2(ejam2excel)
-# 
+#
 #
 ## ejam2excel(
 ##   ejamitout,
@@ -39,12 +41,12 @@
 
 
 args2 <- function(funcname) {
-  
+
   if (length(funcname) > 1) {stop("must provide a single function name")}
   if (!(is.character(funcname) || is.function(funcname))) {stop("must provide function or character string that is name of function")}
   # primitives do not show params the way other functions would
   if (is.character(funcname)) {
-    func_obj <- get(funcname)  
+    func_obj <- get(funcname)
   } else {
     func_obj <- funcname
   }
@@ -53,35 +55,35 @@ args2 <- function(funcname) {
     print(args(func_obj))
     invisible()
   }
-  
+
   # convert to string that has function name
   if (is.function(funcname)) {funcname <- as.character(substitute(funcname))}
-  
+
   # get the arguments and their default values as a list
   y <- formals(funcname)
-  
+
   if (length(y) == 0) {
     cat("No parameters found for function ", funcname, "\n")
   } else {
     param_names <- names(y)
-    
+
     # try to identify the ones with no default specified
     hasdefault <- sapply(y, function(z) {is.character(z) | is.numeric(z) | is.logical(z) | is.null(z) | any(nchar(z) > 0)})
     nodefault <- !hasdefault
-    
+
     ischar <- sapply(y, is.character)
     param_defaults_txt <- as.character(y)
-    
+
     # try to fix at least the ones that are "" or '' but it may miss some defaults this way so print(str()) later as backup
     # param_defaults_txt[hasdefault & param_defaults_txt == ""] <- '""'
     param_defaults_txt[hasdefault & ischar ] <- paste0('"', param_defaults_txt[hasdefault & ischar ], '"')
 # & !param_defaults_txt == ""
     x = paste0(
-      paste0(param_names, ifelse(nodefault, "", " = "), param_defaults_txt), 
+      paste0(param_names, ifelse(nodefault, "", " = "), param_defaults_txt),
       collapse = ",\n  "
     )
     x <- paste0(
-      funcname, "(\n  ", 
+      funcname, "(\n  ",
       x,
       "\n)\n"
     )
@@ -94,7 +96,7 @@ args2 <- function(funcname) {
     attributes(func_obj) <- NULL
     print(str(func_obj))
   }
-  
+
   invisible(formals(funcname))
 }
 

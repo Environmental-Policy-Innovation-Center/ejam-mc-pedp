@@ -22,27 +22,27 @@ default_metadata <- list(
   #   "2.32.0" ok, but not "2.32.0-ejscreen2.32"
   ejam_package_version          = description_file$get("Version"),
 
-  ejscreen_version      = description_file$get("EJScreenVersion"),
-  ejscreen_releasedate  = description_file$get("EJScreenReleaseDate"),
-  acs_releasedate       = description_file$get("ACSReleaseDate"),
-  acs_version           = description_file$get("ACSVersion"),
-  census_version        = description_file$get("CensusVersion")
+  ejscreen_version      = description_file$get("VersionEJSCREEN"),
+  ejscreen_releasedate  = description_file$get("ReleaseDateEJSCREEN"),
+  acs_releasedate       = description_file$get("ReleaseDateACS"),
+  acs_version           = description_file$get("VersionACS"),
+  census_version        = description_file$get("VersionCensus")
 )
 
 # > dput(default_metadata)
 # list(
 #   ejam_package_version = c(Version = "2.32.0"),
-#   ejscreen_version     = c(EJScreenVersion = "2.32"),
-#   ejscreen_releasedate = c(EJScreenReleaseDate = "2024-08-12"),
-#   acs_releasedate      = c(ACSReleaseDate = "2023-12-07"),
-#   acs_version          = c(ACSVersion = "2018-2022"),
-#   census_version       = c(CensusVersion = "2020")
+#   ejscreen_version     = c(VersionEJSCREEN = "2.32"),
+#   ejscreen_releasedate = c(ReleaseDateEJSCREEN = "2024-08-12"),
+#   acs_releasedate      = c(ReleaseDateACS = "2023-12-07"),
+#   acs_version          = c(VersionACS = "2018-2022"),
+#   census_version       = c(VersionCensus = "2020")
 # )
 #################################################### #
 
 # metadata_mapping ####
 
-# x = datapack("EJAM")
+# x = pkg_data("EJAM")
 # # Not included here yet:
 # cbind(sort(setdiff(x$Item, cbind(names(metadata_mapping)))))
 
@@ -51,11 +51,11 @@ metadata_mapping <- list(
   # datacreate_bg_cenpop2020.R
   bg_cenpop2020 =	list(
     source = "https://www2.census.gov/geo/docs/reference/cenpop2020/blkgrp/CenPop2020_Mean_BG.txt",
-    census_version = description_file$get("CensusVersion")
+    census_version = description_file$get("VersionCensus")
   ),
 
   # datacreate_blockgroupstats2.32.R
-  # rstudioapi::documentOpen("./R/datacreate_blockgroupstats2.32.R")
+  # rstudioapi::documentOpen("./data-raw/datacreate_blockgroupstats2.32.R")
   blockgroupstats =	default_metadata,
 
   # datacreate_usastats2.32.R  and others
@@ -69,8 +69,8 @@ metadata_mapping <- list(
 
   # datacreate_map_headernames.R
   map_headernames = list(
-    ejscreen_version      = description_file$get("EJScreenVersion"),
-    ejscreen_releasedate  = description_file$get("EJScreenReleaseDate")
+    ejscreen_version      = description_file$get("VersionEJSCREEN"),
+    ejscreen_releasedate  = description_file$get("ReleaseDateEJSCREEN")
   ),
 
   # datacreate_formulas.R
@@ -99,14 +99,14 @@ metadata_mapping <- list(
   stateinfo  =	list(), ##########  just the date it was updated is what matters for this
   stateinfo2 =  list(), ##########  just the date it was updated is what matters for this
 
-  # TEST DATA SETS 
-  
+  # TEST DATA SETS
+
   # datacreate_testpoints_testoutputs.R
-  
-  ## see   cbind(data.in.package  = sort(grep("test", datapack()$Item, value = T)))
-  
+
+  ## see   cbind(data.in.package  = sort(grep("test", pkg_data()$Item, value = T)))
+
   ## etc. inputs ####
-  
+
   testshapes_2 = list(),
 
   testpoints_10 =	list(),
@@ -119,52 +119,51 @@ metadata_mapping <- list(
   testpoints_500 =	list(),
   testpoints_bad =	list(),
   testpoints_overlap3 =	list(),
-  
+
   # datacreate_testinput_address_table.R
-  testinput_address_table = list(), ######### #  
+  testinput_address_table = list(), ######### #
   testinput_address_table_goodnames = list(),
   testinput_address_table_withfull = list(),
-  
+
   # datacreate_testinput_program_sys_id.R
-  testinput_program_sys_id = list(), ##########  just the date it was updated is what matters for this
-  
+  # testinput_program_sys_id = list(), ##########  just the date it was updated is what matters for this, but omitting metadata so it can remain a vector per is.vector()
+
   # datacreate_testinput_registry_id.R
-  testinput_registry_id = list(), ##########  just the date it was updated is what matters for this
-  testinput_regid = list(),
-  testinput_xtrac = list(),
-  
+  # testinput_registry_id = list(), ##########  just the date it was updated is what matters for this, but omitting metadata so it can remain a vector per is.vector()
+  # testinput_regid = list(), # , but omitting metadata so it can remain a vector per is.vector()
+
   ## etc. outputs ####
-  
-  # [4,] "testoutput_ejamit_1000pts_1miles"         
-  # [5,] "testoutput_ejamit_100pts_1miles"          
-  # [6,] "testoutput_ejamit_10pts_1miles"      
-  
+
+  # [4,] "testoutput_ejamit_1000pts_1miles"
+  # [5,] "testoutput_ejamit_100pts_1miles"
+  # [6,] "testoutput_ejamit_10pts_1miles"
+
   # [13,] "testoutput_getblocksnearby_1000pts_1miles"
-  # [14,] "testoutput_getblocksnearby_100pts_1miles" 
-  # [15,] "testoutput_getblocksnearby_10pts_1miles"  
-  
-  # [1,] "testoutput_doaggregate_1000pts_1miles"    
-  # [2,] "testoutput_doaggregate_100pts_1miles"     
-  # [3,] "testoutput_doaggregate_10pts_1miles"    
-  
-  # [7,] "testoutput_ejscreenapi_1pts_1miles"       
-  # [8,] "testoutput_ejscreenapi_plus_5"            
-  # [9,] "testoutput_ejscreenit_5"                  
-  # [10,] "testoutput_ejscreenit_50"                 
-  # [11,] "testoutput_ejscreenit_500"                
+  # [14,] "testoutput_getblocksnearby_100pts_1miles"
+  # [15,] "testoutput_getblocksnearby_10pts_1miles"
+
+  # [1,] "testoutput_doaggregate_1000pts_1miles"
+  # [2,] "testoutput_doaggregate_100pts_1miles"
+  # [3,] "testoutput_doaggregate_10pts_1miles"
+
+  # [7,] "testoutput_ejscreenapi_1pts_1miles"
+  # [8,] "testoutput_ejscreenapi_plus_5"
+  # [9,] "testoutput_ejscreenit_5"
+  # [10,] "testoutput_ejscreenit_50"
+  # [11,] "testoutput_ejscreenit_500"
   # [12,] "testoutput_ejscreenRESTbroker_1pts_1miles"
-  
+
   testoutput_ejamit_10pts_1miles = default_metadata,
   testoutput_ejamit_100pts_1miles = default_metadata,
   testoutput_ejamit_1000pts_1miles = default_metadata,
 
   # skip most of them
-  
+
   testoutput_ejscreenRESTbroker_1pts_1miles = default_metadata,
 
   ejscreenRESTbroker2table_na_filler = default_metadata,
 
-  
+
   test_metadata_custom = list(
     custominfo = 0,
     moreinfo = "oldvalue",

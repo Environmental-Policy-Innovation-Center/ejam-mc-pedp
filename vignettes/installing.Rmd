@@ -29,12 +29,10 @@ knitr::opts_chunk$set(eval = FALSE)
 
 ```{r libraryEJAM, eval = FALSE, echo= FALSE, include= FALSE}
 # rm(list = ls()); golem::detach_all_attached(); devtools::load_all()
- 
-if (!exists("blockgroupstats")) {library(EJAM)} # use installed version only if pkg not yet attached
-
-dataload_dynamic('all') # varnames = all  currently means all defined by .arrow_ds_names
-
-indexblocks()
+ ## DONT NEED THESE FOR THIS VIGNETTE ON INSTALLATION STEPS
+#if (!exists("blockgroupstats")) {library(EJAM)} # use installed version only if pkg not yet attached
+#dataload_dynamic('all') # varnames = all  currently means all defined by .arrow_ds_names
+#indexblocks()
 ```
 
 ```{r, eval=TRUE, include=FALSE}
@@ -43,83 +41,139 @@ repo <- gsub(".*/", "", owner_repo)        # had been       "EJAM-open"
 quoted_owner_repo <- paste0("'", owner_repo, "'")
 ```
 
-EJAM is not only a web app, it is also an R package.
+EJAM is not only a web app, it is also an R package you can install on your computer. This is useful if you want to use the full set of EJAM R functions, some of which are not available in the web app, to do customized analysis, to explore the datasets, or to reuse data or code in other applications.
 
-To use the R package, you first need to have [R and RStudio](https://posit.co/download/rstudio-desktop/).
+This assumes you have installed and know how to use [R and RStudio](https://posit.co/download/rstudio-desktop/) (some functions assume you have RStudio), and [git](https://github.com/git-guides/install-git){.uri target="_blank" rel="noreferrer noopener"}. You might also want [GitHub Desktop](https://github.com/apps/desktop){.uri target="_blank" rel="noreferrer noopener"} for convenience.
 
-The EJAM package can be installed on your computer as an R package. This is useful if you want to use the full set of EJAM R functions outside of the web app interface, to do customized analysis, to explore the data in R, or to reuse data or code in other applications.
+## How to Get/Install EJAM
 
-## How to install
+The EJAM package gets installed from a GitHub repository, not CRAN (so `install.packages('EJAM')` will _not_ work).
 
-### Try this first (if you just want to use the package, not clone & edit source code)
+To use EJAM in RStudio, you would ideally clone the repo as a new RStudio Project, and then install the package from source. Cloning or forking makes a local copy of the source code repository. Although you could skip cloning (i.e., just install from a .zip source package file), cloning is easy and allows you to explore and edit source code or contribute to the package.
 
-It may be easiest to clone the repo and build/install from source (see below).
+## Install _without_ cloning
 
-Otherwise, trying to install using remotes or devtools packages may require setting up a PAT for authentication to work:
-```{r echo=TRUE, eval=FALSE}
-#  To check on PATs:
-usethis::gh_token_help() # or
-usethis::git_sitrep() # git situation report
+You could try to skip cloning the repository and just install the package from GitHub, but you will not be able to edit the source code or contribute to the package development. You should be able to use the package in RStudio without cloning, but a number of functions (especially those related to package development) assume a local source code copy is available.
 
-#  To make a PAT:
-usethis::create_github_token()
-  
-#  To register a PAT, see
-credentials::set_github_pat()
-# see # https://usethis.r-lib.org/articles/git-credentials.html#git-credential-helpers-and-the-credential-store
-# Windows more or less takes care of this for you now, in conjunction with github.
+Trying to use [remotes::install_github()] requires having set up a PAT for authentication to work (see below on PATs).
+
+a. If you *don't have a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#about-personal-access-tokens){.uri target="_blank" rel="noreferrer noopener"} (PAT) and don't want to set one up*, you could [check the github repository for the latest release](`r paste0("https://github.com/", EJAM:::repo_from_desc(), "/releases/latest")`) and use `remotes::install_url()` something like this:
+
+
+```{r install url, eval=TRUE, echo=FALSE, results='asis'}
+cat("options(timeout = 300); if (!require(remotes)) {install.packages('remotes')} \n")
+cat(
+paste0("
+remotes::install_url('https://github.com/", owner_repo, "/archive/refs/tags/v", EJAM:::description_file$get("Version"),".zip', 
+  dependencies=T, upgrade='always', build=F) \n
+")
+)
 ```
 
 
-If you just install the package without cloning the repository, you can use the EJAM package, but cannot edit the source code, for example. To just install it, try this:
-
-```{r install_github_main, eval=FALSE, include=TRUE}
-options(timeout = 300) # Just in case the download takes longer than 60 seconds
-if (!require(remotes)) {install.packages("remotes")}
-```
-`remotes::install_github(repo = `r quoted_owner_repo`, dependencies = TRUE)`
+_or download the .zip and try something like this in the folder with the saved .zip file:_
 
 
-
-If that does not work, check the github repository for the latest release and use the URL to install the package with `remotes::install_url()`
-
-## load/attach the package
-
-To use EJAM in the RStudio console, start by loading / attaching the package:
-```{r libraryejam, eval=FALSE}
-require(EJAM) # or  library(EJAM)
+```{r install local, eval=TRUE, echo=FALSE, results='asis'}
+cat("options(timeout = 300); if (!require(remotes)) {install.packages('remotes')} \n")
+cat(
+paste0("
+remotes::install_local('EJAM-", EJAM:::description_file$get('Version'), ".zip',
+  dependencies=T, upgrade='always', build=F) \n
+")
+)
 ```
 
-**That should be all you need to do.**
+
+b. If you *do have a PAT set up*, you can install from github with something like this:
+
+
+```{r install package, eval=TRUE, echo=FALSE, results='asis'}
+cat("options(timeout = 300); if (!require(remotes)) {install.packages('remotes')} \n")
+cat(
+  paste0("
+remotes::install_github(repo='",  EJAM:::repo_from_desc(),"', 
+  dependencies=T, upgrade='always', build=F) \n")
+)
+```
+
+
+## Install _with_ cloning
+
+### 1. Clone EJAM & create a Project in RStudio
+
+Here are three options -- Option "a" is probably the simplest:
+
+a.  in **RStudio**: Click **File**, **New Project**, **Version Control**, **Git**, and for the repository URL, enter ``r paste0("https://github.com/", owner_repo)``. For help: [How to create a new RStudio project by cloning a remote Git repo](https://docs.posit.co/ide/user/ide/guide/tools/version-control.html#creating-a-new-project-based-on-a-remote-git-or-subversion-repository){.uri target="_blank" rel="noreferrer noopener"}. Then you also could add it to GitHub Desktop if that is a tool you use.
+
+b.  in **GitHub Desktop**: Click **File**, **Clone**, **URL**, and enter ``r paste0("https://github.com/", owner_repo)`` as the repository URL. For help: [How to clone a repo using GitHub Desktop](https://docs.github.com/en/desktop/adding-and-cloning-repositories/cloning-and-forking-repositories-from-github-desktop){.uri target="_blank" rel="noreferrer noopener"}. Then in **RStudio**: Click **File**, **New Project**, **Existing Directory**, and specify the folder you just cloned into.
+
+c.  at **GitHub.com**: Go to [the EJAM repository page](https://github.com/`r owner_repo` `r paste0("'github.com/", owner_repo, "'")`){.uri target="_blank" rel="noreferrer noopener"}, click the green **Code** button, **Download Zip**, then unzip the zip file that contains the package. For help: [How to clone a repo from GitHub.com](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository){.uri target="_blank" rel="noreferrer noopener"}. Then in **RStudio**: Click **File**, **New Project**, **Existing Directory**, and specify the folder you just cloned into.
+
+#### Configure Build Tools in RStudio (optional)
+
+You can click Build, Configure Build Tools, and change settings. For example, try these settings:
+
+- Project build tools: Package
+- Package directory: (Project Root)
+- Always use --preclean : checked
+- Use devtools : checked
+- Generate documentation with Roxygen: checked
+  - Configure Roxygen options all checked except for Vignettes and optionally Build/Install
+- Install package R CMD check: --no-multiarch --with-keep.source
+- Build source: blank
+- Build binary: blank
+
+For help: [How to configure build tools in RStudio](https://docs.posit.co/ide/user/ide/guide/pkg-devel/writing-packages.html#configuring-build-tools){.uri target="_blank" rel="noreferrer noopener"}.
+
+### 2. Install (after Cloning)
+
+You can install like this, which ensures all packages that EJAM uses (depends on, imports, or suggests) get installed or updated:
+
+
+```{r install2, eval=TRUE, echo=FALSE, results='asis'}
+cat("options(timeout = 300); if (!require(remotes)) {install.packages('remotes')} \n")
+cat(
+paste0("
+if (!(basename(getwd()) %in% 'EJAM' && file.exists('DESCRIPTION'))) {
+  stop('Working directory must be root of the EJAM source package')
+}
+
+devtools::install(dependencies=T, upgrade='always', build=F) \n
+")
+)
+```
 
 ------------------------------------------------------------------------
 
-## Cloning: if you need the full source code or want to build/install in RStudio on your own
+## Start Using EJAM
 
-You can use the package just by installing without cloning. However, if you want to explore and edit source code, etc., you may want to clone the github repository that has the EJAM source code. Note that to do so, you have to know how to use R/RStudio with git and github, create a project, build from source, etc.
-
-The EJAM package is not on CRAN.
-
-Options for getting the full source package:
-
-a.  One way to get the full source package is to use a browser to go to the EJAM repository page (or a fork of the repository) at [`r owner_repo`](https://github.com/`r owner_repo` `r paste0("'github.com/", owner_repo, "'")`){.uri target="_blank" rel="noreferrer noopener"} and then click the green "Code" button, and download and unzip the zip file that contains the package.
-
-b.  Another way to get the source package is that in RStudio you can click New Project, Version Control, Git, and enter the repository URL.
-
-c.  A third way is to Clone or Fork the package via GitHub Desktop.
-
-Regardless of how you got the full source code, you would then need to build/install the package from source on your computer using RStudio (using the Build menu) or using the `{devtools}` package, for example.
-
+After the package is installed, see the [Basics - Quick Start Guide](basics.html).
 
 ------------------------------------------------------------------------
 
-## Technical details
+## Technical Details
 
 Just in case you need more details on how installing and attaching the package works, the following describes the package dependencies and code used by the package to get the data and build an index.
 
+### Setting up Personal Access Tokens (PATs)
+
+You may need to set up a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#about-personal-access-tokens){.uri target="_blank" rel="noreferrer noopener"} (PAT) for authentication to work when using a repository on GitHub.com. See more [about git credentials and the credential store](https://usethis.r-lib.org/articles/git-credentials.html#git-credential-helpers-and-the-credential-store). Note Windows takes care of most of this now, in conjunction with GitHub.
+```{r PAT, echo=TRUE, eval=FALSE}
+##  To check for existing PATs:
+usethis::gh_token_help() # or
+usethis::git_sitrep() # git situation report
+
+#  To make a new PAT:
+usethis::create_github_token()
+
+#  To register a PAT:
+credentials::set_github_pat()
+```
+
 ### Details on CRAN packages needed (dependencies)
 
-You should not have to do anything other than the instructions above, to handle package dependencies. EJAM needs a number of other packages to be installed that are (almost all) available from CRAN. Installing the EJAM package as explained above will handle obtaining those other packages. Cloning and building/installing and then trying to load/attach EJAM will also alert you to those other packages you need to install if you don't already have them. In case it is of interest, the list of CRAN packages needed is in the `DESCRIPTION` file in the R package source code root folder (as can be found in the code repository). Note some are in Suggests and you might want to install those as well -- using dependencies=T in `remotes::install_github()` or `remotes::install_url()` will make sure of that.
+You should not have to do anything other than the instructions above, to handle package dependencies. EJAM needs a number of other packages to be installed that are (almost all) available from [CRAN](https://cran.r-project.org). Installing the EJAM package as explained above will handle obtaining those other packages. Cloning and building/installing and then trying to load/attach EJAM will also alert you to those other packages you need to install if you don't already have them. In case it is of interest, the list of CRAN packages needed is in the `DESCRIPTION` file in the R package source code root folder (as can be found in the code repository). Note some are in Suggests and you might want to install those as well -- using dependencies=T in `remotes::install_github()` or `remotes::install_url()` will make sure of that.
 
 ### Details on the automatic data downloads
 
@@ -133,7 +187,7 @@ Attaching the package actually checks for copies in memory first (e.g., `exists(
 
 ### Details on the indexing of blocks
 
-EJAM also needs to build the index of about 8 million US block locations (one internal point for each block), which takes a few seconds. EJAM does this automatically when attached via `library()` or `require()` e.g., require(EJAM), by creating an object called [localtree](../reference/localtree.html) based on the [quaddata](../reference/quaddata.html) object obtained as mentioned above. Some functions check for it and try to build the index on the fly if it is missing. You can also (re)build it manually:
+EJAM also needs to build the index of more than 8 million US block locations (one internal point for each block), which takes a few seconds. EJAM does this automatically when attached via `library()` or `require()` e.g., `require(EJAM)`, by creating an object called [localtree](../reference/localtree.html) based on the [quaddata](../reference/quaddata.html) object obtained as mentioned above. Some functions check for it and try to build the index on the fly if it is missing. You can also (re)build it manually:
 
 ```{r indexblocks, eval=FALSE}
 indexblocks()

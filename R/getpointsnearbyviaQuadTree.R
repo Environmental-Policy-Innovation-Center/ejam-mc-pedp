@@ -3,7 +3,7 @@
 #' @description Given a set of frompoints (e.g., facilities or blocks) and a specified radius in miles,
 #'   this function quickly finds all the topoints (e.g., blocks or facilities) near each point.
 #'   If from and to are facilities and census blocks, respectively, this can be used to aggregate
-#'   over block groups near a facility for an EJAM analysis. But if it is used to define from
+#'   over blockgroups near a facility for an EJAM analysis. But if it is used to define from
 #'   as blocks and to as facilities, it finds all facilities near each block, which is how
 #'   proxistat works to create proximity indicators.
 #'
@@ -59,9 +59,9 @@ getpointsnearbyviaQuadTree  <- function(frompoints, radius = 3, maxradius = 31.0
                                         quaddatatable,
                                         updateProgress = NULL) {
 
-  
-  
-  
+
+
+
   if (!is(quadtree,"QuadTree")) {
     if (shiny::isRunning()) {
       warning('quadtree must be an index created with indexpoints(pts), from SearchTrees package with treeType = "quad" and dataType = "point"')
@@ -217,8 +217,8 @@ getpointsnearbyviaQuadTree  <- function(frompoints, radius = 3, maxradius = 31.0
 
     ################################# #
     #### If avoidorphans TRUE, and no topoint within radius of site, look past radius to maxradius   ############## #
-    # But note looking past radius is NOT how EJScreen works, for buffer reports - it just fails to provide any result if no blockpoint is inside circle.
-    # (For proximity scores, which are different than circular buffer reports, EJScreen does look beyond radius, but not for circular zone report).
+    # But note looking past radius is NOT how EJSCREEN works, for buffer reports - it just fails to provide any result if no blockpoint is inside circle.
+    # (For proximity scores, which are different than circular buffer reports, EJSCREEN does look beyond radius, but not for circular zone report).
     # Also, you would rarely get here even if avoidorphans set TRUE.
     # cat('about to check avoidorphans\n')
     # if ( 1 == 0 ) {

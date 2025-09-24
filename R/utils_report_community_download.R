@@ -3,7 +3,7 @@
 
 # NOTE on refactoring this code:
 #
-# if/when EJScreen API provided 1-site report, EJAM used that via that API,
+# if/when EJSCREEN API provided 1-site report, EJAM used that via that API,
 # (instead of using the very similar EJAM version of 1-site report),
 # AND provided in a separate button, this pair of barplots on 1 site,
 # via this function.
@@ -42,7 +42,7 @@
 #' @param file for download
 #' @param row_index which row of results (which location), related to react_cur_button
 #' @param react_cur_button like "button_2", event button asking for a 1-site report, a shiny app reactive
-#' @param inshiny logical
+#' @param in_shiny logical
 #'
 #' @param input_analysis_title a shiny app input$
 #' @param input_include_ejindexes a shiny app input$
@@ -58,7 +58,7 @@
 #' @param input_circleweight_in a shiny app input$
 #'
 #' @param react_sanitized_analysis_title a shiny app reactive
-#' @param react_sanitized_bt_rad_buff a shiny app reactive
+#' @param react_sanitized_radius_now a shiny app reactive
 #' @param react_total_pop a shiny app reactive
 #' @param react_submitted_upload_method a shiny app reactive
 #'
@@ -80,7 +80,7 @@
 report_community_download <- function(file,
                                       row_index = NULL,
                                       react_cur_button, # event button asking for a 1-site report; was isolated in one line, not in another
-                                      inshiny = FALSE,
+                                      in_shiny = FALSE,
 
                                       input_analysis_title,
                                       input_include_ejindexes,
@@ -96,7 +96,7 @@ report_community_download <- function(file,
                                       input_circleweight_in,
 
                                       react_sanitized_analysis_title,
-                                      react_sanitized_bt_rad_buff,    # radius
+                                      react_sanitized_radius_now,    # radius
                                       react_total_pop,
                                       react_submitted_upload_method,  # points vs shapefile etc.
 
@@ -113,7 +113,7 @@ report_community_download <- function(file,
 
 ) {
 
-  if (inshiny) {
+  if (in_shiny) {
     # Create a progress object
     progress <- shiny::Progress$new( )
     progress$set(message = "Generating report", value = 0)
@@ -146,14 +146,14 @@ report_community_download <- function(file,
     tempReport <- report_setup_temp_files(Rmd_name = 'community_report_template.Rmd')
   }
 
-  if (inshiny) {progress$set(value = 0.2, detail = "Defining parameters...")}
+  if (in_shiny) {progress$set(value = 0.2, detail = "Defining parameters...")}
 
   # Define parameters for Rmd rendering
 
   ## get radius ####
   rad <- react_data_processed$results_overall$radius.miles
 
-  if (inshiny) {progress$set(value = 0.3, detail = "Adjusting data...")}
+  if (in_shiny) {progress$set(value = 0.3, detail = "Adjusting data...")}
   ################################################################### #
 
   # Adjust the data based on whether a specific row is selected
@@ -188,14 +188,14 @@ report_community_download <- function(file,
 
     # Create a filtered version of react_report_map for single location #####################  #
 
-    if (inshiny) {progress$set(value = 0.4, detail = "Creating map...")}
+    if (in_shiny) {progress$set(value = 0.4, detail = "Creating map...")}
 
     ### ...MAP via map_single_location() ####
 
     map_to_use <- map_single_location(row_index = row_index,
-                                      inshiny = inshiny,
+                                      in_shiny = in_shiny,
                                       input_circleweight_in,
-                                      react_sanitized_bt_rad_buff,    # radius
+                                      react_sanitized_radius_now,    # radius
                                       react_submitted_upload_method,  # points vs shapefile etc.
                                       react_data_uploaded,
                                       react_data_processed)
@@ -229,8 +229,8 @@ report_community_download <- function(file,
       map = map_to_use,
       summary_plot       = react_v1_summary_plot,
       summary_plot_state = react_v1_summary_plot_state,
-      report_title = NULL,
-      logo_path = NULL,
+      report_title = EJAM:::global_or_param("report_title"),
+      logo_path    = EJAM:::global_or_param("report_logo"),
       logo_html = NULL
     )
     # end of report on 1 site
@@ -268,7 +268,7 @@ report_community_download <- function(file,
                                           input_plotkind_1pager,  # like "bar", "box", or "ridgeline"
                                           input_Custom_title_for_bar_plot_of_indicators,
                                           react_cur_button, # also see row_index; like "button_1", event button asking for a 1-site report; was isolated in one line, not in another
-                                          react_sanitized_bt_rad_buff,    # radius in miles
+                                          react_sanitized_radius_now,    # radius in miles
                                           react_data_processed,   # table like output from ejamit()
                                           react_ratio.to.us.d) + ggplot2::guides(fill = ggplot2::guide_legend(nrow = 2))
 
@@ -294,8 +294,8 @@ report_community_download <- function(file,
       filename = NULL,
       map = map_to_use,
       summary_plot = plot_to_use,
-      report_title = NULL,
-      logo_path = NULL,
+      report_title = EJAM:::global_or_param("report_title"),
+      logo_path    = EJAM:::global_or_param("report_logo"),
       logo_html = NULL
     )
   }
@@ -320,9 +320,9 @@ report_community_download <- function(file,
 #' helper - OBSOLETE? - was used by report_community_download. creates leaflet map for summary report
 #'
 #' @param row_index which site in the table is the one of interest
-#' @param inshiny logical
+#' @param in_shiny logical
 #' @param input_circleweight_in from shiny
-#' @param react_sanitized_bt_rad_buff  from shiny
+#' @param react_sanitized_radius_now  from shiny
 #' @param react_submitted_upload_method  from shiny
 #' @param react_data_uploaded  from shiny, needed only if shapefile was input
 #' @param react_data_processed  from shiny, results like output of ejamit(), but only 1 row of 1 table gets used
@@ -331,14 +331,14 @@ report_community_download <- function(file,
 #' @noRd
 #'
 map_single_location <- function(row_index = NULL,
-                                inshiny = FALSE,
+                                in_shiny = FALSE,
                                 input_circleweight_in,
-                                react_sanitized_bt_rad_buff,    # radius
+                                react_sanitized_radius_now,    # radius
                                 react_submitted_upload_method,  # points vs shapefile etc.
                                 react_data_uploaded,
                                 react_data_processed
 ) {
-  if (inshiny) {
+  if (in_shiny) {
     # shiny::req(react_data_processed)
     shiny::validate(shiny::need(react_data_processed, 'Please run an analysis to see results.'))
   }
@@ -354,7 +354,7 @@ map_single_location <- function(row_index = NULL,
     d_merge = merge(d_up_geo, filtered_data, by = "ejam_uniq_id", all.x = FALSE, all.y = TRUE)
 
     popup_labels <- fixcolnames(namesnow = setdiff(names(d_merge),c('geometry', 'valid', 'invalid_msg')), oldtype = 'r', newtype = 'shortlabel')
-    rad_buff <- react_sanitized_bt_rad_buff
+    rad_buff <- react_sanitized_radius_now
 
     if (!is.na(rad_buff) && rad_buff > 0) {
       d_uploads <- sf::st_buffer(d_merge[d_merge$valid == T, ], dist = units::set_units(rad_buff, "mi"))
@@ -426,7 +426,7 @@ map_single_location <- function(row_index = NULL,
 #' @param input_plotkind_1pager from shiny app, from input$plotkind_1pager like "bar", "box", "ridgeline"
 #' @param input_Custom_title_for_bar_plot_of_indicators  from shiny app
 #' @param react_cur_button  from shiny app, such as "button_1" for sitenumber 1, or NULL (should be related to row_index)
-#' @param react_sanitized_bt_rad_buff  from shiny app, radius in miles
+#' @param react_sanitized_radius_now  from shiny app, radius in miles
 #' @param react_data_processed  from shiny app, input table of places like input to ejamit()
 #' @param react_ratio.to.us.d  from shiny app
 #'
@@ -437,7 +437,7 @@ v1_summary_plot_report <- function(row_index = NULL,
                                    input_plotkind_1pager,
                                    input_Custom_title_for_bar_plot_of_indicators = NULL,
                                    react_cur_button, # event button asking for a 1-site report; was isolated in one line, not in another
-                                   react_sanitized_bt_rad_buff,    # radius
+                                   react_sanitized_radius_now,    # radius
                                    react_data_processed,
                                    react_ratio.to.us.d
 ) {
@@ -505,7 +505,7 @@ v1_summary_plot_report <- function(row_index = NULL,
 
     ## boxplots ####
     ## distribution of ratios at all the sites
-    ejam2boxplot_ratios(react_data_processed, react_sanitized_bt_rad_buff,
+    ejam2boxplot_ratios(react_data_processed, react_sanitized_radius_now,
                         main = input_Custom_title_for_bar_plot_of_indicators,
                         varnames = c(names_d, names_d_subgroups))
   }# box

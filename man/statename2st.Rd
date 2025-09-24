@@ -18,6 +18,6 @@ utility to convert between statename and ST abbreviation
 }
 \examples{
  EJAM:::statename2st(c("TX", 'dc', "Illinois"))
-  
+
 }
 \keyword{internal}

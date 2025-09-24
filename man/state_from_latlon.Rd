@@ -12,13 +12,18 @@ state_from_latlon(lat, lon)
 \item{lon}{longitudes vector}
 }
 \value{
-Returns data.frame: ST, statename, FIPS.ST, REGION, n
+unlike \code{\link[=fips_state_from_latlon]{fips_state_from_latlon()}}, returns data.frame: ST, statename, FIPS.ST, REGION, n
 as many rows as elements in lat or lon
 }
 \description{
+Find what state is where each point is located
+}
+\details{
 Takes 3 seconds to find state for 1k points, so a faster alternative would be useful
 It can take approx. one minute for 2.5 million points
 as in state_from_latlon(frs$lat, frs$lon)
+
+Draft function fips_bg_from_latlon() does NOT seem faster? at least as drafted.
 }
 \examples{
  myprogram <- "CAMDBS" # 739 sites
@@ -30,5 +35,5 @@ as in state_from_latlon(frs$lat, frs$lon)
 
 }
 \seealso{
-\link{states_shapefile} \code{\link[=get_blockpoints_in_shape]{get_blockpoints_in_shape()}} \code{\link[=state_from_sitetable]{state_from_sitetable()}}
+\code{\link[=fips_bg_from_latlon]{fips_bg_from_latlon()}} might be faster??  \link{states_shapefile} \code{\link[=get_blockpoints_in_shape]{get_blockpoints_in_shape()}} \code{\link[=state_from_sitetable]{state_from_sitetable()}}
 }

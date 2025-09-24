@@ -1,5 +1,8 @@
 
-#
+
+# see also setup.R
+
+
 # Where should you do additional test configuration?
 # Learn more about the roles of various files in:
 # * https://r-pkgs.org/tests.html
@@ -12,7 +15,7 @@
 ##  it will test the just-installed version = latest source version.
 ##  Note: devtools doesn't seem to work well with GHA (?)
 
-cat("\n\n ------------------ NOW DOING testthat.R script ------------- \n\n")
+cat("\n\n      ------------------ NOW DOING testthat.R script !!!!  -------------      \n\n")
 library(remotes)
 
 # Do you want to install the package now? (shinytest2 always tests on the installed version)
@@ -30,7 +33,10 @@ if (install_now) {
   remotes::install_local('.', force = T, upgrade = "never", build = F, build_vignettes = F, build_manual = F, dependencies = F)
 }
 
+cat("\n\n      ------------------ NOW DOING library(EJAM) !!!!  -------------      \n\n")
 library(EJAM)
+
+
 
 ################################# # ################################# #
 ## this also needs to load global_defaults_ info
@@ -46,11 +52,11 @@ global_defaults_or_user_options <- EJAM:::get_global_defaults_or_user_options(
 ## some had been done via get_golem_options() like these:
 ## could switch to use global_or_param() for those places in ui and server.
 ##  found  golem::get_golem_options("   replaced with EJAM:::global_or_param("
-  # use_shapefile_from_any
-  # default_shp_oktypes_1
-  # default_extratable_list_of_sections
-  # ejam_app_version
-  # default_extratable_hide_missing_rows_for
+# use_shapefile_from_any
+# default_shp_oktypes_1
+# default_extratable_list_of_sections
+# ejam_app_version
+# default_extratable_hide_missing_rows_for
 ## assign each global default value to this envt :
 
 for (i in seq_along(global_defaults_or_user_options)) {

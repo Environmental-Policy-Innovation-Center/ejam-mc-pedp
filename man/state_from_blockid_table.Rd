@@ -2,18 +2,18 @@
 % Please edit documentation in R/state_from_latlon.R
 \name{state_from_blockid_table}
 \alias{state_from_blockid_table}
-\title{state_from_blockid_table was used in some special cases e.g., in testpoints_n()}
+\title{given data.table with blockid column, get state abbreviation of each (function might not be used)}
 \usage{
 state_from_blockid_table(dt_with_blockid)
 }
 \arguments{
-\item{dt_with_blockid}{}
+\item{dt_with_blockid}{(or any data.table with either blockid or bgid column)}
 }
 \value{
 vector of ST info like AK, CA, DE, etc.
 }
 \description{
-given data.table with blockid column, get state abbreviation of each - not used?
+given data.table with blockid column, get state abbreviation of each (function might not be used)
 }
 \examples{
 x = sample(blockpoints$blockid, 3)

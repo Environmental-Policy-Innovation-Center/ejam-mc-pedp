@@ -4,7 +4,7 @@
 \name{EJAM}
 \alias{EJAM}
 \alias{EJAM-package}
-\title{EJAM - Environment and Residential Population Analysis Multisite tool}
+\title{EJAM - Environmental Justice Analysis Multisite tool}
 \description{
 EJAM provides a way to run hundreds or thousands of location-specific reports all at once, very quickly.
 It is also an R package, with functions and data for very fast analysis of areas defined by
@@ -37,7 +37,12 @@ Useful links:
 \itemize{
   \item \url{https://ejanalysis.github.io/EJAM}
   \item \url{https://github.com/ejanalysis/EJAM}
+  \item \url{https://ejanalysis.org}
 }
+
+}
+\author{
+\strong{Maintainer}: Mark A. Corrales \email{ejam@ejanalysis.com} (\href{https://orcid.org/0000-0002-1696-5638}{ORCID})
 
 }
 \keyword{internal}

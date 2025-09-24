@@ -12,7 +12,7 @@ rm(td) # start fresh with new tempdir
 if (!exists("td")) {td <- tempdir() }
 if (!dir.exists(td)) {stop("tempdir() called td does not exist")}
 ############################################################################################ #
-# EJScreen initial v 2.3 ftp site files as of 7/5/2024 had problems with ozone (and possibly ties-handling in percentile lookups)
+# EJSCREEN initial v 2.3 ftp site files as of 7/5/2024 had problems with ozone (and possibly ties-handling in percentile lookups)
 # and team posted version 2.32 on 8/12/24 here:
 baseurl = "https://gaftp.epa.gov/EJScreen/2024/2.32_August_UseMe" # went offline after approx Feb 2025
 # archived version:
@@ -96,18 +96,6 @@ usastats_new_explained.xlsx      <- "EJScreen_2024_BG_Percentiles_Columns.xlsx"
 statestats_new_explained.xlsx    <- "EJScreen_2024_BG_State_Percentiles_Columns.xlsx"
 
 ## some are .zip some .xlsx some .csv and some are found inside the .zip files
-
-############################################################################################ #
-
-############################################################################################ #
-## older scripts:
-# /dev/notes_datasets
-# [1] "0_SCRIPT_overview_get_ejscreendata.R"             "1_SCRIPT_EJAMejscreen_download.R"
-# [3] "2_SCRIPT_FOR_FIPS_ST_TRACT_CNTY.R"                "3_SCRIPT_create_bgDemog_ejscreen2.1_andtracts.R"
-# [5] "4_SCRIPT_ADD_PUERTORICO_DEMOG_SUBGROUPS.R"        "5_SCRIPT_merge_demogsubgroups_v2.1.R"
-# [7] "6_SCRIPT_create_blockgroupstats.R"                "8_SCRIPT_make_MeansByGroup_and_Ratios_RRS.US22.R"
-# [9] "9_SCRIPT_PCTILELOOKUPS_READ-CSVS-MID-2022.R"      "NOTES_which_states_are_in_which_datasets.R"
-# [11] "PINSURLTRY.R"
 ############################################################################################ #
 
 # DOWNLOAD ZIP and CSV ####
@@ -369,7 +357,7 @@ arrow::write_ipc_file(bg_islandareas, sink = file.path(localfolder, "bg_islandar
 #  and are not at all in bgpts, block tables, etc.
 # fips2state_abbrev(unique(substr(blockid2fips$blockfips,1,2)))  -- only DC,PR,states
 # fips2state_abbrev(unique(substr(blockgroupstats_new$OBJECTID ,1,2))) -- also had AS, GU, MP, VI
-#  No EJScreen reports or maps are available in the Island Areas.
+#  No EJSCREEN reports or maps are available in the Island Areas.
 # (we have data and reports in all States and PR and DC, but not GU AS VI MP).
 ## Therefore we should just drop the Island Areas from blockgroupstats_new etc. tables in EJAM for now.
 ##
@@ -419,7 +407,7 @@ blockgroupstats_new       <- blockgroupstats_new[!(blockgroupstats_new$ST %in% c
 blockgroupstats_new_state <- blockgroupstats_new_state[!(blockgroupstats_new_state$ST %in% c('AS', 'GU', 'MP', 'VI')), ]
 blockgroupstats_new_state <- blockgroupstats_new_state[!is.na(blockgroupstats_new_state$ST),]
 
-# AS OF 8/14/24 THERE ARE STILL 19 Connecticut blockgroups FIPS in bgfips (derived from the block weights file provided directly by the EJScreen team)
+# AS OF 8/14/24 THERE ARE STILL 19 Connecticut blockgroups FIPS in bgfips (derived from the block weights file provided directly by the EJSCREEN team)
 #  that are NOT in blockgroupstats (derived from the geodatabase on the FTP site)
 # ***
 NROW(bgpts) - NROW(blockgroupstats_new) # 19
@@ -556,8 +544,8 @@ if (exists("bgej")) {
   all.equal(bgej, bgej_new, check.attributes = FALSE)
   # difference would be just the metadata
 }
-# This confirms that the early June 2025 version of bgej, in EJAM v2.32.4, had errors in ozone mostly but also other indicators,
-# so bgej in pkg should be replaced by redone bgej_new
+# This confirmed that the early June 2025 version of bgej, in EJAM v2.32.4, had errors in ozone mostly but also other indicators,
+# so bgej in pkg had to be replaced by a redone bgej_new
 
 ############################################################### #
 
@@ -653,13 +641,13 @@ cat("bgej created in globalenv but not saved yet - will try to save in later scr
 ## documentation for bgej ####
 
 dataset_documenter("bgej",
-                   title = "bgej (DATA) Summary Indexes for Census block groups",
+                   title = "bgej (DATA) Summary Indexes for Census blockgroups",
                    description = "bgej is a table of all blockgroups, with the raw scores of the Summary Indexes
 #'   and Supplemental Summary Indexes for all the environmental indicators.",
                    details = "This file is not stored in the package.
 #'
 #'   For documentation on the residential population and environmental data and indicators,
-#'   see [EJScreen documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/understanding-ejscreen-results).
+#'   see [EJSCREEN documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/understanding-ejscreen-results).
 #'
 #'   The column names are these:
 #'

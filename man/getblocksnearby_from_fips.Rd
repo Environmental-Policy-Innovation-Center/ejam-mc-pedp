@@ -4,7 +4,14 @@
 \alias{getblocksnearby_from_fips}
 \title{Find all blocks within each of the FIPS codes provided}
 \usage{
-getblocksnearby_from_fips(fips, inshiny = FALSE, need_blockwt = TRUE)
+getblocksnearby_from_fips(
+  fips,
+  in_shiny = FALSE,
+  need_blockwt = TRUE,
+  return_shp = FALSE,
+  allow_multiple_fips_types = TRUE,
+  radius = 0
+)
 }
 \arguments{
 \item{fips}{vector of FIPS codes identifying blockgroups, tracts, counties, or states.
@@ -13,25 +20,39 @@ one will be getting stats on one or more tracts,
 or analyzing and comparing blockgroups in a county,
 or comparing whole counties to each other, within a State.}
 
-\item{inshiny}{used by shiny app server code to handle errors via validate() instead of stop()}
+\item{in_shiny}{used by shiny app server code to handle errors via validate() instead of stop()}
 
 \item{need_blockwt}{set to FALSE to speed it up if you do not need blockwt}
+
+\item{return_shp}{set to TRUE to get a named list, pts and polys, that are sites2blocks table and spatial data.frame,
+or FALSE to get the pts data.table much like output of \code{\link[=getblocksnearby]{getblocksnearby()}} or  \code{\link[=get_blockpoints_in_shape]{get_blockpoints_in_shape()}}}
+
+\item{allow_multiple_fips_types}{if enabled, set TRUE to allow mix of blockgroup, tract, city, county, state fips}
+
+\item{radius}{CURRENTLY NOT IMPLEMENTED - NO BUFFER IS ADDED}
 }
 \value{
-same as for \link{getblocksnearby} but one row per FIPS, and the distance column is irrelevant
+\itemize{
+\item if return_shp=F, returns just a sites2blocks data.table with colnames ejam_uniq_id, blockid, distance, blockwt, bgid, fips.
+This is like the \code{\link[=getblocksnearby]{getblocksnearby()}} and \code{\link[=get_blockpoints_in_shape]{get_blockpoints_in_shape()}} outputs.
+\item if return_shp=T, returns a named list where pts is the data.table of sites2blocks,
+and polys is the spatial data.frame with one row per input fips (including invalid ones).
+
+The ejam_uniq_id represents which of the input sites is being referred to, and the table
+will only have the ids of the sites where blocks were found. If 10 sites were input but only sites 5 and 8
+were valid and had blocks identified, then the data.table here will only include ejam_uniq_id values of 5 and 8.
+}
 }
 \description{
 Allows EJAM to analyze and compare Counties, for example
 }
 \examples{
   x <- getblocksnearby_from_fips(fips_counties_from_state_abbrev("DE"))
-  counties_ej <- doaggregate(x)
-  #cannot use mapfast(counties_ej$results_bysite) since no lat lon.  
-  # mapfastej_counties() should work...
-  y =  ejamit(fips=fips_counties_from_statename("Delaware"))
-  
-  # x=getblocksnearby_from_fips("482011000011") # one blockgroup only
-  # y=doaggregate(x)
+  y <- doaggregate(x)
+  z <- ejamit(fips = fips_counties_from_statename("Delaware"))
+
+  # x2 <- getblocksnearby_from_fips("482011000011") # one blockgroup only
+  # y2 <- doaggregate(x2)
 }
 \seealso{
 \code{\link[=getblocksnearby]{getblocksnearby()}} \code{\link[=fips_bgs_in_fips]{fips_bgs_in_fips()}} \code{\link[=fips_lead_zero]{fips_lead_zero()}} \code{\link[=getblocksnearby_from_fips]{getblocksnearby_from_fips()}} \code{\link[=fips_from_table]{fips_from_table()}}

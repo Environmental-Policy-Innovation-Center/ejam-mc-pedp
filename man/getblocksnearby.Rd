@@ -29,14 +29,14 @@ getblocksnearby(
 
 \item{avoidorphans}{logical If TRUE, then where not even 1 BLOCK internal point is within radius of a SITE,
 it keeps looking past radius, up to maxradius, to find nearest 1 BLOCK.
-What EJScreen does in that case is report NA, right? So,
+What EJSCREEN does in that case is report NA, right? So,
 does EJAM really need to report stats on residents presumed to be within radius,
 if no block centroid is within radius?
 Best estimate might be to report indicators from nearest block centroid which is
 probably almost always the one your site is sitting inside of,
 but ideally would adjust total count to be a fraction of blockwt based on
 what is area of circular buffer as fraction of area of block it is apparently inside of.
-Setting this to TRUE can produce unexpected results, which will not match EJScreen numbers.
+Setting this to TRUE can produce unexpected results, which will not match EJSCREEN numbers.
 
 Note that if creating a proximity score, by contrast, you instead want to find nearest 1 SITE if none within radius of this BLOCK.}
 
@@ -59,6 +59,10 @@ which is relevant only if a user saved the output of this function.}
 \value{
 data.table like testoutput_getblocksnearby_10pts_1miles, with
 columns named "ejam_uniq_id", "blockid", "distance", etc.
+The ejam_uniq_id represents which of the input sites is being referred to, and the table
+will only have the ids of the sites where blocks were found. If 10 sites were input but only sites 5 and 8
+were valid and had blocks identified, then the data.table here will only include ejam_uniq_id values of 5 and 8.
+This is like the output of  \code{\link[=get_blockpoints_in_shape]{get_blockpoints_in_shape()}}, or \code{\link[=getblocksnearby_from_fips]{getblocksnearby_from_fips()}} if return_shp=F.
 }
 \description{
 Get distance from each site (e.g., facility) to each
@@ -75,9 +79,9 @@ the blocks are a high-resolution source of information about where
 residents live.
 
 Finding which blocks have their internal points in a circle provides
-a way to quickly estimate what fraction of a block group is
+a way to quickly estimate what fraction of a blockgroup is
 inside the circular buffer more accurately and more quickly than
-areal apportionment of block groups would provide.
+areal apportionment of blockgroups would provide.
 }
 \details{
 See \code{\link[=ejamit]{ejamit()}} for examples.

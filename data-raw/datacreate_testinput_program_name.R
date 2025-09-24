@@ -1,7 +1,10 @@
 # datacreate_testinput_program_name.R
 
 testinput_program_name <- read_csv_or_xl(testdata("program_name_only_3.xlsx", quiet = T))$program
-testinput_program_name <- metadata_add(testinput_program_name)
+
+## avoid using metadata_add() here so is.vector() will remain true for this object
+# testinput_program_name <- metadata_add(testinput_program_name)
+
 usethis::use_data(testinput_program_name, overwrite = TRUE)
 dataset_documenter(
   "testinput_program_name",

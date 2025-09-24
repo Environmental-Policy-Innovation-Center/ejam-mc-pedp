@@ -3,7 +3,7 @@
 \docType{data}
 \name{map_headernames}
 \alias{map_headernames}
-\title{map_headernames provides metadata about all indicators in EJAM/EJScreen}
+\title{map_headernames provides metadata about all indicators in EJSCREEN / EJAM}
 \format{
 An object of class \code{data.frame} with 634 rows and 76 columns.
 }
@@ -11,13 +11,13 @@ An object of class \code{data.frame} with 634 rows and 76 columns.
 map_headernames
 }
 \description{
-map_headernames provides metadata about all indicators in EJAM/EJScreen
+map_headernames provides metadata about all indicators in EJSCREEN / EJAM
 }
 \details{
 This is an IMPORTANT TABLE that provides information about each variable (indicator), such as the following:
 \itemize{
 \item names as used in geodatabase files (original data source)
-\item names as used in the outputs of the EJScreen API
+\item names as used in the outputs of the EJSCREEN API
 \item names as used in the R code
 \item names as used in short labels of graphics
 \item names as used in table headers (long versions to provide full descriptions of the variables)
@@ -32,41 +32,41 @@ It was created from a spreadsheet of the same name, that is in a data-raw folder
 \code{data.frame(t(map_headernames[1:2, ]))}
 }
 \examples{
-  #   See how many variables are on each list, for example: 
+  #   See how many variables are on each list, for example:
   \donttest{
   data.table::setDT(copy(map_headernames))[, .(
-    variables = .N, 
-    has_apiname = sum(apiname != ""), 
-    has_csvname = sum(csvname != ""), 
+    variables = .N,
+    has_apiname = sum(apiname != ""),
+    has_csvname = sum(csvname != ""),
     has_acsname = sum(acsname != "")
-    ), 
+    ),
  keyby = c("raw_pctile_avg", "DEJ", "ratio.to", "pctile.", "avg.",  "varlist" )]
-  
- # Which sources provide which key variables or indicators? 
- 
- some <- unique(map_headernames$rname[map_headernames$varlist != "" 
+
+ # Which sources provide which key variables or indicators?
+
+ some <- unique(map_headernames$rname[map_headernames$varlist != ""
    & map_headernames$varlist != "x_anyother"])
- 
+
  info <- cbind(
-   varinfo(some, info = c('api', 'csv', 'acs', 'varlist')), 
-   usastats = some \%in\% names(usastats), 
+   varinfo(some, info = c('api', 'csv', 'acs', 'varlist')),
+   usastats = some \%in\% names(usastats),
    statestats = some \%in\% names(statestats))
  info <- info[nchar(paste0(info$api, info$csv, info$acs)) > 0, ]
  info
- 
+
  # any others
- 
- some <- unique(map_headernames$rname[map_headernames$varlist != "" 
+
+ some <- unique(map_headernames$rname[map_headernames$varlist != ""
    & map_headernames$varlist == "x_anyother"])
- 
+
  info <- cbind(
-   varinfo(some, info = c('api', 'csv', 'acs', 'varlist')), 
-   usastats = some \%in\% names(usastats), 
+   varinfo(some, info = c('api', 'csv', 'acs', 'varlist')),
+   usastats = some \%in\% names(usastats),
    statestats = some \%in\% names(statestats))
  info <- info[nchar(paste0(info$api, info$csv, info$acs)) > 0, ]
  info
   }
- 
+
 }
 \seealso{
 \code{\link[=varinfo]{varinfo()}} \code{\link[=fixcolnames]{fixcolnames()}} \code{\link[=varin_map_headernames]{varin_map_headernames()}} \code{\link[=varlist2names]{varlist2names()}}

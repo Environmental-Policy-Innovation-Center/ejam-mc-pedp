@@ -11,17 +11,8 @@ convert_units(x, from = "km", towhat = "mi")
 
 \item{from}{A string specifying original units of input parameter. Default is 'km' which is kilometers.
 Note all must be in the same units.
-Units can be specified as any of the following:
-c(
-'millimeter', 'millimeters', 'centimeter', 'centimeters', 'meter', 'meters', 'kilometer', 'kilometers',
-"mm", "cm", "m", "km",
-"sqmm", "sqcm", "sqm", "sqkm",
-"mm2", "cm2", "m2", "km2",
-'inch', 'inches', 'foot', 'feet', 'yard', 'yards', 'mile', 'miles',
-"in", "ft", "yd", "mi",
-"sqin", "sqft", "sqyd", "sqmi",
-"in2", 'ft2', 'yd2', 'mi2'
-)
+Units can be specified as any of the aliases found in the code for \code{\link[=fixnames_aliases]{fixnames_aliases()}}
+
 Note that m2 is for square meters not square miles.}
 
 \item{towhat}{A string specifying new units to convert to. Default is 'mi' which is miles.}

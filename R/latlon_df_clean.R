@@ -40,7 +40,7 @@ latlon_df_clean <- function(df, invalid_msg_table = FALSE, set_invalid_to_na = T
     # try to interpret as street addresses if possible
     adds = address_from_table(df)
     if (all(0 == sapply(adds, nchar))) {
-      cat("cannot find address in table so no geocoding tried")
+      cat("cannot find address in table so no geocoding tried...")
     }
     cat("trying to use geocoding to add lat and lon columns \n")
     ## requires  AOI  pkg be attached!

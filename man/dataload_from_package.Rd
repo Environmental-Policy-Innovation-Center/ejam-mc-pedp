@@ -32,7 +32,7 @@ and not always used - only to find regulated facilities by ID, etc.
 The frs-related datasets here can be roughly 1.5 GB in RAM, perhaps.
 }
 \examples{
-  x <- datapack("EJAM")
+  x <- pkg_data("EJAM")
   subset(x, x$size >= 0.1) # at least 100 KB
   grep("names_", x$Item, value = T, ignore.case = T, invert = T) # most were like names_d, etc.
   ls()
@@ -42,6 +42,6 @@ The frs-related datasets here can be roughly 1.5 GB in RAM, perhaps.
   
 }
 \seealso{
-\code{\link[=datapack]{datapack()}} \code{\link[=dataload_dynamic]{dataload_dynamic()}} \code{\link[=dataload_from_local]{dataload_from_local()}} \code{\link[=indexblocks]{indexblocks()}} \code{\link[=.onAttach]{.onAttach()}}
+\code{\link[=pkg_data]{pkg_data()}} \code{\link[=dataload_dynamic]{dataload_dynamic()}} \code{\link[=dataload_from_local]{dataload_from_local()}} \code{\link[=indexblocks]{indexblocks()}} \code{\link[=.onAttach]{.onAttach()}}
 }
 \keyword{internal}

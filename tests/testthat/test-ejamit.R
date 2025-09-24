@@ -55,7 +55,8 @@ test_that("ejamit() still returns results_overall identical to what it used to r
           (saved as testoutput_ejamit_10pts_1miles$results_overall)", {
             suppressWarnings({
               suppressMessages({
-                ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE)  #  - takes roughly 5-10 seconds
+                if (!exists("ejamitoutnow")) {stop("ejamitoutnow is missing but should have been created by EJAM/tests/testthat/setup.R")}
+                # ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE)  #  - takes roughly 5-10 seconds
 
                 expect_equal(
                   ejamitoutnow$results_overall,
@@ -72,7 +73,8 @@ test_that("ejamit() still returns results_bysite identical to expected numbers i
           (saved as testoutput_ejamit_10pts_1miles$results_bysite)", {
             suppressWarnings({
               suppressMessages({
-                ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE) # see setup.R - takes roughly 5-10 seconds
+                if (!exists("ejamitoutnow")) {stop("ejamitoutnow is missing but should have been created by EJAM/tests/testthat/setup.R")}
+                # ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE) # see setup.R - takes roughly 5-10 seconds
                 expect_equal(
                   ejamitoutnow$results_bysite,
                   testoutput_ejamit_10pts_1miles$results_bysite,
@@ -86,11 +88,59 @@ test_that("ejamit() still returns results_bysite identical to expected numbers i
 ########################################################## #
 
 test_that("ejamit() returns same exact colnames() in both results_bysite and results_overall", {
-  ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE) # see setup.R - takes roughly 5-10 seconds
+  if (!exists("ejamitoutnow")) {stop("ejamitoutnow is missing but should have been created by EJAM/tests/testthat/setup.R")}
+  # ejamitoutnow <- ejamit(testpoints_10, radius = 1, quiet = T, silentinteractive = TRUE) # see setup.R - takes roughly 5-10 seconds
   expect_identical(
     colnames(ejamitoutnow$results_bysite),
     colnames(ejamitoutnow$results_overall)
   )
+})
+########################################################## #
+## check outside the tests
+# fips_counties = rev(fips_counties_from_state_abbrev("DE")) # all counties in 1 state
+# cbind(fips_counties , ejamit(fips = fips_counties)$results_bysite$ejam_uniq_id )
+# fips_counties = rev(fips_counties_from_state_abbrev("DE")) # all counties in 1 state
+# fips_tracts = rev(unique(substr(fips_bgs_in_fips1(fips_counties[1]), 1, 11))) # all tracts in 1 county
+# fips_bgs = rev(fips_bgs_in_fips(fips_counties[1])) # all bgs in county
+# cbind(fips_tracts ,   ejamit(fips = fips_tracts  )$results_bysite$ejam_uniq_id )
+# cbind(fips_bgs ,      ejamit(fips = fips_bgs     )$results_bysite$ejam_uniq_id )
+# fips_states       = rev(fips_state_from_state_abbrev(c('DE', 'ri', 'ga')) ) # 3 states
+# cbind(fips_states ,   ejamit(fips = fips_states  )$results_bysite$ejam_uniq_id )
+###################################################### #
+
+
+testthat::test_that("ejamit output (counties) sorted like input fips", {
+  fips_counties = rev(fips_counties_from_state_abbrev("DE")) # all counties in 1 state
+  junk = capture_output({
+    suppressMessages({
+      expect_equal(fips_counties , ejamit(fips = fips_counties)$results_bysite$ejam_uniq_id )
+    })
+  })
+})
+########################################################## #
+
+testthat::test_that("ejamit output (tracts,bgs) sorted like input fips", {
+  fips_counties = rev(fips_counties_from_state_abbrev("DE")) # all counties in 1 state
+  fips_tracts = rev(unique(substr(fips_bgs_in_fips1(fips_counties[1]), 1, 11))) # all tracts in 1 county
+  fips_bgs = rev(fips_bgs_in_fips1(fips_counties[1])) # all bgs in county
+  junk = capture_output({
+    suppressMessages({
+      out_tracts <- ejamit(fips = fips_tracts  )$results_bysite$ejam_uniq_id
+      out_bgs <- ejamit(fips = fips_bgs     )$results_bysite$ejam_uniq_id
+    })
+  })
+  expect_equal(fips_tracts , out_tracts)
+  expect_equal(fips_bgs ,    out_bgs)
+})
+########################################################## #
+
+testthat::test_that("ejamit output (states) sorted like input fips", {
+  fips_states       = rev(fips_state_from_state_abbrev(c('DE', 'ri', 'ga')) ) # 3 states
+  junk = capture_output({
+    suppressMessages({
+      expect_equal(fips_states ,   ejamit(fips = fips_states  )$results_bysite$ejam_uniq_id )
+    })
+  })
 })
 ########################################################## #
 
