@@ -10,6 +10,7 @@
 #'   colnames from ejamit()$results_bysite  to show in site-by-site interactive table
 #' @param sitereport_download_buttons_colname header for column to create with buttons to download 1-site reports in shiny app
 #' @param sitereport_download_buttons_show if TRUE, add column near first with buttons to allow download of 1-site html summary report
+#'
 #' @keywords internal
 #'
 create_interactive_table <- function(out,

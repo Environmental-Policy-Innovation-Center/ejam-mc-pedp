@@ -5,7 +5,9 @@
 #' @param sitetype character string, one of "shp", "latlon", "fips" and to describe locations
 #' @param site_method string used in filename for saved report and to describe locations
 #'   site_method can be SHP, latlon, FIPS, NAICS, FRS, EPA_PROGRAM, SIC, or MACT
+#' @seealso [report_residents_within_xyz()]
 #' @returns text string
+#'
 #' @keywords internal
 #'
 buffer_desc_from_sitetype <- function(sitetype, site_method) {

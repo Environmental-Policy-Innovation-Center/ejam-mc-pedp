@@ -923,7 +923,7 @@ sitetype2text <- function(sitetype = NULL) {
 
 
 #' Build text for report: Residents within( X miles of)( any of) the (N) point(s)/polygon(s)/Census unit(s)
-#' @seealso used in app_server to create locationstr for  [build_community_report()]
+#' used in app_server to create locationstr for  [build_community_report()]
 #' @param text1 text to start the phrase, like "Residents within "
 #' @param radius The distance from each place, normally in miles (which can be 0),
 #'   or custom text like "seven kilometers from" in which case
@@ -940,6 +940,8 @@ sitetype2text <- function(sitetype = NULL) {
 #'   but should be something that can be made plural by just adding "s" so ending with "site"
 #'   works better than ending with "... facility" since that would print as "facilitys" here.
 #' @param area_in_square_miles number if available, area in square miles, added as a second line
+#'
+#' @seealso [buffer_desc_from_sitetype()]
 #'
 #' @keywords internal
 #'

@@ -1,6 +1,29 @@
 
+# # checking parameter combinations via argument_combos()
+### but note the fault where unlike if using checkit() below,
+## using argument_combos() means if any of the radii tried here are character, they all get made character
+## and it assumes you did so to provide your own units, so it fails to say "miles" !!
+
+# x = EJAM:::argument_combos(FUN = EJAM:::report_residents_within_xyz, list(radius=c(1,3.1), nsites=c(1,100) , sitetype=c('latlon')), quiet = F)
+# x = EJAM:::argument_combos(FUN = EJAM:::report_residents_within_xyz, list(   sitetype=c( "fips","shp")), quiet = F) #
+# x = EJAM:::argument_combos(FUN = EJAM:::report_residents_within_xyz, list(radius=0, sitetype=c( "fips","shp")), quiet = F)
+# x = EJAM:::argument_combos(FUN = EJAM:::report_residents_within_xyz, list( radius=0.25,  sitetype=c( "fips","shp")), quiet = F)
 #
+# test1_arglist <- list(
+#   sitetype = c('latlon', "shp"),
+#   radius = "3",  # if any of the radii tried here are character, they all get made character and it assumes you did so to provide your own units, so it fails to say "miles" !!
+#   nsites = c(1, "six")
+# )
 #
+# x = EJAM:::argument_combos(FUN = EJAM:::report_residents_within_xyz, test1_arglist, quiet = F)
+#
+# test1_arglist <- list(
+#   sitetype = c("farm", "Georgia site"),
+#   radius = c('9.9 kilometers', "close proximity to"),
+#   nsites = c(1, "seven")
+# )
+# #  expand.grid(test1_arglist, stringsAsFactors = FALSE)
+# x = EJAM:::argument_combos(FUN = EJAM:::report_residents_within_xyz, test1_arglist, quiet = F)
 # ############################## #
 #
 # test_that("report_residents_within_xyz ALL combos ok", {
@@ -12,12 +35,14 @@
 # )
 #   # expand.grid(test1_arglist, stringsAsFactors = FALSE)
 # expect_no_error({
-#   x = argument_combos(FUN = report_residents_within_xyz, test1_arglist, quiet = TRUE)
+  # x = argument_combos(FUN = report_residents_within_xyz, test1_arglist, quiet = TRUE)
 # })
 # })
+
 ############################## #
-
-
+# older way to check combos was this function called checkit()
+# (and it avoids a fault in argument_combos() where checking character string as the radius parameter
+# makes all radius options text not numeric which makes it stop using "miles" even for the originally numeric options)
 
 checkit <- function(mytest) {
 
@@ -66,7 +91,6 @@ checkit <- function(mytest) {
 
 test_that("report_residents_within_xyz test123", {
 
-
   test1 <- list(
 
     # list('latlon', 0, 1), # cannot occur - zero radius with latlon type
@@ -90,10 +114,9 @@ test_that("report_residents_within_xyz test123", {
     list('study location',    "close proximity to",  100),
 
     list('Type X site', 3, 100)   # ok singular / plural
-
   )
+  ############## #
 
-  ############################## #
   expect_no_error({
     x = checkit(test1)
   }
@@ -230,13 +253,10 @@ test_that("report_residents_within_xyz test3", {
 })
 ########################################################################### #
 ########################################################################### #
-########################################################################### #
-
 
 test_that("report_residents_within_xyz test4 warns if NULL params", {
 
   test4 <- list(
-
     # NULL values
     list(NULL, 3, 100),
     list('latlon', NULL, 100),
@@ -248,7 +268,6 @@ test_that("report_residents_within_xyz test4 warns if NULL params", {
       x = checkit(test4)
     })
   })
-
   expect_warning({
     x = checkit(test4)
   } )
@@ -257,5 +276,4 @@ test_that("report_residents_within_xyz test4 warns if NULL params", {
 ########################################################################### #
 
 rm(checkit)
-
 
