@@ -1,8 +1,16 @@
 
 
-# get approx centroid of each fips census unit
 
 
+
+#' get approx centroid of each fips census unit
+#'
+#' @param fips vector of census fips codes
+#'
+#' @returns data.table with columns ftype, fips, lat, lon
+#'
+#' @export
+#'
 latlon_from_fips <- function(fips) {
 
   suppressWarnings( {
