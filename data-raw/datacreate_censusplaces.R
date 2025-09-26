@@ -1,12 +1,17 @@
 # datacreate_censusplaces
 
-############################ # ############################ # ############################ # ############################ # 
+#  ?EJAM::censusplaces
+# DATASET IS USED BY THE FIPS PICKER MODULE and functions
+# TO SELECT or analyze CITY/CDP, ETC. -
+# A 7-DIGIT FIPS CODE (OR 6 IF MISSING LEADING ZERO)
+
+############################ # ############################ # ############################ # ############################ #
 
 # READ FILE FROM CENSUS.GOV ####
 
-# also see 
+# also see
 # https://www2.census.gov/geo/pdfs/reference/GARM/Ch9GARM.pdf
-# https://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2023/TGRSHP2023_TechDoc_Ch3.pdf 
+# https://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2023/TGRSHP2023_TechDoc_Ch3.pdf
 # https://github.com/walkerke/tigris?tab=readme-ov-file#readme
 # https://walker-data.com/census-r/census-geographic-data-and-applications-in-r.html#tigris-workflows
 # tigris only returns feature geometries for US Census data which default to the coordinate reference system NAD 1983 (EPSG: 4269). For US Census demographic data (optionally pre-joined to tigris geometries), try the tidycensus package. For help deciding on an appropriate coordinate reference system for your project, take a look at the crsuggest package.
@@ -36,10 +41,10 @@ x = stringi::stri_enc_detect(censusplaces$COUNTY)
 y = lapply(x, FUN = function(z) z$Encoding[1])
 z = table(unlist(y))
 ### z
-### IBM420_ltr ISO-8859-1 ISO-8859-2 ISO-8859-9   UTF-16BE      UTF-8 
-###          1      39401       1758         35          8        211 
+### IBM420_ltr ISO-8859-1 ISO-8859-2 ISO-8859-9   UTF-16BE      UTF-8
+###          1      39401       1758         35          8        211
 bestguess = names(which.max(z)) # bestguess =  "ISO-8859-1"
-cat("There are", length(which(censusplaces$COUNTY !=  stringi::stri_enc_toascii(censusplaces$COUNTY))), "places where encoding is an issue. 
+cat("There are", length(which(censusplaces$COUNTY !=  stringi::stri_enc_toascii(censusplaces$COUNTY))), "places where encoding is an issue.
     Converting from what appears to be", bestguess,"\n")
 censusplaces$PLACE  <-  stringi::stri_encode(censusplaces$PLACE,  bestguess, to = '') # convert to default
 censusplaces$COUNTY <-  stringi::stri_encode(censusplaces$COUNTY, bestguess, to = '') # convert to default
@@ -59,18 +64,18 @@ cbind(TYPE = table(censusplaces$TYPE))
 # Incorporated Place      19540
 
 # 3,219 PLACE ARE LISTED TWICE, where TYPE "Incorporated Place" vs another type is the only way to distinguish them:
-## 3/4 are in PA, WI, MN 
+## 3/4 are in PA, WI, MN
 # sum(duplicated(censusplaces[,c(1:3,5:6)]))
 
 #      STATE stfips               PLACENAME                    TYPE                            COUNTY    fips                   PLACE
-# 
+#
 #  9:     NY      36             Geneva city      County Subdivision     Ontario County, Seneca County 3628640             Geneva city
 # 10:     NY      36             Geneva city      Incorporated Place     Ontario County, Seneca County 3628640             Geneva city
 
 ## They have the same FIPS so we have no way to distinguish them except by TYPE so we will drop the County Subdivision ones
 
 fips_multitype <- censusplaces$fips[duplicated(censusplaces[, .(STATE, stfips, COUNTY, fips, PLACE)])]
-candrop <- censusplaces$TYPE == "County Subdivision" & censusplaces$fips %in% fips_multitype 
+candrop <- censusplaces$TYPE == "County Subdivision" & censusplaces$fips %in% fips_multitype
 censusplaces <- censusplaces[!candrop, ]
 
 ############################ #
@@ -86,9 +91,9 @@ censusplaces <- censusplaces[!candrop, ]
 #  *** SAVE ONLY THE FIRST COUNTY LISTED FOR A PLACE, TO SIMPLIFY THIS...
 #
 # otherwise,
-# to be able to filter all places/cities to view and select just those within at least partially within 
+# to be able to filter all places/cities to view and select just those within at least partially within
 #  a select list of counties, you would need to make longer the censusplaces table to have separate rows for all county-place pairs !
-# seems like more work than it is worth - 
+# seems like more work than it is worth -
 # You can just filter on states and select all relevant counties
 # and maybe we just show each place as being within the first of the listed counties to simplify it??
 
@@ -96,7 +101,7 @@ censusplaces <- censusplaces[!candrop, ]
 
 censusplaces$COUNTY <- gsub(",.*", "", censusplaces$COUNTY)
 
-# RENAME 
+# RENAME
 
 setnames(censusplaces, "COUNTY", 'countyname')
 setnames(censusplaces, "STATE", 'ST')
@@ -107,7 +112,7 @@ setnames(censusplaces, "PLACE", 'placename')
 censusplaces[ , countyfips := fips_counties_from_countyname(countyname, ST, exact = TRUE)]
 censusplaces[ , countyfips := as.integer(countyfips)]
 
-censusplaces[ , fips := as.integer(fips)]   # saves 3 MB 
+censusplaces[ , fips := as.integer(fips)]   # saves 3 MB
 censusplaces[ , eparegion := fips_st2eparegion(stfips)]
 censusplaces <- censusplaces[!duplicated(censusplaces), ]
 
@@ -116,7 +121,7 @@ print(censusplaces[ , .N, by = "type"])
 #                       TYPE      N
 # 1: Census Designated Place  9,974
 # 2:      Incorporated Place 19,540
-# 3:      County Subdivision 11,900 but now 8681 
+# 3:      County Subdivision 11,900 but now 8681
 # censusplaces[ , type := as.factor(type)]
 censusplaces[ , type := NULL]
 
@@ -129,19 +134,19 @@ gc()
 print(head(censusplaces,20))
 
 setDF(censusplaces)
-
+############################ ############################# #
 # metadata ####
 attr(censusplaces, "date_created") <- Sys.Date()
 censusplaces <- metadata_add(censusplaces)
-
+############################ ############################# #
 # use_data ####
 usethis::use_data(censusplaces, overwrite = TRUE)
-
+############################ ############################# #
 # documentation ####
 dataset_documenter('censusplaces',
                    title = "censusplaces (DATA) Census FIPS and other basic info on roughly 40,000 cities/towns/places",
                    description = "Table of US cities and other Census Designated Places, Incorporated Places, and County Subdivisions",
-                   details = paste0("from [https://www2.census.gov/geo/docs/reference/codes/PLACElist.txt](https://www2.census.gov/geo/docs/reference/codes/PLACElist.txt) 
+                   details = paste0("from [https://www2.census.gov/geo/docs/reference/codes/PLACElist.txt](https://www2.census.gov/geo/docs/reference/codes/PLACElist.txt)
 #' Column names: ", paste0(colnames(censusplaces), collapse = ", "))
 )
-
+############################ # ############################ # ############################ # ############################ #

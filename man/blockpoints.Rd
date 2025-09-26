@@ -7,7 +7,7 @@
 blockpoints (DATA) Census blocks locations
 }
 \details{
-There is \href{https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen}{archived documentation on EJScreen}
+There is \href{https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen}{archived documentation on EJSCREEN }
 
 blockpoints is a table of all census blocks, with the lat, lon
 providing the latitude and longitude of the Census Bureau-defined

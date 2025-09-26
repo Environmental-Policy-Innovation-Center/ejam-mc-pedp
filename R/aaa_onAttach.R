@@ -23,57 +23,74 @@
 
   # These instead could be set in the golem-config.yml file
 
-  asap_download   <- TRUE  # download large datasets now?           Set to FALSE while Testing/Building often
+  asap_download   <- TRUE  # download large datasets now?      Set to FALSE while Testing/Building often
   asap_index <- TRUE  # build index those now?                 Set to FALSE while Testing/Building often
-  asap_bg    <- FALSE  # load now vs lazyload blockgroup data?  Set to FALSE while Testing/Building often
+  asap_bg    <- FALSE  # load now vs lazyload blockgroup data? Set to FALSE while Testing/Building often
 
   # startup msg shown at library(EJAM) or when reinstalling from source ####
   packageStartupMessage("Now running .onAttach(), as part of attaching the EJAM package.")
 
-  # get location of logo etc. so that ejam2report() using generate_html_header() can find logo  even without launching shiny app?
-  source(system.file("global_defaults_package.R", package = "EJAM"), local = FALSE)
+  #################### #
+  packageStartupMessage("Reading global_defaults_package.R")
+  # get location of logo etc. so that ejam2report() using generate_html_header() can find logo  even without launching shiny app
+  ## notloaded <- inherits(try( path.package("EJAM") , silent = TRUE), "try-error")
+  notloaded_and_notinstalled <- inherits(try( find.package("EJAM") , silent = TRUE), "try-error")
+  if (notloaded_and_notinstalled) {
+    cat("EJAM package must be installed or at least loaded from source already for .onAttach() to be able to use system.file(package = 'EJAM') \n")
+    # try using local source package folders
+    localpath <- file.path('./inst/global_defaults_package.R')
+    if (!file.exists(localpath)) {
+      cat("Cannot find", localpath, "to create global_defaults_package object\n")
+    } else {
+      junk = try(source(localpath))
+      if (inherits(junk, "try-error")) {
+        cat("Cannot source", localpath, "to create global_defaults_package object\n")
+      }
+    }
+  } else {
+  localpath <- system.file("global_defaults_package.R", package = "EJAM")
+  # if you have just used devtools::load_all(), then this will find and try to the local source version of the global_defaults_package.R
+  # if you have not done that, this will find and use the installed version.
+  # It will source the file in the global environment by using local=FALSE
+  # BUT, when this tries to source that .R file during .onAttach(), R has not yet attached all the .R files ?
+  if (!file.exists(localpath)) {
+    cat("EJAM package is installed or loaded but cannot find file at", localpath, "\n")
+  } else {
+    packageStartupMessage("Trying to source a local source code copy from ", localpath, " \n")
+  }
+  junk1 = try({
+    source(localpath, local = FALSE)
+    }, silent = TRUE)
+  if (file.exists(localpath) && inherits(junk1, "try-error")) {
+    cat("in .onAttach() -- Unable to do
+    source(system.file('global_defaults_package.R', package = 'EJAM')
+    ")
+    # localpath <- system.file('inst/global_defaults_package.R', package = 'EJAM') # system.file() does not like starting with inst/
+    localpath <- file.path(dirname(system.file(package = "EJAM")), "inst", "global_defaults_package.R")
+    cat("Trying to source a local source code copy from ", localpath, " \n")
+    junk2 = try(source(localpath), silent = TRUE)
+    if (inherits(junk2, "try-error")) {
+      cat("Cannot source", localpath, "to create global_defaults_package object\n")
+      warning(paste0("
+    Problem in .onAttach() -- Unable to create global_defaults_package object because cannot do
+       source(system.file('global_defaults_package.R', package = 'EJAM'))
+       or
+       source(system.file('inst/global_defaults_package.R', package = 'EJAM')
 
-  # packageStartupMessage(
-  #
-  #   "\n
-  #     Developers may want to modify the .onAttach() or even .onLoad() function,
-  #     to control timing of the slow steps needed to load or create EJAM data,
-  #     to have the delays occur at preferred times automatically
-  #     (or only manually when a coder initiates them interactively or via their code).
-  #
-  #     These occur as EJAM starts:
-  #
-  #     1- Download the large datasets stored online (quaddata, blockpoints, frs, etc.)
-  #        EJAM uses download_latest_arrow_data() for this. Also see dataload_dynamic()
-  #        quaddata is >150 MB on disk and >200 MB RAM, while all others are smaller on disk.
-  #        blockid2fips is roughly 600 MB in RAM because it stores 8 million block FIPS as text.
-  #
-  #     2- Build the national index of all block point locations
-  #        EJAM function indexblocks() does this, using quaddata - see ?indexblocks
-  #
-  #     3- Load into memory some datasets installed with EJAM (blockgroupstats, usastats, etc.)
-  #        EJAM function dataload_from_package() can do this - see ?dataload_from_package and ?pkg_data()
-  #        Otherwise these are only lazyloaded at the moment they are needed, making a user wait.
-  #        blockgroupstats (>60 MB on disk, >200 MB in RAM) and usastats, statestats are essential.
-  #        frs-related tables are huge and not always required - needed to look up regulated sites by ID.
-  #
-  #     These are the times at which you may want them to happen:
-  #
-  #     - when the EJAM package is loaded and/or attached
-  #       i.e., every time the source package is rebuilt it is loaded; but it is attached less often,
-  #       as when a coder uses require( ) in RStudio or script
-  #
-  #     - when the shiny app launches and runs the global_defaults_*.R scripts
-  #        i.e., only once a new user opens the app and their session starts,
-  #        and when a coder uses run_app(), either after library( ), or by using EJAM function run_app()
-  #
-  #     - once the app or coder actually needs a given dataset that is available for lazyLoad, which
-  #       works only for data in EJAM/data/ like frs.rda, frs_by_programid.rda, frs_by_sic.rda, etc.
-  #       See utils::data( package = 'EJAM' )
-  #
-  #     - only if manually obtained by coder via functions noted above.
-  #     \n\n"
-  # )
+    ", junk2, "
+    Try (re)installing the package from source -- see guide on installing.
+    Some functions are referred to in the file global_defaults_package.R
+    while the package is loaded as with devtools::load_all(),
+    but if those functions are new or got renamed to a new name
+    then they may not be recognized while first trying to attach the package.
+    Some functions can be used to generate URLs for reports like url_echo_facility() and
+    if they are listed in the default_reports setting defined in global_defaults_package.R,
+    they cause .onAttach() to fail if those functions are not yet recognized."))
+    }
+  }
+  }
+  rm(notloaded_and_notinstalled)
+  #################### #
 
   # download BLOCK (not blockgroup) data, etc ####
 
@@ -118,7 +135,7 @@
       dataload_from_package() # EJAM function works only AFTER shiny does load all/source .R files or package attached
     }
 
-    # load BLOCKGROUP (not block) data (EJScreen data), etc. from package
+    # load BLOCKGROUP (not block) data (EJSCREEN data), etc. from package
     # see ?dataload_from_package()
     # This loads some key data, while others get lazy loaded if/when needed.
     # data(list=c("blockgroupstats", "usastats", "statestats"), package="EJAM")
@@ -126,11 +143,12 @@
     # data(list=c("frs", "frs_by_programid ", "frs_by_naics"),  package="EJAM")
     # # would be to preload some very large ones not always needed.
   }
+  options(tigris_use_cache = TRUE)
 
   packageStartupMessage('For help using the EJAM package in RStudio:
                           ?EJAM
                         To launch shiny app locally:
-                          run_app()
+                          ejamapp()
                         ')
 
 }

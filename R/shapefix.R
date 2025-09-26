@@ -1,21 +1,21 @@
 
 ###################################################################### #
 if (1 == 0) {
-  
+
   # to simplify calling this function from a NON-shiny context, to avoid saying shapefix(shp)[['shp']]
   # Check shiny::!is_running()  and if so, set attributes to shp returned
   # so the attributes provide these values like num_valid_pts_uploaded_SHP
   # or it could be a module
-  
-  
+
+
   ## added this to  shapefile_from_any() (but not each of the helper functions it uses for each file type)
-  
+
   shp <- shapefix(shp)
-  
-  
+
+
   ##  add this to shiny app_server.R, replacing similar code that was being used there:
   ## or if server uses shapefile_from_any() then this has already been done
-  
+
   shp <- shapefix(shp)
   if (!is.null(attr(shp, "disable_buttons_SHP"))) {disable_buttons[['SHP']] <- attr(shp, "disable_buttons_SHP")}
   if (!is.null(attr(shp, "num_valid_pts_uploaded_SHP"))) {num_valid_pts_uploaded[['SHP']] <- attr(shp, "num_valid_pts_uploaded_SHP")}
@@ -29,29 +29,29 @@ if (1 == 0) {
 #' shapefix cleans a spatial data.frame, flags invalid rows, add id if missing, etc.
 #' @description a way for app_server, and ejamit() via shapefile_from_any(),
 #'  to both use this one function to do the same thing
-#'  whether or not in a reactive context 
+#'  whether or not in a reactive context
 #' @param shp simple feature data.frame
 #' @param crs coordinate reference system, default is 4269
 #'
 #' @return returns all rows of shp, but adds columns "valid" and "invalid_msg"
 #'   and adds attributes shiny can use to update some reactives,
 #'   and standardizes "geometry" as the sfc column name.
-#'   
+#'
 #' @keywords internal
 #'
 shapefix = function(shp,
                     # disable_buttons_SHP = NULL, # probably dont need to know its prior state in shiny
-                    # num_valid_pts_uploaded_SHP = NULL, 
-                    # invalid_alert_SHP = NULL, 
+                    # num_valid_pts_uploaded_SHP = NULL,
+                    # invalid_alert_SHP = NULL,
                     # an_map_text_shp = NULL,
                     crs = 4269) {
-  
+
   ## THIS IS A WAY FOR app_server, and ejamit() via shapefile_from_any(),
   ##  to both use this one function
   ##  to do the same thing whether or not in a reactive context.
-  
+
   validate_errmsg <- NULL
-  
+
   if (is.null(shp)) {
     disable_buttons_SHP <- TRUE
     validate_errmsg <- "Uploaded file should have valid file extension(s)"
@@ -67,11 +67,15 @@ shapefix = function(shp,
     colnames(shp)[grepl("sfc",lapply(shp,class))] <- "geometry"
     sf::st_geometry(shp) <- "geometry"
   }
-  
+
   if (nrow(shp) > 0) {
-    
+
     # count valid rows ####
-    shp_valid_check <- terra::is.valid(terra::vect(shp), messages = T)
+    empty = sf::st_is_empty(shp)
+    shp_valid_check <- data.frame(valid = rep(NA, NROW(shp)), reason = "")
+    shp_valid_check[empty, "valid"] <- FALSE
+    shp_valid_check[empty, "reason"] <- "empty geometry"
+    shp_valid_check[!empty, ]  <- terra::is.valid(terra::vect(shp[!empty, ]), messages = T)
     shp_is_valid <- shp_valid_check$valid
     numna <- sum(!shp_is_valid)
     num_valid_pts_uploaded_SHP  <- length(shp_is_valid) - sum(!shp_is_valid)
@@ -81,9 +85,9 @@ shapefix = function(shp,
     # crs ####
     shp <- sf::st_transform(shp, crs = crs)
     an_map_text_shp <- NA # ignored if !is.null(), or maybe will have to handle this as it gets returned?
-    
+
   } else {
-    
+
     invalid_alert_SHP <- 0 # hides the invalid site warning
     an_map_text_shp <- HTML(NULL)  # hides the count of uploaded sites/shapes
     disable_buttons_SHP <- TRUE
@@ -93,13 +97,13 @@ shapefix = function(shp,
   # "valid" flag added  ####
   disable_buttons_SHP <- FALSE
   shp$valid <- shp_is_valid
-  
+
   # "ejam_uniq_id" added ####
-  
+
   if (!("ejam_uniq_id" %in% names(shp))) {
     shp <- cbind(ejam_uniq_id = 1:NROW(shp), shp)
   } else {
-    if (!all.equal(1:NROW(shp), shp$ejam_uniq_id)) {  
+    if (!all.equal(1:NROW(shp), shp$ejam_uniq_id)) {
       warning("ejam_uniq_id already is a column in the shapefile, but is not 1 through N. However, it will NOT be overwritten.")
     }
   }
@@ -107,7 +111,7 @@ shapefix = function(shp,
   shp$invalid_msg <- NA
   shp$invalid_msg[shp$valid == F] <- shp_valid_check$reason[shp$valid == F]
   shp$invalid_msg[is.na(shp$geometry)] <- 'bad geometry'
-  
+
   # pass info back to shiny for reactives, but if NULL, an attribute gets removed here
   attr(shp, "validate_errmsg") <- validate_errmsg
   attr(shp, "disable_buttons_SHP") <- disable_buttons_SHP
@@ -116,4 +120,4 @@ shapefix = function(shp,
   attr(shp, "an_map_text_shp") <- an_map_text_shp
   return(shp)
 }
-############################################################ # 
+############################################################ #

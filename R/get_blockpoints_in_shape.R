@@ -1,10 +1,6 @@
 
-#' Find all Census blocks in a polygon, using internal point of block
-#' @rdname get_blockpoints_in_shape
-#' @return same as [get_blockpoints_in_shape()]
-#'
-#' @export
-#'
+# an alias
+
 shapefile2blockpoints <- function(polys, addedbuffermiles = 0, blocksnearby = NULL,
                                   dissolved = FALSE, safety_margin_ratio = 1.10, crs = 4269,
                                   updateProgress = NULL) {
@@ -21,7 +17,6 @@ shapefile2blockpoints <- function(polys, addedbuffermiles = 0, blocksnearby = NU
 #' @description Like [getblocksnearby()], but for blocks in each polygon rather than
 #' blocks near each facility. For analyzing all residents in certain zones
 #' such as places at elevated risk, redlined areas, watersheds, etc.
-#'
 #'
 #' @aliases shapefile2blockpoints
 #'
@@ -69,7 +64,7 @@ get_blockpoints_in_shape <- function(polys, addedbuffermiles = 0, blocksnearby =
                                      updateProgress = NULL) {
 
   ############################################################################################################### #
-  # NOTE: For comparison or validation one could get the results from the EJScreen API, for a polygon:
+  # NOTE: For comparison or validation one could get the results from the EJSCREEN API, for a polygon:
   #      Example of how the API could be used to analyze a polygon, which must use POST not GET:
   # HTTP POST URL: https://ejscreen.epa.gov/mapper/ejscreenRESTbroker.aspx
   # HTTP POST Body:

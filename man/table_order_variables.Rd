@@ -2,14 +2,9 @@
 % Please edit documentation in R/table_order_variables.R
 \name{table_order_variables}
 \alias{table_order_variables}
-\title{Get order of variable names to sort by, as seen in EJScreen Community Report}
+\title{Get order of variable names to sort by, as seen in EJSCREEN Community Report}
 \usage{
-table_order_variables(
-  varnames,
-  s1 = "ejscreensort",
-  s2 = "sortvarlistEJSCREENREPORT",
-  s3 = "sort_within_varlistEJSCREENREPORT"
-)
+table_order_variables(varnames, s1 = "newsort", s2 = "ejscreensort", s3 = "n")
 }
 \arguments{
 \item{varnames}{vector of indicator variables names from blockgroupstats, bgej, etc.,
@@ -28,15 +23,15 @@ c(names_ej_pctile, names_ej_state_pctile, names_ej_supp_pctile, names_ej_supp_st
 vector as from order(), to be used in sorting a data.frame for example
 }
 \description{
-Get order of variable names to sort by, as seen in EJScreen Community Report
+Get order of variable names to sort by, as seen in EJSCREEN Community Report
 }
 \examples{
   cbind(table_order_variables(c(names_d, names_d_subgroups, names_e)))
-  
+
   out <- testoutput_ejamit_10pts_1miles
   vars <- out$formatted[ , 'indicator']
   vars <- fixcolnames(vars, 'long', 'r')
   out$formatted[table_order_variables(vars), ]
-  
+
 
 }

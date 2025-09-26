@@ -34,7 +34,7 @@ Map - points - ggplot2 map of points in the USA - very basic map
 }
 \examples{
 \donttest{
-  mapfast_gg(EJAM::testpoints_10)
+  mapfast_gg(testpoints_10)
 
   pts <- read.table(textConnection(
   "lat lon

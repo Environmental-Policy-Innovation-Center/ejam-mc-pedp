@@ -21,7 +21,7 @@
 #' @param coloroverall color like "gray" for everyone as a whole
 #' @param returnwhat If returnwhat is "table", invisibly returns a
 #'   full table of sorted distances of blockgroups,
-#'   cumulative count of demog groups at that block group's distance.
+#'   cumulative count of demog groups at that blockgroup's distance.
 #'   If returnwhat is "plotfilename" then it returns the full path including filename of a .png in a tempdir
 #'   If returnwhat is "plot" then it returns the plot object as needed for [ejam2excel()] or related functions
 #' @param ... other parameters passed through to [points()]
@@ -141,7 +141,7 @@ distance_by_group_plot <- function(
   # plot is too slow for huge datasets and can just plot a random sample of points if so huge:
   if (NROW(x) > 5000) {
     x <- x[sample(1:NROW(x), 5000, replace = F), ]
-    warning('plotting just a random sample of 5,000 of these block groups to show pattern quickly')
+    warning('plotting just a random sample of 5,000 of these blockgroups to show pattern quickly')
   }
 
   # SHOULD IT USE distance_avg or distance_min_avgperson ?? ***
@@ -246,7 +246,7 @@ if (length(demogvarname) > 1) {
 #'   for a single population group.
 #'
 #'   This function, distance_cdf_by_group_plot(), is based on ejamit()$results_bybg_people,
-#'   which provides only block group resolution information about distance.
+#'   which provides only blockgroup resolution information about distance.
 #'   For block resolution analysis of distance by group, see [plot_distance_by_pctd()].
 #'
 #' @details The function distance_cdf_by_group_plot is SLOW - ***needs to be optimized
@@ -258,8 +258,8 @@ if (length(demogvarname) > 1) {
 #' @param color1 color like "red" for residential population group of interest
 #' @param color2 color like "gray" for everyone else
 #' @seealso [distance_by_group()] [getblocksnearbyviaQuadTree()] for examples
-#' @return invisibly returns full table of sorted distances of blockgroups, cumulative count of demog group at that block group's distance,
-#' and cumulative count of everyone else in that block group
+#' @return invisibly returns full table of sorted distances of blockgroups, cumulative count of demog group at that blockgroup's distance,
+#' and cumulative count of everyone else in that blockgroup
 #'
 #' @export
 #'

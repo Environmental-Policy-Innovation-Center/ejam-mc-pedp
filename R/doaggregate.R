@@ -6,7 +6,7 @@
 #' [getblocksnearby()] and doaggregate() are the two key functions that run [ejamit()].
 #'   `doaggregate()` takes a set of sites like facilities and the
 #'   set of blocks that are near each,
-#'   combines those with indicator scores for block groups, and
+#'   combines those with indicator scores for blockgroups, and
 #'   aggregates the numbers within each place and across all overall.
 #'
 #'   For all examples, see [getblocksnearbyviaQuadTree()]
@@ -37,26 +37,26 @@
 #'    - [quaddata] data.table used to create localtree, a quad tree index of block points
 #'      (and localtree that is created when package is loaded)
 #'
-#'    - [blockgroupstats] - A data.table (such as EJScreen residential population and environmental data by blockgroup)
+#'    - [blockgroupstats] - A data.table (such as EJSCREEN residential population and environmental data by blockgroup)
 #'
 #' @details  # **Identification of nearby residents -- methodology:** ####################################################################
 #'
-#' EJAM uses the same approach as EJScreen does to identify the count and residential population of nearby residents,
-#' so EJScreen technical documentation should be consulted on the approach,
-#' at [EJScreen Technical Info](https://web.archive.org/web/20250118072723/https://www.epa.gov/ejscreen/technical-information-and-data-downloads "EJScreen Technical Info").
+#' EJAM uses the same approach as EJSCREEN does to identify the count and residential population of nearby residents,
+#' so EJSCREEN technical documentation should be consulted on the approach,
+#' at [EJSCREEN Technical Info](https://web.archive.org/web/20250118072723/https://www.epa.gov/ejscreen/technical-information-and-data-downloads "EJSCREEN Technical Info").
 #' EJAM implements that approach using faster code and data formats, but it
-#' still uses the same high-resolution approach as described in EJScreen documentation
+#' still uses the same high-resolution approach as described in EJSCREEN documentation
 #' and summarized below.
 #'
 #' The identification of nearby residents is currently done in a way that includes all 2020 Census blocks whose
 #' "internal point" (a lat/lon provided by the Census Bureau) is within the specified distance of the facility point.
-#' This is taken from the EJScreen block weights file, but can also be independently calculated.
+#' This is taken from the EJSCREEN block weights file, but can also be independently calculated.
 #'
 #' The summary or aggregation or "rollup" within the buffer is done by calculating the
-#' population-weighted average block group score among all the people residing in the buffer.
+#' population-weighted average blockgroup score among all the people residing in the buffer.
 #' The weighting is by population count for variables that are fractions of population,
 #' but other denominators and weights (e.g., households count) are used as appropriate,
-#' as explained in EJScreen technical documentation on the formulas, and
+#' as explained in EJSCREEN technical documentation on the formulas, and
 #' replicated by formulas used in EJAM functions such as doaggregate().
 #'
 #' Since the blockgroup population counts are from American Community Survey (ACS) estimates,
@@ -68,8 +68,8 @@
 #' that is in the census blocks inside the buffer.
 #'
 #' A given block is considered entirely inside or entirely outside the buffer,
-#' and those are used to more accurately estimate what fraction of a given block group's
-#' population is inside the buffer. This is more accurate and faster than areal apportionment of block groups.
+#' and those are used to more accurately estimate what fraction of a given blockgroup's
+#' population is inside the buffer. This is more accurate and faster than areal apportionment of blockgroups.
 #' Census blocks are generally so small relative to typical buffers that this is very accurate -
 #' it is least accurate if a very small buffer distance is specified
 #' in an extremely low density rural area where a block can be geographically large.
@@ -110,11 +110,11 @@
 #'   using min() of all blockgroup-level values.
 #' @param subgroups_type Optional (uses default). Set this to
 #'   "nh" for non-hispanic race subgroups as in Non-Hispanic White Alone, nhwa and others in names_d_subgroups_nh;
-#'   "alone" for EJScreen v2.2 style race subgroups as in    White Alone, wa and others in names_d_subgroups_alone;
+#'   "alone" for EJSCREEN v2.2 style race subgroups as in    White Alone, wa and others in names_d_subgroups_alone;
 #'   "both" for both versions. Possibly another option is "original" or "default" but work in progress.
 #' @param include_ejindexes whether to calculate Summary Indexes and return that information
 #' @param calculate_ratios whether to calculate and return ratio of each indicator to its US and State overall mean
-#' @param extra_demog if should include extra indicators from EJScreen report,
+#' @param extra_demog if should include extra indicators from EJSCREEN report,
 #'    on language, more age groups, sex, percent with disability, poverty, etc.
 #' @param need_proximityscore whether to calculate proximity scores (may not be implemented yet)
 #' @param infer_sitepoints set to TRUE to try to infer the lat,lon of each site around which the blocks in sites2blocks were found.
@@ -141,7 +141,7 @@
 #'   * **`results_bysite`**   results for individual sites (buffers) - a data.table of results,
 #'     one row per ejam_uniq_id, one column per indicator
 #'
-#'   * **results_bybg_people**  results for each block group, to allow for showing the distribution of each
+#'   * **results_bybg_people**  results for each blockgroup, to allow for showing the distribution of each
 #'      indicator across everyone within each residential population group.
 #'
 #'   * **longnames**  descriptive long names for the indicators in the above outputs
@@ -413,7 +413,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     dataload_dynamic('bgej') # load it on demand when needed
     # if failed to find it, give up
     if (!exists("bgej")) {
-      warning("include_ejindexes was set to TRUE but the (very large) bgej file was not found, so Summary Indexes will not be returned")
+      warning("include_ejindexes was set to TRUE but the (very large) bgej file was not found, so EJ Indexes will not be returned")
       include_ejindexes <- FALSE
     } else {
       message('loaded bgej data because include_ejindexes = TRUE')
@@ -475,7 +475,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     ))
   }
 
-  # DEFAULT COLUMNS TO AGGREGATE VIA POPULATION WEIGHTED AVERAGE OF PARTIAL BLOCK GROUPS IN EACH PLACE
+  # DEFAULT COLUMNS TO AGGREGATE VIA POPULATION WEIGHTED AVERAGE OF PARTIAL BLOCKGROUPS IN EACH PLACE
   if (is.null(wtdmeancols)) {
     wtdmeancols <- unique(
 
@@ -522,7 +522,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   # FIRST, PREPARE TO AGGREGATE BY BLOCK
 
   ## Use pop weights of nearby blocks ####
-  # to track what fraction of each parent block group is considered inside the buffer.
+  # to track what fraction of each parent blockgroup is considered inside the buffer.
   #    getblocksnearby() already did join that added blockwt column
 
   # sort rows
@@ -773,8 +773,8 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   #____________________________________________________ #  ######################################################
 
   ##################################################### #
-  #  *** JOIN  EJScreen indicators ####
-  # joins midsized intermed table of sites and BGs to EJScreen/ blockgroupstats . . . sites2bgs_overall ??
+  #  *** JOIN  EJSCREEN indicators ####
+  # joins midsized intermed table of sites and BGs to EJSCREEN blockgroupstats . . . sites2bgs_overall ??
   ##################################################### #
   #
   # DO JOIN  OF **blockgroupstats**   200 columns, on bgid ,
@@ -819,7 +819,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   ######################### #
   ## ..update progress bar in shiny app ####
   if (is.function(updateProgress)) {
-    boldtext <- paste0('Joining blockgroups to EJScreen indicators')
+    boldtext <- paste0('Joining blockgroups to EJSCREEN indicators')
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #value was 0.6 in non timer approach
   }
   ######################### #
@@ -847,7 +847,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
 
   # others for OVERALL:  count_of_blocks_near_multiple_sites, blockcount_overall, bgcount_overall
   if (is.function(updateProgress)) {
-    boldtext <- paste0('Joining blockgroups to EJScreen indicators')
+    boldtext <- paste0('Joining blockgroups to EJSCREEN indicators')
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #value was 0.6 in non timer approach
   }
 
@@ -859,7 +859,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   } ), .SDcols = countcols_inbgstats, by = .(ejam_uniq_id) ]
 
   if (is.function(updateProgress)) {
-    boldtext <- paste0('Joining blockgroups to EJScreen indicators')
+    boldtext <- paste0('Joining blockgroups to EJSCREEN indicators')
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #value was 0.6 in non timer approach
   }
   # results_bysite[1:100,1:8]
@@ -934,7 +934,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   results_overall <- cbind(results_overall, results_overall_popmeans)
 
   if (is.function(updateProgress)) {
-    boldtext <- paste0('Joining blockgroups to EJScreen indicators')
+    boldtext <- paste0('Joining blockgroups to EJSCREEN indicators')
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #value was 0.6 in non timer approach
   }
   ############################################### #
@@ -964,7 +964,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
     results_overall <- cbind(results_overall, results_overall_wtdmeans) # many columns (the popwtd mean cols)
 
     if (is.function(updateProgress)) {
-      boldtext <- paste0('Joining blockgroups to EJScreen indicators')
+      boldtext <- paste0('Joining blockgroups to EJSCREEN indicators')
       updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #value was 0.6 in non timer approach
     }
   }
@@ -1060,7 +1060,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   #
   results_bysite <- merge(results_bysite, results_bysite_minmax, by = "ejam_uniq_id") # data.table uses by=, not on=, for merge() or groupingby, and uses on=  for JOINS!
   if (is.function(updateProgress)) {
-    boldtext <- paste0('Joining blockgroups to EJScreen indicators')
+    boldtext <- paste0('Joining blockgroups to EJSCREEN indicators')
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #value was 0.6 in non timer approach
   }
   results_overall_minmax <- sites2bgs_plusblockgroupdata_bysite[ , .(
@@ -1074,7 +1074,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   results_overall <- cbind(results_overall, results_overall_minmax) # cbind not merge, since only 1 row
 
   if (is.function(updateProgress)) {
-    boldtext <- paste0('Joining blockgroups to EJScreen indicators')
+    boldtext <- paste0('Joining blockgroups to EJSCREEN indicators')
     updateProgress(message_main = boldtext, value = as.numeric(difftime(Sys.time(), start_time, units = "secs"))) #value was 0.6 in non timer approach
   }
   # note that max E or D score of any bg near a given site must be calculated later,
@@ -1126,7 +1126,7 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   ## We mainly report AVERAGE D and E indicator score near each site, but
   ##   we could save the "worst-case blockgroup" i.e., the MAX of each %D or E indicator score out of all the blockgroups near each Site.
   ##  Comparing sites that way
-  ##  (e.g., which site has poorest single block group? i.e., what is worst site as measured by highest nearby blockgroup-level %poor?)
+  ##  (e.g., which site has poorest single blockgroup? i.e., what is worst site as measured by highest nearby blockgroup-level %poor?)
   ##    need to calculate that MAX from raw bg data when you aggregate by ejam_uniq_id, doing MAX not just AVG or SUM.
   ## something like this?
   #
@@ -1293,6 +1293,9 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   valid_state_vars <- varsneedpctiles[varsneedpctiles %in% colnames(statestats) & myvars_to_use %in% colnames(results_bysite)]
   valid_state_pctl_names <- varnames.state.pctile[varsneedpctiles %in% colnames(statestats) & myvars_to_use %in% colnames(results_bysite)]
   valid_state_vars_to_use <- myvars_to_use[varsneedpctiles %in% colnames(statestats) & myvars_to_use %in% colnames(results_bysite)]
+               # "Demog.Index",                  "Demog.Index.Supp"       are in valid_state_vars
+  # "state.pctile.Demog.Index"      "state.pctile.Demog.Index.Supp"       are in valid_state_pctl_names
+               # "Demog.Index.State"             "Demog.Index.Supp.State" are in valid_state_vars_to_use
 
   if (is.function(updateProgress)) {
     boldtext <- paste0('Computing results')
@@ -1460,9 +1463,9 @@ doaggregate <- function(sites2blocks, sites2states_or_latlon=NA,
   results_bysite <- cbind(results_bysite, state.avg.cols_bysite)  # cbind?? collapse:: has a faster way   ************
 
   #### >>> calc Overall avg person at group of sites as a whole, as popwtd mean of all the various states' averages !!   ####
-  # This is not something EJScreen ever had to do for a single site because it is (entirely or at least mostly) in a single state.
+  # This is not something EJSCREEN ever had to do for a single site because it is (entirely or at least mostly) in a single state.
   # using pop as weights is ok for this even though technically you
-  # might want to use a different denominator (weight) for some indicators as is done when aggregating all block groups at one site.
+  # might want to use a different denominator (weight) for some indicators as is done when aggregating all blockgroups at one site.
   state.avg.cols_overall <-  results_bysite[ ,  lapply(.SD, function(x) {
     collapse::fmean(x, w = pop)   # stats::weighted.mean(x, w = pop, na.rm = TRUE)
   }), .SDcols = names_these_state_avg] # fixed now?

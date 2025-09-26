@@ -3,15 +3,15 @@
 \docType{data}
 \name{blockgroupstats}
 \alias{blockgroupstats}
-\title{blockgroupstats (DATA) residential population and environmental indicators for Census block groups}
+\title{blockgroupstats (DATA) residential population and environmental indicators for Census blockgroups}
 \description{
-The dataset of residential population data and environmental indicators originally from EJScreen.
+The dataset of residential population data and environmental indicators originally from EJSCREEN.
 
 For Summary Indexes, see \link{bgej}
 }
 \details{
 \itemize{
-\item Version 2.32.5 of EJAM
+\item Version 2.32.6 of EJAM
 uses EPA environmental indicators and population indicators derived from
 ACS data from \verb{r a2018-2022 Each year this should be re-created as for the latest version.   See }attributes(blockgroupstats)`
 }
@@ -19,7 +19,7 @@ ACS data from \verb{r a2018-2022 Each year this should be re-created as for the 
 It is a data.table of US Census blockgroups (not blocks).
 With PR, and Island Areas
 
-Column names include \code{bgfips}, \code{bgid} (for join to \link{blockwt} by/on \code{bgid}),
+Column names include \code{bgfips}, \code{bgid} (for join to \link{blockwts} by/on \code{bgid}),
 \code{pop}, \code{pctlowinc}, etc.
 
 To see definitions of the columns (indicators) and some basic info on each:

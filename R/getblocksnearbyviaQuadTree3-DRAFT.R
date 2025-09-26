@@ -16,9 +16,9 @@
 #'   residents live.
 #'
 #'   Finding which blocks have their internal points in a circle provides
-#'   a way to quickly estimate what fraction of a block group is
+#'   a way to quickly estimate what fraction of a blockgroup is
 #'   inside the circular buffer more accurately and more quickly than
-#'   areal apportionment of block groups would provide.
+#'   areal apportionment of blockgroups would provide.
 #'
 #' @param sitepoints data.table with columns ejam_uniq_id, lat, lon giving point locations of sites or facilities around which are circular buffers
 #' @param radius in miles, defining circular buffer around site point
@@ -76,9 +76,9 @@ getblocksnearbyviaQuadTree3 <- function(sitepoints, radius=3, maxradius=31.07,
   # buffer_indexdistance <- ceiling(radius / indexgridsize)
   truedistance <- distance_via_surfacedistance(radius)   # simply 7918*sin(radius/7918)
 
-  # 
-  # 
-  # 
+  #
+  #
+  #
 
   #---- Get ready for loop here ----
 

@@ -32,7 +32,7 @@ mapfastej <- function(mydf, radius = 3, column_names = 'ej', labels = column_nam
 #'   e.g., as from \code{names2fips('DE')} or \code{ejamit(fips='01')$results_bysite}.
 #'
 #' @param radius in miles, converted to meters and passed to leaflet::addCircles() if appropriate
-#' @param column_names If "ej" then nice popup made based on just key EJScreen
+#' @param column_names If "ej" then nice popup made based on just key EJSCREEN
 #'   indicators. If "all" then every column in the entire mydf table is shown
 #'   in the popup. If a vector of colnames, only those are shown in popups.
 #' @param labels The labels used before the column_names, for map popups,
@@ -55,7 +55,6 @@ mapfast <- function(mydf, radius = 3, column_names='all', labels = column_names,
   fromejam <- FALSE
   # if the whole list from ejamit(), not a data.frame, was provided, use just the results_bysite table
   if (!is.data.frame(mydf) && is.list(mydf) && 'results_bysite' %in% names(mydf)) {
-    message("mydf seems to be a list of tables such as output from ejamit() so using just the results_bysite table here")
     sitetype <- ejamit_sitetype_from_output(mydf) # works if mydf is either output of ejamit() or ejamit()$results_bysite
     mydf <- mydf$results_bysite
     fromejam <- TRUE
@@ -86,13 +85,13 @@ mapfast <- function(mydf, radius = 3, column_names='all', labels = column_names,
 
     ejcols <- c(names_ej, names_ej_state, names_ej_supp, names_ej_supp_state)
     if (!all(ejcols %in% names(mydf))) {
-      warning('Not all summary index columns found. Using NA values for all summary indexes in map popups.')
+      warning('Not all EJ index columns found. Using NA values for all EJ indexes in map popups.')
       ejna <- data.frame(matrix(ncol = length(ejcols), nrow = NROW(mydf)))
       names(ejna) <- ejcols
       mydf <- cbind(mydf, ejna)
     }
 
-    mypop <- popup_from_ejscreen(sf::st_drop_geometry(mydf))
+    mypop <- popup_from_ejscreen(sf::st_drop_geometry(mydf)) # linkcolnames = sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
 
   } else if (column_names[1] == 'all') {
     mypop <- popup_from_df(sf::st_drop_geometry(mydf))

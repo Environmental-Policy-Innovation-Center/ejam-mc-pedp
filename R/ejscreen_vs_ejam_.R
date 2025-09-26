@@ -15,7 +15,7 @@
 ############################################################ #
 
 
-#' EJAM/EJSCREEN comparisons - compare EJScreen API vs EJAM stats at tested sites
+#' EJAM / EJSCREEN comparisons - compare EJSCREEN API vs EJAM stats at tested sites
 #'
 #' Used by [ejscreen_vs()]
 #'
@@ -144,7 +144,7 @@ ejscreen_vs_ejam <- function(latlon, radius = 3,
 
   if (missing(latlon) && all(c('id', 'lat', 'lon') %in% names(api1))) {latlon <- api1[ , c('id', 'lat', 'lon')]} # in case provided interactively above
   cat("\n Starting ejamit()... \n")
-  cat("Using EJScreen to analyze", NROW(api1), "sites...\n")
+  cat("Using EJSCREEN to analyze", NROW(api1), "sites...\n")
   junk = capture_output({ # to avoid printing to console the tips on how to view ejamit() results, etc.
     ejam1 <- ejamit(latlon, radius = radius,
                     fips = fips,
@@ -168,14 +168,14 @@ ejscreen_vs_ejam <- function(latlon, radius = 3,
 ############################################################ #
 
 
-#' EJAM/EJSCREEN comparisons - used by ejscreen_vs()
+#' EJAM / EJSCREEN comparisons - used by ejscreen_vs()
 #'
-#' Compare EJScreen API vs EJAM stats at tested sites (after results already run)
+#' Compare EJSCREEN API vs EJAM stats at tested sites (after results already run)
 #'
 #' @param apisite table output of ejscreenit()$table,
 #'   or ejscreenapi_plus(), and also see [ejscreenit_for_ejam()]
 #' @param ejamsite table output of ejamit()$results_bysite
-#' @param nadrop optional, whether to drop indicators for which EJScreen API returns NA
+#' @param nadrop optional, whether to drop indicators for which EJSCREEN API returns NA
 #'
 #' @param x100fix optional, whether to multiply x100 the names_d and names_d_subgroups
 #'   indicator scores to convert fractions 0 to 1 into percentages of 0 to 100,
@@ -246,8 +246,8 @@ ejscreen_vs_ejam_alreadyrun <- function(apisite, ejamsite, nadrop = FALSE,
   setDF(apisite)
   setDF(ejamsite)
 
-  apisite   <- apisite[ , !(names(apisite)  %in% c('ST', 'statename', "REGION", "EJScreen Report", "EJScreen Map", "ECHO Report"))]
-  ejamsite <- ejamsite[ , !(names(ejamsite) %in% c('ST', 'statename', "REGION", "EJScreen Report", "EJScreen Map", "ECHO Report"))]
+  apisite   <- apisite[ , !(names(apisite)  %in% c('ST', 'statename', "REGION", "EJSCREEN Report", "EJSCREEN Map", "ECHO Report"))]
+  ejamsite <- ejamsite[ , !(names(ejamsite) %in% c('ST', 'statename', "REGION", "EJSCREEN Report", "EJSCREEN Map", "ECHO Report"))]
 
   if (x100fix) {
     # *** what about  table_signif_round_x100() ... is that done now by ejamit() and or ejscreenit() ?
@@ -290,7 +290,7 @@ ejscreen_vs_ejam_alreadyrun <- function(apisite, ejamsite, nadrop = FALSE,
 ############################################################ #
 
 
-#' EJAM/EJSCREEN comparisons - see 1 site/row, check estimates for 1 indicator
+#' EJAM / EJSCREEN comparisons - see 1 site/row, check estimates for 1 indicator
 #'
 #' @param vs results of [ejscreen_vs_ejam()]
 #' @param pts data.frame with lat, lon that was input to [ejscreen_vs_ejam()]
@@ -315,7 +315,7 @@ ejscreen_vs_ejam_1var_bysite <- function(vs, pts, varname = "blockcount_near_sit
 ######################################################################################### #
 
 
-#' EJAM/EJSCREEN comparisons - see summary stats after using ejscreen_vs_ejam()
+#' EJAM / EJSCREEN comparisons - see summary stats after using ejscreen_vs_ejam()
 #'
 #' @param vs output of ejscreen_vs_ejam()
 #' @param myvars optional to check just a subset of the colnames found in vs$EJAM and vs$EJSCREEN,
@@ -363,7 +363,7 @@ ejscreen_vs_ejam_1var_bysite <- function(vs, pts, varname = "blockcount_near_sit
 #'
 #'    "max.abs.diff"
 #'
-#'    "mean.pct.diff" Percent difference 0-100% is absolute value of 100*(ratio - 1), and ratio is EJAM/EJSCREEN
+#'    "mean.pct.diff" Percent difference 0-100% is absolute value of 100*(ratio - 1), and ratio is EJAM / EJSCREEN
 #'
 #'    "median.pct.diff" 0-100%
 #'
@@ -380,7 +380,7 @@ ejscreen_vs_ejam_1var_bysite <- function(vs, pts, varname = "blockcount_near_sit
 #'   \donttest{
 #'   pts <- testpoints_n(100, weighting = 'frs')
 #'
-#'   # This step can take a long time, almost 1 minute per 20 points, as it uses the EJScreen API:
+#'   # This step can take a long time, almost 1 minute per 20 points, as it uses the EJSCREEN API:
 #'   vs100 <- ejscreen_vs_ejam(pts, radius = radius, include_ejindexes = TRUE)
 #'
 #'   ejscreen_vs_ejam_see1(vs100, mysite = 1)
@@ -402,7 +402,7 @@ ejscreen_vs_ejam_1var_bysite <- function(vs, pts, varname = "blockcount_near_sit
 #'   sum100_within5pct[sum100_within5pct$indicator %in% names_these, ][ , c(1, 6:12)]
 #'
 #'   ## longer analysis (45 minutes perhaps)
-#'   # This step can take a long time, almost 1 minute per 20 points, as it uses the EJScreen API:
+#'   # This step can take a long time, almost 1 minute per 20 points, as it uses the EJSCREEN API:
 #'   # pts <- testpoints_n(1000, weighting = 'frs')
 #'   # vs1000pts3miles <- ejscreen_vs_ejam(pts, radius = 3, include_ejindexes = TRUE)
 #'   # sum_vs1000pts3miles <- ejscreen_vs_ejam_summary(vs1000pts3miles)
@@ -566,7 +566,7 @@ ejscreen_vs_ejam_summary <- function(vs = NULL,
 
 ############################################################## # ############################################################## #
 
-#' EJAM/EJSCREEN comparisons - see summary stats after ejscreen_vs_ejam() for JUST 1 VARLIST at a time, just 2-3 key stats
+#' EJAM / EJSCREEN comparisons - see summary stats after ejscreen_vs_ejam() for JUST 1 VARLIST at a time, just 2-3 key stats
 #' What percent of sites have agreement to +-1%? etc.
 #' @param vs from ejscreen_vs() can be provided (if vsum is not provided)
 #' @param vsum from ejscreen_vs_ejam_summary() can be provided if vs is not but then tol is ignored
@@ -655,7 +655,7 @@ ejscreen_vs_ejam_summary_byvarlist = function(vs = NULL, vsum = NULL, myvars = c
 ######################################################################### #
 
 
-#' EJAM/EJSCREEN comparisons - see quantiles over tested sites, of a stat like ratio of EJAM/EJSCREEN
+#' EJAM / EJSCREEN comparisons - see quantiles over tested sites, of a stat like ratio of EJAM / EJSCREEN
 #'
 #' @param vs output of ejscreen_vs_ejam()
 #' @param mystat just one (not more than 1) of these: "ratio", "diff", "absdiff", "pctdiff", "abspctdiff"
@@ -687,7 +687,7 @@ ejscreen_vs_ejam_summary_quantiles <- function(vs,
 }
 ######################################################################### #
 
-#' EJAM/EJSCREEN comparisons - see results at every site, for 1 INDICATOR after using ejscreen_vs_ejam()
+#' EJAM / EJSCREEN comparisons - see results at every site, for 1 INDICATOR after using ejscreen_vs_ejam()
 #'
 #' @param vs output of ejscreen_vs_ejam() or ejscreen_vs()
 #' @param varname the 1 indicator to examine, a colname in an output table of ejamit(), such as "pop"
@@ -716,7 +716,7 @@ ejscreen_vs_ejam_1var = function(vs, varname = 'pop', # names_these[4], # "pctli
 ######################################################################### #
 
 
-#' EJAM/EJSCREEN comparisons - see cumulative distribution for 1 variable after using ejscreen_vs_ejam()
+#' EJAM / EJSCREEN comparisons - see cumulative distribution for 1 variable after using ejscreen_vs_ejam()
 #' Plot distribution of absolute values of Percent Differences in 1 indicator at tested sites
 #' @param vs output of ejscreen_vs() or similar
 #' @param varname like "pop" or any of colnames(testoutput_ejamit_10pts_1miles$results_bysite)
@@ -733,7 +733,7 @@ ejscreen_vs_ejam_1var_cdf = function(vs, varname = 'pop') {
   varlabel <- fixcolnames(varname, 'r', 'label')
   x = vs$abspctdiff[ , varname]
   plot(ecdf(x),
-       main = paste0("EJAM EJScreen compared within ", radius, " miles of ", NROW(x),
+       main = paste0("EJAM EJSCREEN compared within ", radius, " miles of ", NROW(x),
                      " randomly selected locations\nfor ", varlabel),
        ylab =  "Cumulative share of all locations (percent scaled as 0 to 1.00)",
        xlab = paste0("Absolute value of Percent Difference in ", varlabel,
@@ -747,7 +747,7 @@ ejscreen_vs_ejam_1var_cdf = function(vs, varname = 'pop') {
 ########################################################### #
 
 
-#'  EJAM/EJSCREEN comparisons - see results for 1 site after using ejscreen_vs_ejam()
+#' EJAM / EJSCREEN comparisons - see results for 1 site after using ejscreen_vs_ejam()
 #'
 #' @param vs output of ejscreen_vs_ejam() or ejscreen_vs()
 #' @param myvars optional to check just a subset of the colnames found in vs$EJAM and vs$EJSCREEN,
@@ -820,7 +820,7 @@ ejscreen_vs_ejam_see1 <- function(vs, myvars = c("ejam_uniq_id", 'pop', names_d)
 ######################################################################### #
 
 
-#' EJAM/EJSCREEN comparisons - Try to explain discrepancy in pop and blocks via map and tables of blocks near a site
+#' EJAM / EJSCREEN comparisons - Try to explain discrepancy in pop and blocks via map and tables of blocks near a site
 #'
 #' @param n row number in vs$EJAM of site to check
 #' @param vs results from  vs <- ejscreen_vs_ejam(testpoints_10, radius = 3, include_ejindexes = TRUE)
@@ -1026,7 +1026,7 @@ ejscreen_vs_ejam_see1map <- function(vs, n = 1, overlay_blockgroups = FALSE,
 }
 ######################################################################### #
 
-#' EJAM/EJSCREEN comparisons - loop or interactively step through sites to see which blocks may explain difference in population count
+#' EJAM / EJSCREEN comparisons - loop or interactively step through sites to see which blocks may explain difference in population count
 #'
 #' @param vs The output of [ejscreen_vs_ejam()] or [ejscreen_vs()]
 #' @param pause_on_each_site set FALSE to avoid tapping key to advance to each next one
@@ -1146,7 +1146,7 @@ ejscreen_vs_explain_summary(why, radius = vs$EJAM$radius[1])
 }
 ########################################################### #
 
-#' EJAM/EJSCREEN comparisons - Summarize explanations for discrepancies in pop
+#' EJAM / EJSCREEN comparisons - Summarize explanations for discrepancies in pop
 #' Summarize output of ejscreen_vs_explain()
 #' @param whyall Output from [ejscreen_vs_explain()]
 #' @param radius optional radius in miles, for labels on plot and table
@@ -1201,10 +1201,10 @@ ejscreen_vs_explain_summary = function(whyall, radius = "analyzed radius", showm
 ")
   ################### #
   if (showmeters) {
-    cat("Direction of discrepancy in distance between EJAM and EJScreen:\n")
-    cat('  At', sum(whyall$meters_diff[whyall$why != "pop shown is same!" & !is.na(whyall$why)] < 0 ), 'of those with a discrepancy, the block with largest abs discrepancy in distance was an extra one EJAM added because EJAM estimated distance was < radius i.e., < EJScreen estimate\n' )
+    cat("Direction of discrepancy in distance between EJAM and EJSCREEN estimates:\n")
+    cat('  At', sum(whyall$meters_diff[whyall$why != "pop shown is same!" & !is.na(whyall$why)] < 0 ), 'of those with a discrepancy, the block with largest abs discrepancy in distance was an extra one EJAM added because EJAM estimated distance was < radius i.e., < EJSCREEN estimate\n' )
 
-    cat('  At', sum(whyall$meters_diff[whyall$why != "pop shown is same!" & !is.na(whyall$why)] > 0 ), 'of those with a discrepancy, the block with largest abs discrepancy in distance was one EJAM missed because EJAM estimated distance was > radius i.e., > EJScreen estimate\n' )
+    cat('  At', sum(whyall$meters_diff[whyall$why != "pop shown is same!" & !is.na(whyall$why)] > 0 ), 'of those with a discrepancy, the block with largest abs discrepancy in distance was one EJAM missed because EJAM estimated distance was > radius i.e., > EJSCREEN estimate\n' )
 
     cat('  At', sum(whyall$meters_diff[whyall$why != "pop shown is same!" & !is.na(whyall$why)] == 0 ), 'of those with a discrepancy, it is unclear if the estimate was too high or too low since no obvious explanation was found (or difference was approximately zero meters in a few cases).\n' )
     cat("\n")
@@ -1238,7 +1238,7 @@ ejscreen_vs_explain_summary_plot <- function(x) {
     names.arg = c("Group of blocks missed/extra", "1 block missed/extra", "No obvious reason", "Pop Counts Identical", "NA"),
     xlab = "Explanation for Difference in Population Counts",
     ylab = "Number of Locations",
-    main = paste0("Comparison of EJScreen and EJAM at ", x$Number.of.Facilities[rownames(x) == 'Sum'], " Sites")
+    main = paste0("Comparison of EJSCREEN and EJAM at ", x$Number.of.Facilities[rownames(x) == 'Sum'], " Sites")
   )
 }
 ########################################################### #
@@ -1249,7 +1249,7 @@ ejscreen_vs_explain_meters_cdf = function(whyall, radius = "x") {
   varlabel = "Analysis of Distance"
   plot(
     ecdf(whyall$meters_absdiff),
-    main = paste0("EJAM EJScreen compared within ", radius, " miles of ", NROW(whyall),
+    main = paste0("EJAM EJSCREEN compared within ", radius, " miles of ", NROW(whyall),
                   " randomly selected locations\nfor ", varlabel),
     ylab = "Cumulative share of all locations (percent scaled as 0 to 1.00)",
     xlab = paste0("Meters difference between specified radius and calculated distance of extra or missed blocks",
@@ -1284,26 +1284,26 @@ ejscreen_vs_explain_meterstats = function(whyall, radius) {
 # ~ ----------------------------------------------------------------------------- ####
 ########################################################### ############################################################ #
 
-#'  EJAM/EJSCREEN comparisons - Key function
-#'  Best starting point for comparing single-site (EJScreen API) and multisite (EJAM) results
+#' EJAM / EJSCREEN comparisons - Key function
+#' Best starting point for comparing single-site (EJSCREEN API) and multisite (EJAM) results
 #' @details
 #'  THIS IS FOR INTERACTIVE RSTUDIO CONSOLE USE
 #'   TO RUN A SET OF POINTS THROUGH BOTH
-#'   EJScreen and the EJAM multisite tool
+#'   EJSCREEN and the EJAM multisite tool
 #'   AND SAVE STATS ON THE DIFFERENCES
 #'
 #'   Also lets you use saved ejscreenapi results and input points
 #'   so you can iterate and rerun just the EJAM portion and compare to the saved benchmark data.
 #'
 #'   The EJAM tool/ function called [ejamit()]
-#'   does not rely on EJScreen's typical single-location approach to do the calculations
-#'   and instead tries to replicate what the EJScreen single-site report would do.
+#'   does not rely on the original EJSCREEN python code to do the calculations
+#'   and instead tries to replicate in R what the EJSCREEN single-site report would do.
 #'   As a result, while
 #'   - *[ejamit()] is much, much faster than [ejscreenit_for_ejam()]* and
 #'   - *provides additional information* (distribution of distances by group, etc.)
 #'   - *features* (histograms, spreadsheet with heatmaps, etc.)
 #'   - *flexibility* (easy for analysts using R to customize analysis, etc.),
-#'   *[ejamit()] does not always exactly replicate EJScreen* --
+#'   *[ejamit()] does not always exactly replicate EJSCREEN * --
 #'   does not provide 100% identical results (percentiles, etc.) for
 #'   every indicator in every analysis at every location.
 #'   For almost all indicators, at 97% of sites tested, the difference is
@@ -1312,7 +1312,7 @@ ejscreen_vs_explain_meterstats = function(whyall, radius) {
 #'   Any differences are due to slight variations in
 #'   - details of the spatial calculations (which blocks are nearby,
 #'   sometimes counting 1 extra block as 2.995 miles away while
-#'   EJScreen counts it as outside the 3 mile radius, e.g.,
+#'   EJSCREEN counts it as outside the 3 mile radius, e.g.,
 #'   often differing by just <50 feet out of 3 miles).
 #'   and possibly other factors like
 #'   - rounding  (how many digits are retained during calculations,
@@ -1544,7 +1544,7 @@ ejscreen_vs <- function(defdir = '.',
 
   # where to save results? ####
 
-  timetxt =  substr(gsub(':','.',Sys.time()), 1, 16)
+  timetxt = Sys.time_txt()
 
   ## note save_ejscreen_output is NOT the same as savedejscreentableoutput !
   save_ejscreen_output <- file.path(mydir, "ejscreenapi_plus_out.rda")
@@ -1574,7 +1574,7 @@ ejscreen_vs <- function(defdir = '.',
     if (newpts) {
       usesavedejscreen <- FALSE
     } else {
-      usesavedejscreen <- askYesNo("Use saved EJScreen results from prior run?")
+      usesavedejscreen <- askYesNo("Use saved EJSCREEN results from prior run?")
       if (is.na(usesavedejscreen)) {stop('canceled')}
     }
   } else {

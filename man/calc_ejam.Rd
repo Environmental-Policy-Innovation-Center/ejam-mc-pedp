@@ -26,7 +26,7 @@ may be used by custom_doaggregate()
 }
 \examples{
 \dontrun{
-### example using just 10 block groups from 1 county in Delaware
+### example using just 10 blockgroups from 1 county in Delaware
 
  c1 <- fips2countyname(fips_counties_from_state_abbrev('DE'), includestate = FALSE)[1]
  bgdf = data.frame(EJAM::blockgroupstats[ST == "DE" & countyname == c1, ])[1:10, ]

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_metadata_add.R
 \name{metadata_check}
 \alias{metadata_check}
-\title{helper function in updating the package metadata}
+\title{helper function in updating the package metadata, used by scripts in /data-raw/}
 \usage{
 metadata_check(
   packages = EJAM::ejampackages,
@@ -37,15 +37,19 @@ It loads unloaded packages as needed, which you might not want it to do,
 but it is not coded to be able to check attributes without doing that.
 }
 \examples{
-  # tail(metadata_check( ))
-  metadata_check(packages = NULL)
+x = metadata_check( which = "ejam_package_version")
+x[!x$ejam_package_version \%in\% "2.32.6", ]
 
-  x <- metadata_check("EJAM")
+  # tail(EJAM:::metadata_check( ))
+  EJAM:::metadata_check(packages = NULL)
+
+  x <- EJAM:::metadata_check_print("EJAM")
   x[x$has_metadata == TRUE, ]
   table(x$has_metadata)
 
 }
 \seealso{
+\code{\link[=metadata_check_print]{metadata_check_print()}} \code{\link[=metadata_check]{metadata_check()}} \code{\link[=metadata_add]{metadata_add()}} \code{\link[=metadata_update_attr]{metadata_update_attr()}}
 \code{\link[=pkg_functions_and_data]{pkg_functions_and_data()}}
 }
 \keyword{internal}

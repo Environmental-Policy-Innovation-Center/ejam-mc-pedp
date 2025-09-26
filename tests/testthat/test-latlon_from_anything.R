@@ -1,7 +1,7 @@
 
 ################################################ #
 
-testthat::test_that("latlon_from_anything works with data.frames", {
+testthat::test_that("it works with data.frame pts", {
 
   expect_no_error({
     x <- latlon_from_anything(testpoints_100[1:6, ])
@@ -18,10 +18,70 @@ testthat::test_that("latlon_from_anything works with data.frames", {
   expect_true(
     all(c("lat", "lon") %in% names(x))
   )
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
 })
 ################################################ #
 
-testthat::test_that("latlon_from_anything returns lat,lon as colnames even if aliases provided and order differs", {
+testthat::test_that("it works with SHAPEFILE with INTPTLAT INTPTLON", {
+
+  expect_no_error({
+    suppressMessages({
+    x <- latlon_from_anything(testinput_shapes_2)
+    })
+  })
+  expect_equal(
+    NROW(x), 2
+  )
+  expect_true(
+    all(c("lat", "lon") %in% names(x))
+  )
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
+})
+################################################ #
+
+testthat::test_that("it works with SHAPEFILE with geometry NOT INTPTLAT INTPTLON", {
+
+  expect_no_error({
+    suppressMessages({
+      x <- latlon_from_anything(testinput_shapes_2[,c("NAME", "geometry")])
+  })
+})
+  expect_equal(
+    NROW(x), 2
+  )
+  expect_true(
+    all(c("lat", "lon") %in% names(x))
+  )
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
+})
+################################################ #
+
+testthat::test_that("latlon_from_anything() ok if only NA,NA pts", {
+
+  expect_no_error({
+    expect_warning({
+    x <- latlon_from_anything(data.frame(lat=NA, lon=NA))
+    })
+  })
+  expect_equal(NROW(x), 1)
+})
+################################################ #
+
+testthat::test_that("latlon_from_anything() ok if some NA,NA pts", {
+
+  expect_no_error({
+    expect_warning({
+      x = latlon_from_anything(data.frame(lat=c(35,NA), lon=c(-100,NA)))
+    })
+  })
+  expect_equal(NROW(x), 2)
+})
+################################################ #
+
+testthat::test_that("it returns lat,lon as colnames even if aliases provided and order differs", {
   suppressWarnings({
     x <- latlon_from_anything(data.frame(n = 1, Longitude = -110, other = 1, latitude = 33))
   })
@@ -31,7 +91,7 @@ testthat::test_that("latlon_from_anything returns lat,lon as colnames even if al
 })
 ################################################ #
 
-testthat::test_that("latlon_from_anything prefers lat,lon if other aliases also exist", {
+testthat::test_that("it prefers lat,lon if other aliases also exist", {
   expect_no_error({
    x <- latlon_from_anything(data.frame(lat = 32, lon = -100, longitude = 0, Latitude = 0))
   })
@@ -41,7 +101,7 @@ testthat::test_that("latlon_from_anything prefers lat,lon if other aliases also 
 })
 ################################################ #
 
-testthat::test_that("latlon_from_anything warns if lat, lon switched", {
+testthat::test_that("it warns if lat, lon switched", {
  expect_warning(
    expect_warning(
    expect_warning({
@@ -50,16 +110,18 @@ testthat::test_that("latlon_from_anything warns if lat, lon switched", {
  ))
 })
 
-testthat::test_that("latlon_from_anything works with x, y vectors", {
+testthat::test_that("it works with x, y vectors", {
   expect_no_error({
     x <- latlon_from_anything(testpoints_100$lat[1:6], testpoints_100$lon[1:6])
     y <- latlon_from_anything(testpoints_100[1:6, ])
   })
   expect_identical(x[, c("lat", "lon")], y[, c("lat", "lon")])
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
 })
 ################################################ #
 
-testthat::test_that("latlon_from_anything works with 1-row data.frame", {
+testthat::test_that("it works with 1-row data.frame", {
   expect_no_error({
     x <- latlon_from_anything(data.frame(lat = testpoints_10$lat[1], lon = testpoints_10$lon[1]))
     y <- latlon_from_anything(testpoints_10$lat[1], testpoints_10$lon[1])
@@ -84,7 +146,7 @@ testthat::test_that("latlon_from_anything works with 1-row data.frame", {
 })
 ################################################ #
 
-testthat::test_that("latlon_from_anything accepts data.table or data.frame", {
+testthat::test_that("it accepts data.table or df", {
 
  expect_no_error({
    # check 1-row dt
@@ -103,7 +165,7 @@ testthat::test_that("latlon_from_anything accepts data.table or data.frame", {
 })
 ################################################ #
 
-testthat::test_that("latlon_from_anything works with tibbles", {
+testthat::test_that("it works with tibbles", {
 
   expect_no_error({
     x <- latlon_from_anything(tibble(lat = testpoints_10$lat, lon = testpoints_10$lon))
@@ -114,10 +176,12 @@ testthat::test_that("latlon_from_anything works with tibbles", {
     y ,
     ignore_attr = TRUE
   )
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
 })
 ################################################ #
 
-testthat::test_that("latlon_from_anything (after create tempfile) works with csv", {
+testthat::test_that("it (after create tempfile) works with csv", {
   suppressWarnings({
     tfile <- tempfile("junk", fileext = ".csv")
     testthat::skip_if(!dir.exists(dirname(tfile)), message = "cannot create tempfile, so skipping test")
@@ -126,10 +190,12 @@ testthat::test_that("latlon_from_anything (after create tempfile) works with csv
   x <- latlon_from_anything(tfile)
   y <- latlon_from_anything(testpoints_10[1:2, ])
   testthat::expect_equal(x, y, ignore_attr = TRUE)
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
 })
 ################################################ #
 
-testthat::test_that("latlon_from_anything works with xlsx", {
+testthat::test_that("it works with xlsx", {
 
   fname <- system.file("./testdata/latlon/testpoints_10.xlsx", package = "EJAM")
   #fname <- "./inst/testdata/latlon/testpoints_10.xlsx"
@@ -139,10 +205,12 @@ testthat::test_that("latlon_from_anything works with xlsx", {
     {x <- latlon_from_anything(fname)}
   )
   expect_equal(NROW(x), 10)
+  expect_true(all(sapply(x[,c("lat","lon")], is.numeric)))
+  expect_true(all(latlon_is.valid(lat=x$lat,lon = x$lon)))
 })
 ################################################ #
 
-testthat::test_that("latlon_from_anything works with matrix", {
+testthat::test_that("it works with matrix", {
 
   x <- matrix(c(34, 35, -110, -111), nrow = 2, ncol = 2)
   colnames(x) <- c("Latitude", "Longitude")
@@ -162,5 +230,8 @@ testthat::test_that("latlon_from_anything works with matrix", {
     colnames(x2),
     c("lat",   "lon",   "valid", "invalid_msg")
   )
+  expect_true(all(sapply(x[,c("Latitude","Longitude")], is.numeric)))
+  x=as.data.frame(x)
+  expect_true(all(latlon_is.valid(lat=x$Latitude,lon = x$Longitude)))
 })
 ################################################ #

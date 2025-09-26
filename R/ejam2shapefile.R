@@ -1,6 +1,6 @@
 
 
-#' export EJAM results as geojson/zipped shapefile/kml for use in ArcPro, EJScreen, etc.
+#' export EJAM results as geojson/zipped shapefile/kml for use in ArcPro, EJSCREEN, etc.
 #'
 #' @param ejamitout output of EJAM such as from [ejamit()]
 #' @param file optional filename with no path, with extension one of "geojson"/"json", "shp", "zip", "kml"
@@ -69,7 +69,7 @@ ejam2shapefile <- function(ejamitout,
   } else {
     if (all(varnames[1] == "basic250")) {
       # because shapefiles have a cap on number of fields in some implementations
-      # omits averages, ratios, and raw EJ scores, which are not essential or are not in typical EJScreen outputs
+      # omits averages, ratios, and raw EJ scores, which are not essential or are not in typical EJSCREEN outputs
       names_basic250 <- sort(grep("^avg|^state.avg|^ratio|^EJ.D|^state.EJ", names(df), invert = T, value = T))
       ok <- names_basic250 %in% names(df)
       if (any(!ok)) {warning("Some of basic250 varnames not found in ejamitout$results_bysite")}
@@ -122,8 +122,8 @@ To include specific columns provides those as a character vector of varnames.")
 
     ## folder OK? ####
     if (interactive() && !shiny::isRunning()) {
-      if (missing(folder)) {
-        folder <- rstudioapi::selectDirectory("Select/confirm Folder to Save in", path = folder)
+      if (!dir.exists(folder)) {
+        folder <- rstudioapi::selectDirectory("Select valid Folder to Save in", path = folder)
       }
     }
     if (!dir.exists(folder)) {stop("folder does not exist")}
@@ -160,7 +160,7 @@ To include specific columns provides those as a character vector of varnames.")
       }
 
       if (ftype %in% c("geojson", "json")) {
-        # junk = capture.output({
+        junk = capture.output({
         sf::st_write(
           obj = bysite_shp,
           dsn = finalpath,
@@ -170,9 +170,9 @@ To include specific columns provides those as a character vector of varnames.")
           quiet = quiet,
           ...
         )
-        # })
+        })
       } else {
-        # junk = capture.output({
+        junk = capture.output({
         sf::st_write(
           obj = bysite_shp,
           dsn = finalpath,
@@ -182,7 +182,7 @@ To include specific columns provides those as a character vector of varnames.")
           quiet = quiet,
           ...
         )
-        # })
+        })
       }
     }
     ##################################### #
@@ -216,7 +216,7 @@ To include specific columns provides those as a character vector of varnames.")
         message("File by that name already exists, but will overwrite it.")
         file.remove(file.path(tds, file))
       }
-      # junk = capture.output({
+      junk = capture.output({
       sf::st_write(
         obj = bysite_shp,
         dsn = file.path(tds, file),
@@ -225,7 +225,7 @@ To include specific columns provides those as a character vector of varnames.")
         quiet = quiet,
         ...
       )
-      # })
+      })
       if (!file.exists(file.path(tds, file))) {stop('could not write to file at ', file.path(tds, file))}
 
       # now make it a zip file
@@ -237,7 +237,9 @@ To include specific columns provides those as a character vector of varnames.")
       # delete any old version of zip
       if (file.exists(zipfullpath)) {file.remove(zipfullpath)}
       # write zip to folder, using shp files in temp dir
-      zip(zipfullpath, files = file.path(tds, fnames), extras = c('-j', '-D'))
+      junk <- capture.output({
+        zip(zipfullpath, files = file.path(tds, fnames), extras = c('-j', '-D'))
+      })
       # Note:
       # -D should prevent storing Directory info,
       # -j is supposed to use no path info so files are all in root of .zip and there are not folders inside the .zip

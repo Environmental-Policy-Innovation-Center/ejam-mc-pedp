@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreenapi.R
 \name{ejscreenapi}
 \alias{ejscreenapi}
-\title{Use EJScreen API to get stats on one or more circular buffers}
+\title{Use EJSCREEN API to get stats on one or more circular buffers}
 \usage{
 ejscreenapi(
   lon,
@@ -71,17 +71,17 @@ TRUE if you want to try to extract ST abbrev and statename from the placename fi
 which is more likely to be correct than the stateAbbr and stateName fields in the API output.}
 }
 \description{
-Get a data.table of EJScreen report results for one or multiple circular buffers.
+Get a data.table of EJSCREEN report results for one or multiple circular buffers.
 }
 \details{
 Specify a radius and vector of latitude longitude points,
 and get for a buffer the population weighted mean value of each raw indicator
 like percent low-income, and total population count, and percentiles for those
-raw indicator scores, all from EJScreen, as in an EJScreen standard report.
+raw indicator scores, all from EJSCREEN, as in an EJSCREEN standard report.
 
 The functions \code{\link[=ejscreenapi_plus]{ejscreenapi_plus()}} and \code{\link[=ejscreenit]{ejscreenit()}} are higher-level functions
 that provide renamed variables in their outputs.
-Column names returned by ejscreenapi() are those provided by the EJScreen API,
+Column names returned by ejscreenapi() are those provided by the EJSCREEN API,
 e.g., RAW_D_INCOME, not the renamed variables like pctlowinc etc. or Percent Low Income
 
 \code{\link[=ejscreenRESTbroker]{ejscreenRESTbroker()}} is the lowest level function here for access to the API.
@@ -121,19 +121,18 @@ rather than the code requesting results via the API.
 See  \url{https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/ejscreen-api}
 }
 \examples{
- 
  \donttest{
  # Specify size of buffer circle and pick random points as example data
  myradius <- 1
  pts2 <- data.frame(lon = c(-111.9040233, -73.7917865), lat = c(33.5604162, 41.0613821))
  pts5 <- testpoints_5
- 
+
  out <- ejscreenapi(lon = pts2$lon, lat = pts2$lat, radius = myradius)
  head(t(out))
  outnice <- ejscreenapi(lon = pts2$lon, lat = pts2$lat, radius = myradius, nicenames = TRUE)
  head(t(outnice), 24)
  }
- 
+
 }
 \seealso{
 \code{\link[=ejscreenit]{ejscreenit()}} \code{\link[=ejscreenapi_plus]{ejscreenapi_plus()}} \code{\link[=ejscreenapi]{ejscreenapi()}}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs_ejam_1var_bysite}
 \alias{ejscreen_vs_ejam_1var_bysite}
-\title{EJAM/EJSCREEN comparisons - see 1 site/row, check estimates for 1 indicator}
+\title{EJAM / EJSCREEN comparisons - see 1 site/row, check estimates for 1 indicator}
 \usage{
 ejscreen_vs_ejam_1var_bysite(vs, pts, varname = "blockcount_near_site")
 }
@@ -17,7 +17,7 @@ ejscreen_vs_ejam_1var_bysite(vs, pts, varname = "blockcount_near_site")
 table
 }
 \description{
-EJAM/EJSCREEN comparisons - see 1 site/row, check estimates for 1 indicator
+EJAM / EJSCREEN comparisons - see 1 site/row, check estimates for 1 indicator
 }
 \seealso{
 \code{\link[=ejscreen_vs]{ejscreen_vs()}}

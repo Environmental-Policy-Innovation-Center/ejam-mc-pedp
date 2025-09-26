@@ -50,9 +50,9 @@ Like latlon_from_anything() but this also adds a ejam_uniq_id column
  sitepoints_from_any(pts)
  pts = data.table(Lat = testpoints_10$lat, Long = testpoints_10$lon)
  sitepoints_from_any(pts)
- 
+
  sitepoints_from_anything(testpoints_bad, set_invalid_to_na = F, invalid_msg_table = T)
- 
+
  \donttest{
  if (interactive()) {
    pts <- sitepoints_from_any()
@@ -61,4 +61,5 @@ Like latlon_from_anything() but this also adds a ejam_uniq_id column
  pts = system.file("testdata/latlon/testpoints_10.xlsx", package = "EJAM")
  sitepoints_from_any(pts)
  }
+
 }

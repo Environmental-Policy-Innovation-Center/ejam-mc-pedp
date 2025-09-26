@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs_ejam_summary_byvarlist}
 \alias{ejscreen_vs_ejam_summary_byvarlist}
-\title{EJAM/EJSCREEN comparisons - see summary stats after ejscreen_vs_ejam() for JUST 1 VARLIST at a time, just 2-3 key stats
+\title{EJAM / EJSCREEN comparisons - see summary stats after ejscreen_vs_ejam() for JUST 1 VARLIST at a time, just 2-3 key stats
 What percent of sites have agreement to +-1\%? etc.}
 \usage{
 ejscreen_vs_ejam_summary_byvarlist(
@@ -25,7 +25,7 @@ table of a few rounded metrics like what percent of sites agree to within 1\%? r
 for the long list of indicators
 }
 \description{
-EJAM/EJSCREEN comparisons - see summary stats after ejscreen_vs_ejam() for JUST 1 VARLIST at a time, just 2-3 key stats
+EJAM / EJSCREEN comparisons - see summary stats after ejscreen_vs_ejam() for JUST 1 VARLIST at a time, just 2-3 key stats
 What percent of sites have agreement to +-1\%? etc.
 }
 \keyword{internal}
