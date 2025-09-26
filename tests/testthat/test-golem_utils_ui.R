@@ -1,3 +1,12 @@
+test_that("Test enurl works", {
+  expect_s3_class(enurl("https://www.thinkr.fr", "ThinkR"), "shiny.tag")
+  expect_equal(
+    as.character(enurl("https://www.thinkr.fr", "ThinkR")),
+    '<a href="https://www.thinkr.fr">ThinkR</a>'
+  )
+})
+
+
 # test_that("Test with_red_star works", {
 #   expect_s3_class(with_red_star("golem"), "shiny.tag")
 #   expect_equal(
@@ -133,14 +142,6 @@
 #   expect_equal(
 #     as.character(rep_br(5)),
 #     "<br/> <br/> <br/> <br/> <br/>"
-#   )
-# })
-#
-# test_that("Test enurl works", {
-#   expect_s3_class(enurl("https://www.thinkr.fr", "ThinkR"), "shiny.tag")
-#   expect_equal(
-#     as.character(enurl("https://www.thinkr.fr", "ThinkR")),
-#     '<a href="https://www.thinkr.fr">ThinkR</a>'
 #   )
 # })
 #

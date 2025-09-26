@@ -22,21 +22,21 @@ default_metadata <- list(
   #   "2.32.0" ok, but not "2.32.0-ejscreen2.32"
   ejam_package_version          = description_file$get("Version"),
 
-  ejscreen_version      = description_file$get("EJScreenVersion"),
-  ejscreen_releasedate  = description_file$get("EJScreenReleaseDate"),
-  acs_releasedate       = description_file$get("ACSReleaseDate"),
-  acs_version           = description_file$get("ACSVersion"),
-  census_version        = description_file$get("CensusVersion")
+  ejscreen_version      = description_file$get("VersionEJSCREEN"),
+  ejscreen_releasedate  = description_file$get("ReleaseDateEJSCREEN"),
+  acs_releasedate       = description_file$get("ReleaseDateACS"),
+  acs_version           = description_file$get("VersionACS"),
+  census_version        = description_file$get("VersionCensus")
 )
 
 # > dput(default_metadata)
 # list(
 #   ejam_package_version = c(Version = "2.32.0"),
-#   ejscreen_version     = c(EJScreenVersion = "2.32"),
-#   ejscreen_releasedate = c(EJScreenReleaseDate = "2024-08-12"),
-#   acs_releasedate      = c(ACSReleaseDate = "2023-12-07"),
-#   acs_version          = c(ACSVersion = "2018-2022"),
-#   census_version       = c(CensusVersion = "2020")
+#   ejscreen_version     = c(VersionEJSCREEN = "2.32"),
+#   ejscreen_releasedate = c(ReleaseDateEJSCREEN = "2024-08-12"),
+#   acs_releasedate      = c(ReleaseDateACS = "2023-12-07"),
+#   acs_version          = c(VersionACS = "2018-2022"),
+#   census_version       = c(VersionCensus = "2020")
 # )
 #################################################### #
 
@@ -51,11 +51,11 @@ metadata_mapping <- list(
   # datacreate_bg_cenpop2020.R
   bg_cenpop2020 =	list(
     source = "https://www2.census.gov/geo/docs/reference/cenpop2020/blkgrp/CenPop2020_Mean_BG.txt",
-    census_version = description_file$get("CensusVersion")
+    census_version = description_file$get("VersionCensus")
   ),
 
   # datacreate_blockgroupstats2.32.R
-  # rstudioapi::documentOpen("./R/datacreate_blockgroupstats2.32.R")
+  # rstudioapi::documentOpen("./data-raw/datacreate_blockgroupstats2.32.R")
   blockgroupstats =	default_metadata,
 
   # datacreate_usastats2.32.R  and others
@@ -69,8 +69,8 @@ metadata_mapping <- list(
 
   # datacreate_map_headernames.R
   map_headernames = list(
-    ejscreen_version      = description_file$get("EJScreenVersion"),
-    ejscreen_releasedate  = description_file$get("EJScreenReleaseDate")
+    ejscreen_version      = description_file$get("VersionEJSCREEN"),
+    ejscreen_releasedate  = description_file$get("ReleaseDateEJSCREEN")
   ),
 
   # datacreate_formulas.R

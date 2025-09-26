@@ -49,7 +49,7 @@ Note a zip can be the same as a county fips in many cases, as with 10001!
 
 ![many county fips are also a zipcode](images/many_county_fips_are_also_a_zipcode.png){width="75%"}
 
-EJScreen's API does not handle zip codes. It can show where the center of the zip code is but will not map its bounds or provide a report easily via the API.
+The original (pre-2025) EJSCREEN API did not handle zip codes. It can show where the center of the zip code is but will not map its bounds or provide a report easily via the API.
 
 ```{r, eval=FALSE, include=TRUE}
 # Just see where the zipcode is, not its boundaries
@@ -64,7 +64,7 @@ Takes time to download!
 
 ```{r tigris, eval=FALSE, include=TRUE}
 library(tigris)
-options(tigris_use_cache=TRUE)
+# options(tigris_use_cache=TRUE) # done by EJAM load/attach
 options(tigris_refresh=FALSE)
 #zcta_DE <- zctas(starts_with = fips_from_name('DE'), keep_zipped_shapefile = T) # all in the state
 #zcta1 <- zctas(starts_with = c("10001"))  # one zip
@@ -98,11 +98,13 @@ shp1 <- sf::st_read(text1)
 mapview::mapview(shp1)
 ```
 
+## see EJSCREEN map at a zip code
 
+browseURL(url_ejscreenmap(wherestr =  '20019'))
 
 ## analyzing zip codes in EJAM
 
-The EJScreen API does not handle zip codes, but you can analyze them in EJAM like this:
+You can analyze zip codes in EJAM like this:
 
 ```{r, eval=FALSE, include=TRUE}
 out = ejamit(shapefile = z, radius = 0)

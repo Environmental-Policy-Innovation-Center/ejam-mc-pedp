@@ -61,7 +61,7 @@ created using indexpoints() which uses the SearchTree package.}
 Given a set of frompoints (e.g., facilities or blocks) and a specified radius in miles,
 this function quickly finds all the topoints (e.g., blocks or facilities) near each point.
 If from and to are facilities and census blocks, respectively, this can be used to aggregate
-over block groups near a facility for an EJAM analysis. But if it is used to define from
+over blockgroups near a facility for an EJAM analysis. But if it is used to define from
 as blocks and to as facilities, it finds all facilities near each block, which is how
 proxistat works to create proximity indicators.
 }

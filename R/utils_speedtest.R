@@ -99,8 +99,7 @@ speedtest <- function(n=10, sitepoints=NULL, weighting='frs',
 
   if (logging |  !missing(logfolder) | !missing(logfilename))  {
     # PREP LOG FILE
-    now <- function() {gsub("-","", gsub(':', '', gsub(' ', '_', Sys.time())))}
-    logfilename <- paste0("logfile_", ntextfile, "_pts_", rtextfile, "_miles_", now(), ".txt")  # file.path(logfolder, fname)
+    logfilename <- paste0("logfile_", ntextfile, "_pts_", rtextfile, "_miles_", Sys.time_txt(), ".txt")  # file.path(logfolder, fname)
     logto = file.path( logfolder, logfilename)
     # START LOGGING
     sink(file = logto, split = TRUE)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreenapi_plus.R
 \name{ejscreenapi_plus}
 \alias{ejscreenapi_plus}
-\title{Given a set of points (lat lon), get table of EJScreen API results near each}
+\title{Given a set of points (lat lon), get table of EJSCREEN API results near each}
 \usage{
 ejscreenapi_plus(
   x,
@@ -52,7 +52,7 @@ or data.frame or data.table with lat,lon}
 
 \item{on_server_so_dont_save_files}{default is FALSE, but set to TRUE if this is run on a server}
 
-\item{ipurl}{change only if different URL has to be used for the EJScreen API}
+\item{ipurl}{change only if different URL has to be used for the EJSCREEN API}
 
 \item{mapping_for_names}{a table that translates between original (as on FTP site),
 short friendly (useful in coding or analysis),
@@ -76,13 +76,13 @@ with over 300 columns.
 \code{\link[=ejscreenit]{ejscreenit()}} returns that as one element of a list that also has a map and plot.
 }
 \description{
-Using EJScreen API without Shiny app interface
+Using EJSCREEN API without Shiny app interface
 }
 \details{
 See \code{\link[=ejscreenit]{ejscreenit()}} for more details on this.
 \code{\link[=ejscreenit]{ejscreenit()}} uses functions below, but returns a list with table, map, plot, etc.
 \code{\link[=ejscreenapi_plus]{ejscreenapi_plus()}} accepts file or table or vectors of point data,
-uses \code{\link[=ejscreenapi]{ejscreenapi()}} to get EJScreen stats,
+uses \code{\link[=ejscreenapi]{ejscreenapi()}} to get EJSCREEN stats,
 and then prepends input table and renames columns, to return a table.
 \code{\link[=ejscreenapi]{ejscreenapi()}}    gets EJ stats for many points as a data.table of many rows.
 \code{\link[=ejscreenapi1]{ejscreenapi1()}} gets EJ stats for 1 point via API, as data.frame of 1 row.

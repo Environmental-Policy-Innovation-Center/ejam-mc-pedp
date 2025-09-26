@@ -235,7 +235,7 @@ batch.summarize <- function(ejamitout,
   #  Not 100% clear that makes sense. It is conservative and useful if normally 0 or 1 in an entire BG - assumes the 1 is in your intersected part of BG.
   #  If often many schools per BG, probably you want to simply report the avg person analyzed has 3 in their entire bg not 3 in the analyzed parts of their bg.
   #  And avg bgcount of demog counts is not useful anyway.
-  #   we dont really need avg count like how many hispanics are in the entire block group of the average resident...
+  #   we dont really need avg count like how many hispanics are in the entire blockgroup of the average resident...
   #   but we do want how many NPL sites or schools are in the (entire?) blockgroup of the average resident.
   #  Like  npl.count (not npl.count*bgwt) is the count indicator of entire BG (even if only part of it is "at" sites)
   #  pophere=(pop * bgwt) is the wt for wtdmean and for wtd pctile. so wtdmean npl.count = sum(npl.count * pop*bgwt) / sum(pop*bgwt)
@@ -254,7 +254,7 @@ batch.summarize <- function(ejamitout,
   #   if ANY portion of the bg intersects the sites analyzed
   #   since we don't know which part of bg does (if it is the part that is "at" a site).
   #   That would suggest unweighted max/min, ("max" would just tell you if any site intersected)
-  #   but sum of flags over bgs, people just tells you how many block groups overlapped Tribal or whatever - not useful.
+  #   but sum of flags over bgs, people just tells you how many blockgroups overlapped Tribal or whatever - not useful.
 
   #  What about # of people overall (and maybe by site??) overlapping with a Tribal or nonattainment or CEJST area?
   #  Want to know how many people have the flag, ie how many are in BGs that are in nonattainment areas.
@@ -452,7 +452,7 @@ batch.summarize <- function(ejamitout,
 
   ###################
   #
-  ## ...min BLOCKGROUP (any person's block group) score ####
+  ## ...min BLOCKGROUP (any person's blockgroup) score ####
 
   #  MIN/MAX BG-SCORE was not done correctly here yet
 
@@ -481,7 +481,7 @@ batch.summarize <- function(ejamitout,
 
   ################### #
 
-  ## ...max BLOCKGROUP (any person's block group) score ####
+  ## ...max BLOCKGROUP (any person's blockgroup) score ####
 
   #  MIN/MAX BG-SCORE was not done correctly here yet
 

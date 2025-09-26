@@ -4,10 +4,12 @@
 \alias{fips_lead_zero}
 \title{FIPS - Add leading zeroes to fips codes if missing, replace with NA if length invalid}
 \usage{
-fips_lead_zero(fips)
+fips_lead_zero(fips, quiet = TRUE)
 }
 \arguments{
 \item{fips}{vector of numeric or character US FIPS codes}
+
+\item{quiet}{whether to warn on invalid fips}
 }
 \value{
 vector of same length

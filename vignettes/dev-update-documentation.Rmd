@@ -70,7 +70,7 @@ Each is explained below:
     `CONTRIBUTING.md` used to make [CONTRIBUTING](../CONTRIBUTING.html),
     [LICENSE](../LICENSE.html) based on `inst/LICENSE.md`,
     [CITATION](../authors.html#citation) based on `inst/CITATION`, 
-    and others.
+    CITATION.cff, and others.
 
 -   Some of these are used by and shown by the github.com repository, notably
     the `README.md` that is generated from the `README.Rmd` file and appears on
@@ -123,7 +123,7 @@ Each is explained below:
 ### User Guide: help for people using the web app
 
 -   If you change the UI then new screenshots are needed for a new version of
-    the User Guide that was stored as a .pdf document.
+    the User Guide that was stored as a .pdf document built from a Word doc.
 
 ### Spell-checking package-wide
 
@@ -172,10 +172,10 @@ who is managing the package, as follows:
     the .yml file.
 
 -   The pkgdown-based webpages should be updated by someone who is managing the
-    package, and they should use the `update_pkgdown()` function found in
-    `data-raw/datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R` You have to
-    `source()` that file and then use the function that it defines. Via that
-    function, the pages get rebuilt by the `{pkgdown}` R package, based on the
+    package, and they should use the `pkgdown_update()` function mentioned in
+    `data-raw/datacreate_0_UPDATE_ALL_DOCUMENTATION_pkgdown.R` 
+    You use the function pkgdown_update() so that the 
+    pages get rebuilt by the `{pkgdown}` R package, based on the
     above files and all other documentation from .R and .md files. For more
     information about using the `{pkgdown}` package to create documentation in
     the form of webpages, see [pkgdown
@@ -201,3 +201,6 @@ who is managing the package, as follows:
 -   depending on which folder you publish/deploy from, you might have to remove
     that folder from `.gitignore` in case it was listed there via some
     `{pkgdown}` or `{usethis}` function.
+
+-   The name of the repo from which documentation is published at any given time needs to be recorded as part of the URL parameter in the `DESCRIPTION` file in the root folder of the source package. That repo URL can be read from there using the unexported helper function `repo_from_desc()` as `EJAM:::repo_from_desc('github.io', get_full_url=T)`, which currently returns (`r docs_reponame_url`). Prior to mid-2025, documentation webpages had been on github pages at URLs related to the USEPA/EJAM and USEPA/EJAM-open repositories -- but those pages might be archived and/or unpublished, and that source of documentation has become obsolete.
+

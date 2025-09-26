@@ -6,22 +6,25 @@
 \usage{
 ejam2tableviewer(
   out,
-  fname = "automatic",
+  filename = "automatic",
   maxrows = 1000,
-  launch_browser = TRUE
+  launch_browser = TRUE,
+  ...
 )
 }
 \arguments{
 \item{out}{output of ejamit(), or one table like \code{ejamit()$results_overall},
 or subset like \code{ejamit()$results_bysite[7,]}}
 
-\item{fname}{optional. path and filename of the html file to save the table to,
+\item{filename}{optional. path and name of the html file to save the table to,
 or it uses tempdir() if not specified. Set it to NULL to prevent saving a file.}
 
 \item{maxrows}{only load/ try to show this many rows max.}
 
 \item{launch_browser}{set TRUE to have it launch browser and show report.
-Ignored if not interactive() or if fname is set to NULL.}
+Ignored if not interactive() or if filename is set to NULL.}
+
+\item{...}{passed to \code{\link[DT:datatable]{DT::datatable()}}}
 }
 \value{
 a datatable object using \code{\link[DT:datatable]{DT::datatable()}}

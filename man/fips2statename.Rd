@@ -2,7 +2,7 @@
 % Please edit documentation in R/FIPS_FUNCTIONS.R
 \name{fips2statename}
 \alias{fips2statename}
-\title{FIPS - Get state names from any type of FIPS codes}
+\title{FIPS - Get names of the States CONTAINING the given census units (of any type)}
 \usage{
 fips2statename(fips)
 }
@@ -13,14 +13,14 @@ fips2statename(fips)
 vector of state names
 }
 \description{
-FIPS - Get state names from any type of FIPS codes
+FIPS - Get names of the States CONTAINING the given census units (of any type)
 }
 \examples{
 n = 1:80
-stfips= fips_lead_zero(n)[!is.na(fips2state_abbrev(n))]
+stfips= fips_lead_zero(n)[!is.na(fips2stateabbrev(n))]
 data.frame(
   stfips = stfips,
-  ST = fips2state_abbrev(stfips),
+  ST = fips2stateabbrev(stfips),
   statename = fips2statename(stfips),
   region = fips_st2eparegion(stfips)
 )

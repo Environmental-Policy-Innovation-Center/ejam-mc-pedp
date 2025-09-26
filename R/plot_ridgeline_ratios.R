@@ -13,16 +13,16 @@
 #'
 #' @export
 #'
-plot_ridgeline_ratios_ez <- function(out, varnames = c(names_d_ratio_to_avg, names_d_subgroups_ratio_to_avg), 
+plot_ridgeline_ratios_ez <- function(out, varnames = c(names_d_ratio_to_avg, names_d_subgroups_ratio_to_avg),
                                      main = 'Variations among Sites',
                                      maxratio = 5) {
-  
+
   ratio.to.us.d.bysite <- out$results_bysite[, varnames, with = FALSE]
-  
+
   x <- as.matrix(ratio.to.us.d.bysite)
   x <- data.table::data.table(x)
   # now cap the ratio, for better plot, in the function below
-  
+
   plot_ridgeline_ratios(x, maxratio = maxratio, main = main)
 }
 ############################################################################################# #
@@ -31,6 +31,7 @@ plot_ridgeline_ratios_ez <- function(out, varnames = c(names_d_ratio_to_avg, nam
 #' Make ridgeline plot of ratios of residential population percentage to its average
 #'
 #' @param ratio.to.us.d.bysite named list of a few ratios to plot (data.frame)
+#' @param main optional title for ggplot2
 #' @param shortlabels names to use for plot - should be same length as named list ratio.to.us.d.overall
 #' @param maxratio largest ratio to plot in case of outliers, so plot looks better
 #' @examples
@@ -48,13 +49,13 @@ plot_ridgeline_ratios_ez <- function(out, varnames = c(names_d_ratio_to_avg, nam
 plot_ridgeline_ratios <- function(ratio.to.us.d.bysite, shortlabels = NULL,
                                   main = 'Variations among Sites',
                                   maxratio = 5) {
-  
+
   if (!is.null(main) && !('' %in% main)) {
     # use what they provided
   } else {
     main <- 'Variations among Sites'
   }
-  
+
   # if (is.null(dim(ratio.to.us.d.bysite))) {
   #   # seems like only 1 variable as vector ?
   #   ratio.to.us.d.bysite <- data.frame(Indicator = ratio.to.us.d.bysite)

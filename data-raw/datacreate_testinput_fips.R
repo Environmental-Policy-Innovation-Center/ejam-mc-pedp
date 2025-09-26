@@ -130,3 +130,29 @@ dataset_documenter(
   description = "Census FIPS codes vector as example of input, e.g., ejamit(fips = testinput_fips_blockgroups)"
 )
 ################################## #
+
+testinput_fips_mix =  c(
+  "091701844002024", # block
+  testinput_fips_blockgroups[1],
+  testinput_fips_tracts[2],
+  "4748000", ## Memphis  # testinput_fips_cities[1],
+  testinput_fips_counties[1],
+  testinput_fips_states[2]
+)
+
+# confirm it works in key functions
+x = testinput_fips_mix
+stopifnot(is.vector(x))
+stopifnot(all(fips_valid(x)))
+y = getblocksnearby_from_fips(x)
+shp <- shapes_from_fips(x)
+mapfast(shp )
+dim(shp)
+# 6 11
+
+usethis::use_data(testinput_fips_mix, overwrite = TRUE)
+dataset_documenter(
+  "testinput_fips_mix",
+  description = "Census FIPS codes vector as example, e.g., mapfast(shapes_from_fips(testinput_fips_mix))"
+)
+################################## #

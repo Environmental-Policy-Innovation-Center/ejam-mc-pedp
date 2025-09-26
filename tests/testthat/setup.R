@@ -1,8 +1,10 @@
 ############################### #
-cat("Starting setup.R for testing \n")
+cat("\n\n\n               !!!!!!!!!!!!!! Starting setup.R for testing !!!!!!!!!!!!!! \n\n\n")
 
-# # This script gets run before any test, so fixtures created here will be available to all the tests.
-# The file already does library(EJAM) and that should do .onAttach() and dataload_dynamic() and indexblocks()
+# see also   testthat.R
+
+# # This script SHOULD get run before tests, so fixtures created here will be available to all the tests.
+# The file does NOT? do library(EJAM) - that would do .onAttach() and dataload_dynamic() and indexblocks()
 
 # When tests try to test the shiny app, the app should handle using global_defaults_*.R
 
@@ -19,6 +21,89 @@ set_state_inspector(function() {
 EJAM:::offline_warning("NO INTERNET CONNECTION AVAILABLE - SOME TESTS MAY FAIL WITHOUT CLEAR EXPLANATION")
 EJAM:::offline_cat("\n\nNO INTERNET CONNECTION AVAILABLE - SOME TESTS MAY FAIL WITHOUT CLEAR EXPLANATION\n\n")
 # skip_if_offline()
+################################# # ################################# #
+
+# helpers to check the output of ejam2map() etc.
+map2popups <- # popups_from_leaflet <-
+  function(mymap) {
+    popup_data_where = which(sapply((mymap$x$calls[[2]])$args, function(z) (is.atomic(z) & is.character(z))) )
+    ((mymap$x$calls[[2]])$args)[[popup_data_where]]
+  }
+map2popups_urls <- # popup_urls_from_popups <-
+  function(mymap) {
+    popups_html <- map2popups(mymap)
+    if (!all(
+      grepl(".*href=\"([^<|\"]*)\".*",    popups_html   )
+    )) {
+      stop("cannot find URLs in popups")
+    }
+    # </a><br>
+    gsub(".*href=\"([^<|\"]*)\".*", "\\1", popups_html )
+  }
+map2sitetype <- function(mymap) {
+
+  # mymap_latlon$x$calls[[2]]$method
+  # [1] "addCircles"
+  # >  mymap_shp$x$calls[[2]]$method
+  # [1] "addPolygons"
+
+  meth = mymap$x$calls[[2]]$method
+  if (meth == "addCircles") {
+    return("latlon")
+  } else {
+    return("shp")
+  }
+}
+map2latlon <-
+  # latlon_from_leaflet_map <-
+  function(mymap) {
+    sitetype = map2sitetype(mymap)
+
+    if (sitetype == "latlon") {
+      # points map case:
+      lat = ((mymap$x$calls[[2]])$args)[[1]]
+      lon = ((mymap$x$calls[[2]])$args)[[2]]
+      pts = data.frame(lat=lat, lon = lon)
+      # plot(pts)
+    } else {
+      # polygon map case:
+      pts = ( (((mymap$x$calls[[2]])$args)[[1]])[1][[1]][[1]][[1]])
+      names(pts) <- c("lon", "lat")
+      # plot(pts); polygon(pts)
+    }
+    return(pts)
+  }
+map2viewdata =   function(mymap) {
+  print(mymap)
+  mypops <- map2popups(mymap)
+  cat("1st popup html text: \n\n")
+  print(mypops[1])
+  htmltools::html_print(shiny::HTML(mypops[1]), viewer = browseURL)
+  cat("\n")
+  myurls <- map2popups_urls(mymap)
+  print(cbind(myurls))
+  cat("\n")
+  mypts  <- map2latlon(mymap)
+  print(head(mypts))
+  cat("\n")
+  plot(mypts)
+  if (map2sitetype(mymap) != "latlon"){
+    polygon(mypts)
+  }
+  return(myurls)
+}
+############# #
+if (FALSE) {
+
+  mymap_latlon <- ejam2map(testoutput_ejamit_10pts_1miles, launch_browser = F) # functions dont work on this format
+  mymap_shp <- ejam2map(testoutput_ejamit_fips_counties, launch_browser = F) # functions work on this
+
+  map2viewdata(mymap_shp)
+
+  map2viewdata(mymap_latlon)
+
+}
+############# #
 
 ################################## #
 # GET DATA AND BUILD INDEX JUST IN CASE ####

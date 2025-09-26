@@ -320,7 +320,7 @@ pctile_from_raw_lookup <- function(myvector, varname.in.lookup.table, lookup=usa
   # datacols <- setdiff(names(usastats), c('PCTILE', 'REGION')); states <- unique(usastats$REGION);  for (myvar in datacols) {for (mystate in states) {z = statestats[mystate == usastats$REGION, myvar]
   #   if ((z[1] == z[2]) & (z[1] == 0)) {cat("in ",mystate, " for ", myvar, " = ", z[1], '\n')}}}
 
-  ## also, this probably happens for any set of tied threshold values (not only ties at min value) - but would need to confirm EJScreen was coded that way.
+  ## also, this probably happens for any set of tied threshold values (not only ties at min value) - but would need to confirm EJSCREEN was coded that way.
 
   # ** also using data.table might make this whole function significantly faster if statestats is a data.frame with keys REGION and PCTILE
   # pctile <- lookup[myvector >= ..varname.in.lookup.table, PCTILE[1]] # but also, if none where >= true, pctile <- lookup$PCTILE[1]

@@ -24,7 +24,7 @@
 #'  (which is more/less than one might expect
 #'    - leaving aside statistical significance
 #'  ie whether this could be by chance if sites were randomly picked
-#'  from US block groups or people's bg scores)
+#'  from US blockgroups or people's bg scores)
 #'
 #' @param x ratios derived from
 #'   a data.frame that is the output of ejscreen analysis, for example:

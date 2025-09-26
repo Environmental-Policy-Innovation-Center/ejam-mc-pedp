@@ -13,37 +13,7 @@
 library(shiny)
 EJAM::indexblocks()
 
-################################################################### #
-
-# CHECK (installed) PACKAGE VERSION ####
-
-ver <- EJAM:::description_file$get("Version") # object created in EJAM namespace by metadata_mapping.R when loaded/attached
-ejam_app_version <- substr(ver, start = 1, stop = gregexpr('\\.',ver)[[1]][2] - 1) ## trim version number to Major.Minor
-.app_version_headertext <- paste0("  (Version ", ejam_app_version, ")")
-rm(ver, ejam_app_version)
-
 ################################################################## #
-
-## ------------------------ Title of App ####
-
-app_title <- "Environmental and Residential Population Analysis Multisite tool"
-
-## ------------------------ logo ####
-
-## logo for app header:
-app_header_logo <- "www/favicon.png" # (small wordless hex)
-app_header_logo_html <- paste0(' <img id="titleLogo" src=', app_header_logo, ' alt="logo" title="logo"
-              style="margin: 0px; padding-bottom: 4px; padding-top: 4px; padding-left: 4px; padding-right: 4px; width: 40px; height: 40px">'
-)
-## old/alt one:
-# app_header_logo_html <- '<img id="titleLogo" src="www/epa_logo_horizBlue.png" alt="EPA" title="EPA"
-#             style="margin: 0px; padding-bottom: 4px; padding-top: 4px;   padding-left: 4px; padding-right: 4px">'
-
-## logo for About page:
-aboutpage_logo <- "www/ejamhex4.png" # (small wordless hex)
-# the width and height are defined in app_ui.R not here, in this case.
-################################################################## #
-# ~ ####
 # ------------------------ ____ SET APP DEFAULTS / OPTIONS ------------------------  ####
 # ~ ####
 # NOTE DEFAULTS HERE ARE UNRELATED TO DEFAULTS IN API module that has its own namespace and is kept separate, like default radius, etc.
@@ -59,14 +29,6 @@ use_shapefile_from_any <- TRUE # used below in list in more than one place so se
 ######################################################################################################## #
 
 global_defaults_shiny <- list(
-
-  ## .app_title ####
-  .app_title = app_title,
-
-  ## logos ####
-  aboutpage_logo = aboutpage_logo,
-  ## .community_report_logo_path is not needed here since since it is defined elsewhere, in global_defaults_package.R
-  ## app_header_logo_html is not needed here since it is simply used below in the html directly, not queried by app_ui.R
 
   ## tab shown at launch ####
   # if they are visible, can be "About" or "Advanced Settings" instead of 'Site Selection'
@@ -134,7 +96,7 @@ global_defaults_shiny <- list(
   stepradius = 0.05, # miles.  0.25 allows quarter miles. 0.10 allows tenths. 0.05 is awkwardly small but allows both quarter mile and tenth of mile.
 
   # input$radius_default   # initial value of slider
-  radius_default = 1,      # and can override this with run_app(radius_default=3.1), and also see effects of bookmarked advanced settings
+  radius_default = 1,      # and can override this with ejamapp(radius_default=3.1), and also see effects of bookmarked advanced settings
   radius_default_shapefile = 0,
 
   # input$max_miles        # current cap, top end of slider right now
@@ -147,6 +109,9 @@ global_defaults_shiny <- list(
 
   # upload or dropdown method of site selection
   default_upload_dropdown = "upload",
+  # global_default or ejamapp() parameter: default_upload_dropdown, which is initial selected value of
+  # input in advanced tab: input$default_ss_choose_method, which is initial selected value of
+  # input in server:              input$ss_choose_method
 
   # NAICS
   default_naics = "313", # 313 is about 900 textile mills and subcategories of that #  initial value of ss_select_naics
@@ -164,6 +129,9 @@ global_defaults_shiny <- list(
   ## ------------------------ fipspicker module ####
 
   # *** but perhaps these should be set only inside the module, just to avoid clutter, unneeded settings if module usused, and possible namespace conflicts. as had been noted for the ejscreenapi module settings
+  default_cities_picked = "",
+  default_counties_picked = "",
+  default_states_picked = "",
   fipspicker_fips_type2pick_default = "Counties",  #"Cities or Places",
   fipspicker_fips_type2pick_choices_default = c(
     # `EPA Regions` = "EPA Regions", # if we wanted to allow user to pick an entire EPA Region or two to compare. More useful for filtering mode, like if picking all states within Region 2.
@@ -261,7 +229,7 @@ global_defaults_shiny <- list(
   # retain_unadjusted_distance TRUE   ** shiny default NOT specified here
   # updateProgress             NULL   ** shiny default NOT specified here
 
-  default_avoidorphans        = FALSE, # seems like EJScreen itself essentially uses FALSE? not quite clear
+  default_avoidorphans        = FALSE, # seems like EJSCREEN itself essentially uses FALSE? not quite clear
   default_maxradius =  31.06856,  # max search dist if no block within radius # 50000 / meters_per_mile #, # 31.06856 miles !!
   # also used as the maxmax allowed
 
@@ -304,7 +272,7 @@ global_defaults_shiny <- list(
   # this sets the default in the web app only, not in functions doaggregate() and ejamit() and plot_distance_mean_by_group() etc.,
   # if used outside web app app_server and app_ui code, as in using datacreate_testpoints_testoutputs.R
   # "nh" for non-hispanic race subgroups as in Non-Hispanic White Alone, nhwa and others in names_d_subgroups_nh;
-  # "alone" for EJScreen v2.2 style race subgroups as in    White Alone, wa and others in names_d_subgroups_alone;
+  # "alone" for EJSCREEN v2.2 style race subgroups as in    White Alone, wa and others in names_d_subgroups_alone;
   # "both" for both versions.
 
 
@@ -394,6 +362,25 @@ global_defaults_shiny <- list(
   ## (download as excel vs csv, for ejscreenapi module)
   # asExcel <- TRUE # WHETHER TO DOWNLOAD RESULTS AS EXCEL OR CSV
 
+  ## ------------------------ by-site interactive web table ####
+
+  sitereport_download_buttons_show = FALSE,
+  sitereport_download_buttons_colname = "Download EJAM Report",
+
+  default_bysite_webtable_colnames = c('ejam_uniq_id',
+                                       # sitereport_download_buttons_colname will go here
+                                       sapply(EJAM:::global_or_param("default_reports"), function(x) x$header), # vector of colnames of reports
+                                       'lon', 'lat', "statename", 'invalid_msg',
+                                       'pop',
+                                       names_d_state_pctile,
+                                       names_d_subgroups_state_pctile,
+                                       names_e_state_pctile,
+                                       names_ej_state_pctile,
+
+                                       # names_d, names_d_subgroups, names_e,  # basic indicators but not percentiles, not ratios, not extra indicators, etc. !
+
+                                       "blockcount_near_site"
+  ),
 
   ## ------------------------ Excel formatting options ####
 
@@ -427,7 +414,7 @@ global_defaults_shiny <- list(
   # heatmap2_colnames            NULL            ***
   # heatmap2_cuts                expression      ***
   # heatmap2_colors              expression      ***
-  # hyperlink_colnames           expression   ***
+  # reports # not hyperlink_colnames           expression   ***
   # graycolnames                 NULL
   # narrowcolnames               NULL
   # graycolor                    "gray"
@@ -454,6 +441,9 @@ global_defaults_shiny <- list(
 
   ## ------------------------ Short report options ####
 
+  ## TO TURN OFF THE LOGO in the REPORT HEADER, set these to empty ""
+  # report_logo = "", report_html = "",
+  ## but to  use the logo, should be left as-set in global_defaults_package.R
 
   default_standard_analysis_title = 'Summary of Analysis', # Default title to show on each short report
   default_plotkind_1pager = "bar",  #    Bar = "bar", Box = "box", Ridgeline = "ridgeline"
@@ -482,7 +472,7 @@ global_defaults_shiny <- list(
 
 )
 ######################################################################################################## #
-
+# . ####
 # R and Shiny Options
 ## ------------------------ autoloading of .R files ####
 options(shiny.autoload.r = FALSE)
@@ -637,10 +627,11 @@ aboutpage_texts <- list(
     p("EJAM is a tool that makes it easy to see residential population and environmental information summarized in and across any list of places in the nation. Using this tool is like getting reports for hundreds or thousands of places, all at the same time."),
     p("This provides interactive results and a formatted, ready-to-share report with tables, graphics, and a map. The report can provide information about communities near any of the industrial facilities on a list, for example."),
 
-    p("This version of the Environmental and Residential Population Analysis Multisite tool (EJAM) is not associated with the United States Environmental Protection Agency (US EPA), but has its roots in open source code that was originally developed at EPA."),
+    p(paste0('This version of the ', EJAM:::global_or_param("app_title"),
+             ' (EJAM) is not associated with the United States Environmental Protection Agency (US EPA), but has its roots in open source code that was originally developed at EPA.')),
 
     h4("For more information about ",
-       a(href = "https://www.ejanalysis.org/status", "the evolving status of EJSCREEN & EJAM in 2025",
+       a(href = "https://www.ejanalysis.org/status", "the evolving status of EJSCREEN & EJAM since early 2025",
          target = "_blank", rel = "noreferrer noopener"),
        ", see ",
        a(href = "https://www.ejanalysis.org", "ejanalysis.org",
@@ -857,15 +848,17 @@ AIR,	IL000031012ACJ<br>
 # ~ ####
 # ------------------------ ____ TEMPLATE ONE EPA SHINY APP WEBPAGE _______ ####
 # ~ ####
+{ #          code-folding starting point for UI template -------------------------  #
+
 html_fmts <- list(
   html_header_fmt = tagList(
 
     #################################################################################################################### #
-    # WHERE TO FIND THIS template  #
-    #  USEPA/webcms/blob/main/utilities/r/OneEPA_template.R
+    # original starting point of this template was
+    #  github.com/USEPA/webcms/blob/main/utilities/r/OneEPA_template.R
     # but also see
     # https://www.epa.gov/themes/epa_theme/pattern-lab/patterns/pages-standalone-template/pages-standalone-template.rendered.html
-    # START OF ONEEPA SHINY APP WEB UI TEMPLATE to insert within your fluid page
+    # original starting point of SHINY APP WEB UI TEMPLATE to insert within an app's UI/fluid page
     #################################################################################################################### #
 
     tags$html(class = "no-js", lang = "en"),
@@ -919,9 +912,9 @@ html_fmts <- list(
       # and below in THIN HEADER ROW
       ## but not done this way:   tags$title('EJAM | US EPA'),
 
-      tags$meta(name = "application-name", content = app_title),
+      tags$meta(name = "application-name", content = EJAM:::global_or_param("app_title")),
 
-      ## Favicons can be specified in (and this would conflict with) golem_add_external_resources() within app_ui.R ####
+      ## (EPA-related) Favicons can be specified in (and this would conflict with) golem_add_external_resources() within app_ui.R ####
 
       # try to let app_ui.R define the main favicon instead of using the EPA one....
       # tags$link(rel="icon",                      href="https://www.epa.gov/themes/epa_theme/images/favicon-32.png", sizes="32x32"),
@@ -939,7 +932,7 @@ html_fmts <- list(
       tags$link(rel="apple-touch-icon-precomposed", sizes="72x72",   href="https://www.epa.gov/themes/epa_theme/images/favicon-72.png"),
       tags$link(rel="apple-touch-icon-precomposed",                  href="https://www.epa.gov/themes/epa_theme/images/favicon-180.png"),
 
-      ## Fonts/ Themes ####
+      ## (EPA-related) Fonts/ Themes ####
 
       tags$link(rel="preload", href="https://www.epa.gov/themes/epa_theme/fonts/source-sans-pro/sourcesanspro-regular-webfont.woff2", as="font", crossorigin="anonymous"),
       tags$link(rel="preload", href="https://www.epa.gov/themes/epa_theme/fonts/source-sans-pro/sourcesanspro-bold-webfont.woff2", as="font", crossorigin="anonymous"),
@@ -984,11 +977,11 @@ html_fmts <- list(
     # body ####
 
     ### cloudflare script ####
+
     tags$body(
       class = "path-themes not-front has-wide-template", id = "top",
       tags$script(src = 'https://cdnjs.cloudflare.com/ajax/libs/uswds/3.0.0-beta.3/js/uswds.min.js')
     ),
-
     ######################################################################## #
     ## THIN HEADER ROW ####
 
@@ -1009,9 +1002,9 @@ html_fmts <- list(
           padding-bottom: 0px; padding-top: 0px; padding-left: 0px; padding-right: 0px">
 
 ',
-                  ### >> app_header_logo_html ####
+                  ### >> app_logo_html ####
 
-                  app_header_logo_html
+               app_logo_HTML_global_or_param()  #  # built from app_logo unless set in call to ejamapp()
                   ,'
         </td>
 
@@ -1023,15 +1016,15 @@ html_fmts <- list(
 
                   ### >> app_title  ####
 
-                  app_title,
+                  EJAM:::global_or_param("app_title"),
 
                   '</span>',
 
                   '<span style="font-size: 10pt; font-weight:700; font-family:Arial";>',  # smaller font for version info
 
-                  ### >> .app_version_headertext   ####
+                  ### >> app_version_header_text  ####
 
-                  .app_version_headertext,
+                  EJAM:::global_or_param("app_version_header_text"),
 
                   '</span>',
                   '
@@ -1044,9 +1037,9 @@ html_fmts <- list(
                 border-bottom-color: #ffffff; border-top-color: #ffffff; border-left-color: #ffffff; border-right-color: #ffffff";>
           <span id="homelinks">
 
-  <!--           <a href="https://www.epa.gov/ejscreen" alt="Go to EJScreen home page" title="Go to EJScreen home page" target="_blank">EJScreen Website</a> |   -->
-  <!--           <a href="https://ejscreen.epa.gov/mapper/" alt="Go to EJScreen mapper"    title="Go to EJScreen mapper" target="_blank">Mapper</a> |   -->
-              <a href="https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/overview-socioeconomic-indicators-ejscreen" alt="Go to glossary page" title="Go to EJScreen glossary page" target="_blank">Glossary</a> |
+  <!--           <a href="https://www.epa.gov/ejscreen" alt="Go to EJSCREEN home page" title="Go to EJSCREEN home page" target="_blank">EJSCREEN Website</a> |   -->
+  <!--           <a href="https://ejscreen.epa.gov/mapper/" alt="Go to EJSCREEN mapper"    title="Go to EJSCREEN mapper" target="_blank">Mapper</a> |   -->
+              <a href="https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/overview-socioeconomic-indicators-ejscreen" alt="Go to glossary page" title="Go to EJSCREEN glossary page" target="_blank">Glossary</a> |
             <a href="www/user-guide-2025-02.pdf" alt="Go to help document" title="Go to help document" target="_blank">Help</a> |
             <a href="mailto:ejam@ejanalysis.com?subject=EJAM%20Multisite%20Tool%20Question" id="emailLink" alt="Contact Us" title="Contact Us">Contact Us</a>
           </span>&nbsp;&nbsp;
@@ -1412,6 +1405,7 @@ html_fmts <- list(
     }
   )# end of footer tag list
 )
+} #         # code folding ending point for UI template
 # ------------------------ ____   _______ ####
 # ~ ####
 

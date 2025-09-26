@@ -1,27 +1,28 @@
 Package: EJAM
-Title: Environment and Population Analysis Multisite tool
-Version: 2.32.5
-Description: Actively maintained version of EJAM, previously also called the
-    EJSCREEN Multisite Tool for Environmental Justice (EJ) analysis.
-    Originally based on a fork from the last version EPA released before it was archived.
-    Web app and R tools to easily summarize demographic and environmental indicators
+Title: Environmental Justice Analysis Multisite tool
+Version: 2.32.6
+VersionDate: September 2025
+Description: Actively maintained non-EPA version of EJAM, the web app
+    and set of tools that supported the EJSCREEN multisite capability.
+    EJAM lets you easily summarize demographic and environmental indicators
     for residents in or near a large number of areas or specific sites.
     Sites can be specified in a variety of ways - lat/lon coordinates, 
     EPA-regulated facility IDs, type of facility (industry), polygons (shapefile), 
     or Census units FIPS (eg., cities, counties).  Very fast
     identification of nearby blocks and distances, aggregation of
     indicators by site and overall (all sites as a whole), in maps/plots/reports.
+    This version grew from a fork of the last version EPA released before it was archived.
 License: MIT + file LICENSE
 URL: https://ejanalysis.github.io/EJAM, https://github.com/ejanalysis/EJAM, https://ejanalysis.org
 Authors@R: person("Mark A.", "Corrales", , "ejam@ejanalysis.com", role = c("cre", "aut"), comment = c(ORCID = "0000-0002-1696-5638"))
 Author: Mark A. Corrales <ejam@ejanalysis.com>
 Maintainer: Mark A. Corrales <ejam@ejanalysis.com>
 ejam_data_repo: ejanalysis/ejamdata
-EJScreenVersion: 2.32
-EJScreenReleaseDate: 2024-08-12
-ACSReleaseDate: 2023-12-07
-ACSVersion: 2018-2022
-CensusVersion: 2020
+VersionEJSCREEN: 2.32
+ReleaseDateEJSCREEN: 2024-08-12
+VersionACS: 2018-2022
+ReleaseDateACS: 2023-12-07
+VersionCensus: 2020
 Depends: 
     R (>= 4.1)
 Imports:
@@ -75,6 +76,7 @@ Imports:
 Suggests: 
     AOI,
     beepr,
+    bookdown,
     datasets,
     desc,
     devtools,
@@ -113,4 +115,4 @@ LazyDataCompression: gzip
 Config/testthat/edition: 3
 Config/testthat/parallel: false
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3

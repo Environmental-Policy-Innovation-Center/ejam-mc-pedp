@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejam2shapefile.R
 \name{ejam2shapefile}
 \alias{ejam2shapefile}
-\title{export EJAM results as geojson/zipped shapefile/kml for use in ArcPro, EJScreen, etc.}
+\title{export EJAM results as geojson/zipped shapefile/kml for use in ArcPro, EJSCREEN, etc.}
 \usage{
 ejam2shapefile(
   ejamitout,
@@ -50,7 +50,7 @@ rows exactly corresponding to those in ejamitout$results_bysite}
 path to saved file
 }
 \description{
-export EJAM results as geojson/zipped shapefile/kml for use in ArcPro, EJScreen, etc.
+export EJAM results as geojson/zipped shapefile/kml for use in ArcPro, EJSCREEN, etc.
 }
 \details{
 FIELD NAMES (indicator names) CURRENTLY ARE TRUNCATED AND NUMBERED TO BE ONLY 10 CHARACTERS MAX.

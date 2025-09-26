@@ -1,7 +1,9 @@
+# obsolete at least while that API is gone
+if (FALSE) {
 
 # can the app_server_EJAMejscreenapi() be wrapped inside moduleServer() to use as a module in EJAM
 # and was that already drafted somewhere?
-# R/MODULE_ejscreenapi.R  had older approach where all of the code was in that one file?
+# R/MODULE_ejscreenapi.R  had older approach where all of the code was in that one file
 
 # mod_ejscreenapi_server <- function(id,
 #                                    # default_radius_react,
@@ -211,7 +213,7 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
           } else {
             if ('FacLong' %in% names(pts_filecontents) & 'FacLat' %in% names(pts_filecontents)) {
               #  ECHO column names  - but latlon_infer() has already renamed them anyway, actually so we can't get here probably
-              names(pts_filecontents) <- gsub('FacLat', 'lat', names(pts_filecontents)); names(pts_filecontents) <- gsub('FacLong', 'lon', names(pts_filecontents)) # as used by leaflet, and so names are unique even when uploaded table is merged with EJScreen results
+              names(pts_filecontents) <- gsub('FacLat', 'lat', names(pts_filecontents)); names(pts_filecontents) <- gsub('FacLong', 'lon', names(pts_filecontents)) # as used by leaflet, and so names are unique even when uploaded table is merged with EJSCREEN results
               # the variable names latitude and longitude are compatible with leaflet() but we will not rename them except for that one purpose right when mapping
               # ALL SET - using FacLat/FacLong
               if (('registry_id' %in% names(pts_filecontents) ) | ('pgm_sys_id' %in% names(pts_filecontents))) {
@@ -226,7 +228,7 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
                 # THIS COULD BE REPLACED WITH EJAM CODE THAT USES FRS FILE ON SERVER TO DO THIS QUERY, NOT AN API ***
                 showModal(modalDialog(title = "Please Wait", paste0("querying FRS based on facility registry_id to get lat and lon (ignores pgm_sys_id column since registry_id is present)", ''), easyClose = TRUE))
                 cat(paste0("querying FRS based on facility registry_id to get lat and lon (ignores pgm_sys_id column since registry_id is present)", '\n'), file = stdout())
-                x <- try(locate_by_id(id = pts_filecontents$registry_id, type = 'frs'))
+                x <- try(locate_by_id(idx = pts_filecontents$registry_id, type = 'frs'))
                 # error handling could go here
                 pts_filecontents$lat <- as.numeric(x$Latitude83)
                 pts_filecontents$lon <- as.numeric(x$Longitude83)
@@ -242,7 +244,7 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
                   # THIS COULD BE REPLACED WITH EJAM CODE THAT USED FRS FILE ON SERVER TO DO THIS QUERY, NOT AN API ***
                   showModal(modalDialog(title = "Please Wait", paste0("querying FRS based on facility pgm_sys_id to get lat and lon", ''), easyClose = TRUE))
                   cat(paste0("querying FRS based on facility pgm_sys_id to get lat and lon", ''), file = stdout())
-                  x <- try(locate_by_id(id = pts_filecontents$pgm_sys_id, type = 'program'))
+                  x <- try(locate_by_id(idx = pts_filecontents$pgm_sys_id, type = 'program'))
                   # error handling could go here
                   pts_filecontents$lat <- as.numeric(x$Latitude83)
                   pts_filecontents$lon <- as.numeric(x$Longitude83)
@@ -301,7 +303,7 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
       mapurl <- url_ejscreenmap(lat = pts_filecontents$lat, lon = pts_filecontents$lon)  # e.g.,  "https://ejscreen.epa.gov/mapper/index.html?wherestr=35.3827475,-86.2464592"
     }
 
-    pts_filecontents$mapurl  <- paste0('<a href=\"', mapurl, '\", target=\"_blank\">EJScreen Map ', rownames(pts_filecontents), '</a>')
+    pts_filecontents$mapurl  <- paste0('<a href=\"', mapurl, '\", target=\"_blank\">EJSCREEN Map ', rownames(pts_filecontents), '</a>')
 
     pts_filecontents
   }) # END OF pts() reactive
@@ -447,7 +449,7 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
         # NOTE MAY REPLACE THIS SECTION OF CODE WITH ejscreenapi_plus() which does this itself  :
         #   or maybe even use  ejscreenit() or ejscreenit_for_ejam()
 
-        # *_EJScreen API Get Results*  ####
+        # *_EJSCREEN API Get Results*  ####
         batchtableout <- ejscreenapi(
           lon = pts()$lon, lat = pts()$lat,  # ignored if fips not NULL
           radius = radius_miles(), unit = 'miles', wkid = 4326 ,
@@ -469,11 +471,11 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
         ### Combine input (from user) + output (from EJ stat buffering) ####
         #      (e.g., that user input uploaded may have site name, address, etc.)
         #      & return combined table: 1 row per site (buffer), 1 col per indicator (variable).
-        ### Add links to EJScreen ####
+        ### Add links to EJSCREEN ####
         ### Flag sites near others ####
         ### Put best cols 1st ####
         results_table <- cbind(pts(), batchtableout) # this would be a problem if we did not isolate or use bindEvent
-        results_table <- urls_clusters_and_sort_cols(results_table)
+        results_table <- url_ejscreenapi_clusters_and_sort_cols(results_table)
 
         results_table <- results_table[, names(results_table) != 'mapurl']   # drop this column that was only useful while viewing uploaded points but is redundant in final results here
 
@@ -520,7 +522,7 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
   escape = FALSE
   ) # *** CAUTION -- MAY NEED TO CHANGE THIS ***
   # escape=TRUE is better for security reasons (XSS attacks).
-  # escape=FALSE fixes ejscreen pdf URL to be a link,
+  # escape=FALSE fixes EJSCREEN pdf URL to be a link,
   # but it breaks links from ECHO table download (wont be clickable in table) ***
   ############################################################## #
 
@@ -611,7 +613,7 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
   escape = FALSE
   ) # *** CAUTION -- MAY NEED TO CHANGE THIS ***
   # escape=TRUE is better for security reasons (XSS attacks).
-  # escape=FALSE fixes ejscreen pdf URL to be a link,
+  # escape=FALSE fixes EJSCREEN pdf URL to be a link,
   # but it breaks links from ECHO table download (wont be clickable in table) ***
   ############################################################## #
 
@@ -695,12 +697,12 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
         pctile_colnums <-  which('pctile' ==  fixcolnames(names(table_as_displayed), oldtype = currentnametype, newtype = 'jsondoc_shortvartype') ) # this should get what type each is.
 
         # fix URLs to work in csv pulled into Excel or in Excel files (as opposed to datatable shown in browser)
-        table_as_displayed$`EJScreen Report` <- gsub('.*(http.*)\", target=.*', '\\1', table_as_displayed$`EJScreen Report`)
-        table_as_displayed$EJScreenMAP <- gsub('.*(http.*)\", target=.*', '\\1', table_as_displayed$EJScreenMAP)
+        table_as_displayed$`EJSCREEN Report` <- gsub('.*(http.*)\", target=.*', '\\1', table_as_displayed$`EJSCREEN Report`)
+        table_as_displayed$EJSCREEN_MAP <- gsub('.*(http.*)\", target=.*', '\\1', table_as_displayed$EJSCREEN_MAP)
 
         if (!asExcel) {
-          table_as_displayed$`EJScreen Report` <- paste0('=HYPERLINK("', table_as_displayed$`EJScreen Report`,'", "EJScreen Report ', rownames(table_as_displayed), '")')
-          table_as_displayed$EJScreenMAP <- paste0('=HYPERLINK("', table_as_displayed$EJScreenMAP,'", "EJScreen Map ',    rownames(table_as_displayed), '")')
+          table_as_displayed$`EJSCREEN Report` <- paste0('=HYPERLINK("', table_as_displayed$`EJSCREEN Report`,'", "EJSCREEN Report ', rownames(table_as_displayed), '")')
+          table_as_displayed$EJSCREEN_MAP <- paste0('=HYPERLINK("', table_as_displayed$EJSCREEN_MAP,'", "EJSCREEN Map ',    rownames(table_as_displayed), '")')
           readr::write_excel_csv(table_as_displayed, file)
           # write.csv(table_as_displayed, file, row.names = FALSE) # simplest
           # note despite name of function, write_excel_csv() saves it as a csv, NOT ACTUALLY excel,
@@ -708,7 +710,8 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
         } else {
           # MIGHT NOT BE WORKING:
           wb <- table_xls_format_api(df = table_as_displayed,
-                                     hyperlink_cols = c('EJScreen Map', 'EJScreen Report'),
+                                     # hyperlink_cols = c('EJSCREEN Map', 'EJSCREEN Report'),
+                                     # reports = NULL,
                                      heatmap_colnames = names(table_as_displayed)[pctile_colnums],
                                      heatmap_cuts = c(80, 90, 95),
                                      heatmap_colors = c('yellow', 'orange', 'red'))
@@ -965,3 +968,4 @@ app_server_EJAMejscreenapi <- function(input, output, session) {
 
 ## Use Alt-O in RStudio to fold code, then expand top level to see sections.
 ## Use Ctrl-Shift-O in RStudio to view the document Outline panel
+}

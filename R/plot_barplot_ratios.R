@@ -219,7 +219,7 @@ plot_barplot_ratios <- function(ratio.to.us.d.overall,
       legend.title = ggplot2::element_text(size = 12),
       legend.text = ggplot2::element_text(size = 10),
       legend.position = "bottom"
-    )
+    )  + ggplot2::guides(fill = ggplot2::guide_legend(nrow = 2)) # was done by ejam2report
 
   return(thisplot)
 

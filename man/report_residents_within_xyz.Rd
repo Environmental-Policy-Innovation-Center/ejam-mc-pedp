@@ -2,7 +2,8 @@
 % Please edit documentation in R/community_report_helper_funs.R
 \name{report_residents_within_xyz}
 \alias{report_residents_within_xyz}
-\title{Build text for report: Residents within( X miles of)( any of) the (N) point(s)/polygon(s)/Census unit(s)}
+\title{Build text for report: Residents within( X miles of)( any of) the (N) point(s)/polygon(s)/Census unit(s)
+used in app_server to create locationstr for  \code{\link[=build_community_report]{build_community_report()}}}
 \usage{
 report_residents_within_xyz(
   text1 = "Residents within ",
@@ -43,8 +44,9 @@ works better than ending with "... facility" since that would print as "facility
 }
 \description{
 Build text for report: Residents within( X miles of)( any of) the (N) point(s)/polygon(s)/Census unit(s)
+used in app_server to create locationstr for  \code{\link[=build_community_report]{build_community_report()}}
 }
 \seealso{
-used in app_server to create locationstr for  \code{\link[=build_community_report]{build_community_report()}}
+\code{\link[=buffer_desc_from_sitetype]{buffer_desc_from_sitetype()}}
 }
 \keyword{internal}

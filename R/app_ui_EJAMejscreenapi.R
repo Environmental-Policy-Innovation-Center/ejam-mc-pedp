@@ -1,9 +1,12 @@
-#' Shiny app User-Interface for ejscreenapi
-#'
-#' @param request Internal parameter for `{shiny}`.
-#'     DO NOT REMOVE.
-#' @noRd
-#'
+
+
+# OBSOLETE AT LEAST WHILE THAT API IS GONE
+if (FALSE) {
+
+# Shiny app User-Interface for ejscreenapi
+#
+#  request is an Internal parameter for `{shiny}` - DO NOT REMOVE.
+
 app_ui_EJAMejscreenapi <- function(request) {
 
   ## Use Alt-O in RStudio to fold code, to see sections.
@@ -279,12 +282,12 @@ app_ui_EJAMejscreenapi <- function(request) {
 	shiny::uiOutput('debugbutton_ui'),
 
 	tabsetPanel(
-	  id = 'ejscreenapi_tabset', selected = 'EJScreenAPI' ,
+	  id = 'ejscreenapi_tabset', selected = 'OLD_EJSCREEN_API_APP' ,
 	  # ____________________________ ####
 
 	  #--------------------- MAIN TAB --------------------- ##########
 	  tabPanel(
-	    "EJScreenAPI",
+	    "OLD_EJSCREEN_API_APP",
 
 	    fluidRow(
 	      # _____ INPUTS _____ (LH column) ####
@@ -674,9 +677,10 @@ app_ui_EJAMejscreenapi <- function(request) {
 ## Use Alt-O in RStudio to fold code, then expand app_ui line to see sections.
 ## Use Ctrl-Shift-O in RStudio to view the document Outline panel
 
-#' Add external resources to the shiny app
-#' This function (from the golem package) is used internally.
-#' @noRd
+#  Add external resources to the shiny app
+#  This function (from the golem package) is used internally.
+#
+
 # golem_add_external_resources <- function() {   # (adds external Resources to App) ####
 #   golem::add_resource_path(
 #     "www",
@@ -694,3 +698,6 @@ app_ui_EJAMejscreenapi <- function(request) {
 #
 #   )
 # }
+
+
+}

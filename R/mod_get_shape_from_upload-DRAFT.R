@@ -68,7 +68,7 @@ if (testing_this_module) {
       tabsetPanel(
         tabPanel(
           title = "api app",
-          shiny::h2('EJScreen API batch tool packaged with EJAM'),
+          shiny::h2('EJSCREEN API batch tool packaged with EJAM'),
           # verbatimTextOutput("testinfo1"),
           # verbatimTextOutput("testinfo_radius"),
           # shiny::textOutput("testinfo2"),

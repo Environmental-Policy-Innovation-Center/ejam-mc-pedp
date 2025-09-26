@@ -1,12 +1,24 @@
+#################################################################### #
 
-#' Get the URLs to use to query FRS API to find EPA facilities by ID
-#' Note API might have changed and related functions like locate_by_id() might not work now
-#' @details
-#' Note API might have changed and related functions like locate_by_id() might not work now -
-#' use ?latlon_from_programid() and ?latlon_from_regid() instead
+#' Get the URLs to use to query FRS API via GET, to find EPA facilities by ID as xml format info
 #'
-#' This uses an API to find sites, but it is faster to look in a table
-#'   if that FRS dataset is already loaded in an app, for example.
+#' @details
+#'
+#' url_by_id() is a helper used by locate_by_id()
+#'
+#' see [latlon_from_programid()] and [latlon_from_regid()] in contrast to this.
+#'
+#' This function helps use an API to get latest info that is online,
+#' unlike latlon_from_regid() that looks in the last snapshot of
+#' FRS info that the installed EJAM package has, which might be out of date.
+#'
+#' This URL is to be used to get xml info back, while latlon_from_programid() etc.
+#' would return a data.frame. See examples
+#'
+#' This provides street address too, which latlon_from_regid() does not.
+#'
+#' This can use a registry ID or the EPA program ID.
+#'
 #' For details on FRS API,
 #'   see https://www.epa.gov/frs/frs-rest-services
 #'   and examples at https://www.epa.gov/frs/frs-rest-services#ex1
@@ -14,8 +26,8 @@
 #'   For example:
 #'  https://frs-public.epa.gov/ords/frs_public2/frs_rest_services.get_facilities?pgm_sys_id=VA0088986
 #'  https://frs-public.epa.gov/ords/frs_public2/frs_rest_services.get_facilities?registry_id=110010912496
-#'   Note: API URL for internal use at EPA appears to be different than public one?
-#' @param id vector of one or more character strings with pgm_sys_id or registry_id
+#'
+#' @param idx vector of one or more character strings with pgm_sys_id or registry_id
 #'   values (all need to be the same type, as defined by type parameter).
 #'   Program ids are like "VA0088986" and frs ids are like "110015787683"
 #' @param type one word, applies to all. default is frs but can be program or the word other.
@@ -23,14 +35,20 @@
 #' @seealso ?latlon_from_programid() and ?latlon_from_regid() and the obsolete locate_by_id()
 #'
 #' @return vector of URLs as strings, same length as id parameter
-#' @examples  \donttest{
-#'     url_by_id(testinput_regid)
-#'     browseURL(url_by_id(testinput_regid)[1])
+#' @examples
+#' url_by_id(testinput_regid)
+#' \donttest{
+#' browseURL(url_by_id(testinput_regid)[1])
+#'
+#' urlx = url_by_id(testinput_regid[1])
+#' x = xml2::read_xml(urlx)
+#' x = xml2::as_list(x)
+#' cbind( unlist(x$Results$FRSFacility))
 #' }
 #'
 #' @keywords internal
 #'
-url_by_id <- function(id, type='frs', ...) {
+url_by_id <- function(idx, type='frs', ...) {
 
   # specify URL for query in FRS API
   # given one or more facility IDs, return URL to use in query via FRS API
@@ -49,9 +67,9 @@ url_by_id <- function(id, type='frs', ...) {
   }
   if (type == 'other') {
     baseurl <- 'https://frs-public.epa.gov/ords/frs_public2/frs_rest_services.get_facilities?'
-    id <- ''
+    idx <- ''
   }
-  fullurl <- paste0(baseurl, id, ...)
+  fullurl <- paste0(baseurl, idx, ...)
   return(fullurl)
   #################################################################### #
   # API info  ####
@@ -73,21 +91,25 @@ url_by_id <- function(id, type='frs', ...) {
 }
 #################################################################### #
 
-#' query FRS API to find EPA facilities by registry ID or program ID
-#' @description FUNCTION IS NOT WORKING - API MIGHT HAVE CHANGED
+#' DRAFT - query FRS API to find latest info on EPA facilities by registry ID or program ID
+#' @description FUNCTION IS NOT FULLY WORKING/TESTED
 #' @details
-#' FUNCTION IS NOT WORKING - API MIGHT HAVE CHANGED
-#' use ?latlon_from_programid() and ?latlon_from_regid() instead
+#' May want to use [latlon_from_programid()] and [latlon_from_regid()] instead.
 #'
-#'   Uses the Facility Registry Service (FRS) API to find sites by ID.
+#'  Uses the Facility Registry Service (FRS) API to find a site
+#'   by registry ID or program ID.
 #'   This uses an API to find sites, but it is faster to look in a table
 #'   if that FRS dataset is already loaded in an app, for example.
-#' @param id vector of one or more character strings that must be
+#'
+#' see [url_by_id()] for more details
+#'
+#' @param idx vector of one or more character strings that must be
 #'   registry IDs (default) or program IDs
 #' @param type either frs (default) or program.
 #'   frs means all are registry_id and
 #'   program means all are pgm_sys_id
-#' @param ... passed through to [locate_by_id1()]
+#' @param simple use simpler method
+#' @param ... passed through to locate_by_id1()
 #' @seealso ?latlon_from_programid() and ?latlon_from_regid() and url_by_id() and the obsolete locate_by_id()
 #'
 #' @return data.frame with one row per queried id, columns as returned by API
@@ -106,16 +128,18 @@ url_by_id <- function(id, type='frs', ...) {
 #' @keywords internal
 #' @noRd
 #'
-locate_by_id <- function(id, type='frs', ...) {
+locate_by_id <- function(idx, type='frs', simple = FALSE, ...) {
 
-    stop('locate_by_id() FUNCTION IS NOT WORKING - API MIGHT HAVE CHANGED')
+  warning('locate_by_id() FUNCTION IS NOT WORKING - API MIGHT HAVE CHANGED')
   # functions to QUERY FRS API by registry id or by program system id
   # STILL BUGGY:   locate_by_id(testinput_registry_id[5:6], type='frs')  # AS AN EXAMPLE
   if (length(type) > 1) {'only 1 type can be specified for all the ids in a query here, at the moment'}
-  seq <- 1:length(id)
-  x <- vector('list', length = length(id))
+  seq <- 1:length(idx)
+  x <- vector('list', length = length(idx))
   for (i in seq) {
-    x[[i]] <- locate_by_id1(id[i], type = type, ...) #(id[i])
+
+    x[[i]] <- locate_by_id1(idx[i], type = type, simple = simple, ...) #(idx[i])
+
     # could say type[i] to allow each type to be different in vector of ids, but would need type to be recycled to same length as id
   }
   # could say do.call(rbind, x) if they all had identical columns, but they do not necessarily.
@@ -137,18 +161,19 @@ locate_by_id <- function(id, type='frs', ...) {
 
 #' Helper function to query FRS API to find 1 EPA facility
 #'
-#' @description FUNCTION IS NOT WORKING - API MIGHT HAVE CHANGED
+#' @description FUNCTION IS NOT FULLY WORKING - API MIGHT HAVE CHANGED
 #' @details
-#' FUNCTION IS NOT WORKING - API MIGHT HAVE CHANGED
+#' FUNCTION IS NOT FULLY WORKING - API MIGHT HAVE CHANGED
 #' use ?latlon_from_programid() and ?latlon_from_regid() instead
 #'
 #'  Uses the Facility Registry Service (FRS) API to find a site
 #'   by registry ID or program ID.
 #'   This uses an API to find sites, but it is faster to look in a table
 #'   if that FRS dataset is already loaded in an app, for example.
-#' @param id one character string that must be a registry ID (default) or program ID
+#' @param idx one character string that must be a registry ID (default) or program ID
 #' @param type either frs (default) which means registry_id or
 #'   program which means pgm_sys_id
+#' @param simple use simpler method
 #' @param ... passed through to url_by_id()
 #' @seealso ?latlon_from_programid() and ?latlon_from_regid() and url_by_id() the obsolete locate_by_id()
 #'
@@ -161,38 +186,52 @@ locate_by_id <- function(id, type='frs', ...) {
 #' @keywords internal
 #' @noRd
 #'
-locate_by_id1 <- function(id, type='frs', ...) {
+locate_by_id1 <- function(idx, type='frs', simple = FALSE, ...) {
 
-  stop('locate_by_id() FUNCTION IS NOT WORKING - API MIGHT HAVE CHANGED')
+  warning('locate_by_id() FUNCTION IS NOT fully WORKING - API MIGHT HAVE CHANGED')
 
   # functions to QUERY FRS API by registry id or by program system id
-  if (length(id) > 1) {stop('only one id at a time')}
+  if (length(idx) > 1) {stop('only one id at a time')}
   if (length(type) > 1) {stop('only one type at a time')}
-  if (is.null(id)) id <- NA
-  if (is.na(id) | length(id) == 0 | nchar(id) == 0 | (grepl('[^[:alnum:]]', id))) {
+  if (is.null(idx)) idx <- NA
+  if (is.na(idx) | length(idx) == 0 | nchar(idx) == 0 | (grepl('[^[:alnum:]]', idx))) {
     warning('bad id - function will return NA values')
-    id <- NA # If "NA" API returns results for some default site it looks like,
+    idx <- NA # If "NA" API returns results for some default site it looks like,
     # and then later below we can replace those results with NA values
   } # **********
   # if (!(type %in% c('frs', 'program'))) {stop('type of ID specified must be "frs" or "program",
   # with program ids like "VA0088986" or frs ids like "110015787683" ')}
-  url_this_request <- url_by_id(id, type = type, ...)
-  x <- try(httr::GET(url_this_request))
-  x <- XML::xmlTreeParse(x)$doc$children$Results
-  if (length(x) == 0) {
-    # no results, probably bad ID specified that was not caught by simple error checking
-    id <- NA
-    x <- try(httr::GET(url_by_id(id, type = type)))
+
+
+  url_this_request <- url_by_id(idx, type = type, ...)
+
+  if (simple) {
+
+    ### this might be a simpler way: ***
+
+    x <- try(xml2::read_xml(urlx))
+    x <- xml2::as_list(x)
+    x <- unlist(x$Results$FRSFacility)
+    # cbind( x )
+  } else {
+    x <- try(httr::GET(url_this_request))
     x <- XML::xmlTreeParse(x)$doc$children$Results
+    if (length(x) == 0) {
+      # no results, probably bad ID specified that was not caught by simple error checking
+      idx <- NA
+      x <- try(httr::GET(url_by_id(idx, type = type)))
+      x <- XML::xmlTreeParse(x)$doc$children$Results
+    }
+    x <- XML::xmlValue(as.vector(x$children$FRSFacility$children))
+    if (is.list(x)) {
+      x <- unlist(x) # looks like malformed xml from one example query caused a problem this fixes
+    }
+    x <- as.data.frame(rbind(x))
   }
-  x <- XML::xmlValue(as.vector(x$children$FRSFacility$children))
-  if (is.list(x)) {
-    x <- unlist(x) # looks like malformed xml from one example query caused a problem this fixes
-  }
-  x <- as.data.frame(rbind(x))
-  if (is.na(id)) x[,] <- NA # replace each value w NA, to return correct format but all values NA
+
+  if (is.na(idx)) x[,] <- NA # replace each value w NA, to return correct format but all values NA
   x$lat <- as.numeric(x$Latitude83); x$Latitude83 <- NULL
   x$lon <- as.numeric(x$Longitude83); x$Longitude83 <- NULL
   return(x)
-  #################################################################### #
 }
+#################################################################### #

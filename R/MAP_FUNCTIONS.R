@@ -21,10 +21,10 @@
 #' \dontrun{
 #' shp1 <- shapefile_from_any(file.path(
 #'   testdatafolder(), "shapes/portland_shp.zip"))
-#' ejam2map(ejamit(shapefile = shp1, radius = 0), shp = shp1)
+#' ejam2map(ejamit(shapefile = shp1), shp = shp1)
 #' shp2 <- testshapes_2
-#' ejam2map(ejamit(shapefile = shp2, radius = 0), shp = shp2)
-#' ejam2map(ejamit(shapefile = shp2, radius = 2), shp = shp2)
+#' ejam2map(ejamit(shapefile = shp2), shp = shp2)
+#' ejam2map(ejamit(shapefile = shp2), shp = shp2)
 #'
 #' }
 #'
@@ -42,8 +42,6 @@ map_ejam_plus_shp <- function(shp, out, radius_buffer = NULL, circle_color = '#0
   ### see also ejam2map()
   ### add popups parameter maybe
 
-  sitetype = ejamit_sitetype_from_output(out)
-
   if (!("results_bysite" %in% names(out))) {
     # maybe were given the table not the whole list
     if ("ejam_uniq_id" %in% names(out)) {
@@ -53,47 +51,67 @@ map_ejam_plus_shp <- function(shp, out, radius_buffer = NULL, circle_color = '#0
       stop("out needs to be a list with results_bysite in it, as from ejamit()")
     }
   }
+  if ("sitetype" %in% names(out)) {
+    sitetype <- out$sitetype
+  } else {
+    sitetype <- ejamit_sitetype_from_output(out)
+  }
 
   if ("ejam_uniq_id" %in% names(shp)) {
     # Assume we are in server, or at least assume that invalids were dropped after id assigned
     # If this function is used in the middle of server, is dealing with shp that already had ejam_uniq_id assigned after which invalids dropped.
   } else {
+    if (NROW(shp) == 1 && NROW(out$results_bysite) == 1) {
+      shp$ejam_uniq_id <- out$results_bysite$ejam_uniq_id
+      # can just use cbind, not merge - sitenumber already limited each to 1 row, or was only 1 analyzed ever.
+      #  if sitenumber was used, shapefile_from_any(cleanit=T) would assign ejam_uniq_id of 1, which probably no longer matches the one in out$results_bysite
+    }  else {
     # If this function is used outside shiny, shp probably does not have ejam_uniq_id assigned and can have invalid rows
     # Should clean shp like ejamit() would do...
     # i.e. give it NEW ejam_uniq_id 1:NROW and then doesn't matter if we drop invalid or empty here since
     # that happens next based on the valid flag out$results_bysite$valid, merged on ejam_uniq_id
     # This just adds id, may change crs, and
     #  drops polygons if not valid, but may leave empty. see shapefile_clean()
-    shp <- shapefile_from_any(shp, cleanit = TRUE) # this might not be exactly what happens in server or ejamit?
+    # numbers them before dropping invalid ones
+    shp <- shapefile_from_any(shp, cleanit = TRUE, silentinteractive=TRUE) # this might not be exactly what happens in server or ejamit?    # returns NULL if none valid
   }
-
+}
   shp <- shp[, c("ejam_uniq_id", "geometry")] # the "valid" column is in out$results_bysite, not in shp, and shp should have even invalid rows.
   # in FIPS case, ejam_uniq_id is fips not 1:N, so merge() here would fail.
   # but if we assume same NROW and same sort for shp and out#results_bysite, then we can just use the row number to match them up, or use cbind(shp, out$results_bysite)
-  if (sitetype == "fips") {
-    shpout <- cbind(shp, out$results_bysite)
+  if (sitetype %in% "fips") {
+    shp$ejam_uniq_id <- NULL # since it is 1:NROW there but was the fips value in out$results_bysite
+    shpout <- cbind(shp, out$results_bysite) # retains "sf" class only if shp is 1st in cbind()
+    names(shpout)[names(shpout) != "geometry"] <- names(out$results_bysite) #  fixes colnames where dot replaced space
+    # headers2fix = sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
   } else {
+    if (NROW(shp) == 1 && NROW(out$results_bysite) == 1) {
+      shpout <- cbind(shp[,"geometry"], out$results_bysite) # retains "sf" class only if shp is 1st in cbind()
+      names(shpout)[names(shpout) != "geometry"] <- names(out$results_bysite) #  fixes colnames where dot replaced space
+    } else {
+    # must ensure merge does not mess up spatial data.frame. cbind(shp, df) is fine.
     shpout <- merge(shp, out$results_bysite,
                     by = "ejam_uniq_id",
                     all.x = FALSE, all.y = TRUE)
+    }
   }
   # as long as inputs are correct, matching on id should work and then we can drop invalid polygons to avoid mapping them.
   # and all.x or all.y should not matter
   # but we are about to drop all invalid ones to avoid mapping them.
-  message("There were ", sum(!shpout$valid, na.rm = TRUE), " invalid polygons." )
-  if ("valid" %in% names(shpout)) {
-    shpout <- shpout[shpout$valid == TRUE, ] # Drop invalid polygons, dont try to map
+  if (!("valid" %in% names(shpout))) {
+    shpout$valid <- TRUE
   }
-  popup_labels <- fixcolnames(namesnow = setdiff(names(shpout), c('geometry', 'valid', 'invalid_msg')), oldtype = 'r', newtype = 'shortlabel')
+  # drop empty geometry rows
+  shpout$valid <- shpout$valid & !(sf::st_is_empty(shpout))
+  if (sum(!shpout$valid, na.rm = TRUE) > 0 ) {
+    message("There were ", sum(!shpout$valid, na.rm = TRUE), " invalid polygons." )
+  }
+  shpout <- shpout[shpout$valid == TRUE, ] # Drop invalid polygons, dont try to map
+
+    # linkcolnames = sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
   pops <- popup_from_ejscreen(
     shpout %>% sf::st_drop_geometry()
   )
-  ## previously had been something like this:
-  # pops <- popup_from_df(
-  #   shpout %>% sf::st_drop_geometry(),
-  #   labels = popup_labels
-  # )
-
   if (is.null(radius_buffer)) {
     radius_buffer <- out$results_bysite$radius.miles[1]
   }
@@ -101,6 +119,7 @@ map_ejam_plus_shp <- function(shp, out, radius_buffer = NULL, circle_color = '#0
     shpout <- sf::st_buffer(shpout, # was "ESRI:102005" but want 4269
                             dist = units::set_units(radius_buffer, "mi"))
   } else {
+    ## why was it doing this ?
     shpout <- shpout %>%
       sf::st_zm() %>% sf::as_Spatial()
   }
@@ -110,7 +129,6 @@ map_ejam_plus_shp <- function(shp, out, radius_buffer = NULL, circle_color = '#0
     leaflet::addPolygons(color = circle_color,
                          popup = pops,
                          popupOptions = leaflet::popupOptions(maxHeight = 200))
-
 
   # see in browser ####
 
@@ -513,8 +531,14 @@ map_shapes_leaflet <- function(shapes, color = "green", popup = NULL, fillOpacit
     if("SQMI" %in% colnames(shapes)) {
       shapes$area_sqmi <- round(shapes$SQMI, 1)
     } else {
-    shapes$area_sqmi <- round(area_sqmi_from_shp(shapes), 1)
+      shapes$area_sqmi <- round(area_sqmi_from_shp(shapes), 1)
     }
+  }
+
+  ## DROP EMPTY GEOMETRIES ####
+  empty <- try(sf::st_is_empty(shapes))
+  if (!inherits(empty, "try-error")) {
+    shapes = shapes[!empty, ]
   }
 
   if ("FIPS" %in% names(shapes) & !("pop" %in% names(shapes))) {
@@ -525,7 +549,7 @@ map_shapes_leaflet <- function(shapes, color = "green", popup = NULL, fillOpacit
   if (is.null(popup)) {
     # if all but 3 colnames are in both, looks like results of ejamit(), so use that type of popup formatting
     if (length(setdiff2(names(shapes), names(testoutput_ejamit_10pts_1miles$results_overall))) < 3) {
-      popup = popup_from_ejscreen(sf::st_drop_geometry(shapes))
+      popup = popup_from_ejscreen(sf::st_drop_geometry(shapes))# linkcolnames = sapply(EJAM:::global_or_param("default_reports"), function(x) x$header)
     } else {
       popup <- popup_from_any(sf::st_drop_geometry(shapes))
     }
@@ -555,6 +579,12 @@ map_shapes_leaflet_proxy <- function(mymap, shapes, color = "green", popup = sha
   # *** need to confirm this default for popup is right -
   # compare to the one now in map_shapes_leaflet()
   # in RStudio console, can do  map_shapes_leaflet(shapes)
+
+  ## DROP EMPTY GEOMETRIES ####
+  empty <- try(sf::st_is_empty(shapes))
+  if (!inherits(empty, "try-error")) {
+    shapes = shapes[!empty, ]
+  }
   mymap <- mymap %>%
     leaflet::addPolygons(data = shapes, color = color,  popup = popup, popupOptions = leaflet::popupOptions(maxHeight = 200)) %>%
     leaflet::addTiles()
@@ -619,7 +649,7 @@ map_shapes_mapview <- function(shapes, col.regions = "green", map.types = "OpenS
 #' @return a ggplot() object
 #'
 #' @examples \donttest{
-#'   mapfast_gg(EJAM::testpoints_10)
+#'   mapfast_gg(testpoints_10)
 #'
 #'   pts <- read.table(textConnection(
 #'   "lat lon

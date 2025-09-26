@@ -71,7 +71,10 @@ plot_boxplot_vs_ref <- function(bysite = NULL, # ejamit()$results_bysite,
 #' @param siteslabel e.g., "At Avg. Site Analyzed"
 #' @param siteidlabel vector of text one per site to show if type 'box'
 #' @param refdata reference area dataset, like blockgroupstats, but must have columns
-#'   named 'pop' and varname. e.g., refdata = blockgroupstats[ST %in% "DE", .(pop, pcthisp)]
+#'   named 'pop' and varname. e.g.,
+#'   ```
+#'   refdata = blockgroupstats[ST %in% "DE", .(pop, pcthisp)]
+#'   ```
 #' @param nsample to limit dots on plot of ref area like all bg in US
 #' @param colorfills two colors for boxplot
 #' @param box.cex.ref use default
@@ -144,7 +147,7 @@ plot_vs_us <- function(bysite = NULL, # ejamit()$results_bysite,
   sites <- cbind(bysite[ , c("pop", varname, 'ejam_uniq_id'), with = FALSE], Locations = siteslabel)
   rm(bysite)
 
-  # refdata -- If no reference area is specified, use all US block groups
+  # refdata -- If no reference area is specified, use all US blockgroups
   if (is.null(refdata)) {
     if (!(varname %in% names(blockgroupstats))) {stop(varname, "must be a column name in refdata (which is blockgroupstats by default)")}
     if (is.data.table(blockgroupstats)) {

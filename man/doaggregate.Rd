@@ -67,14 +67,14 @@ using min() of all blockgroup-level values.}
 
 \item{subgroups_type}{Optional (uses default). Set this to
 "nh" for non-hispanic race subgroups as in Non-Hispanic White Alone, nhwa and others in names_d_subgroups_nh;
-"alone" for EJScreen v2.2 style race subgroups as in    White Alone, wa and others in names_d_subgroups_alone;
+"alone" for EJSCREEN v2.2 style race subgroups as in    White Alone, wa and others in names_d_subgroups_alone;
 "both" for both versions. Possibly another option is "original" or "default" but work in progress.}
 
 \item{include_ejindexes}{whether to calculate Summary Indexes and return that information}
 
 \item{calculate_ratios}{whether to calculate and return ratio of each indicator to its US and State overall mean}
 
-\item{extra_demog}{if should include extra indicators from EJScreen report,
+\item{extra_demog}{if should include extra indicators from EJSCREEN report,
 on language, more age groups, sex, percent with disability, poverty, etc.}
 
 \item{need_proximityscore}{whether to calculate proximity scores (may not be implemented yet)}
@@ -105,7 +105,7 @@ list with named elements:
 aggregated results for all unique residents.
 \item \strong{\code{results_bysite}}   results for individual sites (buffers) - a data.table of results,
 one row per ejam_uniq_id, one column per indicator
-\item \strong{results_bybg_people}  results for each block group, to allow for showing the distribution of each
+\item \strong{results_bybg_people}  results for each blockgroup, to allow for showing the distribution of each
 indicator across everyone within each residential population group.
 \item \strong{longnames}  descriptive long names for the indicators in the above outputs
 \item \strong{count_of_blocks_near_multiple_sites}  additional detail
@@ -120,7 +120,7 @@ Used by ejamit() and the shiny app to summarize blockgroups scores at each site 
 \code{\link[=getblocksnearby]{getblocksnearby()}} and doaggregate() are the two key functions that run \code{\link[=ejamit]{ejamit()}}.
 \code{doaggregate()} takes a set of sites like facilities and the
 set of blocks that are near each,
-combines those with indicator scores for block groups, and
+combines those with indicator scores for blockgroups, and
 aggregates the numbers within each place and across all overall.
 
 For all examples, see \code{\link[=getblocksnearbyviaQuadTree]{getblocksnearbyviaQuadTree()}}
@@ -147,26 +147,26 @@ This function requires the following datasets:
 \item \link{blockwts}: data.table with these columns: blockid , bgid, blockwt
 \item \link{quaddata} data.table used to create localtree, a quad tree index of block points
 (and localtree that is created when package is loaded)
-\item \link{blockgroupstats} - A data.table (such as EJScreen residential population and environmental data by blockgroup)
+\item \link{blockgroupstats} - A data.table (such as EJSCREEN residential population and environmental data by blockgroup)
 }
 }
 \section{\strong{Identification of nearby residents -- methodology:}}{
-EJAM uses the same approach as EJScreen does to identify the count and residential population of nearby residents,
-so EJScreen technical documentation should be consulted on the approach,
-at \href{https://web.archive.org/web/20250118072723/https://www.epa.gov/ejscreen/technical-information-and-data-downloads}{EJScreen Technical Info}.
+EJAM uses the same approach as EJSCREEN does to identify the count and residential population of nearby residents,
+so EJSCREEN technical documentation should be consulted on the approach,
+at \href{https://web.archive.org/web/20250118072723/https://www.epa.gov/ejscreen/technical-information-and-data-downloads}{EJSCREEN Technical Info}.
 EJAM implements that approach using faster code and data formats, but it
-still uses the same high-resolution approach as described in EJScreen documentation
+still uses the same high-resolution approach as described in EJSCREEN documentation
 and summarized below.
 
 The identification of nearby residents is currently done in a way that includes all 2020 Census blocks whose
 "internal point" (a lat/lon provided by the Census Bureau) is within the specified distance of the facility point.
-This is taken from the EJScreen block weights file, but can also be independently calculated.
+This is taken from the EJSCREEN block weights file, but can also be independently calculated.
 
 The summary or aggregation or "rollup" within the buffer is done by calculating the
-population-weighted average block group score among all the people residing in the buffer.
+population-weighted average blockgroup score among all the people residing in the buffer.
 The weighting is by population count for variables that are fractions of population,
 but other denominators and weights (e.g., households count) are used as appropriate,
-as explained in EJScreen technical documentation on the formulas, and
+as explained in EJSCREEN technical documentation on the formulas, and
 replicated by formulas used in EJAM functions such as doaggregate().
 
 Since the blockgroup population counts are from American Community Survey (ACS) estimates,
@@ -178,8 +178,8 @@ and that fraction is calculated as the fraction of the blockgroup's decennial ce
 that is in the census blocks inside the buffer.
 
 A given block is considered entirely inside or entirely outside the buffer,
-and those are used to more accurately estimate what fraction of a given block group's
-population is inside the buffer. This is more accurate and faster than areal apportionment of block groups.
+and those are used to more accurately estimate what fraction of a given blockgroup's
+population is inside the buffer. This is more accurate and faster than areal apportionment of blockgroups.
 Census blocks are generally so small relative to typical buffers that this is very accurate -
 it is least accurate if a very small buffer distance is specified
 in an extremely low density rural area where a block can be geographically large.
