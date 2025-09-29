@@ -14,6 +14,7 @@
 latlon_from_fips <- function(fips) {
 
   fips <- fips_lead_zero(fips)
+
   suppressWarnings( {
     ftype = fipstype(fips)
   })
