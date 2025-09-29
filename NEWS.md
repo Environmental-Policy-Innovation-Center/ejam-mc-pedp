@@ -100,12 +100,11 @@
 
 -   Simplified the [README](https://github.com/ejanalysis/EJAM/#readme)
 -   Improved the [article on how to install the package](https://ejanalysis.github.io/EJAM/articles/installing.html), but it does need some additional testing/fixes.
--   Added article on [Counties](https://ejanalysis.github.io/EJAM/articles/counties.html) -- about the skewed distribution across US Counties, of population and blockgroup counts
 -   Renamed fields in the DESCRIPTION file, for VERSION and DATE info!
 -   Redid sample report, etc. outputs in `testdata/examples_of_outputs` folder to reflect changes in version numbers shown in report footer and app header, etc.
 -   Renamed various \*.R files and relocated some source code among those, to make some filenames more consistent.
 -   Made some functions internal that until now had been exported, to simplify things for most R users.
--   Updated [roxygen2](https://roxygen2.r-lib.org/index.html) help file docs and pkgdown documentation webpages
+-   Updated `{roxygen2}` help file docs and pkgdown documentation webpages
 -   New function `url_github_preview()` makes it a bit easier to view rendered HTML reports that each package release or branch stores in the testdata/examples_of_outputs folder, to compare how they look in different versions. 
 -   Spell checked / fixed some typos
 -   Fixed some documentation
@@ -116,14 +115,14 @@
 -   `ejam2map()` now has a sitenumber parameter, to map one site more easily
 -   `ejam2report()` now downloads FIPS bounds if missing.
 -   `ejam2map()` now downloads FIPS bounds if missing.
--    unit tests added for functions including ejam2map() and ejam2excel()
+-    unit tests added for functions including ejam2map() and ejam2excel() and various other functions
 -   `mapfast()` and some others now drop sites with empty geometry before trying to map, avoid an error
 -   `popup_from_any()` and other map popup functions now have different parameters that can handle more columns of URLs/links of any type
 -   `popup_from_any()` and other map popup functions now drop the geometry column from spatial data.frames to avoid including a mess in the popup
 -   `ejam2histogram()` is now exported and has more flexible parameters for title, y axis label, variable names
 -   `shape2geojson()` is a new helper function that tries to convert a spatial data.frame to text string geojson, the format needed by the 8/2025 version of the EJAM-API
 -   `shapefile_from_any()` now can also recognize a vector of character strings that are geojson polygons, via helper shapefile_from_geojson_text(), the inverse of shape2geojson()
--   `?testinput_fips_mix` is a new dataset with fips of each type: block, blockgroup, tract, city, county, state
+-   `testinput_fips_mix` is a new dataset with fips of each type: block, blockgroup, tract, city, county, state
 -   `fips_county_from_latlon()` and `fips_state_from_latlon()` are new internal functions - for each point, they identify the county or state it is in
 -   `fips2countyfips()` reports what US County contains each fips-based Census unit, such as the Counties in which some blockgroups are located.
 -   `fips2name()` now handles block fips instead of warning
@@ -200,7 +199,7 @@
 -   fixed inconsistent use of parameter `in_shiny` versus `inshiny`, to always call it `in_shiny`
 -   removed functions and text related to pins board (obsolete)
 -   renamed map_headernames spreadsheet file to reflect a new version (`EJAM/data-raw/map_headernames_2.32.5.xlsx`), made edits/fixes (spelling of CEJST, e.g.), and updated the data object `?map_headernames`.
--   rebuilt favicons per updates in [pkgdown](https://pkgdown.r-lib.org/index.html)
+-   rebuilt favicons per updates in {pkgdown}
 -   Edited DESCRIPTION file to specify minimum versions for most packages in Imports, and a newer version of R. Almost all of these just refer to the latest version on CRAN as of this release, even though several were not strictly necessary for the functions to work correctly.
 
 # EJAM v2.32.4 (June 2025)
