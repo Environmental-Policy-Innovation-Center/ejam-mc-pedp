@@ -71,6 +71,7 @@ shapes_from_fips <- function(fips,
 ) {
 
   # preserve original input SORT order ####
+  fips <- fips_lead_zero(fips) # or else merge with this will fail later
   original_order <- data.frame(n = seq_along(fips), fips = fips)
 
   if (offline_cat()) {
