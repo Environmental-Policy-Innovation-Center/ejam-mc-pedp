@@ -3,6 +3,11 @@ Maintaned by Environmental Policy Innovation Center on behalf of Public Environm
 What's EJAM -> https://ejanalysis.github.io/EJAM/articles/ ?
 
 July 28th, 2025 
-- Created this repo as a fork of the conical repo -> https://github.com/ejanalysis/EJAM
+- Created this repo as a fork of the cononical repo -> https://github.com/ejanalysis/EJAM
 - ported over .yaml and dockerfile
 - ## TO DO: RUN folder cleanup! 
+-  hosted to ejam2.policyinnovation.info for testing
+
+Sept 30th, 2025 
+- syncing main fork with cononical repo to 2.32.6
+- rehosting, now at ejam.policyinnovation.info 
