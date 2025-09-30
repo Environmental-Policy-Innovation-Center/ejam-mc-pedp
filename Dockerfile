@@ -43,7 +43,6 @@ RUN install2.r --error \
     ggridges \
     glue \
     golem \
-    hrbrthemes \
     htmltools \
     leaflet \
     leaflet.extras2 \
@@ -89,6 +88,8 @@ RUN install2.r --error \
 
 #adding Areas of Interest
 RUN R -e "remotes::install_github('mikejohnson51/AOI')"
+
+RUN R -e "remotes::install_github('hrbrmstr/hrbrthemes')"
 
 #Copying folder contents 
 ADD . /home/epic/
