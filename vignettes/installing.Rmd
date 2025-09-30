@@ -107,7 +107,7 @@ You may be able to install the package to just run the web app locally in RStudi
 If you *do have a PAT set up*, you can use `remotes::install_github()`. (For help on PAT setup, see the last section of this article).
 
 ```{r install-gh, eval=FALSE}
-options(timeout=300); if (!require(remotes)) {install.packages("remotes")}
+options(timeout=300); if (!require(devtools)) {install.packages("devtools")}
 ref = github_release() # specifies you want the latest released version
 #ref = "development"   # development branch version
 #ref = "HEAD"          # main branch
@@ -123,7 +123,7 @@ library(EJAM)
 If you *don't have a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#about-personal-access-tokens){.uri target="_blank" rel="noreferrer noopener"} (PAT) and don't want to set one up*, you could [check the github repository for the latest release](`r paste0("https://github.com/", EJAM:::repo_from_desc(), "/releases/latest")`) and may be able to use `remotes::install_url()` something like this:
 
 ```{r install-url, eval=FALSE}
-options(timeout=300); if (!require(remotes)) {install.packages("remotes")}
+options(timeout=300); if (!require(devtools)) {install.packages("devtools")}
 zipname = "v2.32.6.zip" # or "v2.32.5.zip", etc. - update as needed
 remote_zip = paste0(
   "https://github.com/ejanalysis/EJAM/archive/refs/tags/", zipname)
@@ -135,7 +135,7 @@ library(EJAM)
 _or download the .zip file as a separate step, and install from that saved file:_
 
 ```{r install-local, eval=FALSE}
-options(timeout=300); if (!require(remotes)) {install.packages("remotes")}
+options(timeout=300); if (!require(devtools)) {install.packages("devtools")}
 zipname = "v2.32.6.zip" # or "v2.32.5.zip", etc. - update as needed
 remote_zip = paste0(
   "https://github.com/ejanalysis/EJAM/archive/refs/tags/", zipname)
