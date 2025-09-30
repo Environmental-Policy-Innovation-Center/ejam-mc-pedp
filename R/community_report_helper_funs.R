@@ -97,7 +97,7 @@ fill_tbl_row <- function(output_df, Rname, longname, show_ratios_in_report) {
 #' @keywords internal
 #'
 fill_tbl_full <- function(output_df,
-                          title = 'EJScreen environmental and socioeconomic indicators data',
+                          title = 'EJSCREEN environmental and socioeconomic indicators data',
                           title_top_row = '',  # or 'SELECTED VARIABLES',
                           show_ratios_in_report = TRUE) {
 
@@ -232,7 +232,7 @@ fill_tbl_row_ej <- function(output_df, Rname, longname) {
 #' @keywords internal
 #'
 fill_tbl_full_ej <- function(output_df,
-                             title = 'EJScreen environmental and socioeconomic indicators data',
+                             title = 'EJSCREEN environmental and socioeconomic indicators data',
                              title_top_row = '') {
 
   tbl_head <- paste0('<table id=\"data-indicators-table\"        class=\"color-alt-table\"  summary=\"',
@@ -248,13 +248,13 @@ fill_tbl_full_ej <- function(output_df,
                      '<tbody>
   <tr class=\"color-alt-table-subheader\">
 
-  <th colspan=\"7\">Summary Indexes</th>
+  <th colspan=\"7\">EJ Indexes</th>
   </tr>'
   )
 
   tbl_head2 <- '<tr class=\"color-alt-table-subheader\">
 
-<th colspan=\"7\">Supplemental Summary Indexes</th>
+<th colspan=\"7\">Supplemental EJ Indexes</th>
   </tr>'
 
   full_html <- tbl_head
@@ -549,7 +549,7 @@ fill_tbl_full_subgroups <- function(output_df,
 #' @keywords internal
 #'
 generate_report_footnotes <- function(
-    # ejscreen_vs_ejam_caveat = "Note: Some numbers as shown on the EJScreen report for a single location will in some cases appear very slightly different than in EJScreen's multisite reports. All numbers shown in both types of reports are estimates, and any differences are well within the range of uncertainty inherent in the American Community Survey data as used in EJScreen. Slight differences are inherent in very quickly calculating results for multiple locations.",
+    # ejscreen_vs_ejam_caveat = "Note: Some numbers as shown on the EJSCREEN report for a single location will in some cases appear very slightly different than in EJSCREEN's multisite reports. All numbers shown in both types of reports are estimates, and any differences are well within the range of uncertainty inherent in the American Community Survey data as used in EJSCREEN. Slight differences are inherent in very quickly calculating results for multiple locations.",
   diesel_caveat = paste0("Note: Diesel particulate matter index is from the EPA's Air Toxics Data Update, which is the Agency's ongoing, comprehensive evaluation of air toxics in the United States. This effort aims to prioritize air toxics, emission sources, and locations of interest for further study. It is important to remember that the air toxics data presented here provide broad estimates of health risks over geographic areas of the country, not definitive risks to specific individuals or locations. More information on the Air Toxics Data Update can be found at: ",
                          url_linkify("https://www.epa.gov/haps/air-toxics-data-update", "https://www.epa.gov/haps/air-toxics-data-update"))
 ) {
@@ -594,7 +594,8 @@ generate_report_footnotes <- function(
 #' @param in_shiny, whether the function is being called in or outside of shiny - affects location of header
 #' @param report_title generic name of this type of report, to be shown at top, like "EJAM Multisite Report"
 #' @param logo_path optional relative path to a logo for the upper right of the overall header.
-#'   Ignored if logo_html is specified and not NULL, but otherwise uses default or param set in run_app()
+#'   Ignored if logo_html is specified and not NULL, but otherwise uses default or param set in ejamapp(),
+#'   but NULL means default and "" means omit logo entirely.
 #' @param logo_html optional HTML for img of logo for the upper right of the overall header.
 #'   If specified, it overrides logo_path. If omitted, gets created based on logo_path.
 #'
@@ -608,47 +609,100 @@ generate_html_header <- function(analysis_title,
                                  logo_html = NULL
 ) {
 
-  if (is.null(logo_path)) {
-
-    if (!in_shiny) {
-      full_path <- global_defaults_package$.community_report_logo_path
-      logo_path <- full_path # ok
-      cat("TRYING TO USE logo_path = ", logo_path, "\n")
-
-    } else {
-      ## maps to installed installed/EJAM/report/community_report using resource path defined in shiny app_ui.R
-
-      # ## fails:
-      # full_path <- EJAM:::global_or_param(".community_report_logo_path") #  "community_report/ejamhex4.png" # ***
-      # logo_path <- gsub(getwd(), ".", full_path)
-      ## hard coded but want it based on params or global !
-      ## the full path stored in the global object:  is if used load_all() .....then..EJAM/inst/report/community_report/ejamhex4.png"
-      # global_defaults_package$.community_report_logo_path
-      ## fails: (good path but fails to work in shiny)
-      # logo_path <- paste0('community_report/',
-      #                     EJAM:::global_or_param(".community_report_logo_file"))
-      #                     # global_defaults_package$.community_report_logo_file)
-      logo_path <- 'community_report/ejamhex4.png'
-      cat("TRYING TO USE logo_path = ", logo_path, "\n")
-    }
-  }
-  # backup tried here since path was problematic:
-  # if (!file.exists(logo_path)) {
-  #   logo_path <- system.file('report/community_report/ejamhex4.png', package = "EJAM")
-  # cat("*******   using backup path to logo file \n")
-  # cat("TRYING TO USE logo_path = ", logo_path, "\n")
+  # if (is.null(logo_path) || !file.exists(logo_path)) {
+  #
+  #   if (!in_shiny) {
+  #     logo_path <- EJAM:::global_or_param("report_logo")
+  #     cat("TRYING TO USE logo_path = ", logo_path, "\n")
+  #
+  #   } else {
+  #     ## should map to installed pkgs library /EJAM/report/community_report using resource path defined in shiny app_ui.R
+  #
+  #     logo_path <- EJAM:::global_or_param("report_logo")
+  #     if (!file.exists(logo_path)) { # might not need anymore
+  #       logo_path <- 'community_report/ejamhex4.png'; cat("logo not found via report_logo, trying hardcoded path\n")
+  #       if (!file.exists(logo_path)) { # might not need anymore
+  #         system.file('report/community_report/ejamhex4.png', package = "EJAM"); cat("logo still not found, trying another path \n")
+  #       }
+  #     }
+  #     cat("TRYING TO USE logo_path = ", logo_path, "\n")
+  #   }
   # }
+  ########## #
+  # helper function picking report logo info -- helps to decide which parameter to use or when to use defaults or warn
+  report_logo_html_from_inputs = function(logo_path, logo_html) {
 
-  if (is.null(logo_html)) {
-    # add padding and adjust size so that the img_html object is a bit lower on the screen and does not get shrunk
-    logo_html <- paste0('<img src=\"', logo_path, '\" alt=\"logo\" width=\"220\" height=\"70\">')
+    default_logo_path <- EJAM:::global_or_param("report_logo")
+
+    pkg_relative_path = function(fpath) {gsub((system.file( "", package = "EJAM")), "", fpath)}
+    #### might need RELATIVE not absolute path here, though. See app_server.R
+    #
+    # default_logo_path <-  pkg_relative_path(default_logo_path) # maybe ***
+    # logo_path <- pkg_relative_path(logo_path)                  # maybe ***
+
+    default_logo_html <- paste0('<img src=\"', default_logo_path, '\" alt=\"logo\" width=\"220\" height=\"70\">')
+    notempty <- function(z) {!is.null(z) & !("" %in% z)}
+
+    # if both NULL, use defaults to create html
+    if (is.null(logo_path) && is.null(logo_html)) {
+      return(default_logo_html)
+    }
+    # if logo_path NULL and logo_html "", warn of conflict and use defaults to make html from path (ignore empty html)
+    if (is.null(logo_path) && ("" %in% logo_html)) {
+      return(default_logo_html)
+    }
+
+    # if both "", omit logo
+    if (("" %in% logo_path) && ("" %in% logo_html)) {
+      return("")
+    }
+    # if logo_path "" and logo_html NULL, omit logo (dont warn)
+    if (("" %in% logo_path) && is.null(logo_html)) {
+      return("")
+    }
+
+    # if both PROVIDED as not null and not empty,  try to use given html (and ignore given path)
+    if (notempty(logo_path) && notempty(logo_html)) {
+      # warn if html not seem to match path or a valid path?
+      path_from_html <- gsub(".*img src=.(.*). alt.*", "\\1", logo_html)
+      if (!file.exists(path_from_html)) {
+        warning("logo_html seems to point to -- but cannot find -- ", path_from_html, ", but will try using logo_html as provided")
+      }
+      return(logo_html)
+    }
+    # if logo_path NULL or "", but logo_html PROVIDED as not null not empty, try to use given html  (and ignore given path)
+    if (!notempty(logo_path) && notempty(logo_html)) {
+      #  warn if html not seem ok ?
+      path_from_html <- gsub(".*img src=.(.*). alt.*", "\\1", logo_html)
+      if (!file.exists(path_from_html)) {
+        warning("logo_html seems to point to -- but cannot find -- ", path_from_html, ", but will try using logo_html as provided")
+      }
+      return(logo_html)
+    }
+
+    # if logo_path PROVIDED as not null and not empty, and logo_html NULL or "", (warn?) try to use path to make html (and ignore given html)
+    if (notempty(logo_path) && !notempty(logo_html)) {
+      if (!file.exists(logo_path)) {
+        warning("cannot find ", logo_path, " but will try to use it for the logo on report")
+        # return("") # to be safe could omit logo if seems like file not available
+      }
+      logo_html <- paste0('<img src=\"', logo_path, '\" alt=\"logo\" width=\"220\" height=\"70\">')
+      return(logo_html)
+    }
+
+    # catchall
+    return(default_logo_html)
   }
 
+
+  logo_html <- report_logo_html_from_inputs(logo_path = logo_path, logo_html = logo_html)
+
+########## #
   if (is.null(report_title)) {
     if (shiny::isRunning()) {
-      report_title <- EJAM:::global_or_param(".community_report_title")
+      report_title <- EJAM:::global_or_param("report_title")
     } else {
-      report_title <- global_defaults_package$.community_report_title
+      report_title <- EJAM:::global_or_param("report_title") # was # report_title <- global_defaults_package$report_title
     }
   }
 
@@ -672,24 +726,26 @@ generate_html_header <- function(analysis_title,
     '<div id="header-primary-background">',
     '<div id="header-primary-background-inner">',
 
-    '<h1 id="title" tabindex="0">',          report_title,
+    '<h1 id="title" tabindex="0">',            report_title,
     '</h1>',
     '<p>This report summarizes environmental and residential population information for user-defined areas,',
     '<br>and combines that data into indexes.</p>',
     '</div>',
-    '<div id="header-primary-background-img-container">',  logo_html,   # for example an EPA logo
+
+    '<div id="header-primary-background-img-container">',  logo_html,
     '</div>',
     '</div>',
+
     '<div class="header">
-    <div>
-        <h2 id="placename">',                analysis_title,
+       <div>
+        <h2 id="placename">',                  analysis_title,
     '</h2>
-    </div>
-  <div>
-  <h5>',                                     locationstr,
+      </div>
+    <div>
+     <h5>',                                    locationstr,
     '<br>Population: <span id="TOTALPOP">',    totalpop,
     '</span><br></h5>
- </div>
+    </div>
 </div>',
     sep = '', collapse = '')
   # Population: <span id=\"TOTALPOP\">',totalpop,'</span><br>',
@@ -716,7 +772,7 @@ generate_env_demog_header <- function(title = 'Environmental and Residential Pop
 #'
 #' @keywords internal
 #'
-generate_ej_header <- function(title = 'Summary Indexes') {
+generate_ej_header <- function(title = 'EJ Indexes') {
   paste0('<br>
  <div id=\"page-2-header\" class=\"header\" style=\"background-color: #005ea2;  color: white; text-align: center; padding: 20px 32px 10px 32px;\">
             <h2 tabindex=\"8\" style=\"font-size: 18px; margin-bottom: 5px\">',
@@ -724,9 +780,9 @@ generate_ej_header <- function(title = 'Summary Indexes') {
          title, '</h2>
 
             <p style=\"font-family: Oswald, Arial, sans-serif; font-size: 15px; padding-left: 20px;\">',
-         'The summary and supplemental indexes are a combination of environmental and residential population information.
+         'The summary and supplemental EJ indexes are a combination of environmental and residential population information.
          <br>
-         For each of the environmental indicators, there is a Summary Index and a Supplemental Summary Index.
+         For each of the environmental indicators, there is an EJ Index and a Supplemental EJ Index.
          <br>
          The indexes for a selected area are compared to those for all other locations in the state or nation.</p>',
          '
@@ -734,29 +790,29 @@ generate_ej_header <- function(title = 'Summary Indexes') {
          ### This extra header section was redundant here - it was probably more appropriate if put before the "Supplemental" section but now the two sets of indexes have no big header between them.
          #  , '<div style=\"background-color: #71bf44; color: white; text-align: center; padding: 0 32px 7px 32px;\">
          #     <h3  tabindex=\"10\" style=\"padding-top: 10px; margin-bottom: -10px; font-family: Arial, sans-serif; font-size: 23px;\">',
-         #  'SUMMARY INDEXES', '</h3>
+         #  'EJ INDEXES', '</h3>
          #     <p style=\"font-family: Oswald, Arial, sans-serif; font-weight: 300; font-size: 16px; margin: 15px 15% -2px 15%\">',
-         #  'The summary indexes help users screen for potential concerns. To do this, the summary index combines data on low income and POC populations with a single environmental indicator.</p>',
+         #  'The EJ indexes help users screen for potential concerns. To do this, the EJ index combines data on low income and POC populations with a single environmental indicator.</p>',
          #  '
          # </div>'
   )
 }
 ################################################################### #
 
-#' Build header for supplemental summary indexes in community report
+#' Build header for supplemental summary / EJ indexes in community report
 #' @seealso used by [build_community_report()]
 #' @param title title
 #'
 #' @keywords internal
 #'
-generate_ej_supp_header <- function(title = 'SUPPLEMENTAL INDEXES') {
+generate_ej_supp_header <- function(title = 'SUPPLEMENTAL EJ INDEXES') {
   paste0('<div style=\"background-color: #71bf44; color: white; text-align: center; padding: 0 32px 7px 32px;\">
     <h3 tabindex=\"11\" style=\"padding-top: 10px; margin-bottom: -10px; font-family: Arial, sans-serif; font-size: 23px;\">',
 
          title, '</h3>
 
       <p style=\"font-family: Oswald, Arial, sans-serif; font-weight: 300; font-size: 16px; margin-bottom: -2px; padding-left: 20px;\">',
-         'The supplemental indexes offer a different perspective on community-level conditions. Each one combines the Residential Populations Indicator with a single environmental indicator.  </p>
+         'The supplemental EJ indexes offer a different perspective on community-level conditions. Each one combines the Residential Populations Indicator with a single environmental indicator.  </p>
   </div>')
 }
 ################################################################### #
@@ -867,7 +923,7 @@ sitetype2text <- function(sitetype = NULL) {
 
 
 #' Build text for report: Residents within( X miles of)( any of) the (N) point(s)/polygon(s)/Census unit(s)
-#' @seealso used in app_server to create locationstr for  [build_community_report()]
+#' used in app_server to create locationstr for  [build_community_report()]
 #' @param text1 text to start the phrase, like "Residents within "
 #' @param radius The distance from each place, normally in miles (which can be 0),
 #'   or custom text like "seven kilometers from" in which case
@@ -884,6 +940,8 @@ sitetype2text <- function(sitetype = NULL) {
 #'   but should be something that can be made plural by just adding "s" so ending with "site"
 #'   works better than ending with "... facility" since that would print as "facilitys" here.
 #' @param area_in_square_miles number if available, area in square miles, added as a second line
+#'
+#' @seealso [buffer_desc_from_sitetype()]
 #'
 #' @keywords internal
 #'

@@ -16,6 +16,8 @@ plot_ridgeline_ratios(
 
 \item{shortlabels}{names to use for plot - should be same length as named list ratio.to.us.d.overall}
 
+\item{main}{optional title for ggplot2}
+
 \item{maxratio}{largest ratio to plot in case of outliers, so plot looks better}
 }
 \description{

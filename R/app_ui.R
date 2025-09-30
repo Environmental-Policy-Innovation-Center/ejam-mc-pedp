@@ -14,7 +14,7 @@ app_ui  <- function(request) {
 
     fluidPage(
 
-     ## enable JavaScript, CSS   ####
+      ## enable JavaScript, CSS   ####
       #   functionality (such as resetting inputs) etc.
       shinyjs::useShinyjs(),
       ## javascript function for jumping to top of screen
@@ -40,17 +40,17 @@ app_ui  <- function(request) {
       ## html header inserted from global_defaults_*.R ####
       EJAM:::global_or_param("html_header_fmt"),
 
-     ## title is now in html in global_defaults_*.R (for app and browser tab) ####
+      ## title is now in html in global_defaults_*.R (for app and browser tab) ####
 
-     ## title, favicon, etc. ####
+      ## title, favicon, etc. ####
 
-     ############################################################# #
+      ############################################################# #
 
       # TABS:   ####
       tabsetPanel( # up to line 1101 or so
         id = 'all_tabs',
 
-        selected = 'Site Selection',
+        selected = EJAM:::global_or_param("tabshown_default"),
 
         # . ## ##
         # ______ "About" tab ______ tabPanel(title = 'About' ####
@@ -62,23 +62,28 @@ app_ui  <- function(request) {
                    column(8,
 
                           ## html intro text from global_defaults_*.R
-                          EJAM:::global_or_param("intro_text"),
+                          EJAM:::global_or_param("aboutpage_text"),
                           actionButton(inputId = 'back_to_site_sel2', label = div(icon('play', style = 'transform: rotate(180deg);'), HTML('&nbsp;'), 'Return to Site Selection'), class = 'usa-button'),
                           br(), br(),
-                          actionButton('ui_show_advanced_settings','Show Advanced Settings Tab', class = 'usa-button'),
-                          actionButton('ui_hide_advanced_settings','Hide Advanced Settings Tab', class = 'usa-button'),
+                          conditionalPanel(
+                            # So that About tab can be shown without necessarily allowing users to show/hide the advanced tab,
+                            ## button to show/hide Advanced tab  ####
+                            condition = "input.can_show_advanced_settings == 'TRUE'",
+                            actionButton(inputId = 'ui_show_advanced_settings','Show Advanced Settings Tab', class = 'usa-button'),
+                            actionButton(inputId = 'ui_hide_advanced_settings','Hide Advanced Settings Tab', class = 'usa-button')
+                          ),
                           br(),br(),
                    ),
                    column(4,
-                          img(id = "biglogo", src = EJAM:::global_or_param("aboutpage_logo"),
+                          img(id = "biglogo", src = EJAM:::global_or_param("app_logo_aboutpage"),
                               alt = "logo", title = "logo", width = "100px", height = "100px")
                    )
                  )
         ), # end About EJAM tab
-
         ######################################################################################################### #
         #
         ######################################################################################################### #
+        # . --------------------------------------------------------------- ####
         #. ####
         # ______ SELECT SITES ________ tabPanel(title = 'Site Selection'####
         #. ####
@@ -103,8 +108,10 @@ app_ui  <- function(request) {
                                                'Upload specific locations'),
                                choiceValues = c('dropdown',
                                                 'upload'),
-                               selected = 'upload'),   # hard-coded default selection.
-                  # uiOutput(outputId = 'ss_choose_method_ui'), # flexible default selection, handled in server code.
+                               selected = EJAM:::global_or_param("default_upload_dropdown")),
+                               # selected = input$default_ss_choose_method), # which has a default of EJAM:::global_or_param("default_upload_dropdown")
+                  # selected = 'upload'),   # if hard-coded default selection.
+                  # uiOutput(outputId = 'ss_choose_method_ui'), # flexible default selection, if handled in server code.
 
                   ## > what DROPDOWN CATEGORY TYPE? (NAICS, SIC, MACT, Program, FIPS_PLACE) ####
 
@@ -114,18 +121,20 @@ app_ui  <- function(request) {
                                 label = tags$span(
                                   'How would you like to select categories?'
                                 ),
-                                choices = EJAM:::global_or_param("default_choices_for_type_of_site_category")
+                                choices = EJAM:::global_or_param("default_choices_for_type_of_site_category"),
+                                selected = EJAM:::global_or_param("default_selected_type_of_site_category")
                     )
                   ),
 
-                  ## > what UPLOAD TYPE? Locations type to upload? (IDs, latlon, FIPS, Shapes) ####
+                  ## > what UPLOAD TYPE? Locations type to upload? (SHP, FIPS, FRS, EPA_PROGRAM, latlon) ####
                   conditionalPanel(
                     condition = 'input.ss_choose_method == "upload"',
                     selectInput(inputId = 'ss_choose_method_upload',
                                 label = tags$span(
                                   'What type of data are you uploading?'
                                 ),
-                                choices = EJAM:::global_or_param("default_choices_for_type_of_site_upload")
+                                choices = EJAM:::global_or_param("default_choices_for_type_of_site_upload"),
+                                selected = EJAM:::global_or_param("default_selected_type_of_site_upload")
                     )
                   ),
               ),
@@ -173,7 +182,7 @@ app_ui  <- function(request) {
                             ### include error msg here?? ***
                             # textOutput("error_message"),
                             # tags$style(HTML("#error_message { color: red; }")),
-                            actionButton('latlon_help', label = 'More Info', class = 'usa-button usa-button--outline'), # HTML(latlon_help_msg)
+                            actionButton(inputId = 'latlon_help', label = 'More Info', class = 'usa-button usa-button--outline'), # HTML(latlon_help_msg)
                             br()
                           ), # end latlong conditionalPanel
                           ################################################################# #
@@ -198,7 +207,7 @@ app_ui  <- function(request) {
                             ),
                             textOutput("error_message"),
                             tags$style(HTML("#error_message { color: red; }")),
-                            actionButton('shp_help', label = 'More Info', class = 'usa-button usa-button--outline')
+                            actionButton(inputId = 'shp_help', label = 'More Info', class = 'usa-button usa-button--outline')
                           ), # end Shapefile conditionalPanel
                           ################################################################# #
 
@@ -221,7 +230,7 @@ app_ui  <- function(request) {
                             ### include error msg here?? ***
                             # textOutput("error_message"),
                             # tags$style(HTML("#error_message { color: red; }")),
-                            actionButton('fips_help', label = 'More Info', class = 'usa-button usa-button--outline')
+                            actionButton(inputId = 'fips_help', label = 'More Info', class = 'usa-button usa-button--outline')
                           ), # end FIPS conditionalPanel
                           ################################################################# #
 
@@ -239,7 +248,7 @@ app_ui  <- function(request) {
                             ### include error msg here?? ***
                             # textOutput("error_message"),
                             # tags$style(HTML("#error_message { color: red; }")),
-                            actionButton('frs_help', label = 'More Info', class = 'usa-button usa-button--outline')
+                            actionButton(inputId = 'frs_help', label = 'More Info', class = 'usa-button usa-button--outline')
                           ), # end FRS conditionalPanel
                           ################################################################# #
 
@@ -253,7 +262,7 @@ app_ui  <- function(request) {
                             ### include error msg here?? ***
                             # textOutput("error_message"),
                             # tags$style(HTML("#error_message { color: red; }")),
-                            actionButton('epa_program_help', label = 'More Info', class = 'usa-button usa-button--outline')
+                            actionButton(inputId = 'epa_program_help', label = 'More Info', class = 'usa-button usa-button--outline')
                           ), #end EPA program upload conditional panel
                           ################################################################# #
 
@@ -270,7 +279,7 @@ app_ui  <- function(request) {
                                            ## named vector in global_defaults_*.R - values are acronyms,
                                            ## names include # of rows corresponding to that program
                                            choices = epa_programs,
-                                           selected = EJAM:::global_or_param("default_epa_program_selected"), # not sure this is a good idea but trying it out
+                                           selected = EJAM:::global_or_param("default_epa_program_selected"),
                                            ## add X to remove selected options from list
                                            options = list('plugins' = list('remove_button'))),
                             br(),
@@ -293,8 +302,9 @@ app_ui  <- function(request) {
                               label = h6("Select industry of interest"),
                               # choose from named numeric vector on server-side
                               ## number is NAICS like 31182, names are like "31182 - Cookie, Cracker, and Pasta Manufacturing"
-                              choices = NULL,
-                              selected = NULL,
+                              # choices = NULL,  # gets updated when buttons used
+                              choices = NULL, # setNames(naics_counts[nchar(naics_counts$NAICS) == 3, ]$NAICS, naics_counts[nchar(naics_counts$NAICS) == 3, ]$label_w_subs), # start with limited options ? ***
+                              selected = EJAM:::global_or_param("default_naics"),
                               width = 400,
                               multiple = TRUE,
                               ## add X to remove selected options from list
@@ -308,16 +318,16 @@ app_ui  <- function(request) {
                             condition = "input.ss_choose_method == 'dropdown' && input.ss_choose_method_drop == 'NAICS'",
                             div(style = 'border: 1px solid #005ea2; padding: 10px; background-color: white',
 
-                                radioButtons('naics_digits_shown', "See all subcategories of NAICS?",
+                                radioButtons(inputId = 'naics_digits_shown', "See all subcategories of NAICS?",
                                              inline = TRUE,
                                              choiceNames = c("Basic list", "Detailed list"),
                                              choiceValues = c('basic', 'detailed'),
-                                             selected = 'basic'),
-                                radioButtons('add_naics_subcategories', "Add all subcategories of NAICS?",
+                                             selected = EJAM:::global_or_param("default_naics_digits_shown")), # "basic"
+                                radioButtons(inputId = 'add_naics_subcategories', "Add all subcategories of NAICS?",
                                              inline = TRUE,
                                              choiceNames = c("Yes","No"),
                                              choiceValues = c(TRUE,FALSE),
-                                             selected = TRUE)
+                                             selected = EJAM:::global_or_param("default_add_naics_subcategories"))
                             ),
 
                             br(),
@@ -335,17 +345,16 @@ app_ui  <- function(request) {
                             condition = "input.ss_choose_method == 'dropdown' && input.ss_choose_method_drop == 'SIC'",
 
                             ## input: Select SIC from list
-                            selectizeInput(
-                              inputId = "ss_select_sic",
-                              label = h6("Select industry of interest"),
-                              # choose from named numeric vector on server-side
-                              ## number is NAICS like 31182, names are like "31182 - Cookie, Cracker, and Pasta Manufacturing"
-                              choices = NULL,
-                              selected = NULL,
-                              width = 400,
-                              multiple = TRUE,
-                              ## add X to remove selected options from list
-                              options = list('plugins' = list('remove_button'))
+                            selectizeInput(inputId = "ss_select_sic",
+                                           label = h6("Select industry of interest"),
+                                           # choose from named numeric vector on server-side
+                                           ## number is NAICS like 31182, names are like "31182 - Cookie, Cracker, and Pasta Manufacturing"
+                                           choices = NULL,
+                                           selected = NULL,
+                                           width = 400,
+                                           multiple = TRUE,
+                                           ## add X to remove selected options from list
+                                           options = list('plugins' = list('remove_button'))
                             ),
                             br(), ## vertical space
                           ), # end SIC conditionalPanel
@@ -375,7 +384,7 @@ app_ui  <- function(request) {
                             # modalDialog(
                             # tagList(
                             fipspicker_module_ui(id = "pickermoduleid"),
-                            shiny::actionButton("fipspicker_done_button", label = "Done")
+                            shiny::actionButton(inputId = "fipspicker_done_button", label = "Done")
                             # )
                             # )
                             # data_fips_place() is defined in server based on selections of FIPS places,
@@ -422,7 +431,7 @@ app_ui  <- function(request) {
                      div(
                        style = "flex: 1; display: flex; flex-wrap: wrap; gap: 1em; align-items: center;",
                        div(
-                         actionButton('show_data_preview', label = 'Review selected sites',
+                         actionButton(inputId = 'show_data_preview', label = 'Review selected sites',
                                       class = 'usa-button usa-button--outline')
                        ),
                        div(
@@ -479,24 +488,25 @@ app_ui  <- function(request) {
         #############################################################################  #
         # . --------------------------------------------------------------- ####
         #. ####
-        # ______ SUMMARY RESULTS _________ ####
+        # ______ SUMMARY RESULTS, results_overall _________ ####
         #. ####
         # #############################################################################  #
 
         # See Results tabPanel(title = "See Results" ####
+
         tabPanel(title = "See Results",
-                 ##br(),
-                 ##actionButton('back_to_site_sel', label = div(icon('play', style = 'transform: rotate(180deg);'),
+
+                 ##actionButton(inputId = 'back_to_site_sel', label = div(icon('play', style = 'transform: rotate(180deg);'),
                  ## HTML('&nbsp;'), 'Return to Site Selection'), class = 'usa-button'),
                  # . ### #
                  ## tabsetPanel(id = 'results_tabs'  ####
                  #tags$div( class = 'results_tabs_theme',
+
                  tabsetPanel(id = 'results_tabs',
                              #type = 'pills',
 
-
                              ######################################################################################################### #
-                             # COMMUNITY REPORT VIEW ####
+                             # REPORT Overall - for BROWSER ####
                              tabPanel(
                                title = "Community Report",
 
@@ -504,17 +514,19 @@ app_ui  <- function(request) {
                                includeCSS(app_sys('report/community_report/main.css')),
                                #includeCSS('inst/report/community_report/communityreport.css'),
                                #includeCSS('inst/report/community_report/main.css'),
-
-                               ## build HTML for community report
+                               ############################## #
+                               ###               > TABLES       ####
                                uiOutput('comm_report_html'),
-
                                br(),
-
-                               #### quick_view_map (results, in summary report) ####
+                               ############################## #
+                               ###                > MAP    ####
+                               #### quick_view_map (results, in summary report) ### #
                                shinycssloaders::withSpinner(
                                  leaflet::leafletOutput('quick_view_map')#, width = '1170px', height = '627px')
                                ),
                                br(),
+                               ############################## #
+                               ###                > BARPLOT    ####
                                fluidRow(
                                  column(
                                    12, align = 'center',
@@ -524,6 +536,8 @@ app_ui  <- function(request) {
                                    )
                                  )
                                ),
+                               ############################## #
+                               ###              > FOOTER  (version, date)    ####
                                div(
                                  style = "background-color: #edeff0; color: black; width: 100%; padding: 10px 20px; text-align: right; margin: 10px 0;",
                                  uiOutput("report_version_date")
@@ -538,7 +552,7 @@ app_ui  <- function(request) {
 
                              ######################################################################################################### #
                              #. ####
-                             # ______ DETAILED RESULTS  _________ ####
+                             # ______ DETAILED RESULTS, results_bysite  _________ ####
                              #. ####
                              ## tabPanel(title = 'Details' ####
                              #. ## ##
@@ -595,7 +609,7 @@ app_ui  <- function(request) {
                                             tabPanel(id = "plot_average",
                                                      title = 'Plot Average Scores',
                                                      h4('About this Chart'),
-                                                     helpText('These charts show how each residential population group and environmental stressor, in the analyzed locations, compares to its US average. A Summary Index combines an environmental indicator with the Demog. Index (The Summary Index is what EJScreen called an EJ Index).'),
+                                                     helpText('These charts show how each residential population group and environmental stressor, in the analyzed locations, compares to its US average. A Summary/ EJ Index combines an environmental indicator with the Demog. Index (The Summary Index is what EJSCREEN called an EJ Index).'),
 
                                                      wellPanel(
                                                        style = 'width: 100%;',
@@ -624,9 +638,9 @@ app_ui  <- function(request) {
                                                        br(), br()
                                                        ######################################################################################################### #
                                                      ) # end of wellPanel
-                                                     ),  # end of tabPanel(title = 'Plot Average Scores',
+                                            ),  # end of tabPanel(title = 'Plot Average Scores',
 
-                                                     ### _HISTOPLOT (RANGE OF SCORES) - tabPanel(title = 'Plot Full Range of Scores' ####
+                                            ### _HISTOPLOT (RANGE OF SCORES) - tabPanel(title = 'Plot Full Range of Scores' ####
 
                                             tabPanel(id = "plot_range",
                                                      title = 'Plot Full Range of Scores',
@@ -677,320 +691,316 @@ app_ui  <- function(request) {
                                       ) # end div(class = 'navbar1'
                              ), # end 'Details' results tab
                              ######################################################################################################### #
-                             #. ####
-                             # ______ FULL REPORT (Word doc) - tabPanel(title = 'Written Report' _________ ####
-                             #. ####
+                             { # code folding for full written report chunk
+                               #. ####
+                               # ______ FULL REPORT (Word doc) - tabPanel(title = 'Written Report' _________ ####
+                               #. ####
 
+                               tabPanel(title = 'Written Report',
 
-                             tabPanel(title = 'Written Report',
+                                        #  MAKE SURE all parameter names are used (identical names, and all are there) in these 4 places:
+                                        #  1. input$ ids in app_ui.R, from user, to customize the long report
+                                        #  2. params$ list passed by app_server.R to render the Rmd doc
+                                        #  3. params: accepted in  .Rmd yaml info header
+                                        #  4. params$  as used within body of  .Rmd text inline and in r code blocks.
 
-                                      #  MAKE SURE all parameter names are used (identical names, and all are there) in these 4 places:
-                                      #  1. input$ ids in app_ui.R, from user, to customize the long report
-                                      #  2. params$ list passed by app_server.R to render the Rmd doc
-                                      #  3. params: accepted in  .Rmd yaml info header
-                                      #  4. params$  as used within body of  .Rmd text inline and in r code blocks.
-
-                                      br(), ## vertical space
-
-                                      wellPanel(
                                         br(), ## vertical space
 
-                                        ## arrange text and buttons
-                                        fluidRow(
-                                          column(6,
-                                                 ## add text above report settings
-                                                 p('Edit report settings below to tailor the full report to your specific analysis.')
+                                        wellPanel(
+                                          br(), ## vertical space
+
+                                          ## arrange text and buttons
+                                          fluidRow(
+                                            column(6,
+                                                   ## add text above report settings
+                                                   p('Edit report settings below to tailor the full report to your specific analysis.')
+                                            ),
+                                            column(6,
+                                                   ## output: button to download static report
+                                                   shiny::downloadButton(outputId = 'rg_download',
+                                                                         label = 'Download report',
+                                                                         class = 'usa-button')
+                                            )
+                                          ), ######################################################### #
+
+                                          #------- WHERE was analyzed? (where/ what sector/zones/types of places)
+
+                                          #?  # analysis_title =  input$analysis_title,
+                                          # zonetype =  input$rg_zonetype,   ### names differ by   rg_
+                                          # where = input$rg_enter_miles,   ############# names differ
+                                          # distance = paste0(input$radius_now,' miles'), #input$radius_units),   #############  param derived from input
+                                          # sectorname_short = input$rg_enter_sites,                 ############# names differ
+                                          # ## allow for either or
+                                          # in_the_x_zone = ifelse(nchar(input$in_the_x_zone_enter) > 0,     ######  _enter  and derived from inputs
+                                          #                        input$in_the_x_zone_enter,
+                                          #                        input$in_the_x_zone),
+                                          # facilities_studied = ifelse(nchar(input$facilities_studied_enter) > 0,    ####   _enter and derived from inputs
+                                          #                             input$facilities_studied_enter,
+                                          #                             input$facilities_studied),
+                                          # within_x_miles_of = paste0("within ", paste0(input$radius_now,' miles'), " of"),   ##### param derived from input
+                                          #
+                                          # in_areas_where = paste0(input$in_areas_where, ' ', input$in_areas_where_enter),   ######   _enter
+                                          # risks_are_x = input$risks_are_x,                      ### names match
+                                          # source_of_latlons = input$source_of_latlons,          ### names match
+                                          # sitecount = nrow(data_processed()$results_bysite),      ### param derived from data
+
+                                          # put input$analysis_title   here???
+
+                                          fluidRow(          #    param is called  where
+                                            column(4,
+                                                   ## input: analysis location - uses current value of radius slider
+                                                   uiOutput('rg_enter_miles')
+                                            )),
+
+                                          # param distance is based on input$radius_now
+
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:  - which sites analyzed  #    param is called   sectorname_short
+                                                   textInput(inputId = "rg_enter_sites",
+                                                             label = "Describe sites analyzed:",
+                                                             value = "facilities in the _____ source category"),
+                                            )
                                           ),
-                                          column(6,
-                                                 ## output: button to download static report
-                                                 shiny::downloadButton(outputId = 'rg_download',
-                                                                       label = 'Download report',
-                                                                       class = 'usa-button'),
 
-                                          )
-                                        ), ######################################################### #
-
-                                        #------- WHERE was analyzed? (where/ what sector/zones/types of places)
-
-                                        #?  # analysis_title =  input$analysis_title,
-                                        # zonetype =  input$rg_zonetype,   ### names differ by   rg_
-                                        # where = input$rg_enter_miles,   ############# names differ
-                                        # distance = paste0(input$bt_rad_buff,' miles'), #input$radius_units),   #############  param derived from input
-                                        # sectorname_short = input$rg_enter_sites,                 ############# names differ
-                                        # ## allow for either or
-                                        # in_the_x_zone = ifelse(nchar(input$in_the_x_zone_enter) > 0,     ######  _enter  and derived from inputs
-                                        #                        input$in_the_x_zone_enter,
-                                        #                        input$in_the_x_zone),
-                                        # facilities_studied = ifelse(nchar(input$facilities_studied_enter) > 0,    ####   _enter and derived from inputs
-                                        #                             input$facilities_studied_enter,
-                                        #                             input$facilities_studied),
-                                        # within_x_miles_of = paste0("within ", paste0(input$bt_rad_buff,' miles'), " of"),   ##### param derived from input
-                                        #
-                                        # in_areas_where = paste0(input$in_areas_where, ' ', input$in_areas_where_enter),   ######   _enter
-                                        # risks_are_x = input$risks_are_x,                      ### names match
-                                        # source_of_latlons = input$source_of_latlons,          ### names match
-                                        # sitecount = nrow(data_processed()$results_bysite),      ### param derived from data
-
-                                        # put input$analysis_title   here???
-
-                                        fluidRow(          #    param is called  where
-                                          column(4,
-                                                 ## input: analysis location - uses current value of radius slider
-                                                 uiOutput('rg_enter_miles')
-                                          )),
-
-                                        # param distance is based on input$bt_rad_buff
-
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:  - which sites analyzed  #    param is called   sectorname_short
-                                                 textInput(inputId = "rg_enter_sites",
-                                                           label = "Describe sites analyzed:",
-                                                           value = "facilities in the _____ source category"),
-                                          )
-                                        ),
-
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:   # zonetype =  input$rg_zonetype
-                                                 selectInput(inputId = 'rg_zonetype',
-                                                             label = 'Zone Type (How are zones defined?)',
-                                                             choices = c('General' = 'zone_is_named_x','Proximity' = 'zone_is_nearby',
-                                                                         'Risk' = 'zone_is_risk_x'))
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:   # zonetype =  input$rg_zonetype
+                                                   selectInput(inputId = 'rg_zonetype',
+                                                               label = 'Zone Type (How are zones defined?)',
+                                                               choices = c('General' = 'zone_is_named_x','Proximity' = 'zone_is_nearby',
+                                                                           'Risk' = 'zone_is_risk_x'))
+                                            ),
+                                            column(4,
+                                                   ## input:   #  based on  input$radius_now
+                                                   selectInput(inputId = 'within_x_miles_of',
+                                                               label = 'Near to',
+                                                               choices = c('near the','nearby',''))
+                                            )
                                           ),
-                                          column(4,
-                                                 ## input:   #  based on  input$bt_rad_buff
-                                                 selectInput(inputId = 'within_x_miles_of',
-                                                             label = 'Near to',
-                                                             choices = c('near the','nearby',''))
-                                          )
-                                        ),
 
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:    # in_areas_where calculated from input$in_areas_where, and input$in_areas_where_enter
-                                                 selectInput(inputId = 'in_areas_where',
-                                                             label = 'Describe the surrounding area',
-                                                             choices = c('in areas with',
-                                                                         'where','in block groups where')
-                                                 )
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:    # in_areas_where calculated from input$in_areas_where, and input$in_areas_where_enter
+                                                   selectInput(inputId = 'in_areas_where',
+                                                               label = 'Describe the surrounding area',
+                                                               choices = c('in areas with',
+                                                                           'where','in blockgroups where')
+                                                   )
+                                            ),
+                                            column(4,
+                                                   ## input:
+                                                   textInput(inputId = 'in_areas_where_enter',
+                                                             label = 'Add area details',
+                                                             value = '')
+                                            )
                                           ),
-                                          column(4,
-                                                 ## input:
-                                                 textInput(inputId = 'in_areas_where_enter',
-                                                           label = 'Add area details',
-                                                           value = '')
-                                          )
-                                        ),
-                                        fluidRow(
-                                          column(8,
-                                                 ## input:
-                                                 selectInput(inputId = 'risks_are_x',
-                                                             label = 'Risk level',
-                                                             choices = c("risk is at or above 1 per million (lifetime individual cancer risk due to inhalation of air toxics from this source category)",
-                                                                         "risk is above 1 per million",
-                                                                         "the area is in nonattainment",
-                                                                         "PM2.5 levels are in the highest decile",
-                                                                         "ozone concentrations are at least 70 ppb")
-                                                 )
-                                          )
-                                        ),
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:
-                                                 selectInput(inputId = 'in_the_x_zone',
-                                                             label = 'General study location',
-                                                             choices = c('in the study area' = 'area', 'in the analyzed locations' = 'locs',
-                                                                         'in [State X] (specify)' = 'state',
-                                                                         'in EPA Region [XX] (specify)' = 'region')
-                                                 )
+                                          fluidRow(
+                                            column(8,
+                                                   ## input:
+                                                   selectInput(inputId = 'risks_are_x',
+                                                               label = 'Risk level',
+                                                               choices = c("risk is at or above 1 per million (lifetime individual cancer risk due to inhalation of air toxics from this source category)",
+                                                                           "risk is above 1 per million",
+                                                                           "the area is in nonattainment",
+                                                                           "PM2.5 levels are in the highest decile",
+                                                                           "ozone concentrations are at least 70 ppb")
+                                                   )
+                                            )
                                           ),
-                                          column(4,
-                                                 ## add free text box if certain values chosen from radio button
-                                                 conditionalPanel(
-                                                   condition = "input.in_the_x_zone == 'state' || input.in_the_x_zone == 'region'",
-                                                   textInput(inputId = 'in_the_x_zone_enter',
-                                                             label = 'Other - please specify',
-                                                             value = 'in ')
-                                                 )
-                                          )
-                                        ),
-
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:
-                                                 selectInput(inputId = 'facilities_studied',
-                                                             label = 'Facilities Studied',
-                                                             choices = c('facilities subject to this proposed rule' = 'rule',
-                                                                         'analyzed facilities' = 'fac','analyzed sites' = 'sites',
-                                                                         'facilities in the ___ source category' = 'cat',
-                                                                         'facilities in the ____ sector (NAICS code __)' = 'sector')
-                                                 )
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:
+                                                   selectInput(inputId = 'in_the_x_zone',
+                                                               label = 'General study location',
+                                                               choices = c('in the study area' = 'area', 'in the analyzed locations' = 'locs',
+                                                                           'in [State X] (specify)' = 'state',
+                                                                           'in EPA Region [XX] (specify)' = 'region')
+                                                   )
+                                            ),
+                                            column(4,
+                                                   ## add free text box if certain values chosen from radio button
+                                                   conditionalPanel(
+                                                     condition = "input.in_the_x_zone == 'state' || input.in_the_x_zone == 'region'",
+                                                     textInput(inputId = 'in_the_x_zone_enter',
+                                                               label = 'Other - please specify',
+                                                               value = 'in ')
+                                                   )
+                                            )
                                           ),
-                                          column(4,
-                                                 ## add free text box if certain values chosen
-                                                 conditionalPanel(
-                                                   condition = "input.facilities_studied == 'cat' || input.facilities_studied == 'sector' || input.facilities_studied == 'rule'",
-                                                   textInput(inputId = 'facilities_studied_enter',
-                                                             label = 'Other - please specify')
-                                                 )
-                                          )
-                                        ),
 
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:
-                                                 textInput(inputId = 'source_of_latlons',
-                                                           label = 'Source of Points',
-                                                           placeholder = "EPA's Facility Registry Service (FRS)"),
-                                          )
-                                        ),
-
-
-                                        #------- METHODS, AUTHORS, ETC.
-
-                                        fluidRow(
-                                          column(2,
-                                                 ## input:
-                                                 textInput(inputId = "rg_author_name",
-                                                           label = "Author Name(s):",
-                                                           value = "FirstName LastName")
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:
+                                                   selectInput(inputId = 'facilities_studied',
+                                                               label = 'Facilities Studied',
+                                                               choices = c('facilities subject to this proposed rule' = 'rule',
+                                                                           'analyzed facilities' = 'fac','analyzed sites' = 'sites',
+                                                                           'facilities in the ___ source category' = 'cat',
+                                                                           'facilities in the ____ sector (NAICS code __)' = 'sector')
+                                                   )
+                                            ),
+                                            column(4,
+                                                   ## add free text box if certain values chosen
+                                                   conditionalPanel(
+                                                     condition = "input.facilities_studied == 'cat' || input.facilities_studied == 'sector' || input.facilities_studied == 'rule'",
+                                                     textInput(inputId = 'facilities_studied_enter',
+                                                               label = 'Other - please specify')
+                                                   )
+                                            )
                                           ),
-                                          column(2,
-                                                 ## input:
-                                                 textInput(inputId = "rg_author_email",
-                                                           label = "Author Email(s):",
-                                                           value = "author@email.org")
+
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:
+                                                   textInput(inputId = 'source_of_latlons',
+                                                             label = 'Source of Points',
+                                                             placeholder = "EPA's Facility Registry Service (FRS)"),
+                                            )
                                           ),
-                                          column(2,
-                                                 ## input: checkbox to add line for coauthor information
-                                                 checkboxInput(inputId = 'rg_add_coauthors',
-                                                               label = 'Add co-authors?',
-                                                               value = FALSE)
-                                          )
-                                        ),
-                                        ## if checkbox is checked, add textinputs for co-author name and email
-                                        conditionalPanel(
-                                          condition = 'input.rg_add_coauthors == 1',
+
+                                          #------- METHODS, AUTHORS, ETC.
+
                                           fluidRow(
                                             column(2,
                                                    ## input:
-                                                   textInput(inputId = 'coauthor_names', 'Co-Author Name(s)')
+                                                   textInput(inputId = "rg_author_name",
+                                                             label = "Author Name(s):",
+                                                             value = "FirstName LastName")
                                             ),
                                             column(2,
                                                    ## input:
-                                                   textInput(inputId = 'coauthor_emails', 'Co-Author Email(s)')
+                                                   textInput(inputId = "rg_author_email",
+                                                             label = "Author Email(s):",
+                                                             value = "author@email.org")
+                                            ),
+                                            column(2,
+                                                   ## input: checkbox to add line for coauthor information
+                                                   checkboxInput(inputId = 'rg_add_coauthors',
+                                                                 label = 'Add co-authors?',
+                                                                 value = FALSE)
                                             )
-                                          )
-                                        ),
-                                        fluidRow(
-                                          ## input:
-                                          textInput(inputId = 'fundingsource',
-                                                    label = 'Funding Source',
-                                                    placeholder = "The Inflation Reduction Act (for example)"),
-                                          ## input:
-                                          textInput(inputId = 'acs_version',
-                                                    label = 'Version of ACS data (years)',
-                                                    placeholder =  as.vector(metadata_mapping$blockgroupstats[['acs_version']])),
-                                          ## input:
-                                          textInput(inputId = 'ejscreen_version',
-                                                    label = 'Version of EJScreen',
-                                                    placeholder =  as.vector(metadata_mapping$blockgroupstats[['ejam_package_version']]))
-                                        ),
-                                        ############################ #
-
-                                        #------- RESULTS (tables and map and plots)
-
-                                        # total_pop: NA
-                                        # results: NA
-                                        # results_formatted: NA
-                                        # map: NA
-                                        # map_placeholder_png:                 "map_placeholder.png"
-                                        # envt_table: NA
-                                        # envt_table_placeholder_png:   "envt_table_placeholder.png"
-                                        # envt_table_placeholder_rda:   "envt_table_placeholder.rda"
-                                        # demog_table: NA
-                                        # demog_table_placeholder_png: "demog_table_placeholder.png"
-                                        # demog_table_placeholder_rda: "demog_table_placeholder.rda"
-                                        # boxplot: NA
-                                        # boxplot_placeholder_png:         "boxplot_placeholder.png"
-                                        # barplot: NA
-                                        # barplot_placeholder_png:         "barplot_placeholder.png"
-                                        #
-
-
-                                        #------- TEXT PHRASES DESCRIBING AND INTERPRETING RESULT
-
-                                        # demog_how_elevated: NA
-                                        # envt_how_elevated: NA
-                                        # demog_high_at_what_share_of_sites: NA
-                                        # envt_high_at_what_share_of_sites: NA
-                                        # conclusion1: NA
-                                        # conclusion2: NA
-                                        # conclusion3: NA
-
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:
-                                                 textInput(inputId = 'demog_how_elevated',
-                                                           label = 'Elevation of Residential Population Indicators',
-                                                           placeholder = 'moderately elevated'),
                                           ),
-                                          column(4,
-                                                 ## input:
-                                                 textInput(inputId = 'envt_how_elevated',
-                                                           label = 'Elevation of Environmental Indicators',
-                                                           placeholder = 'moderately elevated'),
-                                          )
-                                        ),
-                                        fluidRow(
-                                          column(4,
-                                                 ## input:
-                                                 selectInput(inputId = 'demog_high_at_what_share_of_sites',
-                                                             label = 'Residential population indicators high at what share of sites?',
-                                                             choices = c('a surprisingly large share of these sites',
-                                                                         'some of these sites, just as it varies nationwide',
-                                                                         'a relatively small share of these sites'),
-                                                             selected = 'some of these sites, just as it varies nationwide'),
+                                          ## if checkbox is checked, add textinputs for co-author name and email
+                                          conditionalPanel(
+                                            condition = 'input.rg_add_coauthors == 1',
+                                            fluidRow(
+                                              column(2,
+                                                     ## input:
+                                                     textInput(inputId = 'coauthor_names', 'Co-Author Name(s)')
+                                              ),
+                                              column(2,
+                                                     ## input:
+                                                     textInput(inputId = 'coauthor_emails', 'Co-Author Email(s)')
+                                              )
+                                            )
                                           ),
-                                          column(4,
-                                                 ## input:
-                                                 selectInput(inputId = 'envt_high_at_what_share_of_sites',
-                                                             label = 'Environmental indicators high at what share of sites?',
-                                                             choices = c('a surprisingly large share of these sites',
-                                                                         'some of these sites, just as it varies nationwide',
-                                                                         'a relatively small share of these sites'),
-                                                             selected = 'some of these sites, just as it varies nationwide'),
-                                          )
-                                        ),
-                                        fluidRow(
-                                          column(8,
-                                                 ## input: conclusion 1 -
-                                                 textAreaInput(inputId = 'conclusion1',
-                                                               label = 'Conclusion 1',
-                                                               placeholder = "The people living near these sites are 40% more likely to be in Limited-English Households than the average US resident. (for example)"
-                                                 )
-                                          )
-                                        ),
-                                        fluidRow(
-                                          column(8,
-                                                 ## input: conclusion 2-
-                                                 textAreaInput(inputId = 'conclusion2',
-                                                               label = 'Conclusion 2',
-                                                               placeholder = "The % low income among these residents is 2.4 times the rate in the US overall. (for example)")
-                                          )
-                                        ),
-                                        fluidRow(
-                                          column(8,
-                                                 ## input: conclusion 3 -
-                                                 textAreaInput(inputId = 'conclusion3',
-                                                               label = 'Conclusion 3',
-                                                               placeholder = "The average resident near these sites is 1.5 times as likely to be Hispanic as the average person in their State overall. (for example)")
-                                          )
-                                        ),
-                                      ) # end wellpanel
-                             )  # end written report  tab
+                                          fluidRow(
+                                            ## input:
+                                            textInput(inputId = 'fundingsource',
+                                                      label = 'Funding Source',
+                                                      placeholder = "The Inflation Reduction Act (for example)"),
+                                            ## input:
+                                            textInput(inputId = 'acs_version',
+                                                      label = 'Version of ACS data (years)',
+                                                      placeholder =  as.vector(metadata_mapping$blockgroupstats[['acs_version']])),
+                                            ## input:
+                                            textInput(inputId = 'ejscreen_version',
+                                                      label = 'Version of EJSCREEN',
+                                                      placeholder =  as.vector(metadata_mapping$blockgroupstats[['ejam_package_version']]))
+                                          ),
+                                          ############################ #
 
+                                          #------- RESULTS (tables and map and plots)
+
+                                          # total_pop: NA
+                                          # results: NA
+                                          # results_formatted: NA
+                                          # map: NA
+                                          # map_placeholder_png:                 "map_placeholder.png"
+                                          # envt_table: NA
+                                          # envt_table_placeholder_png:   "envt_table_placeholder.png"
+                                          # envt_table_placeholder_rda:   "envt_table_placeholder.rda"
+                                          # demog_table: NA
+                                          # demog_table_placeholder_png: "demog_table_placeholder.png"
+                                          # demog_table_placeholder_rda: "demog_table_placeholder.rda"
+                                          # boxplot: NA
+                                          # boxplot_placeholder_png:         "boxplot_placeholder.png"
+                                          # barplot: NA
+                                          # barplot_placeholder_png:         "barplot_placeholder.png"
+
+                                          #------- TEXT PHRASES DESCRIBING AND INTERPRETING RESULT
+
+                                          # demog_how_elevated: NA
+                                          # envt_how_elevated: NA
+                                          # demog_high_at_what_share_of_sites: NA
+                                          # envt_high_at_what_share_of_sites: NA
+                                          # conclusion1: NA
+                                          # conclusion2: NA
+                                          # conclusion3: NA
+
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:
+                                                   textInput(inputId = 'demog_how_elevated',
+                                                             label = 'Elevation of Residential Population Indicators',
+                                                             placeholder = 'moderately elevated'),
+                                            ),
+                                            column(4,
+                                                   ## input:
+                                                   textInput(inputId = 'envt_how_elevated',
+                                                             label = 'Elevation of Environmental Indicators',
+                                                             placeholder = 'moderately elevated'),
+                                            )
+                                          ),
+                                          fluidRow(
+                                            column(4,
+                                                   ## input:
+                                                   selectInput(inputId = 'demog_high_at_what_share_of_sites',
+                                                               label = 'Residential population indicators high at what share of sites?',
+                                                               choices = c('a surprisingly large share of these sites',
+                                                                           'some of these sites, just as it varies nationwide',
+                                                                           'a relatively small share of these sites'),
+                                                               selected = 'some of these sites, just as it varies nationwide'),
+                                            ),
+                                            column(4,
+                                                   ## input:
+                                                   selectInput(inputId = 'envt_high_at_what_share_of_sites',
+                                                               label = 'Environmental indicators high at what share of sites?',
+                                                               choices = c('a surprisingly large share of these sites',
+                                                                           'some of these sites, just as it varies nationwide',
+                                                                           'a relatively small share of these sites'),
+                                                               selected = 'some of these sites, just as it varies nationwide'),
+                                            )
+                                          ),
+                                          fluidRow(
+                                            column(8,
+                                                   ## input: conclusion 1 -
+                                                   textAreaInput(inputId = 'conclusion1',
+                                                                 label = 'Conclusion 1',
+                                                                 placeholder = "The people living near these sites are 40% more likely to be in Limited-English Households than the average US resident. (for example)"
+                                                   )
+                                            )
+                                          ),
+                                          fluidRow(
+                                            column(8,
+                                                   ## input: conclusion 2-
+                                                   textAreaInput(inputId = 'conclusion2',
+                                                                 label = 'Conclusion 2',
+                                                                 placeholder = "The % low income among these residents is 2.4 times the rate in the US overall. (for example)")
+                                            )
+                                          ),
+                                          fluidRow(
+                                            column(8,
+                                                   ## input: conclusion 3 -
+                                                   textAreaInput(inputId = 'conclusion3',
+                                                                 label = 'Conclusion 3',
+                                                                 placeholder = "The average resident near these sites is 1.5 times as likely to be Hispanic as the average person in their State overall. (for example)")
+                                            )
+                                          ),
+                                        ) # end wellpanel
+                               )  # end written report  tab
+                             }
                  ) ## end of tabset panel results_tabs ^^^^^^^^^^  ####
 
         ),      # end of tab panel See Results ^^^^^^^^^^  ####
@@ -1009,53 +1019,48 @@ app_ui  <- function(request) {
 
                  # * Each time a user session is started, the application-level option set is duplicated, for that session.
                  # * If the options are set from inside the server function, then they will be scoped to the session.
-                 # h5("Note: Some defaults and caps are defined in global_defaults_*.R"),
+                 # see  global_defaults_*.R and ?ejamapp()
 
-                 ######################################################## #
-                 ## Bookmarking button ####
+                 ######################################################## ######################################################### #
+                 ## BOOKMARKS button ####
                  h2("Bookmarking to save settings and inputs"),
 
-                 conditionalPanel(condition = "EJAM:::global_or_param('bookmarking_allowed') != 'disable'", {
+                 conditionalPanel(condition = 'EJAM:::global_or_param("bookmarking_allowed") != "disable"', {
                    bookmarkButton()  # https://mastering-shiny.org/action-bookmark.html
                  }),
                  ######################################################## #
-                 ### ------------------------ app title ### #
-                 # will not be editable here.
+                 ## ------------------------ app title ### #
+                 # will not be editable here. defined in global_defaults_package.R
 
+                 ######################################################## ######################################################### #
+                 ## SITE SELECTION Options ####
+                 h2("Site Selection Options"),
                  ######################################################## #
-                 ##  upload or dropdown as default site selection method ####
+                 ### Caps on site number and file size ####
+                 h3("Caps on site number and file size"),
 
-                 radioButtons(inputId = "default_ss_choose_method", label = "Default site selection method",
-                              choices = c(Dropdown = "dropdown", Upload = "upload"),
-                              selected = EJAM:::global_or_param("default_upload_dropdown"),
-                              inline = TRUE),
-
-                 ######################################################## #
-                 ##  Uploading files/points/shapes ####
-                 h2("Limits on uploads/points/shapes"),
-
-                 numericInput('max_pts_upload', label = "Cap on number of points one can UPLOAD, additional ones in uploaded table get dropped entirely",
+                 numericInput(inputId = 'max_pts_upload', label = "Cap on number of points one can UPLOAD, additional ones in uploaded table get dropped entirely",
                               min = 1000,  step = 500,
                               value = EJAM:::global_or_param("default_max_pts_upload"),
                               max   = EJAM:::global_or_param("maxmax_pts_upload")),
-                 numericInput('max_pts_select', label = "Cap on number of points one can SELECT, additional ones in selected table get dropped entirely",
+                 numericInput(inputId = 'max_pts_select', label = "Cap on number of points one can SELECT, additional ones in selected table get dropped entirely",
                               min = 1000,  step = 500,
                               value = EJAM:::global_or_param("default_max_pts_select"),
                               max   = EJAM:::global_or_param("maxmax_pts_select")),
-                 numericInput('max_pts_map', label = "Cap on number of points one can MAP",
+                 numericInput(inputId = 'max_pts_map', label = "Cap on number of points one can MAP",
                               min = 500,  step = 100,
                               value = EJAM:::global_or_param("default_max_pts_map"),
                               max   = EJAM:::global_or_param("maxmax_pts_map")),
-                 numericInput('max_pts_showtable', label = "Cap on number of points to be rendered for display in DT interactive TABLE (uploads or results)",
+                 numericInput(inputId = 'max_pts_showtable', label = "Cap on number of points to be rendered for display in DT interactive TABLE (uploads or results)",
                               min = 100, step = 100,
                               value = EJAM:::global_or_param("default_max_pts_showtable"),
                               max   = EJAM:::global_or_param("maxmax_pts_showtable")),
-                 numericInput('max_pts_run', label = "Cap on number of points one can request RESULTS for in one batch",
+                 numericInput(inputId = 'max_pts_run', label = "Cap on number of points one can request RESULTS for in one batch",
                               min = 1000,  step = 100,
                               value = EJAM:::global_or_param("default_max_pts_run"),
                               max   = EJAM:::global_or_param("maxmax_pts_run")),
 
-                 numericInput('max_shapes_map', label = "Cap on number of shapes (polygons) one can MAP",
+                 numericInput(inputId = 'max_shapes_map', label = "Cap on number of shapes (polygons) one can MAP",
                               min = 10,  step = 10,
                               value = EJAM:::global_or_param("default_max_shapes_map"),
                               max =        EJAM:::global_or_param("maxmax_shapes_map")),
@@ -1065,99 +1070,103 @@ app_ui  <- function(request) {
                               value = EJAM:::global_or_param("default_max_mb_upload"),
                               max = EJAM:::global_or_param("maxmax_mb_upload"),
                               step = EJAM:::global_or_param("minmax_mb_upload")),
+                 ######################################################## #
+                 ###  Upload file vs Dropdown menu site selection ####
+                 h3("Uploaded files and dropdown menu site selection"),
+
+                 radioButtons(inputId = "default_ss_choose_method", label = "Site Selection Method",
+                              choices = c(Dropdown = "dropdown", Upload = "upload"),
+                              selected = EJAM:::global_or_param("default_upload_dropdown"),
+                              inline = TRUE),
+                 # global_default or ejamapp() parameter: default_upload_dropdown, which is initial selected value of
+                 # input in advanced tab: input$default_ss_choose_method, which is initial selected value of
+                 # input in server:              input$ss_choose_method
+                 ######################################################## #
+                 ###  Upload files for site selection options ####
+                 h3("Upload files options"),
+
+                 # maybe   default_selected_type_of_site_upload  can be handled like default_ss_choose_method
+
+
 
                  ######################################################## #
-                 ## *Radius* options ####
-                 h2("Radius options"),
+                 ###  Dropdown site selection options ####
+                 h3("Dropdown menu site selection options"),
 
-                 numericInput('default_miles', label = "Default miles radius",  # what is shown at app startup for all but shapefiles
+                 # maybe   default_selected_type_of_site_category can be handled like default_ss_choose_method
+
+
+
+                 ### NAICS codes
+                 # naics_from_any("hazard")
+                 selectizeInput(
+                   inputId = "default_naics",
+                   label = h6("NAICS industry code to start with"),
+                   choices = setNames(naics_counts$NAICS, naics_counts$label_w_subs), # all details not just 3-digit list
+                   selected = EJAM:::global_or_param("default_naics"),
+                   width = 400,
+                   multiple = TRUE,
+                   ## add X to remove selected options from list
+                   options = list('plugins' = list('remove_button'))
+                 ),
+
+                 ######################################################## ######################################################### #
+                 ### *RADIUS* options ####
+                 h3("Radius options"),
+
+                 numericInput(inputId = 'radius_default', label = "Default miles radius",  # what is shown at app startup for all but shapefiles
                               ### Also note server code where radius can be modified via updateSliderInput,
                               ### and saved current value stored is specific to each upload type, returns to that when switch type back.
                               min   = EJAM:::global_or_param("minradius"),  # from global_defaults_*.R
-                              value = EJAM:::global_or_param("default_default_miles"),
+                              value = EJAM:::global_or_param("radius_default"),
                               max   = EJAM:::global_or_param("default_max_miles")), # (set via global_defaults_*.R) highest allowed default (i.e. initial) value
 
-                 numericInput('default_miles_shapefile', label = "Default miles width of buffer around shapefile edges",
+                 numericInput(inputId = 'radius_default_shapefile', label = "Default miles width of buffer around shapefile edges",
                               min   = EJAM:::global_or_param("minradius_shapefile"), # from global_defaults_*.R
-                              value = EJAM:::global_or_param("default_default_miles_shapefile"),
-                              max   = EJAM:::global_or_param("max_default_miles")), # (set via global_defaults_*.R) highest allowed default (i.e. initial) value
+                              value = EJAM:::global_or_param("radius_default_shapefile"),
+                              max   = EJAM:::global_or_param("max_radius_default")), # (set via global_defaults_*.R) highest allowed default (i.e. initial) value
 
-                 numericInput('max_miles', label = "Maximum radius in miles",
+                 numericInput(inputId = 'max_miles', label = "Maximum radius in miles",
                               value = EJAM:::global_or_param("default_max_miles"), # (set via global_defaults_*.R) initial cap that advanced tab lets you increase here
                               max   = EJAM:::global_or_param("maxmax_miles")), # (set via global_defaults_*.R) i.e., even in the advanced tab one cannot exceed this cap
 
+                 ######################################################## ######################################################### #
+                 ## CALCULATIONS: Calculating and reporting extra metrics ####
+                 h2("Calculating distances, Aggregating, and extra metrics"),
                  ######################################################## #
-                 ## Calculating and reporting extra metrics ####
-                 h2("Calculating and reporting extra metrics"),
+                 ###  Finding distances and blocks/residents at each site via getblocksnearby() ####
+                 h3("Finding distances and blocks/residents at each site"),
 
-                 checkboxInput('calculate_ratios',
-                               label = "Results in Excel should include ratios to US and State averages",
-                               value = EJAM:::global_or_param("default_calculate_ratios")),
-                 checkboxInput('include_averages',
-                               label = "Results should include US and State Averages - *** not implemented yet",
-                               value = EJAM:::global_or_param("default_include_averages")),
-                 checkboxInput('include_extraindicators',
-                               label = 'Results should include extra indicators from Community Report - *** not implemented yet',
-                               value = EJAM:::global_or_param("default_include_extraindicators")),
+                 ## EJAM:::args2(getblocksnearby)
+                 ## EJAM:::args2(getblocksnearbyviaQuadTree)
+                 ## EJAM:::args2(get_blockpoints_in_shape)
+                 ## EJAM:::args2(getblocksnearby_from_fips)
 
-                 ######################################################## #
-                 ## Viewing maps, saving results ####
-                 h2("Viewing maps, saving results"),
+                 # sitepoints can be a param in ejamapp()
+                 # shapefile  can be a param in ejamapp()
+                 # fips
 
-                 textInput('prefix_filenames', label = "Prefix to use in default file names when downloading [***NOT implemented yet]", value = ""),
-
-                 ## Map colors, weights, opacity ####
-                 ### in ejscreenapi:
-                 numericInput(inputId = "circleweight_in", label = "weight of circles in maps", value = EJAM:::global_or_param("default_circleweight")),
-
-                 # opacitymin   <- 0
-                 # opacitymax   <- 0.5
-                 # opacitystep  <- 0.025
-                 # opacitystart <- 0.5
-                 # opacityratio <- 2 / 5
-                 # base_color_default      <- "blue"  ;
-                 # cluster_color_default   <- "red"   ;
-                 # highlight_color_default <- 'orange';
-
-                 ######################################################## #
-                 ## Spreadsheet formatting of results ####
-                 h2("Spreadsheet formatting of results"),
-
-                 # heatmap column names
-
-
-                 # heatmap cutoffs for bins
-
-
-                 # heatmap colors for bins
-
-
-                 checkboxInput("ok2plot",
-                               label = "OK to try to plot graphics and include in Excel download",
-                               value = EJAM:::global_or_param("default_ok2plot")),
-
-                 ######################################################## #
-                 ##  Finding distances: getblocksnearby() ####
-                 h2("Finding distances to nearby blocks and residents"),
+                 # radius_donut_lower_edge
+                 # quiet = FALSE
 
                  radioButtons(inputId = "avoidorphans",
-                              label =  "Avoid orphans (by searching for nearest one out to maxradius, instead of reporting NA when no block is within radius)",
+                              label =  "(normally unused) Avoid orphans (by searching for nearest one out to maxradius, instead of reporting NA when no block is within radius)",
                               choices = c(Yes = TRUE, No = FALSE),
                               inline = TRUE,
                               selected = EJAM:::global_or_param("default_avoidorphans")),
 
                  numericInput(inputId = 'maxradius', # THIS IS NOT THE MAX RADIUS USERS CAN PICK - THIS IS THE MAX TO WHICH IT COULD SEARCH IF avoidorphans=T
-                              label = 'If avoid orphans=T, Max distance in miles to search for closest single block if site has none within normal radius',
+                              label = '(normally unused) If avoid orphans=T, Max distance in miles to search for closest single block if site has none within normal radius',
                               value =  EJAM:::global_or_param("default_maxradius"),  # 50000 / meters_per_mile, # 31.06856 miles !!
                               min = 0, max = EJAM:::global_or_param("default_maxradius"), step = 1),
 
                  ######################################################## #
-                 ## Which indicators to include in outputs via doaggregate() ####
-                 h2("Which indicators to include in outputs"),
+                 ### Which indicators to include in outputs via doaggregate() ####
+                 h3("Which indicators to include in aggregation"),
 
-                 shiny::selectInput('subgroups_type',
+                 shiny::selectInput(inputId = 'subgroups_type',
                                     #    "nh" for non-hispanic race subgroups as in Non-Hispanic White Alone, nhwa and others in names_d_subgroups_nh;
-                                    #    "alone" for EJScreen v2.2 style race subgroups as in    White Alone, wa and others in names_d_subgroups_alone;
+                                    #    "alone" for EJSCREEN v2.2 style race subgroups as in    White Alone, wa and others in names_d_subgroups_alone;
                                     #    "both" for both versions.
                                     label = "Which definition of Residential Populations subgroups to include?",
                                     choices = list(NonHispanicAlone = 'nh', Alone = 'alone', Both = 'both'),
@@ -1169,7 +1178,7 @@ app_ui  <- function(request) {
                                      selected = EJAM:::global_or_param("default_need_proximityscore")),
 
                  shiny::radioButtons(inputId = "include_ejindexes",
-                                     label = "Need Summary Indexes",
+                                     label = "Need EJ Indexes",
                                      choices = list(Yes = TRUE, No = FALSE ),
                                      selected = EJAM:::global_or_param("default_include_ejindexes")),
 
@@ -1179,8 +1188,8 @@ app_ui  <- function(request) {
                                      selected = EJAM:::global_or_param("default_extra_demog")),
 
                  ######################################################## #
-                 ## Counting indicators reaching certain thresholds ####
-                 h2("Counting indicators reaching certain thresholds"),
+                 ### Counting indicators reaching certain thresholds ####
+                 h3("Counting indicators reaching certain thresholds"),
 
                  ## input: GROUP NAME for 1st set of comparisons - where the table counts which scores are above certain cutoffs?
                  shiny::textInput(inputId = 'an_threshgroup1',
@@ -1219,19 +1228,27 @@ app_ui  <- function(request) {
                               value = EJAM:::global_or_param("default.an_thresh_comp2")
                  ),
                  ######################################################## #
-                 ## Plots on webpages ####
-                 h2("Plots"),
+                 ### Ratios, Averages, and extra indicators ####
+                 h3("Ratios, Averages, and extra indicators"),
 
-                 shiny::radioButtons(inputId = "allow_median_in_barplot_indicators",
-                                     label = "Allow median not just average as metric for array of barplots",
-                                     choices = list(Yes = TRUE, No = FALSE),
-                                     selected = EJAM:::global_or_param("default_allow_median_in_barplot_indicators")),
+                 checkboxInput(inputId = 'calculate_ratios',
+                               label = "Results in Excel should include ratios to US and State averages",
+                               value = EJAM:::global_or_param("default_calculate_ratios")),
+                 checkboxInput(inputId = 'include_averages',
+                               label = "Results should include US and State Averages - *** not implemented yet",
+                               value = EJAM:::global_or_param("default_include_averages")),
+                 checkboxInput(inputId = 'include_extraindicators',
+                               label = 'Results should include extra indicators from Community Report - *** not implemented yet',
+                               value = EJAM:::global_or_param("default_include_extraindicators")),
 
                  ######################################################## #
-                 ## Short report options ####
-                 h2("Short report"),
+                 ## VIEW INTERACTIVE RESULTS ####
+                 h2("Viewing Interactive Results"),
+                 ######################################################## #
+                 ### Short report options ####
+                 h2("Short (summary) report"),
 
-                 shiny::textInput("standard_analysis_title",
+                 shiny::textInput(inputId = "standard_analysis_title",
                                   label = "Default title to show on each short report",
                                   value = EJAM:::global_or_param("default_standard_analysis_title")),
 
@@ -1243,7 +1260,7 @@ app_ui  <- function(request) {
 
                  ## _radio button on format of short report
                  #                  was DISABLED while PDF KNITTING DEBUGGED
-                 radioButtons("format1pager", "Format", choices = c(html = "html", html = "pdf"), inline = TRUE),
+                 radioButtons(inputId = "format1pager", "Format", choices = c(html = "html", html = "pdf"), inline = TRUE),
 
                  textInput(inputId = "Custom_title_for_bar_plot_of_indicators", label = "Enter title for barplot of indicators", value = gsub("[^a-zA-Z0-9 ]", "", "") ),
 
@@ -1268,21 +1285,19 @@ app_ui  <- function(request) {
                                   value = EJAM:::global_or_param("default_extratable_title_top_row") # in the upper left cell
                                   # value = gsub("[^a-zA-Z0-9 ]", "", "")
                  ),
-                 ## not implemented yet:
+                 ######################################################## #
+                 ## not implemented yet ?
 
                  ## options for what extra or custom indicators to show in report
                  ## *** ideally enable an input here that allows user to create a named list of choices
                  ## limited to indicators that will be available as colnames(ejamit()$results_bysite)
-                 # input$extratable_list_of_sections
 
                  ## but this can only return a vector not a named list that the parameter to build_community_report() etc. needs
                  shiny::selectizeInput(inputId = "extratable_list_of_sections",
                                        label = "What additional indicators to show in report",
-
                                        choices  = EJAM:::global_or_param("default_extratable_list_of_sections"),
                                        ### not yet working:
                                        #choices  =  default_extratable_list_of_sections_ui, # see global_defaults_*.R
-
                                        selected = as.vector(EJAM:::global_or_param("default_extratable_list_of_sections")),    # see global_defaults_*.R
                                        multiple = TRUE),
                  shiny::selectizeInput(inputId = "extratable_hide_missing_rows_for",
@@ -1292,29 +1307,102 @@ app_ui  <- function(request) {
                                        multiple = TRUE),
 
                  ######################################################## #
-                 ## Long report options ####
-                 h2("Long report"),
+                 ### By-site interactive table of results ####
+                 h3("By-site interactive table of results"),
 
-                 # relocate any here from the Full Report tab??
+                 shiny::renderUI("bysite_webtable_colnames_ui"),
 
-                 br(), ## vertical space
+                 # default_reports is not adjustable here-  changing this in advance tab is complicated since it is a list of functions, etc.
 
-                 shiny::radioButtons(inputId = "more3",
-                                     label = "placeholder for options not yet implemented",
-                                     choices = list(TBD = "a", etc = "b"),
-                                     selected = "a"),
+                 # sitereport_download_buttons_colname = "Download EJAM Report", # input$sitereport_download_buttons_colname
+                 shiny::textInput("sitereport_download_buttons_colname",
+                                  label = "Name of column of uttons that download 1-site report per row",
+                                  value = EJAM:::global_or_param("sitereport_download_buttons_show")),
 
-                 # ),
+                 checkboxInput("sitereport_download_buttons_show",
+                               label = "Show column of buttons that download 1-site report per row",
+                               value = isTRUE(EJAM:::global_or_param("sitereport_download_buttons_show"))),
+
+                 ######################################################## #
+                 ### Plots on webpages ####
+                 h3("Plots"),
+
+                 shiny::radioButtons(inputId = "allow_median_in_barplot_indicators",
+                                     label = "Allow median not just average as metric for array of barplots",
+                                     choices = list(Yes = TRUE, No = FALSE),
+                                     selected = EJAM:::global_or_param("default_allow_median_in_barplot_indicators")),
+                 ######################################################## #
+                 ### ejscreenapi only: Map colors, weights, opacity ####
+                 ### ONLY in ejscreenapi:
+                 numericInput(inputId = "circleweight_in", label = "ejscreenapi only: weight of circles in maps", value = EJAM:::global_or_param("default_circleweight")),
+                 ## ejscreenapi only:
+                 # opacitymin   <- 0
+                 # opacitymax   <- 0.5
+                 # opacitystep  <- 0.025
+                 # opacitystart <- 0.5
+                 # opacityratio <- 2 / 5
+                 # base_color_default      <- "blue"  ;
+                 # cluster_color_default   <- "red"   ;
+                 # highlight_color_default <- 'orange';
+
+                 ######################################################## #
+                 ## DOWNLOAD RESULTS ####
+                 h2("Downloading Results"),
+
+                 ### filename prefix ####
+                 textInput(inputId = 'prefix_filenames', label = "Prefix to use in default file names when downloading [***NOT implemented yet]", value = ""),
+
+                 ### Spreadsheet ####
+                 h3("Spreadsheet of results"),
+
+
+                 # default_reports ? changing this in advance tab is complicated since it is a list of functions, etc.
+
+                 checkboxInput(inputId = "ok2plot",
+                               label = "OK to try to plot graphics and include in Excel download",
+                               value = EJAM:::global_or_param("default_ok2plot")),
+
+                 # p("May add more options here TBD"),
+
+                 # heatmap column names
+
+
+                 # heatmap cutoffs for bins
+
+
+                 # heatmap colors for bins
+
+
+                 ######################################################## #
+                 ### Long report  ####
+                 #h3("Long report (multipage report) - Not implemented yet***"),
+                 # Relocate any settings to here from the Full Report tab if they are complicated/rarely needed
+                 # Would need to uncomment the code in server/ui, etc.
+                 #
+                 #br(), ## vertical space
 
                  ##################################################### #
-                 ## Testing modes ####
-                 h2("Testing/ debugging modes!!!"),
+                 ## MISC OPTIONS ####
+                 h2("Other Settings"),
+                 ##################################################### #
+                 ### show and can_show_advanced_settings ####
+                 h3("Advanced tab"),
+                 radioButtons(inputId = "show_advanced_settings", "Start with Advanced tab shown?", choices = c(Yes = TRUE, No = FALSE),
+                              inline = TRUE,
+                              selected =  EJAM:::global_or_param("default_show_advanced_settings")), # see global_defaults_shiny_public.R
+                 radioButtons(inputId = "can_show_advanced_settings", "Provide buttons to let user Show/Hide advanced tab?", choices = c(Yes = TRUE, No = FALSE),
+                              inline = TRUE,
+                              selected = EJAM:::global_or_param("default_can_show_advanced_settings")),
 
-                 radioButtons("testing", "testing?", choices = c(Yes = TRUE, No = FALSE),
+                 ##################################################### #
+                 ### testing modes ####
+                 h3("Testing/ debugging modes/etc."),
+
+                 radioButtons(inputId = "testing", "testing?", choices = c(Yes = TRUE, No = FALSE),
                               inline = TRUE,
                               selected = EJAM:::global_or_param("default_testing")),
 
-                 radioButtons("shiny.testmode", "shiny.testmode?", choices = c(Yes = TRUE, No = FALSE),
+                 radioButtons(inputId = "shiny.testmode", "shiny.testmode?", choices = c(Yes = TRUE, No = FALSE),
                               inline = TRUE,
                               selected = EJAM:::global_or_param("default_shiny.testmode")),
                  # If TRUE, then various features for testing Shiny applications are enabled.
@@ -1339,7 +1427,7 @@ app_ui  <- function(request) {
                  # shiny.autoload.r (defaults to TRUE)
                  # If TRUE, then the R/ of a shiny app will automatically be sourced.
 
-                 checkboxInput('print_uploaded_points_to_log', label = "Print each new uploaded lat lon table full contents to server log",
+                 checkboxInput(inputId = 'print_uploaded_points_to_log', label = "Print each new uploaded lat lon table full contents to server log",
                                value = EJAM:::global_or_param("default_print_uploaded_points_to_log")),
 
                  br()
@@ -1355,14 +1443,14 @@ app_ui  <- function(request) {
         #
         # . ----------------------------------------------- ####
         ## . ####
-        # EJScreen API MODULE -  tabPanel   ####
+        # EJSCREEN API MODULE -  tabPanel   ####
         ## may move to another tab. or in a conditional UI panel.
         ## see default_hide_ejscreenapi_tab in global_defaults_*.R
 
-        #  , tabPanel(title = 'EJScreen Batch Tool',
+        #  , tabPanel(title = 'EJSCREEN Batch Tool',
         #
-        #          h3("Access to EJScreen results via the API"),
-        #          h4("(slow, fewer features, and cannot aggregate overall, but exactly replicates EJScreen web app)"),
+        #          h3("Access to EJSCREEN results via the API"),
+        #          h4("(slow, fewer features, and cannot aggregate overall, but exactly replicates EJSCREEN web app)"),
         #          br(),
         #
         #          # notes  ## ##
@@ -1375,7 +1463,7 @@ app_ui  <- function(request) {
         #
         #          mod_ejscreenapi_ui("x2",
         #
-        #                             simpleradius_default_for_ui = 2
+        #                             simpleradiusdefault_for_ui = 2
         #          )
         #
         #          # uiOutput("mod_ejscreenapi_ui_TO_SHOW_IN_APP_UI")  # this approach would use the module UI from the outer app server, not here
@@ -1388,16 +1476,16 @@ app_ui  <- function(request) {
 
         # ejscreenapi mini-webapp link ####
         ### obsolete
-        # span('tool for batch use of the EJScreen API: ',
+        # span('tool for batch use of the EJSCREEN API: ',
         #
         # a('ejscreenapi tool for expert use',
         # href = 'https://',                                 ## offline
         # target = '_blank', rel = 'noreferrer noopener'))
         ######################################################## #
 
-        # EJScreen single-site-report widget ####
+        # EJSCREEN single-site-report widget ####
         ### obsolete while API down
-        # span('widget for querying EJScreen by place name',
+        # span('widget for querying EJSCREEN by place name',
         # div(HTML('
         #   <iframe
         #   src="https://www.epa.gov/sites/production/files/widgets/ejscreenwidget.html"  ## offline
@@ -1414,7 +1502,7 @@ app_ui  <- function(request) {
         ######################################################## #
         ## . ####
 
-      ), # end tabset panel from line 37 or so ^^^^^^^^^  ## ##
+      ), # end tabset panel from top of file ^^^^^^^^^  ## ##
       EJAM:::global_or_param("html_footer_fmt")  ## adds HTML footer - defined in global_defaults_*.R
 
     ) ## end fluidPage
@@ -1440,11 +1528,14 @@ golem_add_external_resources <- function() {
     "www",
     app_sys("app/www") #   points to  installed/EJAM/app/www which is same as   source/EJAM/inst/app/www
   )
-
   golem::add_resource_path(
-    "community_report",
-    app_sys("report/community_report") #   points to  installed/EJAM/report/community_report which is same as   source/EJAM/inst/report/community_report
+    "report",
+    app_sys("report")
   )
+  # golem::add_resource_path(
+  #   "community_report",
+  #   app_sys("report/community_report") #   points to  installed/EJAM/report/community_report which is same as   source/EJAM/inst/report/community_report
+  # )
 
   tags$head(
 
@@ -1453,7 +1544,7 @@ golem_add_external_resources <- function() {
     golem::bundle_resources(
       path = app_sys("app/www"),   #  points to  installed/EJAM/app/www which is same as   source/EJAM/inst/app/www
 
-      app_title = EJAM:::global_or_param(".app_title") # BUT SEE ALSO THE TITLE IN HTML IN global_defaults_*.R
+      app_title = EJAM:::global_or_param("app_title")
     ),
 
     # favorites icons ####

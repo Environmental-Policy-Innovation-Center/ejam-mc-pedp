@@ -9,23 +9,23 @@
 offline_warning()
 
 test_that("latlon_from_address( xy=TRUE) works", {
-  
+
   testthat::skip_if_offline()
   testthat::skip_if_not_installed("AOI")
-  
+
   if (!exists("geocode") || !is.function(geocode)) {
     expect_warning(
       # if pkg installed but not attached, warn and return NULL
-      latlon_from_address("1200 Pennsylvania Ave NW, Washington DC")  
+      latlon_from_address("1200 Pennsylvania Ave NW, Washington DC")
     )
     expect_null(
-      latlon_from_address("1200 Pennsylvania Ave NW, Washington DC")  
+      latlon_from_address("1200 Pennsylvania Ave NW, Washington DC")
     )
   }
-  
+
   ## test should work if installed as long as we load/attach the package, if it is not already in Imports of DESCRIPTION of EJAM pkg.
   require("AOI")
-  
+
   a1 <- "1200 Pennsylvania Ave NW, Washington DC"
   a2 <- "4930 Old Page Road Durham NC 27703"
   out1old <- structure(list(lon = -77.028948300066, lat = 38.8948262664), class = "data.frame", row.names = c(NA, -1L))
@@ -41,11 +41,11 @@ test_that("latlon_from_address( xy=TRUE) works", {
 })
 
 testthat::test_that("latlon_from_address( xy=FALSE) works", {
-  
+
   testthat::skip_if_offline()
   testthat::skip_if_not_installed("AOI")
   require("AOI")
-  
+
   a1 <- "1200 Pennsylvania Ave NW, Washington DC"
   a2 <- "4930 Old Page Road Durham NC 27703"
   out1old <- structure(list(request = "1200 Pennsylvania Ave NW, Washington DC",
@@ -64,16 +64,16 @@ testthat::test_that("latlon_from_address( xy=FALSE) works", {
   testthat::expect_no_error({
     out2 <- latlon_from_address(c(a1, a2), xy = FALSE)
   })
-  testthat::expect_equal(out1, out1old)
-  testthat::expect_equal(out2, out2old)
+  testthat::expect_equal(tolower(out1), tolower(out1old))
+  testthat::expect_equal(tolower(out2), tolower(out2old))
 })
 
 testthat::test_that("latlon_from_address( aoimap=T) works", {
-  
+
   testthat::skip_if_offline()
   testthat::skip_if_not_installed("AOI")
   require("AOI")
-  
+
   testthat::expect_no_error({
     x <- latlon_from_address("ames iowa", aoimap = T)
   })

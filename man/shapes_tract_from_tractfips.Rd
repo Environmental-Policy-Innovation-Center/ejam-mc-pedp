@@ -29,7 +29,7 @@ Get tract boundaries, via API, to map them
 }
 \details{
 This is useful mostly for small numbers of tracts.
-The EJScreen map services provide other ways to map tracts and see EJScreen data.
+The EJSCREEN map services provide other ways to map tracts and see EJSCREEN data.
 }
 \seealso{
 \code{\link[=shapes_from_fips]{shapes_from_fips()}}

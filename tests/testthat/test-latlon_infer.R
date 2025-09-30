@@ -64,11 +64,12 @@ test_that('dupes left as dupes',{
 #   latlon_infer(c('lat', 'lat', 'Lon')) # dupes left as dupes but warn!
 
 test_that("stops if data.frame not colnames passed as input to latlon_infer", {
+  suppressWarnings({
   expect_error(
     latlon_infer(testpoints_10)
   )
 })
-
+})
 
 test_that("handles NA", {
   suppressWarnings({
@@ -79,12 +80,12 @@ test_that("handles NA", {
       expect_warning(
         latlon_infer(c(NA, NA))
       )
-      
+
       expect_warning(
         latlon_infer(c(NA, NA, "Latitude", "long"))
       )
     })
-    
+
   })
-  
+
 })

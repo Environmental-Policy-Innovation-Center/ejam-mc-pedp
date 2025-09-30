@@ -1,107 +1,5 @@
-################################ #
-grab_hits = function(pattern, x, ignore.case = TRUE, ignorecomments = FALSE, value = TRUE) {
 
-  # use grepl to find all members of character vector z where the character string "h" appears in the string
-  # but the string does not start with zero or more spaces followed by the character "#"
-  # ## example
-  #   xx = c("   ej", "ej", "#ej", "   #ej", "asdf#ej", "   asdf#ej", "#   ej", "#   xej", "x#  ej", "  x#ej")
-  #
-  # cbind(xx, grab_hits("ej", xx, ignorecomments = TRUE,  value = F))
-  # cbind(xx, grab_hits("ej", xx, ignorecomments = FALSE, value = F))
-  #
-  # cbind(  grab_hits("ej", xx, ignorecomments = TRUE,    value = T))
-  # cbind(  grab_hits("ej", xx, ignorecomments = FALSE,   value = T))
-
-  hit_line = grepl(pattern = pattern, x = x, ignore.case = ignore.case)
-  commented_line = grepl("^\\s*#", x = x)
-  if (ignorecomments) {
-    hits  = hit_line & !commented_line
-  } else {
-    hits = hit_line
-  }
-  which_hit = which(hits)
-  if (value) {
-    out = x[hits]
-  } else {
-    out = hits # like grepl
-  }
-  names(out) <- which_hit # names(out) are the file's line numbers if looking in a file via find_in_files()
-  return(out)
-}
-################################ #
-# search for one query term in a list of files
-
-find_in_files <- function(pattern, path = "./tests/testthat", filename_pattern = "\\.R$|\\.r$",
-                          ignorecomments = FALSE,
-                          ignore.case = TRUE,
-                          value = TRUE, quiet=TRUE) {
-  if (!quiet) {
-    cat("\nSearching in ", path, ' to find files containing ', pattern, '\n')
-    # or e.g., find_in_files(pattern = "^#'.*[^<]http", path = "./R")
-  }
-  x <- list.files(path = path, pattern = filename_pattern, recursive = TRUE, full.names = TRUE)
-  names(x) <- x
-  if (ignorecomments) {
-    pattern <- paste0("(^|[^#])", pattern) # ignore comments, so only match if not preceded by a #
-  }
-  found <- x |>
-    purrr::map(
-      # ~grep(    pattern, readLines(.x, warn = FALSE), value = value, ignore.case = ignore.case)
-      ~grab_hits(pattern, readLines(.x, warn = FALSE), value = value, ignore.case = ignore.case,
-                 ignorecomments = ignorecomments)
-    ) |>
-    purrr::keep(~length(.x) > 0)
-  if (!quiet) {
-    if (length(found) > 0) {
-      print(sapply(found, function(y) cbind(linenumber = names(y), text = y)))
-      cat("\n------------------------------------------------------------------------- \n")
-      cat("------------------------------------------------------------------------- \n")
-    }
-  }
-  invisible(found)
-}
-################################ #
-# search for vector of query terms, to see which ones are found in any of the files
-# ... passed to find_in_files() can be ignore.case, filename_pattern
-# ignorecomments = TRUE IS NOT DEFAULT IN find_in_files() but is here
-
-found_in_files <- function(pattern_vector, path = "./R", ignorecomments = TRUE, ...) {
-
-  found = vector(length = length(pattern_vector))
-  for (i in seq_along(pattern_vector)) {
-    hits = find_in_files(pattern_vector[i], path = path, ignorecomments=ignorecomments, ...)
-    found[i] <- length(hits) > 0
-  }
-  foundones = pattern_vector[found]
-  print(foundones)
-  return(found) # logical vector
-}
-################################ #
-# frequency of occurrences of each term within a list of files
-# actually how many lines of code does it appear in so counts as 1 each line where it appears even if it appears >1x in that line
-# ignorecomments = TRUE IS NOT DEFAULT IN find_in_files() but is here
-
-found_in_N_files_T_times <- function(pattern_vector, path = "./R", ignorecomments = TRUE, ...) {
-
-  nfiles <- vector(length = length(pattern_vector))
-  nhits <- vector(length = length(pattern_vector))
-  for (i in seq_along(pattern_vector)) {
-    hits <- find_in_files(pattern_vector[i], path = path, ignorecomments = ignorecomments, ...)
-    nfiles[i] <- length(hits)
-    nhits[i] <- length(as.vector(unlist(hits)))
-    # found[i] <- length(hits) > 0
-  }
-  # foundones <- pattern_vector[found]
-  out <- data.frame(term = pattern_vector,
-                    nfiles = nfiles,
-                    nhits = nhits
-  )
-  print(head(
-    out[order(out$nfiles, out$nhits, decreasing = TRUE), ]
-  ), 10)
-  invisible(out)
-}
-################################ ################################# #
+# Notes on test coverage ####
 
 # see  also, test_coverage() which computes test coverage for your package. It's a shortcut for covr::package_coverage() plus covr::report().
 # see  https://covr.r-lib.org/
@@ -122,25 +20,47 @@ found_in_N_files_T_times <- function(pattern_vector, path = "./R", ignorecomment
 # Number of exported functions with no matching test file names:  541
 # or  129 where the function does not even appear at all in full text of any test file:
 #
-# These dont seem to have tests but are used (or mentioned) by the most R/*.R files:
-#                       term nfiles nhits
-# 1              table_round     23    48  ***
-# 2               ejam2excel     16    29  ***
-# 3      frs_update_datasets     15    20
-# 4              ejam2report     14    41  ***
-# 5      table_rounding_info     12    25  ***
-# 6             testpoints_n     12    27
-# 7              indexblocks     11    24
-# 8         fixnames_aliases     11    32  ***
-# 9                  frs_get     11    24
-# 10     sitepoints_from_any     11    44  ***
-# 11            table_signif     11    28  ***
-# 12 table_signif_round_x100     11    23  ***
-# 13                  app_ui     10    17
-# 14                datapack      9    27
-# 15          read_csv_or_xl      9    22
-# 16               calc_ejam      8    32  ***
+#
+# newer
+# These dont seem to have tests but are
+# used (or mentioned) by the most R/*.R files
+# (excluding commented-out lines):
+#
+#   Need to add unit tests for ejam2report, ejam2excel, calc_ratios_to_avg, plot_barplot_ratios, table_signif_round_x100, popup_from_ejscreen, popup_from_df, mapfast, sitepoints_from_any
+#
+# term nfiles nhits
+#
+# 18                  ejam2report      6    15  ***  ***  SUMMARY REPORT - needs unit tests ideally (the ejam2map and maybe barplot? parts are tested) (compares to prior? but does not test header, logo, footer, table contents, map, plot)
+#
+# ####   and maybe    ejam2excel is important  ***  ***   EXCEL (now has some tests) (Tables headers aligned, working URL links, right tabs, sorting of cols?, nrow/ncol?, etc.)
+#
+#   2                   table_round     14    22  ***  *** TABLE ROUNDING needs unit tests ideally
+#   14                 table_signif      7    10  ***  *** same
+#   20      table_signif_round_x100      6     8  ***  *** same
+#   7           table_rounding_info      9    15  ***  *** same
+#
+#   13          popup_from_ejscreen      7   9  ***  *** POPUPS- it is tested actually, in test-MAP_FUNCTIONS.R
+# 19                popup_from_df      6    13  ***  ***       - it is tested actually, in test-MAP_FUNCTIONS.R
+#   3                       mapfast     10    20  *** *** MAPS - it is tested actually, in test-MAP_FUNCTIONS.R
+#
+# 6           sitepoints_from_any      9    13  *** SITEPOINTS INPUT needs unit tests ideally
 
+# 10               read_csv_or_xl      8    16
+# 1               global_or_param     16   196
+# 4                       varinfo      9    16
+
+# 5                    app_server      9    17 - app functionality tests should handle this
+# 8                        app_ui      8    16 - app functionality tests should handle this
+# 11                  indexblocks      7    13
+# 12             fixnames_aliases      7    12
+# 16              create_filename      6    10
+# 17 distance_via_surfacedistance      6    11
+
+# 9           plot_barplot_ratios      8    18  But this is used ONLY by old ejscreenapi functions
+# 15           calc_ratios_to_avg      6    10  But this is used ONLY by old ejscreenapi functions (via plot_boxplot_ratios() etc.)
+#   and maybe calc_ejam ?
+
+################################ ################################# #
 
 test_coverage_check <- function(loadagain = FALSE, quiet = TRUE) {
 
@@ -198,18 +118,24 @@ test_coverage_check <- function(loadagain = FALSE, quiet = TRUE) {
   tdat$notes[grepl("functionality.R$|ui_and_server.R$|test1.R$|test2.R$", tdat$testfile)] <- "ok, test file is for app functionality not a function"
   tdat$notes[!is.na(tdat$testfile) & is.na(tdat$codefile) & tdat$utils_object_is_in_pkg & grepl("test-utils_", tdat$testfile)] <- "ok, testfile prefixed with utils_ but otherwise matches object, though .R filename differs"
   justdata <- "R/data_" == substr(tdat$codefile, 1,7) & !is.na(tdat$codefile)
-  tdat$notes[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata  ] <- "cant find testfile"
+  tdat$notes[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata  ] <- "cant find testfile of exact name,"
   tdat$notes[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata & !tdat$utils_object_is_in_pkg ] <- "cant match this .R filename to a single (exported?) object or testfile - coverage unclear"
 
   funcs_not_in_txt_of_testfiles_at_all = NULL
-  func2searchfor = tdat$object[!is.na(tdat$object) & tdat$notes == "cant find testfile"]
+  func2searchfor = tdat$object[!is.na(tdat$object) & tdat$notes == "cant find testfile of exact name,"]
+  #browser()
   for (i in seq_along(func2searchfor)) {
-    x = find_in_files(paste0(func2searchfor[i], ""), ignorecomments = TRUE)
-    if (length(x) > 1) {
-      tdat$notes[tdat$object %in% func2searchfor[i]] <- paste0("cant find testfile, BUT at least obj appears in uncommented full txt of ", length(x), " testfile(s)")
+    x = EJAM:::find_in_files(paste0(func2searchfor[i], ""), ignorecomments = TRUE)
+    if (length(x) > 0) {
+      y = EJAM:::find_in_files(paste0("test_that.*", func2searchfor[i], ""), ignorecomments = TRUE)
+      if (length(y) > 0) {
+        tdat$notes[tdat$object %in% func2searchfor[i]] <- paste0("OK? no fname match, but test_that found in ", length(y), " testfile(s)")
+      } else {
+      tdat$notes[tdat$object %in% func2searchfor[i]] <- paste0("no fname match, but name found in uncommented lines of ", length(x), " testfile(s)")
+      }
     } else {
       funcs_not_in_txt_of_testfiles_at_all = c(funcs_not_in_txt_of_testfiles_at_all, func2searchfor[i])
-      tdat$notes[tdat$object %in% func2searchfor[i]] <- paste0("cant find testfile, and obj not even used within any testfile (ignoring comments)")
+      tdat$notes[tdat$object %in% func2searchfor[i]] <- paste0("NO TESTS - no fname match, and not in any uncommented lines of testfiles")
     }
   }
   ################################ #
@@ -246,6 +172,18 @@ test_coverage_check <- function(loadagain = FALSE, quiet = TRUE) {
   x <- tdat[is.na(tdat$testfile) & !is.na(tdat$codefile) & !justdata, ]
   x[order(x$object), ] |> print(n = 500)
 
+  cat('
+      -----------------------------------------------\n\n')
+
+  cat("   CERTAINLY NO TESTS \n\n")
+
+  zz = x[order(x$object), ]
+zz[substr(zz$notes,1,8) == "NO TESTS", c("object", "notes")] |> print(n = 500)
+
+cat('
+      -----------------------------------------------\n\n')
+
+
   ################################ #
   cat('
       -----------------------------------------------\n\n')
@@ -268,21 +206,22 @@ test_coverage_check <- function(loadagain = FALSE, quiet = TRUE) {
       "or ", length(funcs_not_in_txt_of_testfiles_at_all), "where the function does not even appear at all in full text of any test file:", '\n\n'
   )
   #  cat(paste0(funcs_not_in_txt_of_testfiles_at_all, collapse = ", "), "\n\n")
-  (dput(funcs_not_in_txt_of_testfiles_at_all))
+  (dput(sort(funcs_not_in_txt_of_testfiles_at_all)))
   cat("\n\n")
   junk = capture.output({
-    freq = found_in_N_files_T_times(funcs_not_in_txt_of_testfiles_at_all, path = "./R", ignorecomments = TRUE)
+    freq = EJAM:::found_in_N_files_T_times(funcs_not_in_txt_of_testfiles_at_all, path = "./R", ignorecomments = TRUE)
   })
   freq = freq[order(freq$nfiles, decreasing = T), ]
   rownames(freq) <- NULL
   cat("
 
-These dont seem to have tests but are
+These dont appear in testfiles at all, but are
 used (or mentioned) by the most R/*.R files
 (excluding commented-out lines):
 
       ")
-  print(head(freq, 20))
+
+  print(head(as.data.frame(freq), 30))
   cat("\n\n")
   cat("Also see https://devtools.r-lib.org/reference/test.html and https://covr.r-lib.org/ and ?devtools::test_coverage() which computes test coverage for your package.\nIt's a shortcut for covr::package_coverage() plus covr::report().\n")
 
@@ -305,3 +244,4 @@ used (or mentioned) by the most R/*.R files
 ## and
 
 # x = EJAM:::linesofcode2(packages = 'EJAM')
+

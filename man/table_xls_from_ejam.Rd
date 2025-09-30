@@ -18,7 +18,7 @@ table_xls_from_ejam(
   radius_or_buffer_in_miles = NULL,
   buffer_desc = "Selected Locations",
   radius_or_buffer_description = NULL,
-  hyperlink_colnames = "ECHO Report",
+  reports = EJAM:::global_or_param("default_reports"),
   site_method = "",
   mapadd = FALSE,
   report_map = NULL,
@@ -57,7 +57,8 @@ prompts RStudio user interactively asking where to save the downloaded file}
 
 \item{radius_or_buffer_description}{optional text phrase describing places analyzed}
 
-\item{hyperlink_colnames}{optional names of columns with URLs}
+\item{reports}{info about which columns to treat as URLs that should be hyperlinks -
+see \code{\link[=url_columns_bysite]{url_columns_bysite()}}}
 
 \item{site_method}{site selection method, such as SHP, latlon, FIPS, NAICS, FRS, EPA_PROGRAM, SIC, MACT
 optional site method parameter used to create a more specific title with create_filename.

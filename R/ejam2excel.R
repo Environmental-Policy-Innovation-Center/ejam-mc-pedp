@@ -23,7 +23,10 @@
 #' @param in.analysis_title optional title as character string
 #' @param react.v1_summary_plot optional - a plot object
 #' @param radius_or_buffer_description optional text phrase describing places analyzed
-#' @param hyperlink_colnames optional names of columns with URLs
+#'
+#' @param reports info about which columns to treat as URLs that should be hyperlinks -
+#'   see [url_columns_bysite()]
+#'
 #' @param site_method site selection method, such as SHP, latlon, FIPS, NAICS, FRS, EPA_PROGRAM, SIC, MACT
 #'   optional site method parameter used to create a more specific title with create_filename.
 #'   Note `ejamitout$sitetype` is not quite the same as the `site_method` parameter used in building reports.
@@ -62,11 +65,13 @@ ejam2excel <- function(ejamitout,
                        in.testing = FALSE,
                        in.analysis_title =  "EJAM analysis",
                        react.v1_summary_plot = NULL,
-                       radius_or_buffer_in_miles = NULL,  #  input$bt_rad_buff
+                       radius_or_buffer_in_miles = NULL,  #  input$radius_now
                        buffer_desc = NULL, # "Selected Locations",
                        radius_or_buffer_description = 'Miles radius of circular buffer (or distance used if buffering around polygons)',
                        # radius_or_buffer_description =   "Distance from each site (radius of each circular buffer around a point)",
-                       hyperlink_colnames = "ECHO Report",#c("EJScreen Report", "EJScreen Map","ACS Report", "ECHO Report"),
+
+                       reports = EJAM:::global_or_param("default_reports"), # has hyperlink colnames and text to use
+
                        site_method = "",
 
                        mapadd = FALSE, # if report is added, map is redundant
@@ -80,15 +85,14 @@ ejam2excel <- function(ejamitout,
   # server already handles it, but for nonshiny we can handle adding a missing shapefile for MAP + shapefile for map for REPORT in lower-level function table_xls_format()
   # if report is added, map is redundant
   # if (mapadd == T && is.null(report_map)) {
-  #   report_map <- ejam2map(ejamitout, radius = radius_or_buffer_in_miles)
+  #   report_map <- ejam2map(ejamitout)
   # }
 
   # server already handles it, but for nonshiny we can handle adding a missing shapefile for MAP + shapefile for map for REPORT in lower-level function table_xls_format()
   # if (community_reportadd && is.null(community_html)) {
   #   community_html <- ejam2report(ejamitout = ejamitout, )
   # }
-
-  x <- table_xls_from_ejam(
+  x <-  table_xls_from_ejam(
     ejamitout = ejamitout,
     fname = fname,
     save_now = save_now,
@@ -102,7 +106,9 @@ ejam2excel <- function(ejamitout,
     radius_or_buffer_in_miles = radius_or_buffer_in_miles,
     buffer_desc = buffer_desc,
     radius_or_buffer_description = radius_or_buffer_description,
-    hyperlink_colnames = hyperlink_colnames,
+
+    reports = reports,
+
     site_method = site_method,
 
     mapadd = mapadd,
@@ -112,5 +118,7 @@ ejam2excel <- function(ejamitout,
     shp = shp,
     ...
   )
+# tips on how to see the file are printed to console by helpers already
+
   invisible(x)
 }

@@ -19,12 +19,12 @@ ejscreenit_see_table <- function(x) {
   y <- as.data.frame(y)
   radiuscolname <- ifelse("radius.miles" %in% colnames(y), "radius.miles", fixcolnames("radius.miles", "r", "long"))
   if (radiuscolname %in% colnames(y)) {radius <- y[1, radiuscolname]} else {radius <- NA}
-  y$`EJScreen Report` <- url_ejscreen_report(lon = x$table$lon, lat = x$table$lat, radius = radius, 
+  y$`EJSCREEN Report` <- url_ejscreen_report(lon = x$table$lon, lat = x$table$lat, radius = radius, 
                                              # areaid = "",
                                                as_html = TRUE, linktext = "Report")
-  y$`EJScreen Map` <- url_ejscreenmap(lon = x$table$lon, lat = x$table$lat,
+  y$`EJSCREEN Map` <- url_ejscreenmap(lon = x$table$lon, lat = x$table$lat,
                                       #  areaid = "", # not a parameter
-                                      as_html = TRUE, linktext = "EJScreen Map")
+                                      as_html = TRUE, linktext = "EJSCREEN Map")
 
   names(y) <- fixcolnames(names(y), 'r', 'long')  # in case currently r format
   DT::datatable(y, escape = FALSE) # escape FALSE ensures URLs work as links in RStudio viewer

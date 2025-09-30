@@ -1,11 +1,13 @@
-%||%
-%|NA|%
-%not_in%
+_whatis
 .__NAMESPACE__.
 .__S3MethodsTable__.
 .arrow_ds_names
 .onAttach
 .packageName
+%||%
+%|NA|%
+%not_in%
+aboutpage
 absdiff
 abspctdiff
 ACRNMS
@@ -15,6 +17,7 @@ acs_bybg
 acs_bycounty
 acsendyear
 acsname
+acstabs
 addCircles
 addedbuffermiles
 addin
@@ -39,6 +42,7 @@ app_sys
 app_ui
 app_ui_EJAMejscreenapi
 appendixa
+appOptions
 appsilon
 arcgis
 ArcGIS
@@ -49,7 +53,9 @@ area_sqmi_from_pts
 area_sqmi_from_shp
 area_sqmi_from_table
 areaid
+arealand
 areatype
+areawater
 arg
 args
 args2
@@ -93,6 +99,8 @@ blockwts
 bookmarkable
 borrough
 britannica
+browseURL
+bt
 buffer_desc_from_sitetype
 build_barplot_report
 build_community_report
@@ -102,8 +110,11 @@ build_summary_title
 bybg
 bycounty
 bydistance
+byfile
 byformula
+bygroup
 bysite
+bytest
 bytype
 CAA
 CAC
@@ -124,6 +135,7 @@ cdf
 cdp
 CDP
 CDPs
+CEJST
 cenpop
 censusplaces
 CFR
@@ -138,6 +150,7 @@ CityName
 cJ
 cleanit
 closecodes
+CMD
 CNT
 coef
 col_1
@@ -159,6 +172,7 @@ colMaxs
 colMaxs2
 colMins2
 colname
+colorpalette
 colorspace
 colorvarname
 colSums
@@ -192,6 +206,7 @@ CRS
 css
 csv
 csvname
+ctrl
 curl
 currentnames
 custom
@@ -237,6 +252,7 @@ diffviewer
 digest
 dir
 dir2
+dirnames
 disadv
 display
 distance_by_group
@@ -266,7 +282,6 @@ dsubgroups
 dt
 DT
 dupenames
-pkg_dupeRfiles
 DUyn
 dvar
 dvarnames
@@ -274,6 +289,7 @@ eachother
 ECDF
 echo_colids_from_num_name_group
 echodata
+edgi
 efservice
 efsystemquery
 eg
@@ -302,31 +318,35 @@ ejam2report
 ejam2shapefile
 ejam2table_tall
 ejam2tableviewer
+ejamapi
+ejamapp
 EJAMbatch
 EJAMblockdata
 ejamdata
-ejamdata's
 ejamdata_version
+ejamdata's
+ejamdocs
 EJAMejscreenapi
 EJAMejscreendata
 EJAMfrsdata
 ejamit
-Ejamit's
 ejamit_compare_distances
 ejamit_compare_distances_fulloutput
 ejamit_compare_distances2plot
 ejamit_compare_types_of_places
 ejamit_sitetype_from_input
 ejamit_sitetype_from_output
+Ejamit's
 ejamitbased
 ejamitout
 ejampackages
+ejamrepo
+ejanalysis
 EJAPIinstructions
 ejindexes
 ejquery
 ejscreen
 EJScreen
-EJScreen's
 EJScreen Map
 EJScreen Report
 ejscreen_vs
@@ -345,11 +365,13 @@ ejscreen_vs_explain_meters_cdf
 ejscreen_vs_explain_meterstats
 ejscreen_vs_explain_summary
 ejscreen_vs_explain_summary_plot
+EJScreen's
 ejscreenapi
 ejscreenapi_online
 ejscreenapi_plus
 ejscreenapi1
 ejscreenapi2ejam_format
+ejscreenapp
 ejscreenit
 ejscreenit_for_ejam
 ejscreenit_see_table
@@ -359,6 +381,7 @@ ejscreenRESTbroker
 ejscreenRESTbroker2table
 ejscreenRESTbroker2table_na_filler
 elsevier
+enableBookmarking
 enurl
 env
 Env
@@ -376,6 +399,7 @@ eparegion
 eparest
 epsg
 espec
+esri
 evarnames
 exactmatch
 expand_gridMatrix
@@ -386,6 +410,7 @@ FacilityName
 FacLat
 FacLong
 FacName
+favicons
 FeatureServer
 FFFF
 fid
@@ -504,11 +529,6 @@ ftpname
 fulloutput
 func
 funcs
-pkg_functions_with_keywords_internal_tag
-pkg_functions_and_data
-pkg_functions_all_equal
-pkg_functions_and_sourcefiles
-pkg_functions_that_use
 funs
 gdb
 generate_ej_header
@@ -546,6 +566,7 @@ getblocksnearbyviaQuadTree_Clustered
 getblocksnearbyviaQuadTree2
 getblocksnearbyviaQuadTree3
 getfrsnearby
+getNamespaceExports
 getpoints
 getpointsnearby
 getpointsnearbyviaQuadTree
@@ -563,6 +584,7 @@ glue
 golem
 golem_add_external_resources
 goodnames
+govdata
 greatlakes
 grephits
 grepl
@@ -586,6 +608,7 @@ ie
 ifelse
 img
 inboth
+includewater
 incrementing
 indexblocks
 indexfrs
@@ -615,7 +638,6 @@ knitr
 landarea
 lat_alias
 latlon
-latlon_any_format
 latlon_as.numeric
 latlon_df_clean
 latlon_from_address
@@ -695,6 +717,7 @@ map_shapes_mapview
 map_shapes_plot
 map_single_location
 map2browser
+mapadd
 mapfast
 mapfast_gg
 mapfastej
@@ -736,6 +759,7 @@ MODULE_SERVER_latlontypedin
 MODULE_UI_latlon_from_map_click
 MODULE_UI_latlontypedin
 msg
+multiarch
 multirow
 multisite
 Multisite
@@ -887,6 +911,7 @@ newtype
 nh
 nhwa
 nonattainment
+noncity
 nongroup
 noninteractive
 noopener
@@ -912,6 +937,7 @@ oldnames
 oldtype
 onAttach
 openxlsx
+ORCID
 ords
 out_bydistance2results_bydistance
 out_bydistance2results_bydistance_bysite
@@ -940,6 +966,12 @@ pgm
 PhantomJS
 piggyback
 pjson
+pkg_dupeRfiles
+pkg_functions_all_equal
+pkg_functions_and_data
+pkg_functions_and_sourcefiles
+pkg_functions_that_use
+pkg_functions_with_keywords_internal_tag
 pkgdown
 pkgs
 place_st2place_statename
@@ -989,6 +1021,7 @@ pre
 pre_comma
 predict_doaggregate_runtime
 predict_ejamit_runtime
+preload
 prj
 probs
 programid
@@ -1033,8 +1066,8 @@ relatedtype
 remotes
 rep_br
 repo
-repo's
 repo_from_desc
+repo's
 repoissues
 reponame
 report_community_download
@@ -1068,13 +1101,16 @@ rownumber
 rownums
 ROWNUMS
 rowsnames
+Roxygen
 rstudio
 RStudio
 rstudioapi
 rtips
 Rulemaking
 run_app
+runall
 runApp
+runsome
 rv
 rvest
 rvtl
@@ -1127,6 +1163,7 @@ shiny's
 shinycssloaders
 shinydisconnect
 shinyjs
+shinytest
 shinytest2
 shinytests
 shortlabel
@@ -1142,6 +1179,8 @@ sic_from_code
 sic_from_name
 sic_subcodes_from_code
 sictable
+sigfig
+sigfigs
 signif
 silentinteractive
 siteid
@@ -1156,6 +1195,7 @@ sitetype
 sitetype_from_dt
 sitetype_from_filepath
 sitetype2text
+skipbasic
 snd
 SOE
 source_this_codetext
@@ -1179,6 +1219,7 @@ sqm
 sqmi
 sqmm
 sqyd
+ss
 st2statename
 state_from_blockid
 state_from_blockid_table
@@ -1220,6 +1261,7 @@ subparts
 subtable
 summarization
 summarizer
+sumstat
 sys
 Sys
 table_gt_format_step1
@@ -1342,6 +1384,7 @@ uniques
 units
 unlinkify
 unshared
+updateXYZINPUT
 uri
 url_4table
 url_bookmark_save
@@ -1377,6 +1420,7 @@ usastats_querye
 usavg
 usefulcolumns
 usegrep
+useloadall
 usemapfast
 usepa
 USEPA
@@ -1412,12 +1456,12 @@ webapp
 weblinks
 webshot
 WGS
-_whatis
 wherestr
 wheretext
 whichlist
 with_red_star
 withfull
+WORDLIST
 writeData
 writexl
 wtd

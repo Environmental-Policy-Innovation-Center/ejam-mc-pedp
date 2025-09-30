@@ -25,7 +25,7 @@ doaggregate_newscores(
 \item{userstats}{like blockgroupstats but data.frame or data.table of all US
 blockgroups and one or more columns of user provided raw indicator scores
 and any other variables needed for formulas to aggregate indicators
-across block groups in each site.}
+across blockgroups in each site.}
 
 \item{formulas}{a character vector of formulas in R code (see formulas_d for
 an example), that use variables in userstats to calculate any
@@ -60,6 +60,6 @@ see \code{\link[=doaggregate]{doaggregate()}}
 }
 \description{
 Like doaggregate() but for any user-provided indicator available for all
-block groups (nationwide so that US percentiles make sense, or at least statewide)
+blockgroups (nationwide so that US percentiles make sense, or at least statewide)
 }
 \keyword{internal}
