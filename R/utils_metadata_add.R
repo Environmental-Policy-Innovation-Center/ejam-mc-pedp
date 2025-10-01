@@ -152,7 +152,7 @@ metadata_add <- function(x, metadata=NULL,
 #' @return same as [metadata_check()], invisibly
 #' @examples
 #' # x = metadata_check( which = "ejam_package_version")
-#' # x[!x$ejam_package_version %in% "2.32.6", ]
+#' # x[!x$ejam_package_version %in% "2.32.7", ]
 #'
 #' @seealso [metadata_check_print()] [metadata_check()] [metadata_add()] [metadata_update_attr()]
 #' @keywords internal
@@ -230,7 +230,7 @@ cat("\n\n")
 #'   [pkg_functions_and_data()]
 #' @examples
 #' x = metadata_check( which = "ejam_package_version")
-#' x[!x$ejam_package_version %in% "2.32.6", ]
+#' x[!x$ejam_package_version %in% "2.32.7", ]
 #'
 #'   # tail(EJAM:::metadata_check( ))
 #'   EJAM:::metadata_check(packages = NULL)
