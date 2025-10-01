@@ -60,7 +60,8 @@ jobs:
             libgeos-dev \
             libproj-dev \
             libjq-dev \
-            libprotobuf-dev
+            libprotobuf-dev \
+            protobuf-compiler
 
       - name: System Libraries (macOS)
         if: matrix.os == 'macOS-latest'
