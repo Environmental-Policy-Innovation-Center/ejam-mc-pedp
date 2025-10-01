@@ -113,12 +113,12 @@ jobs:
           }
         shell: Rscript {0}
 
-      - name: Restore R package cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}
-          key: ${{ runner.os }}-R-${{ matrix.r-version }}-${{ hashFiles('**/DESCRIPTION') }}
-          restore-keys: ${{ runner.os }}-R-${{ matrix.r-version }}-
+      # - name: Restore R package cache  ## these seemed to be duplicates of lines 35-40 and not needed ?
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ${{ runner.temp }}
+      #     key: ${{ runner.os }}-R-${{ matrix.r-version }}-${{ hashFiles('**/DESCRIPTION') }}
+      #     restore-keys: ${{ runner.os }}-R-${{ matrix.r-version }}-
 
       - name: Test Installation
         run: |
