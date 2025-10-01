@@ -1,4 +1,4 @@
-name: EJAM Installation
+name: EJAM Installation check in dev branch only ubuntu only
 
 on:
   push:
