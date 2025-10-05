@@ -55,7 +55,7 @@
 #'
 #' - [calc_ejam()] uses [calc_byformula()]
 #'
-#' - [calc_byformula()] uses [formula_varname()] and maybe [source_this_codetext()]
+#' - [calc_byformula()] uses [formula_varname()] and maybe source_this_codetext()
 #'
 #' @return data.frame of calculated variables one row per bg row
 #' @examples
