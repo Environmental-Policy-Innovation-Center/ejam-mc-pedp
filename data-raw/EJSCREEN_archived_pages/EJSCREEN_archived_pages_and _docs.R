@@ -26,5 +26,7 @@ Documentation of Sources and Methods in EJSCREEN
 
 Raw Data downloads
 
-- Documentation of EJSCREEN datasets as used by EJAM:  https://ejanalysis.github.io/EJAM/reference/index.html#datasets-with-indicators-etc-
-- Documentation of EJSCREEN datasets
+- Documentation of EJSCREEN datasets as used by EJAM
+  - Datasets stored within the EJAM package (.rda files): [Documentation](https://ejanalysis.github.io/EJAM/reference/index.html#datasets-with-indicators-etc-) and [access to data files](https://github.com/ejanalysis/EJAM/tree/main/data)
+  - Datasets used by EJAM but stored separately (large .arrow files): [Documentation](https://ejanalysis.github.io/EJAM/reference/index.html#datasets-with-indicators-etc-) and [access to data files](https://github.com/ejanalysis/ejamdata/tree/main/data)
+
