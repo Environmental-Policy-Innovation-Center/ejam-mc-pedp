@@ -1520,7 +1520,7 @@ custom_doaggregate <- function(sites2blocks,
     #
     #
     #   if (is.null(custom_cols)) {
-    #     custom_cols = EJAMformula_varname(custom_formulas)
+    #     custom_cols = EJAM:::formula_varname(custom_formulas)
     #   }
     #
     # results_bysite_custom  <-  bybg_bysite[ , calc_ejam( ..???? ), by = "ejam_uniq_id"]
