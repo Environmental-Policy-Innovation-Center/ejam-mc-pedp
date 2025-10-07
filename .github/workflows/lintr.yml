@@ -9,6 +9,21 @@
 
 # More details at https://lintr.r-lib.org/
 
+# ## to use just a subset of the most important checks:
+## see  EJAM/R/utils_lint_trailing_spaces.R
+#  mine = c(
+#     linters_with_tags('common_mistakes'),
+#     list( # correctness minus object usage
+#       duplicate_argument_linter(),
+#       equals_na_linter(),
+#       missing_argument_linter(),
+#       namespace_linter(),
+#       package_hooks_linter(),
+#       sprintf_linter()
+#     )
+#   )
+#   # ### but not "object_usage_linter"
+
 name: lintr
 
 on:
@@ -56,5 +71,5 @@ jobs:
       - name: Upload analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: lintr-results.sarif@4
+          sarif_file: lintr-results.sarif
           wait-for-processing: true
