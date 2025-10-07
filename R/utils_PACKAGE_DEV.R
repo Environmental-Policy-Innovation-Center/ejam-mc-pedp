@@ -1026,7 +1026,7 @@ pkg_functions_all_equal <- function(fun="latlon_infer", package1="EJAM", package
   }
   if (!(is.function(f2))) {warning(package2, "::", fun, " is not a function");return(NA)}
 
-  x <- (all.equal(body(f1), body(f2))) && (all.equal(formals(f1), formals(f2)))
+  x <- isTRUE(all.equal(body(f1), body(f2))) && isTRUE(all.equal(formals(f1), formals(f2)))
   return(x)
 }
 ##################################################################################### #
