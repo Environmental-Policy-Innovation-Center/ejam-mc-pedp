@@ -49,8 +49,8 @@ jobs:
         shell: Rscript {0}
         continue-on-error: true
 
-      - name: Upload analysis results to GitHub
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: lintr-results.sarif
-          wait-for-processing: true
+      # - name: Upload analysis results to GitHub
+      #   uses: github/codeql-action/upload-sarif
+      #   with:
+      #     sarif_file: lintr-results.sarif@4
+      #     wait-for-processing: true
