@@ -1579,7 +1579,7 @@ ejscreen_vs <- function(defdir = '.',
     }
   } else {
     # user can specify they dont want to get asked about using saved results like this:
-    if ((length(savedejscreentableoutput) == 1 && !savedejscreentableoutput[1]) || is.null(savedejscreentableoutput) || all(is.na(savedejscreentableoutput))) {
+    if ((length(savedejscreentableoutput) == 1 && isFALSE(savedejscreentableoutput[1])) || is.null(savedejscreentableoutput) || all(is.na(savedejscreentableoutput))) {
       usesavedejscreen <- FALSE
     } else {
       usesavedejscreen <- TRUE
