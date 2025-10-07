@@ -425,7 +425,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
     xx = EJAM:::find_in_files(pattern = "_that[^,]*,", ignorecomments = T, whole_line = FALSE, quiet = T)
     xx = lapply(xx, function(y) gsub("t_that\\(", "", y))
     z = (lapply(xx, function(y) cbind(y[nchar(y) > 80])))
-    z = z[lapply(z, length) > 0]  ## *** might want sapply here, or use as.vector(lapply ???)
+    z = z[sapply(z, length) > 0]  ## use sapply for cleaner code
     z = data.frame(long_unit_test_names = unlist(z))
     z$long_unit_test_names <- gsub(",$", "", z$long_unit_test_names)
     z$file = rownames(z)
