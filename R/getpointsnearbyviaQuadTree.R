@@ -154,12 +154,12 @@ getpointsnearbyviaQuadTree  <- function(frompoints, radius = 3, maxradius = 31.0
     ### progress bar ####
     ## could add check that data has enough points to show increments with rounding ***
     ## i.e. if 5% increments, need at least 20 points or %% will return NaN
-    if (((a %% report_progress_every_n) == 0) & interactive()) {cat(paste("Finished finding points near ", a ," of ", nRowsDf),"\n" ) }   # i %% report_progress_every_n indicates i mod report_progress_every_n (“i modulo report_progress_every_n”)
+    if (((a %% report_progress_every_n) == 0) && interactive()) {cat(paste("Finished finding points near ", a ," of ", nRowsDf),"\n" ) }   # i %% report_progress_every_n indicates i mod report_progress_every_n (“i modulo report_progress_every_n”)
     ## update progress bar at 5% intervals
     pct_inc <- 5
     ## add check that data has enough points to show increments with rounding
     ## i.e. if 5% increments, need at least 20 points or %% will return NaN
-    if (is.function(updateProgress) & (nRowsDf >= (100/pct_inc)) & (a %% round(nRowsDf/(100/pct_inc)) < 1)) {
+    if (is.function(updateProgress) && (nRowsDf >= (100/pct_inc)) && (a %% round(nRowsDf/(100/pct_inc)) < 1)) {
       boldtext <- paste0((pct_inc)*round((100/pct_inc*a/nRowsDf)), '% done')
       updateProgress(message_main = boldtext, value = round((pct_inc)*a/nRowsDf,2)/(pct_inc))
     }
