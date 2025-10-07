@@ -58,7 +58,7 @@ format_ejamit_columns <- function(df, nms=c()) {
       next
     }
 
-    if (is.percentage[i] ) {
+    if (isTRUE(is.percentage[i])) {
       if (is.na(decimal_num[i])) {
         df[[colname]] <-
           scales::label_percent(
