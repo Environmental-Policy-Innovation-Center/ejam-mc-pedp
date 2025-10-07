@@ -333,7 +333,7 @@ x <- EJAM:::test_ejam(
     ### check we grouped all tests ####
     # ensure the testlist includes all test files found
     {
-      if (!all( all.equal(sort(test_all), sort(test_files_found)))) {
+      if (!isTRUE(all.equal(sort(test_all), sort(test_files_found)))) {
         if (interactive() && beepr_available) {beepr::beep(10)}
         cat("\n\n ** Test files found in folder does not match test_files_found list ** \n\n")
       }
