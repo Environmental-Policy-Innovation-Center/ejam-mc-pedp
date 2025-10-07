@@ -125,17 +125,17 @@ x <- EJAM:::test_ejam(
 ')
   }
   ########################################## # ########################################## #
-  if (missing(y_skipbasic) & ask) {
+  if (missing(y_skipbasic) && ask) {
     if (missing(y_skipbasic)) {
       y_skipbasic = askYesNo("Skip basic quick checks (which are not unit tests) ?", default = y_skipbasic)
     }}
   if (is.na(y_skipbasic)) {stop("canceled")}
   if (!y_skipbasic) {
-    if (missing(y_latlon) & ask) {y_latlon = askYesNo("quick tests for latlon?", default = y_latlon)}
+    if (missing(y_latlon) && ask) {y_latlon = askYesNo("quick tests for latlon?", default = y_latlon)}
     if (is.na(y_latlon)) {stop("canceled")}
-    if (missing(y_shp)    & ask) {y_shp    = askYesNo("quick tests for shp?",    default = y_shp)}
+    if (missing(y_shp)    && ask) {y_shp    = askYesNo("quick tests for shp?",    default = y_shp)}
     if (is.na(y_shp))    {stop("canceled")}
-    if (missing(y_fips)   & ask) {y_fips   = askYesNo("quick tests for fips?",   default = y_fips)}
+    if (missing(y_fips)   && ask) {y_fips   = askYesNo("quick tests for fips?",   default = y_fips)}
     if (is.na(y_fips))   {stop("canceled")}
   }
   # if only doing basic non-unit-testing then do not ask about other details and do not find groups of test files, etc. -
@@ -332,7 +332,7 @@ x <- EJAM:::test_ejam(
     ### check we grouped all tests ####
     # ensure the testlist includes all test files found
     {
-      if (!all(TRUE == all.equal(sort(test_all), sort(test_files_found)))) {
+      if (!all( all.equal(sort(test_all), sort(test_files_found)))) {
         if (interactive() && beepr_available) {beepr::beep(10)}
         cat("\n\n ** Test files found in folder does not match test_files_found list ** \n\n")
       }
@@ -353,7 +353,7 @@ x <- EJAM:::test_ejam(
         } else {
           stopfix <- TRUE
         }
-        if (is.na(stopfix) || stopfix == TRUE) { # if ESC or asked and yes
+        if (is.na(stopfix) || stopfix) { # if ESC or asked and yes
           cat("
 You need to fix `testlist`, the list of files in the test_ejam() source code, to
 ensure all existing `./test/test-xyz.R` files are listed in `testlist`
@@ -424,7 +424,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
     xx = EJAM:::find_in_files(pattern = "_that[^,]*,", ignorecomments = T, whole_line = FALSE, quiet = T)
     xx = lapply(xx, function(y) gsub("t_that\\(", "", y))
     z = (lapply(xx, function(y) cbind(y[nchar(y) > 80])))
-    z = z[lapply(z, length) > 0]
+    z = z[lapply(z, length) > 0]  ## *** might want sapply here, or use as.vector(lapply ???)
     z = data.frame(long_unit_test_names = unlist(z))
     z$long_unit_test_names <- gsub(",$", "", z$long_unit_test_names)
     z$file = rownames(z)
@@ -687,7 +687,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       if (length(missingtime_groups) > 0) {
         cat("Missing time estimates for these GROUPS:", paste0(missingtime_groups, collapse = ","), '\n')
       }
-      if (length(missingtime_tests) >0 || length(missingtime_groups > 0)) {
+      if (length(missingtime_tests) >0 || length(missingtime_groups) > 0 ) {
         timing_needed <- TRUE
 
         cat("Need to update the timing info on unit tests after running them again \n")
@@ -743,7 +743,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
 
     if (y_runsome) {y_runall =  FALSE} # in case you want to say y_runsome = T and not have to also remember to specify y_runall = F
 
-    if (interactive() & ask) {
+    if (interactive() && ask) {
 
       if (missing(y_coverage_check)) {
         y_coverage_check <- askYesNo(
@@ -767,7 +767,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
         if (missing(run_these)) {
           run_these = rstudioapi::showPrompt(
             "WHICH TEST GROUPS TO RUN? Enter a comma-separated list like  maps,frs  (or Esc to specify none)",
-            paste0(shortgroupnames, collapse = ","),
+            paste0(shortgroupnames, collapse = ",")
             #e.g., "fips,naics,frs,latlon,maps,shape,getblocks,fixcolnames,doag,ejamit,ejscreenapi,mod,app"
           )
         }
@@ -808,10 +808,10 @@ and all filenames listed there actually exist as in that folder called `test`.\n
         y_save = askYesNo("Save results of unit testing (and log file of printed summaries)?")}
       if (is.na(y_save)) {stop("canceled")}
       if (y_save) {
-        if (missing(y_tempdir) & missing(mydir)) {
+        if (missing(y_tempdir) && missing(mydir)) {
           y_tempdir = askYesNo("OK to save in a temporary folder you can see later? (say No if you want to specify a folder)")}
         if (is.na(y_tempdir)) {stop("canceled")}
-        if (y_tempdir & missing(mydir)) {
+        if (y_tempdir && missing(mydir)) {
           mydir <- tempdir()
         } else {
           if (missing(mydir)) {
