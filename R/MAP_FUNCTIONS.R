@@ -176,7 +176,7 @@ map_facilities_proxy <- function(mymap, rad = 3, highlight = FALSE, clustered = 
     circle_color <- base_color
   }
 
-  if (use_marker_clusters) {
+  if (!use_marker_clusters) {
     ## add to leafletProxy call from Shiny app
     mymap <- mymap %>%
       leaflet::clearShapes() %>%
