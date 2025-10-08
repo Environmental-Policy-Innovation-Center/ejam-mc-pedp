@@ -146,6 +146,21 @@ for (f1 in rfiles) {
   writeLines(x, f1)
 }
 
+}
+################################################### #
+if (FALSE) {
+
+  # check for nul or incomplete final lines in .R files
+  #
+  # In readLines(f1) : incomplete final line found
+  rfiles <- file.path("./R", list.files("./R", pattern = "\\.R$"))
+  for (f1 in rfiles) {
+    cat('reading file: ', f1, '\n')
+    x <- readLines(f1)
+  }
+
+  summary(warnings())
+
 
 }
 ################################################### #

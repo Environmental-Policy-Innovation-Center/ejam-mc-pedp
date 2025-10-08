@@ -157,7 +157,7 @@ app_server <- function(input, output, session) {
   # initial state (or if input$show_advanced_settings is changed in the adv. tab)
   observe({
     req(input$show_advanced_settings)
-    if (input$show_advanced_settings == FALSE) {
+    if (isFALSE(input$show_advanced_settings)) {
       hideTab(inputId = 'all_tabs', target = 'Advanced Settings')
       isolate({
         if (input$can_show_advanced_settings) {
@@ -1323,8 +1323,8 @@ app_server <- function(input, output, session) {
         showNotification(id = 'radius_warning', session = session,
                          duration = NULL, type = 'error', closeButton = F,
                          'Please use a numeric radius greater than 0 for analyzing points.')
-      } else if (current_slider_val[[current_upload_method()]] > 0 &
-                 disable_buttons[[current_upload_method()]] == FALSE) {
+      } else if (current_slider_val[[current_upload_method()]] > 0 &&
+                 isFALSE(disable_buttons[[current_upload_method()]])) {
         shinyjs::enable(id = 'bt_get_results')
         removeNotification(id = 'radius_warning', session = session)
       } else {
@@ -1339,7 +1339,7 @@ app_server <- function(input, output, session) {
                        duration = NULL, type = 'error', closeButton = F,
                        paste0('Too many sites provided. This web app currently caps analyses at ', input$max_pts_run,' sites.'))
     } else {
-      if (disable_buttons[[current_upload_method()]] == FALSE) {
+      if (isFALSE(disable_buttons[[current_upload_method()]])) {
         shinyjs::enable(id = 'bt_get_results')
       }
       removeNotification(id = 'max_pts_warning', session = session)
@@ -1823,10 +1823,10 @@ app_server <- function(input, output, session) {
                     # calctype_minbg = NULL,
 
                     subgroups_type      = input$subgroups_type,
-                    extra_demog         = TRUE == as.character(input$extra_demog),
-                    include_ejindexes   = TRUE == as.character(input$include_ejindexes),
-                    calculate_ratios    = TRUE == as.character(input$calculate_ratios),
-                    need_proximityscore = TRUE == as.character(input$need_proximityscore), # not relevant for FIPS
+                    extra_demog         = "TRUE" %in% as.character(input$extra_demog), # "TRUE" %in% is safe if input was a vector or NULL or logical or character, etc.
+                    include_ejindexes   = "TRUE" %in% as.character(input$include_ejindexes),
+                    calculate_ratios    = "TRUE" %in% as.character(input$calculate_ratios),
+                    need_proximityscore = "TRUE" %in% as.character(input$need_proximityscore), # not relevant for FIPS
                     # infer_sitepoints = FALSE,
                     # need_blockwt = TRUE,
 
@@ -1903,10 +1903,10 @@ app_server <- function(input, output, session) {
                       # calctype_minbg = NULL,
 
                       subgroups_type      = input$subgroups_type,
-                      extra_demog         = TRUE == as.character(input$extra_demog),
-                      include_ejindexes   = TRUE == as.character(input$include_ejindexes),
-                      calculate_ratios    = TRUE == as.character(input$calculate_ratios),
-                      need_proximityscore = TRUE == as.character(input$need_proximityscore), # not relevant for FIPS
+                      extra_demog         = "TRUE" %in% as.character(input$extra_demog),
+                      include_ejindexes   = "TRUE" %in% as.character(input$include_ejindexes),
+                      calculate_ratios    = "TRUE" %in% as.character(input$calculate_ratios),
+                      need_proximityscore = "TRUE" %in% as.character(input$need_proximityscore), # not relevant for FIPS
                       # infer_sitepoints = FALSE,
                       # need_blockwt = TRUE,
 
@@ -1962,10 +1962,10 @@ app_server <- function(input, output, session) {
                        # calctype_minbg = NULL,
 
                        subgroups_type      = input$subgroups_type,
-                       extra_demog         = TRUE == as.character(input$extra_demog),
-                       include_ejindexes   = TRUE == as.character(input$include_ejindexes),
-                       calculate_ratios    = TRUE == as.character(input$calculate_ratios),
-                       need_proximityscore = TRUE == as.character(input$need_proximityscore), # not relevant for FIPS
+                       extra_demog         = "TRUE" %in% as.character(input$extra_demog),
+                       include_ejindexes   = "TRUE" %in% as.character(input$include_ejindexes),
+                       calculate_ratios    = "TRUE" %in% as.character(input$calculate_ratios),
+                       need_proximityscore = "TRUE" %in% as.character(input$need_proximityscore), # not relevant for FIPS
                        # infer_sitepoints = FALSE,
                        # need_blockwt = TRUE,
 
