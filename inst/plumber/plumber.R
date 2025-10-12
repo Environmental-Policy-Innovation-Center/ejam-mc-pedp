@@ -2,55 +2,318 @@
 #
 # Set up API for access to EJAM functionality, using the plumber package.
 #
-# also see    EJAM file "plumber/test_the_api.R"
+# also see    EJAM file "plumber/try_the_api.R"
+
+# for help on plumber APIs, see  https://www.rplumber.io/index.html
+# for hosting a plumber API,
+# see https://www.rplumber.io/articles/hosting.html
+# and https://github.com/meztez/plumberDeploy?tab=readme-ov-file#readme
+#   via DigitalOcean https://www.rplumber.io/articles/hosting.html#digitalocean
+#   via Docker:  https://www.rplumber.io/articles/hosting.html#docker
+############################# #
+
+# Load necessary libraries just once
+# over all shiny user sessions?,
+# but once per process and/or R session?
+
+library(EJAM) #   uses installed version
+if (!exists("blockwts")) dataload_dynamic("blockwts")
+if (!exists("localtree")) indexblocks()
+
+library(rlang)
+# library(plumber)
+library(geojsonsf)
+library(jsonlite)
+library(sf)
+
 ############################# #
 #* @apiTitle EJAM API
 #*
 #* @apiDescription Provides EJAM / EJSCREEN batch analysis summary results.
 #* See the EJAM package for technical documentation on functions powering the API, at <https://ejanalysis.org/ejamdocs>
-
-# future::plan("multisession")  # did not seem to work
-
 ############################# #
-
-library(EJAM)
-
-# helpers to convert API input format to R function parameter formats
+# future::plan("multisession")  # did not seem to work
+############################# #
+# helpers functions ####
+# to convert API input format to R function parameter formats
 # note these do not handle a vector parameter, only convert a single "" or "true" or "false" value
-NULL_if_empty = function(x) {
-  if ("" %in% x) {return(NULL)} else {return(x)}
+NULL_if_empty <- function(x) {
+  if ("" %in% x) {
+    return(NULL)
+  } else {
+    return(x)
+  }
 }
-TRUEFALSE_if_truefalse = function(x) {
-  if (length(x) == 1 && ("true" %in% x || "TRUE" %in% x)) {return(TRUE)}
-  if (length(x) == 1 && ("false" %in% x || "FALSE" %in% x)) {return(FALSE)}
+TRUEFALSE_if_truefalse <- function(x) {
+  if (length(x) == 1 && ("true"  %in% x || "TRUE"  %in% x)) {
+    return(TRUE)
+  }
+  if (length(x) == 1 && ("false" %in% x || "FALSE" %in% x)) {
+    return(FALSE)
+  }
   return(x)
 }
-api2r = function(x) {
-  NULL_if_empty(
-    TRUEFALSE_if_truefalse(x)
+api2rnulltf <- function(x) {
+  NULL_if_empty(TRUEFALSE_if_truefalse(x))
+}
+############################# #
+
+# helpers - from EJAM-API ####
+
+# Centralized error handling function
+handle_error <- function(message, type = "json") {
+  if (type == "html") {
+    return(paste0("<html><body><h3>Error</h3><p>", message, "</p></body></html>"))
+  }
+  return(list(error = message))
+}
+
+# The fipper function processes FIPS inputs, converting area names (e.g., states)
+# to the appropriate FIPS codes for the specified scale (e.g., counties).
+fipper <- function(area, scale = "blockgroup") {
+  fips_area <- tryCatch(
+    name2fips(area),
+    warning = function(w) {
+      # If a warning occurs, it's likely the input is already a FIPS code.
+      return(area)
+    }
+  )
+
+  # Determine the type of the provided FIPS code.
+  fips_type <- fipstype(fips_area)[1]
+
+  if (fips_type == scale) {
+    return(fips_area)
+  }
+
+  # Convert the FIPS code to the desired scale.
+  switch(scale,
+         "county" = fips_counties_from_statefips(fips_area),
+         "blockgroup" = fips_bgs_in_fips(fips_area),
+         fips_area # Default to returning the original FIPS if the scale is not recognized.
   )
 }
 
-############################# #
+# The ejamit_interface function serves as a unified interface for the ejamit function,
+# handling various input methods such as latitude/longitude, shapes (SHP), and FIPS codes.
+ejamit_interface <- function(area, method, buffer = 0, scale = "blockgroup", endpoint = "report") {
+  # Validate buffer size to ensure it's within a reasonable limit.
+  if (!is.numeric(buffer) || buffer > 15) {
+    stop("Please select a buffer of 15 miles or less.")
+  }
+
+  # Process the request based on the specified method.
+  switch(method,
+         "latlon" = {
+           # Ensure the area is a data frame before passing it to ejamit.
+           if (!is.data.frame(area)) {
+             stop("Invalid coordinates provided.")
+           }
+           ejamit(sitepoints = area, radius = buffer)
+         },
+         "SHP" = {
+           # Convert the GeoJSON input to an sf object.
+           sf_area <- tryCatch(
+             geojson_sf(area),
+             error = function(e) stop("Invalid GeoJSON provided.")
+           )
+           ejamit(shapefile = sf_area, radius = buffer)
+         },
+         "FIPS" = {
+           # Process the FIPS code using the fipper function.
+           if (endpoint == "data") {
+             fips_codes <- fipper(area = area, scale = scale)
+           } else if (endpoint == "report") {
+             fips_codes <- area
+           }
+           ejamit(fips = fips_codes, radius = buffer)
+         },
+         stop("Invalid method specified.") # Handle unrecognized methods.
+  )
+}
+############################# ############################## #
+
 
 # MULTIPLE POINTS or Shapefile WILL NEED TO BE PASSED USING POST AND REQUEST BODY
 #  SO IT IS A BIT MORE COMPLICATED - NOT DONE YET
 
 ############################# #
+# filters ####
+## filters the API could use
+
+## logger ####
+
+#* Log some information about the incoming request
+#* @filter logger
+function(req, res) {
+  cat(as.character(Sys.time()), "-",
+    req$REQUEST_METHOD, req$PATH_INFO, "-",
+    req$HTTP_USER_AGENT, "@", req$REMOTE_ADDR, "\n", append = TRUE,
+    file = "log_api_usage.txt")
+  plumber::forward()
+}
+
+## cookies ####
+
+# to set cookies to track which requests come from which session or user
+# https://www.rplumber.io/articles/rendering-output.html#setting-cookies
 
 
 ####################################################### #
+#  . --------------------------------- ####
 #  DEFINE API ENDPOINTS ####
 ####################################################### #
 # . ####
+
+# dataset ####
+
+#* Return .rda or .arrow file from data folder of EJAM package
+#* @param lat Latitude of the site
+#* @param attachment
+#* @get /dataset
+#*
+function(fname = "blockgroupstats.rda", attachment = "false", res) {
+
+  data_items = EJAM:::pkg_data()$Item
+  data_items = data_items[ file.exists(paste0("./data/", data_items, ".rda"))]
+
+
+  arrow_items = list.files("./data", pattern = "arrow", ignore.case = TRUE, full.names = FALSE)
+  arrow_itemsp = system.file(paste0("data/", arrow_items), package="EJAM")
+
+  if (fname %in% data_items) {
+    out <- get(fname)
+  } else {
+  if (fname %in% arrow_items) {
+    dataload_dynamic(fname)
+    out <- get(fname)
+  }}
+
+  attachment = api2rnulltf(attachment)
+  if (attachment == "true") {
+    plumber::as_attachment(
+      value = out,
+      filename = fname
+    )
+  } else {
+    out
+  }
+}
 ####################################################################################################### #
+if (FALSE) {
 
-# report ####
+  # data - from EJAM-API ####
 
+  #* Return EJAM analysis data as JSON
+  #* @param sites A data frame of site coordinates (lat/lon) passed to `sf::st_as_sf()`
+  #* @param shape A GeoJSON string representing the area of interest passed to `geojson_sf()`
+  #* @param fips A FIPS code for a specific US Census geography passed to `shapes_from_fips()`
+  #* @param buffer The buffer radius in miles
+  #* @param geometries A boolean to indicate whether to include geometries in the output
+  #* @param scale The Census geography at which to return results (blockgroup or county)
+  #* @post /data
+  function(sites = "", shape = "", fips = "", buffer = 0, geometries = FALSE, scale = "", res) {
+    # Determine the input method.
+    method <- if (!("" %in% sites)) "latlon" else if (!("" %in% shape)) "SHP" else if (!("" %in% fips)) "FIPS" else NULL
+    area <- sites %||% shape %||% fips
+
+    if (is.null(method) || is.null(area)) {
+      res$status <- 400
+      return(handle_error("You must provide valid points, a shape, or a FIPS code."))
+    }
+
+    # Perform the EJAM analysis.
+    result <- tryCatch(
+      ejamit_interface(area = area, method = method, buffer = as.numeric(buffer), scale = scale, endpoint = "data"),
+      error = function(e) {
+        res$status <- 400
+        handle_error(e$message)
+      }
+    )
+
+    # If an error was returned from the interface, return it.
+    if ("error" %in% names(result)) {
+      return(result)
+    }
+
+    # Prepare the final JSON output.
+    if (geometries) {
+      output_shape <- switch(method,
+                             "latlon" = sf::st_as_sf(sites, coords = c("lon", "lat"), crs = 4326),
+                             "SHP" = geojson_sf::geojson_sf(shape),
+                             "FIPS" = shapes_from_fips(fips)
+      )
+      # Combine the analysis results with the geographic shapes.
+      return(cbind(data.table::setDF(result$results_bysite), output_shape))
+    } else {
+      return(result$results_bysite)
+    }
+  }
+}
+####################################################### #
+if (FALSE) {
+  # assets - from EJAM-API ####
+
+  #* Serve static assets from the ./assets directory
+  #* @assets ./assets /
+  list()
+}
+####################################################### #
+
+# if (format == "excel") {
+#   # NOT WORKING YET - THIS WOULD NOT RETURN A SPREADSHEET IF save_now=FALSE... IT JUST WOULD CREATE A WORKBOOK IN openxlsx::  format.
+# promises::future_promise({  # })
+#   # out <- table_xls_from_ejam(ejamit(sitepoints = sitepoints, radius = radius), launchexcel = F, save_now = FALSE)
+# })
+
+# ##promises::future_promise({  # })
+#   out <- as.data.frame(as.data.frame(EJAM::ejamit(sitepoints = sitepoints, radius = radius)[["results_overall"]]))
+# ##})
+# }
+####################################################### #
+
+# report - EJAM-API ####
+
+#* Generate an EJAM report in HTML format
+#* @param lat Latitude of the site
+#* @param lon Longitude of the site
+#* @param shape A GeoJSON string representing the area of interest
+#* @param fips A FIPS code for a specific US Census geography
+#* @param buffer The buffer radius in miles
+#* @get /report
+#* @serializer html
+function(lat = "", lon = "", shape = "", fips = "", buffer = 3, res) {
+  # Determine the input method and prepare the area.
+  method <- if (!("" %in% lat) && !("" %in% lon)) "latlon" else if (!("" %in% shape)) "SHP" else if (!("" %in% fips)) "FIPS" else NULL
+  area <- if (method == "latlon") data.frame(lat = as.numeric(lat), lon = as.numeric(lon)) else shape %||% fips
+
+  if (is.null(method) || is.null(area)) {
+    res$status <- 400
+    return(handle_error("You must provide valid coordinates, a shape, or a FIPS code.", "html"))
+  }
+
+  # Perform the EJAM analysis.
+  out <- tryCatch(
+    ejamit_interface(area = area, method = method, buffer = as.numeric(buffer), endpoint = "report"),
+    error = function(e) {
+      res$status <- 400
+      handle_error(e$message, "html")
+    }
+  )
+
+  # If an error occurred during the analysis, return the error message.
+  if (is.character(out)) {
+    return(out)
+  }
+
+  # Generate and return the HTML report.
+  ejam2report(out, sitenumber = 1, return_html = TRUE, launch_browser = FALSE, submitted_upload_method = method)
+}
+####################################################### #
+
+# report2 ####
 
 ## JUST A DRAFT - NOT TESTED AT ALL
-
-
 ##  This endpoint is essentially doing  ejam2report(ejamit(  ))
 ##  so inputs are point(s) or polygon(s) or fip(s), and output is html summary report.
 
@@ -127,58 +390,56 @@ api2r = function(x) {
 #*
 #* @param attachment "true" means return html file as attachment
 #*
-#* @post /report
+#* @post /report2
 #* @serializer html
 function(
     # mosty the same arguments as ejamit()
 
-  sitepoints = "",  lat = "",  lon = "",
-  radius = 3,
-  fips = "",
-  shapefile = "",
+    sitepoints = "",  lat = "",  lon = "",
+    radius = 3,
+    fips = "",
+    shapefile = "",
 
-  sitenumber = "",
+    sitenumber = "",
 
-  radius_donut_lower_edge = 0,
-  maxradius = 31.07,
-  avoidorphans = "false",
-  # quadtree = "",
-  countcols = "",
-  wtdmeancols = "",
-  calculatedcols = "",
-  calctype_maxbg = "",
-  calctype_minbg = "",
-  subgroups_type = "nh",
-  include_ejindexes = "true",
-  calculate_ratios = "true",
-  extra_demog = "true",
-  need_proximityscore = "false",
-  infer_sitepoints = "false",
-  need_blockwt = "true",
-  thresholds = list(80, 80),
-  threshnames = list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
-  threshgroups = list("EJ-US-or-ST", "Supp-US-or-ST"),
-  updateProgress = "",
-  updateProgress_getblocks = "",
-  progress_all = "",
-  in_shiny = "false",
-  quiet = "true",
-  silentinteractive = "false",
-  called_by_ejamit = "true",
-  testing = "false",
-  showdrinkingwater = "true",
-  showpctowned = "true",
-  download_city_fips_bounds = "true",
-  download_noncity_fips_bounds = "false",
+    radius_donut_lower_edge = 0,
+    maxradius = 31.07,
+    avoidorphans = "false",
+    # quadtree = "",
+    countcols = "",
+    wtdmeancols = "",
+    calculatedcols = "",
+    calctype_maxbg = "",
+    calctype_minbg = "",
+    subgroups_type = "nh",
+    include_ejindexes = "true",
+    calculate_ratios = "true",
+    extra_demog = "true",
+    need_proximityscore = "false",
+    infer_sitepoints = "false",
+    need_blockwt = "true",
+    thresholds = list(80, 80),
+    threshnames = list(c(names_ej_pctile, names_ej_state_pctile), c(names_ej_supp_pctile, names_ej_supp_state_pctile)),
+    threshgroups = list("EJ-US-or-ST", "Supp-US-or-ST"),
+    updateProgress = "",
+    updateProgress_getblocks = "",
+    progress_all = "",
+    in_shiny = "false",
+    quiet = "true",
+    silentinteractive = "false",
+    called_by_ejamit = "true",
+    testing = "false",
+    showdrinkingwater = "true",
+    showpctowned = "true",
+    download_city_fips_bounds = "true",
+    download_noncity_fips_bounds = "false",
 
-  ...,
+    ...,
+    attachment = "true",
+    res
+    ) {
 
-  attachment = "true"
-) {
-
-
-
-  filename = "EJAM_results.html"
+  fname <- "EJAM_results.html"
 
   crs <- 4326
 
@@ -206,70 +467,70 @@ function(
 
   ejamitout <- tryCatch(
     ejamit(
-      sitepoints = api2r(sitepoints),
-      lat = api2r(lat), lon = api2r(lon),
-      radius = api2r(radius),
-      fips = api2r(fips),
-      shapefile = api2r(shapefile),
+      sitepoints = api2rnulltf(sitepoints),
+      lat = api2rnulltf(lat), lon = api2rnulltf(lon),
+      radius = api2rnulltf(radius),
+      fips = api2rnulltf(fips),
+      shapefile = api2rnulltf(shapefile),
 
-      radius_donut_lower_edge = api2r(radius_donut_lower_edge),
-      maxradius = api2r(maxradius),
-      avoidorphans = api2r(avoidorphans),
+      radius_donut_lower_edge = api2rnulltf(radius_donut_lower_edge),
+      maxradius = api2rnulltf(maxradius),
+      avoidorphans = api2rnulltf(avoidorphans),
       # quadtree = quadtree,
-      countcols = api2r(countcols),
-      wtdmeancols = api2r(wtdmeancols),
-      calculatedcols = api2r(calculatedcols),
-      calctype_maxbg = api2r(calctype_maxbg),
-      calctype_minbg = api2r(calctype_minbg),
-      subgroups_type = api2r(subgroups_type),
-      include_ejindexes = api2r(include_ejindexes),
-      calculate_ratios = api2r(calculate_ratios),
-      extra_demog = api2r(extra_demog),
-      need_proximityscore = api2r(need_proximityscore),
-      infer_sitepoints = api2r(infer_sitepoints),
-      need_blockwt = api2r(need_blockwt),
-      thresholds = api2r(thresholds),
-      threshnames = api2r(threshnames),
-      threshgroups = api2r(threshgroups),
-      updateProgress = api2r(updateProgress),
-      updateProgress_getblocks = api2r(updateProgress_getblocks),
-      progress_all = api2r(progress_all),
-      in_shiny = api2r(in_shiny),
-      quiet = api2r(quiet),
-      silentinteractive = api2r(silentinteractive),
-      called_by_ejamit = api2r(called_by_ejamit),
-      testing = api2r(testing),
-      showdrinkingwater = api2r(showdrinkingwater),
-      showpctowned = api2r(showpctowned),
+      countcols = api2rnulltf(countcols),
+      wtdmeancols = api2rnulltf(wtdmeancols),
+      calculatedcols = api2rnulltf(calculatedcols),
+      calctype_maxbg = api2rnulltf(calctype_maxbg),
+      calctype_minbg = api2rnulltf(calctype_minbg),
+      subgroups_type = api2rnulltf(subgroups_type),
+      include_ejindexes = api2rnulltf(include_ejindexes),
+      calculate_ratios = api2rnulltf(calculate_ratios),
+      extra_demog = api2rnulltf(extra_demog),
+      need_proximityscore = api2rnulltf(need_proximityscore),
+      infer_sitepoints = api2rnulltf(infer_sitepoints),
+      need_blockwt = api2rnulltf(need_blockwt),
+      thresholds = api2rnulltf(thresholds),
+      threshnames = api2rnulltf(threshnames),
+      threshgroups = api2rnulltf(threshgroups),
+      updateProgress = api2rnulltf(updateProgress),
+      updateProgress_getblocks = api2rnulltf(updateProgress_getblocks),
+      progress_all = api2rnulltf(progress_all),
+      in_shiny = api2rnulltf(in_shiny),
+      quiet = api2rnulltf(quiet),
+      silentinteractive = api2rnulltf(silentinteractive),
+      called_by_ejamit = api2rnulltf(called_by_ejamit),
+      testing = api2rnulltf(testing),
+      showdrinkingwater = api2rnulltf(showdrinkingwater),
+      showpctowned = api2rnulltf(showpctowned),
 
-      maxradius = api2r(maxradius),
-      avoidorphans = api2r(avoidorphans),
-      quadtree = api2r(quadtree),
-      countcols = api2r(countcols),
-      wtdmeancols = api2r(wtdmeancols),
-      calculatedcols = api2r(calculatedcols),
-      calctype_maxbg = api2r(calctype_maxbg),
-      calctype_minbg = api2r(calctype_minbg),
-      subgroups_type = api2r(subgroups_type),
-      include_ejindexes = api2r(include_ejindexes),
-      calculate_ratios = api2r(calculate_ratios),
-      extra_demog = api2r(extra_demog),
-      need_proximityscore = api2r(need_proximityscore),
-      infer_sitepoints = api2r(infer_sitepoints),
-      need_blockwt = api2r(need_blockwt),
-      thresholds = api2r(thresholds),
-      threshnames = api2r(threshnames),
-      threshgroups = api2r(threshgroups),
-      updateProgress = api2r(updateProgress),
-      updateProgress_getblocks = api2r(updateProgress_getblocks),
-      progress_all = api2r(progress_all),
-      in_shiny = api2r(in_shiny),
-      quiet = api2r(quiet),
-      silentinteractive = api2r(silentinteractive),
-      called_by_ejamit = api2r(called_by_ejamit),
-      testing = api2r(testing),
-      download_city_fips_bounds = api2r(download_city_fips_bounds),
-      download_noncity_fips_bounds = api2r(download_noncity_fips_bounds)
+      maxradius = api2rnulltf(maxradius),
+      avoidorphans = api2rnulltf(avoidorphans),
+      quadtree = api2rnulltf(quadtree),
+      countcols = api2rnulltf(countcols),
+      wtdmeancols = api2rnulltf(wtdmeancols),
+      calculatedcols = api2rnulltf(calculatedcols),
+      calctype_maxbg = api2rnulltf(calctype_maxbg),
+      calctype_minbg = api2rnulltf(calctype_minbg),
+      subgroups_type = api2rnulltf(subgroups_type),
+      include_ejindexes = api2rnulltf(include_ejindexes),
+      calculate_ratios = api2rnulltf(calculate_ratios),
+      extra_demog = api2rnulltf(extra_demog),
+      need_proximityscore = api2rnulltf(need_proximityscore),
+      infer_sitepoints = api2rnulltf(infer_sitepoints),
+      need_blockwt = api2rnulltf(need_blockwt),
+      thresholds = api2rnulltf(thresholds),
+      threshnames = api2rnulltf(threshnames),
+      threshgroups = api2rnulltf(threshgroups),
+      updateProgress = api2rnulltf(updateProgress),
+      updateProgress_getblocks = api2rnulltf(updateProgress_getblocks),
+      progress_all = api2rnulltf(progress_all),
+      in_shiny = api2rnulltf(in_shiny),
+      quiet = api2rnulltf(quiet),
+      silentinteractive = api2rnulltf(silentinteractive),
+      called_by_ejamit = api2rnulltf(called_by_ejamit),
+      testing = api2rnulltf(testing),
+      download_city_fips_bounds = api2rnulltf(download_city_fips_bounds),
+      download_noncity_fips_bounds = api2rnulltf(download_noncity_fips_bounds)
     ),
     error = function(e) {
       res$status <- 400
@@ -284,21 +545,22 @@ function(
 
   # Prepare the final JSON output.
   # Generate and return the HTML report.
-  reportout <- ejam2report(ejamitout = ejamitout,
+  out <- ejam2report(ejamitout = ejamitout,
 
-                           # shp = api2r(shp), ### WHERE TO GET shp as done in server ?? ***
+    # shp = api2rnulltf(shp), ### WHERE TO GET shp as done in server ?? ***
 
-                           sitenumber = api2r(sitenumber), ############ #
-                           return_html = TRUE,
-                           launch_browser = FALSE)
+    sitenumber = api2rnulltf(sitenumber), ############ #
+    return_html = TRUE,
+    launch_browser = FALSE)
 
+  attachment = api2rnulltf(attachment)
   if (attachment == "true") {
     plumber::as_attachment(
-      value = reportout,
-      filename = filename
+      value = out,
+      filename = fname
     )
   } else {
-    reportout
+    out
   }
 
 }
@@ -326,23 +588,26 @@ function(
 #* @param ... parameters passed to ejam2report(), but these are preset and cannot be changed:
 #*   launch_browser, fileextension, return_html, filename = "EJAM_results.html"
 #*
-#* @param attachment "true" means return html file as attachment
+#* @param attachment optional, set TRUE for download of attachment,
+#*   FALSE to get json results back
 #*
 #* @serializer html
 #* @post /reportpost
 #*
-function(lat = '', lon = '', sitepoints = "", radius = '', shapefile = '', fips = '', ..., attachment = "true") {
+function(lat = "", lon = "", sitepoints = "", radius = "", shapefile = "", fips = "", ..., attachment = "true", res) {
 
-  filename = "EJAM_results.html"
+  filename <- "EJAM_results.html"
 
-  lat = api2r(lat)
-  lon = api2r(lon)
-  radius = api2r(radius)
-  shapefile = api2r(shapefile)
-  fips = api2r(fips)
-  sitepoints = api2r(sitepoints)
+  lat <- api2rnulltf(lat)
+  lon <- api2rnulltf(lon)
+  radius <- api2rnulltf(radius)
+  shapefile <- api2rnulltf(shapefile)
+  fips <- api2rnulltf(fips)
+  sitepoints <- api2rnulltf(sitepoints)
 
-  lat <- as.numeric(lat); lon <- as.numeric(lon); radius <- as.numeric(radius)
+  lat <- as.numeric(lat)
+  lon <- as.numeric(lon)
+  radius <- as.numeric(radius)
   # if (length(lat) != 1 | length(lon) != 1) {lat <- 40.81417; lon <- -96.69963}
   # if (length(radius) != 1) {radius <- 1}
 
@@ -365,11 +630,12 @@ function(lat = '', lon = '', sitepoints = "", radius = '', shapefile = '', fips 
   # Generate and return the HTML report.
 
   reportout <- ejam2report(ejamitout = ejamitout,
-                           sitenumber = sitenumber, ############ #
-                           return_html = TRUE,
-                           launch_browser = FALSE,
-                           ...)
+    sitenumber = sitenumber, ############ #
+    return_html = TRUE,
+    launch_browser = FALSE,
+    ...)
 
+  attachment = api2rnulltf(attachment)
   if (attachment == "true") {
     plumber::as_attachment(
       value = reportout,
@@ -378,27 +644,29 @@ function(lat = '', lon = '', sitepoints = "", radius = '', shapefile = '', fips 
   } else {
     reportout
   }
-
 }
-
 ####################################################################################################### #
+# ~ ####
 
 # ejam2report ####
 
 ## JUST A DRAFT - NOT TESTED AT ALL
 
-#* like ejam2report(), returns html EJAM summary report, analysis results, given the list that is the output of ejamit()
+#* like `ejam2report()`, returns html EJAM summary report, analysis results, given the list that is the output of `ejamit()`
 #*
-#* @param ejamitout the output of ejamit(), and if omitted, a sample report is returned
-#* @param ... other parameters passed to ejam2report(), but these are preset and cannot be changed:
+#* @param ejamitout the output of `ejamit()`, and if omitted, a sample report is returned
+#* @param ... other parameters passed to ejam2report(),
+#*   but these are preset and cannot be changed:
 #*   launch_browser, fileextension, return_html, filename = "EJAM_results.html"
+#* @param attachment optional, set TRUE for download of attachment,
+#*   FALSE to get json results back
 #*
-#* Like EJAM::ejam2report()
+#* Like `EJAM::ejam2report()`
 #*
 #* @serializer html
 #* @post /ejam2report
 #*
-function(ejamitout = testoutput_ejamit_10pts_1miles, ...) {
+function(ejamitout = testoutput_ejamit_10pts_1miles, ..., attachment = "true", res) {
 
   # ejamitout = testoutput_ejamit_10pts_1miles,
   # sitenumber = NULL,
@@ -437,20 +705,27 @@ function(ejamitout = testoutput_ejamit_10pts_1miles, ...) {
   # ## all the indicators that are in extratable_list_of_sections:
   # extratable_hide_missing_rows_for = as.vector(unlist(extratable_list_of_sections))
 
-  filename = "EJAM_results.html"
+  filename <- "EJAM_results.html"
 
-  reportout <- ejam2report(ejamitout = ejamitout, launch_browser = FALSE, fileextension = "html",
-                           return_html = FALSE, ## ???
-                           filename = filename, ## or NULL ?
-                           ...)
+  future::future({
 
+  out <- ejam2report(
+    ejamitout = ejamitout,
+    launch_browser = FALSE,
+    fileextension = "html",
+    return_html = FALSE, ## ???
+    filename = filename, ## or NULL ?
+    ...)
+})
+
+  attachment = api2rnulltf(attachment)
   if (attachment == "true") {
     plumber::as_attachment(
-      value = reportout,
+      value = out,
       filename = filename
     )
   } else {
-    reportout
+    out
   }
 }
 ####################################################################################################### #
@@ -461,49 +736,102 @@ function(ejamitout = testoutput_ejamit_10pts_1miles, ...) {
 
 #* like ejam2excel(), returns xlsx file of EJAM analysis results for all residents within X miles of a single point defined by latitude and longitude.
 #*
-#* @param lat Latitude decimal degrees (single point only, for now)
-#* @param lon Longitude decimal degrees (single point only, for now)
-#* @param radius Radius in miles
-#* @param names "long" returns plain-English name of each indicator. Any other setting returns short variable names like "pctlowinc"
-#* @param test "true" or "false" If true, returns a pre-calculated result (ignoring lat, lon, radius)
-#* @param ... other parameters passed to ejam2excel()
+#* @param ... parameters passed to ejam2excel(), mainly the output of ejamit(),
+#*   a list with names including "results_bysite" and "results_overall",
+#*   which are data.tables of results from analysis by `EJAM::ejamit()`
+#* @param attachment optional, set TRUE for download of attachment,
+#*   FALSE to get json results back
 #*
-#* Like EJAM::ejam2excel()
+#* See `?EJAM::ejam2excel()`
 #*
 #* @serializer excel
-#* @get /ejam2excel
+#* @post /ejam2excel
 #*
-function(lat = 40.81417, lon = -96.69963, radius = 1, test = "false", ...) {
+function(..., attachment = "true", res) {
 
-  fname = "EJAM_results.xlsx"
+  fname <- "EJAM_results.xlsx"
 
-  lat <- as.numeric(lat); lon <- as.numeric(lon); radius <- as.numeric(radius)
-  if (length(lat) != 1 | length(lon) != 1) {lat <- 40.81417; lon <- -96.69963}
-  if (length(radius) != 1) {radius <- 1}
+  out <- ejam2excel(...)
 
+  attachment = api2rnulltf(attachment)
+  if (attachment == "true") {
+    plumber::as_attachment(
+      value = out,
+      filename = fname
+    )
+  } else {
+    out
+  }
+}
+####################################################################################################### #
+####################################################################################################### #
+
+# ejamit_csv ####
+
+## JUST A DRAFT - NOT TESTED AT ALL
+
+#* csv table of EJAM analysis summary results for all residents within X miles of point(s) defined by latitude and longitude.
+#* Like EJAM::ejamit()$results_overall (but with friendlier column names for indicators).
+#*
+#* @param lat Latitude decimal degrees
+#* @param lon Longitude decimal degrees
+#* @param radius Radius in miles
+#*
+#* @param fips Census FIPS code(s) such as Counties or blockgroups
+#* @param shapefile shapefile (ignores lat,lon,radius if this is provided).
+#*
+#* @param names "long" returns plain-English name of each indicator. Any other setting returns short variable names like "pctlowinc"
+#* @param test "true" or "false" If true, returns a pre-calculated result (ignoring lat, lon, radius)
+#* @param attachment optional, set TRUE for download of attachment,
+#*   FALSE to get json results back
+#*
+#* @serializer csv
+#* @get /ejamit_csv
+#*
+function(lat = 40.81417, lon = -96.69963, radius = 1, shapefile = "", fips = "",
+         names = "long", test = "false", attachment = "true", res) {
+
+  fname = "EJAM_results.csv"
+
+  lat <- as.numeric(lat)
+  lon <- as.numeric(lon)
+  radius <- as.numeric(radius)
+  # if (length(lat) != 1 | length(lon) != 1) {
+  #   lat <- 40.81417
+  #   lon <- -96.69963
+  # }
+  # if (length(radius) != 1) {
+  #   radius <- 1
+  # }
+  # promises::future_promise({ # did not seem to work
+  future::future({
   if (test == "true") {
     out <- as.data.frame(EJAM::testoutput_ejamit_10pts_1miles$results_overall)
   } else {
-    # promises::future_promise({ # did not seem to work
+
+
     out <- ejamit(
       sitepoints = data.frame(lat = lat, lon = lon),
       radius = radius
     )$results_overall
-    # }) # did not seem to work
+
   }
 
-  out <- ejam2excel(out, ...)
+  if (names == "long") {
+    names(out) <- fixcolnames(names(out), "r", "long")
+  }
 
-  # if (attachment == "true") {
-  plumber::as_attachment(
-    value = out,
-    filename = fname
-  )
-  # } else {
-  #   out
-  #   }
+  attachment = api2rnulltf(attachment)
+  if (attachment == "true") {
+    plumber::as_attachment(
+      value = out,
+      filename = fname
+    )
+  } else {
+    out
+  }
+  })
 }
-####################################################################################################### #
 ####################################################################################################### #
 
 # ejamit ####
@@ -511,15 +839,17 @@ function(lat = 40.81417, lon = -96.69963, radius = 1, test = "false", ...) {
 ## JUST A DRAFT - NOT TESTED AT ALL
 
 #* json table of EJAM analysis summary results for all residents within X miles of a single point or in a polygon
+#* Like EJAM::ejamit()$results_overall (but with friendlier column names for indicators).
 #*
-#* @param lat Latitude decimal degrees  (single point only, for now)
-#* @param lon Longitude decimal degrees (single point only, for now)
+#* @param lat Latitude decimal degrees
+#* @param lon Longitude decimal degrees
 #* @param radius Radius in miles
-#* @param shapefile shapefile (ignores lat,lon,radius if this is provided). NOT YET IMPLEMENTED.
+#*
+#* @param fips Census FIPS code(s) such as Counties or blockgroups
+#* @param shapefile shapefile (ignores lat,lon,radius if this is provided).
+#*
 #* @param names "long" returns plain-English name of each indicator. Any other setting returns short variable names like "pctlowinc"
 #* @param test "true" or "false" If true, returns a pre-calculated result (ignoring lat, lon, radius)
-#*
-#* Like EJAM::ejamit()$results_overall (but with friendlier column names for indicators).
 #*
 #* Calling from R for example:
 #* url2 <- "https://urlgoeshere/ejamit?lon=-101&lat=36&radius=1&test=true";
@@ -528,16 +858,27 @@ function(lat = 40.81417, lon = -96.69963, radius = 1, test = "false", ...) {
 #*
 #* @get /ejamit
 #*
-function(lat = 40.81417, lon = -96.69963, radius = 1, shapefile = 0, names = "long", test = "false") {
+function(lat = 40.81417, lon = -96.69963, radius = 1, shapefile = "", fips = "", names = "long", test = "false", res) {
 
-  lat <- as.numeric(lat); lon <- as.numeric(lon); radius <- as.numeric(radius)
-  if (length(lat) != 1 | length(lon) != 1) {lat <- 40.81417; lon <- -96.69963}
-  if (length(radius) != 1) {radius <- 1}
+  shapefile <- api2nulltf(shapefile)
+  fips <- api2rnulltf(fips)
+
+  # fname <- "EJAM_results.csv"
+
+  # lat <- as.numeric(lat)
+  # lon <- as.numeric(lon)
+  # radius <- as.numeric(radius)
+  # if (length(lat) != 1 | length(lon) != 1) {
+  #   lat <- 40.81417
+  #   lon <- -96.69963
+  # }
+  # if (length(radius) != 1) {
+  #   radius <- 1
+  # }
 
   if (test == "true") {
     out <- as.data.frame(EJAM::testoutput_ejamit_10pts_1miles$results_overall)
   } else {
-
     # promises::future_promise({  # did not seem to work
 
     if (!all(0 == shapefile)) {
@@ -562,13 +903,14 @@ function(lat = 40.81417, lon = -96.69963, radius = 1, shapefile = 0, names = "lo
   }
 
   if (names == "long") {
-    names(out) <- fixcolnames(names(out), 'r', 'long')
+    names(out) <- fixcolnames(names(out), "r", "long")
   }
 
+  # attachment = api2rnulltf(attachment)
   # if (attachment == "true") {
   # plumber::as_attachment(
   #   value = as.data.frame(out),
-  #   filename = "EJAM_results.csv"
+  #   filename = fname
   # )
   # } else {
   out
@@ -576,58 +918,9 @@ function(lat = 40.81417, lon = -96.69963, radius = 1, shapefile = 0, names = "lo
 }
 ####################################################################################################### #
 
-# ejamit_csv ####
-
-## JUST A DRAFT - NOT TESTED AT ALL
-
-#* csv table of EJAM analysis summary results for all residents within X miles of a single point defined by latitude and longitude.
-#*
-#* @param lat Latitude decimal degrees (single point only, for now)
-#* @param lon Longitude decimal degrees (single point only, for now)
-#* @param radius Radius in miles
-#* @param names "long" returns plain-English name of each indicator. Any other setting returns short variable names like "pctlowinc"
-#* @param test "true" or "false" If true, returns a pre-calculated result (ignoring lat, lon, radius)
-#*
-#* Like EJAM::ejamit()$results_overall (but with friendlier column names for indicators).
-#*
-#* @serializer csv
-#* @get /ejamit_csv
-#*
-function(lat = 40.81417, lon = -96.69963, radius = 1, names = "long", test = "false") {
-
-  lat <- as.numeric(lat); lon <- as.numeric(lon); radius <- as.numeric(radius)
-  if (length(lat) != 1 | length(lon) != 1) {lat <- 40.81417; lon <- -96.69963}
-  if (length(radius) != 1) {radius <- 1}
-
-  if (test == "true") {
-    out <- as.data.frame(EJAM::testoutput_ejamit_10pts_1miles$results_overall)
-  } else {
-    # promises::future_promise({ # did not seem to work
-    out <- ejamit(
-      sitepoints = data.frame(lat = lat, lon = lon),
-      radius = radius
-    )$results_overall
-    # }) # did not seem to work
-  }
-
-  if (names == "long") {
-    names(out) <- fixcolnames(names(out), 'r', 'long')
-  }
-
-  # if (attachment == "true") {
-  plumber::as_attachment(
-    value = as.data.frame(out),
-    filename = "EJAM_results.csv"
-  )
-  # } else {
-  #   out
-  #   }
-}
-####################################################################################################### #
-
 # getblocksnearby ####
 
-## JUST A DRAFT - NOT TESTED AT ALL
+## SEEMS TO WORK, AT LEAST FOR 1 POINT
 
 #* json table of distances to all Census blocks near given point.
 #*
@@ -635,15 +928,25 @@ function(lat = 40.81417, lon = -96.69963, radius = 1, names = "long", test = "fa
 #* @param lon decimal degrees (single point only, for now)
 #* @param radius Radius of circular area in miles.
 #*
+#* @param attachment optional, set TRUE for download of attachment,
+#*   FALSE to get json results back
+#*
 #* Finds all Census blocks whose internal point is within radius of site point.
 #*
 #* @get /getblocksnearby
 #*
-function(lat, lon, radius) {
+function(lat, lon, radius, attachment = "false", res) {
 
-  lat <- as.numeric(lat); lon <- as.numeric(lon); radius <- as.numeric(radius)
-  if (length(lat) != 1 | length(lon) != 1) {lat <- 40.81417; lon <- -96.69963}
-  if (length(radius) != 1) {radius <- 1}
+  lat <- as.numeric(lat)
+  lon <- as.numeric(lon)
+  radius <- as.numeric(radius)
+  if (length(lat) != 1 | length(lon) != 1) {
+    lat <- 40.81417
+    lon <- -96.69963
+  }
+  if (length(radius) != 1) {
+    radius <- 1
+  }
 
   # require(EJAM)
   # if (!exists("blockwts")) {dataload_dynamic('blockwts)}
@@ -659,7 +962,16 @@ function(lat, lon, radius) {
     radius = as.numeric(radius)  # , quadtree = localtree
   )
   # })
-  out
+
+  attachment = api2rnulltf(attachment)
+  if (attachment == "true") {
+    plumber::as_attachment(
+      value = out,
+      filename = fname
+    )
+  } else {
+    out
+  }
 }
 ####################################################### #
 
@@ -674,13 +986,17 @@ function(lat, lon, radius) {
 #* @param dissolved If TRUE, use sf::st_union(polys) to find unique blocks inside any one or more of polys
 #* @param safety_margin_ratio  multiplied by addedbuffermiles, how far to search for blocks nearby using EJAM::getblocksnearby(), before using those found to do the intersection
 #* @param crs coordinate reference system used in st_as_sf() and st_transform() and shape_buffered_from_shapefile_points(), crs = 4269 or Geodetic CRS NAD83
-#* @get /get_blockpoints_in_shape
+#* @param attachment optional, set TRUE for download of attachment,
+#*   FALSE to get json results back
+#*
+#* @post /get_blockpoints_in_shape
 #*
 function(polys,
          addedbuffermiles = 0,
          dissolved = FALSE,
          safety_margin_ratio = 1.10,
-         crs = 4269
+         crs = 4269,
+         res
 ) {
 
   return("not working yet for shapefile inputs")
@@ -699,7 +1015,16 @@ function(polys,
     crs = crs
   )
   # })
-  out
+
+  attachment = api2rnulltf(attachment)
+  if (attachment == "true") {
+    plumber::as_attachment(
+      value = out,
+      filename = fname
+    )
+  } else {
+    out
+  }
 }
 ####################################################### #
 
@@ -717,18 +1042,19 @@ function(polys,
 #* @param ... passed to [doaggregate()]
 #* @get /doaggregate
 #*
-function(sites2blocks, sites2states_or_latlon, countcols, popmeancols, calculatedcols, ...) {
+function(sites2blocks, sites2states_or_latlon, countcols, popmeancols, calculatedcols, ..., res) {
   # promises::future_promise({
-  if (!exists("blockgroupstats")) {library(EJAM)} # to use installed version only if not already attached
-  # library(EJAM)
-  if (!exists("blockwts"))  dataload_dynamic("blockwts")
-  if (!exists("localtree")) indexblocks()
-  EJAM::doaggregate(sites2blocks = sites2blocks,
-                    sites2states_or_latlon = sites2states_or_latlon,
-                    countcols = countcols, popmeancols = popmeancols, calculatedcols = calculatedcols, ... )
+  if (!exists("blockgroupstats")) {
+    stop("EJAM package must be available")
+  }
+  EJAM::doaggregate(
+    sites2blocks = sites2blocks,
+    sites2states_or_latlon = sites2states_or_latlon,
+    countcols = countcols, popmeancols = popmeancols, calculatedcols = calculatedcols, ...)
   # })
 }
 # ####################################################### #
+
 
 # echo ####
 #
@@ -736,22 +1062,8 @@ function(sites2blocks, sites2states_or_latlon, countcols, popmeancols, calculate
 #* @param msg The message to echo back.
 #* @get /echo
 #*
-function(msg="") {
+function(msg = "") {
   list(msg = paste0("The message is: '", msg, "'"))
 }
-####################################################### #
-
-# if (format == "excel") {
-#   # NOT WORKING YET - THIS WOULD NOT RETURN A SPREADSHEET IF save_now=FALSE... IT JUST WOULD CREATE A WORKBOOK IN openxlsx::  format.
-# promises::future_promise({  # })
-#   # out <- table_xls_from_ejam(ejamit(sitepoints = sitepoints, radius = radius), launchexcel = F, save_now = FALSE)
-# })
-
-# ##promises::future_promise({  # })
-#   out <- as.data.frame(as.data.frame(EJAM::ejamit(sitepoints = sitepoints, radius = radius)[["results_overall"]]))
-# ##})
-# }
-#
-
 ####################################################### #
 ####################################################### #
