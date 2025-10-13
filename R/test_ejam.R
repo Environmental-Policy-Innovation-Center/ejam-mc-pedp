@@ -941,7 +941,53 @@ and all filenames listed there actually exist as in that folder called `test`.\n
 
   ## DO BASIC QUICK CHECKS, NOT UNIT TESTS   ####
   # for easy/basic case, main functions, without actually running unit tests with testthat
-
+{
+  # in_latlon = testpoints_10[1:2,]
+  # in_shp = testshapes_2
+  # in_fips = testinput_fips_mix
+  # in_fipsb = shapes_from_fips(fips_counties_from_state_abbrev("DE"))
+  # ################################################################################################### #
+  #
+  # # WEB APP CHECKS / notes
+  #
+  # #   check for report header text, logo, footer; map popups; table urls/links; plots
+  #
+  # #  ejamapp(sitepoints = in_latlon, radius = 3.14)
+  #
+  # #  ejamapp(shapefile = in_shp)
+  #
+  # #  ejamapp(fips = in_fipsb)
+  # ################################################################################################### #
+  #
+  # # R function checks
+  #
+  # #   check for report header text, logo, footer; map popups; table urls/links; plots
+  #
+  # # # LATLON
+  #
+  # out_latlon = ejamit(sitepoints = in_latlon, radius  = 3.14)
+  # ejam2map(   out_latlon)
+  # ejam2report(out_latlon)
+  # ejam2excel( out_latlon,            save_now = F, launchexcel = T)
+  # ejam2tableviewer(out_latlon)
+  #
+  # # # SHAPEFILE
+  #
+  # out_shp = ejamit(shapefile = in_shp, radius=0)
+  # ejam2map(   out_shp, shp = in_shp)
+  # ejam2report(out_shp, shp = in_shp)
+  # ejam2excel( out_shp, shp = in_shp, save_now = F, launchexcel = T)
+  # ejam2tableviewer(out_shp)
+  #
+  # # FIPS
+  #
+  # out_fips = ejamit(fips = in_fips) # in_fipsb
+  # ejam2map(   out_fips ) # in_fipsb
+  # ejam2report(out_fips ) # in_fipsb
+  # ejam2excel( out_fips,            save_now = F, launchexcel = T) # in_fipsb
+  # ejam2tableviewer(out_fips) # in_fipsb
+  # ############################################################ #
+  }
   if (!y_skipbasic) {
 
     if (y_latlon) {
@@ -952,6 +998,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       ejam2barplot(x)
       ejam2barplot_sites(x)
       ejam2tableviewer(x)
+
       junk = ejam2excel(x, save_now = F, launchexcel = T)
 
       ejam2report(x, analysis_title = "2 point latlon example")
@@ -981,6 +1028,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       ejam2barplot(x3)
       ejam2barplot_sites(x3)
       ejam2tableviewer(x3 , filename = file.path(tempdir(), "ejam2tableviewer_3polygon_test.html")) # should be able to pick name
+
       junk = ejam2excel(x3, save_now = F, launchexcel = T)
 
       ejam2report(x3, analysis_title = "3 polygon portland example", shp = shp)
@@ -1006,6 +1054,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
       ejam2barplot(x2)
       ejam2barplot_sites(x2)
       ejam2tableviewer(x2)
+
       junk = ejam2excel(x2, save_now = F, launchexcel = T)
 
       ejam2report(x2)
