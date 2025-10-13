@@ -915,7 +915,7 @@ and all filenames listed there actually exist as in that folder called `test`.\n
   if (useloadall) {
 
     # Note devtools package is in Suggests not Imports, in DESCRIPTION file
-    dx = try({suppressWarnings(suppressMessages({devtools_available <- requireNamespace(devtools)}))}, silent = TRUE)
+    dx = try({suppressWarnings(suppressMessages({devtools_available <- requireNamespace("devtools")}))}, silent = TRUE)
     if (!devtools_available) {
       # if (inherits(dx, "try-error")) {
       stop("this requires installing the package devtools first, e.g., \n  install.packages('devtools') \n")
