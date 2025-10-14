@@ -643,18 +643,30 @@ if (FALSE) {
   bb = EJAM:::shapefile2bboxdf(shp)
   whichblocks = EJAM:::getblocksrowsinbox(bb)
 
-
   ########################### #
-  leaflet::leaflet()  %>% leaflet::addTiles() %>% map_add_shp(shp) %>%
-    # fails to draw all points - why? same for map_add_bbox() that only maps one bounding box
-    map_add_pts(blockpoints[whichblocks, ])
-
 
   leaflet::leaflet() %>% map_add_shp(shp) %>% leaflet::addTiles() %>%
     # does draw all points:
     leaflet::addCircles(lng = blockpoints[whichblocks, lon],
-                        lat = blockpoints[whichblocks, lat])
+                        lat = blockpoints[whichblocks, lat],
+                        group="points") %>%
+    EJAM:::map_add_bbox(bb, color="lightgreen")  %>%
+
+    leaflet::addTiles(group = "OpenStreetMap") %>%
+    leaflet::addProviderTiles("CartoDB.Voyager", group = "Carto Voyager") %>%
+    leaflet::addLayersControl(
+      baseGroups = c("Carto Voyager", "OpenStreetMap"),
+      overlayGroups = c( "points", "boundingbox"),
+      options = leaflet::layersControlOptions(collapsed=FALSE)
+    )
   ########################### #
+
+  leaflet::leaflet()  %>% leaflet::addTiles() %>% map_add_shp(shp) %>%
+    # fails to draw all points - why? same for map_add_bbox() that only maps one bounding box
+    map_add_pts(blockpoints[whichblocks, ])
+  ########################### #
+
+  # fails to draw all points -
 
   mapfast(shp) %>%
 
@@ -671,6 +683,7 @@ if (FALSE) {
 
   ## or
 
+  # fails to draw all points -
   leaflet::leaflet() %>% map_add_shp(shp) %>%
 
     map_add_pts(blockpoints[whichblocks, ], color="red",

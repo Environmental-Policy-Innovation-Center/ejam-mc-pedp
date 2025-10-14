@@ -110,14 +110,16 @@ if (FALSE) {
 
 getblocksrowsinbox = function(bb) {
 
-  bb_yx = bboxdf_latlon2yxdf(bb)
-  return(
+  bb_yx_list = bboxdf_latlon2yxlist(bb)
+  blks <- lapply(bb_yx_list, FUN = function(bb1)  {
     SearchTrees::rectLookup(
       localtree,
-      xlims = c(bb_yx$xmin, bb_yx$xmax),
-      ylims = c(bb_yx$ymin, bb_yx$ymax)
+      xlims = c(bb1[,"xmin"], bb1[,"xmax"]),
+      ylims = c(bb1[,"ymin"], bb1[,"ymax"])
     )
-  )
+  }) %>% unlist(use.names = FALSE) %>% unique
+  return(blks)
+
   ###### #
   # radians_per_degree <- 0.01745329 # pi/180
   # yminrad = bb$ymin * radians_per_degree
@@ -135,23 +137,54 @@ getblocksrowsinbox = function(bb) {
   # )
 }
 ######################################################### #
+########################## ########################### #
+if (FALSE) {
 
-## code extracted from get_blockpoints_in_shape(), to be replaced by components/helpers
+  ### MAP EXAMPLES using these helpers -- MUST DO load_all() for these to work
+  # since pipe is not attached and ejam functions are internal, etc.
 
-## "Filtering to blocks in each bounding box"
-# earthRadius_miles <- 3959
-# radians_per_degree <- pi/180
-#
-# bbox_polys <- lapply(polys$geometry, sf::st_bbox)
-#
-# blockpoints_filt <- lapply(bbox_polys, function(a) {
-#   SearchTrees::rectLookup(
-#     localtree,
-#     xlims = c(earthRadius_miles * cos(a$ymin * radians_per_degree) * cos(a$xmin * radians_per_degree),
-#               earthRadius_miles * cos(a$ymax * radians_per_degree) * cos(a$xmax * radians_per_degree)),
-#     ylims = c(earthRadius_miles * sin(a$ymin * radians_per_degree),
-#               earthRadius_miles * sin(a$ymax * radians_per_degree))
-#   )
-# }) %>% unlist(use.names = FALSE) %>% unique
+  # shp <- testinput_shapes_2[1,]
+  shp <- testinput_shapes_2  # shp <- shapefile_from_any(testdata("portland_folder_shp.zip", quiet = TRUE))
+  bb = shapefile2bboxdf(shp)
+  whichblocks = getblocksrowsinbox(bb)
+
+  ########################### #
+  mymap <- leaflet::leaflet() %>% map_add_shp(shp, group="polygons") %>% # leaflet::addTiles() %>%
+    leaflet::addRectangles(lng1 = bb$xmin, lat1 = bb$ymin,
+                           lng2 = bb$xmax, lat2 = bb$ymax,
+                           group="boundingbox", color = "lightblue")  %>%
+    # map_add_bbox(bb, color="lightgreen")  %>%
+    # does draw all points:
+    leaflet::addCircles(lng = blockpoints[whichblocks, lon],
+                        lat = blockpoints[whichblocks, lat], radius = 0.3,
+                        group="points", color = "black") %>%
+
+    leaflet::addTiles(group = "OpenStreetMap") %>%
+    leaflet::addProviderTiles("CartoDB.Voyager", group = "Carto Voyager") %>%
+    leaflet::addLayersControl(
+      baseGroups = c("Carto Voyager", "OpenStreetMap"),
+      overlayGroups = c("polygons", "points", "boundingbox"),
+      options = leaflet::layersControlOptions(collapsed=FALSE)
+    )
+  mymap
+  ########################### #
+  ## CONFIRM THE BLOCK POINTS INSIDE THE POLYGON ARE THE RIGHT SUBSET OF THOSE IN THE BOUNDING BOX
+
+  system.time({
+    s2b = get_blockpoints_in_shape(shp)$pts
+  })
+  mymap %>% leaflet::addCircles(lat = s2b$lat, lng = s2b$lon, radius = 0.2, color="red", group="points")
+
+  system.time({
+    s2b = get_blockpoints_in_shape(shp, oldway = FALSE)$pts
+  })
+  mymap %>% leaflet::addCircles(lat = s2b$lat, lng = s2b$lon, radius = 0.2, color="red", group="points")
+  # map_add_pts(sitepoints=s2b, color = "red")
+
+### looks like both methods are fast enough and old one is at least as fast. e.g., 50 cities takes maybe half a second either way
+
+
+}
 ########################## ########################### #
 
+######################################################### #
