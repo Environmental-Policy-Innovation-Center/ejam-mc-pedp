@@ -173,8 +173,8 @@ find_in_files <- function(pattern, path = "./tests/testthat", filename_pattern =
       if (!whole_line) {
         print(sapply(found, cbind))
       } else {
-      print(sapply(found, function(y) cbind(linenumber = names(y), text = y)))
-}
+        print(sapply(found, function(y) cbind(linenumber = names(y), text = y)))
+      }
       cat("\n------------------------------------------------------------------------- \n")
       cat("------------------------------------------------------------------------- \n")
     }
@@ -649,7 +649,7 @@ pkg_functions_and_sourcefiles2 <- function(funcnames, pkg = "EJAM", full.names =
 
 pkg_functions_with_keywords_internal_tag <- function(
 
-    package.dir = ".", loadagain = TRUE, quiet = FALSE) {
+  package.dir = ".", loadagain = TRUE, quiet = FALSE) {
 
   # Does load_all() first if loadagain==TRUE so even unexported functions will seem exported, fyi
   #
@@ -718,7 +718,7 @@ pkg_functions_with_keywords_internal_tag <- function(
     } else {
       if (length(tags) > 1) {
         if (!quiet) {cat("   MULTIPLE KEYWORDS TAGS FOUND - showing 1st only\n")}
-        }
+      }
       if (!quiet) {cat(' @keywords ')}
       # for (tag in tags) {
       #    keyword <- roxygen2:::block_get_tag_value(block, 'keywords')  # or
@@ -1140,12 +1140,35 @@ x = sort(packrat", ":::", "recursivePackageDependencies('",
              localpkg,
              "', lib.loc = .libPaths(), ignores = NULL))
 
-x
+
+# For example try this:
+
+pkgs_needed = sort(packrat:::recursivePackageDependencies('EJAM', lib.loc = .libPaths(), ignores = NULL))
+pkgs_in_imports = desc::desc_get('Imports', file = system.file('DESCRIPTION', package='EJAM'))
+pkgs_in_imports = gsub(' .*', '', trimws(as.vector(unlist(strsplit(pkgs_in_imports,',\n')))))
+pkgs_in_suggests = desc::desc_get('Suggests', file = system.file('DESCRIPTION', package='EJAM'))
+pkgs_in_suggests = gsub(' .*', '', trimws(as.vector(unlist(strsplit(pkgs_in_suggests,',\n')))))
+pkgs_missing_from_description =  setdiff(pkgs_needed, c(pkgs_in_imports, pkgs_in_suggests))
+pkgs_in_desc_supposedly_not_needed = setdiff(c(pkgs_in_imports, pkgs_in_suggests), pkgs_needed)
+pkgs_all = unique(c(pkgs_in_imports, pkgs_in_suggests, pkgs_needed))
+pkgs_all_sizes = pkg_sizes(pkgs_all ) # e.g., nearly 1 GB
+
+pkgs_missing_from_description # but supposedly needed
+pkgs_in_desc_supposedly_not_needed
+# largest packages:  (size of folder once installed)
+tail(pkgs_all_sizes, 20)
+
+# but should confirm these truly reflect what is actually needed and not needed
+# for web app to work,
+# functions used by analysts but not web app, and
+# functions only used in maintaining the pkg!
+
+
 
 # and see EJAM:::find_transitive_minR() to see what version of R those collectively need at minimum
       "))
 
-  #################### #
+
 
   #   cat(paste0("
   #
@@ -1189,6 +1212,56 @@ x
 }
 ##################################################################################### #
 
+#################### #  #################### #  #################### #
+
+pkg_sizes = function(pkgs) {
+
+  get_directory_size <- function(path, recursive = TRUE) {
+    # Ensure the provided path is a character string
+    stopifnot(is.character(path))
+
+    # List all files within the directory, including subdirectories if recursive is TRUE
+    # full.names = TRUE ensures the full path is returned for each file
+    files <- list.files(path, full.names = TRUE, recursive = recursive)
+
+    # Get file information for all listed files
+    # The 'size' column contains the size of each file in bytes
+    file_details <- file.info(files)
+
+    # Sum the sizes of all files to get the total directory size
+    total_size <- sum(file_details$size, na.rm = TRUE)
+    return(total_size / 1e6)
+  }
+
+  x = vector(length = length(pkgs))
+  for (i in seq_along(pkgs)) {
+    x[i] <- get_directory_size(find.package(pkgs[i])[1])
+    cat(paste0(i, "/", length(pkgs), " ", pkgs[i], " size = ", round(x[i], 2), " MB\n"))
+  }
+  y = data.frame(meg = round(x, 3), pkg = pkgs)
+  cat("\n\nTOTAL: ", round(sum(y$meg), 1), "MB\n\n")
+  y = y[order(y$meg), ]
+  return(y)
+
+  # # Save directory
+  # save.dir = "F:/CRANMirror"
+  #
+  # # Create a directory to store package .tar.gz
+  # dir.create(save.dir)
+  #
+  # # Obtain a list of packages
+  # pkgs = available.packages()[,'Package']
+  #
+  # # Download those packages
+  # download.packages(pkgs = pkg$package.list, destdir = save.dir)
+  # pkg.files = list.files(save.dir)
+  # pkg.sizes = round(file.size(file.path(save.dir,pkg.files))/ 1024^2,2) # Convert to MB from Bytes
+}
+
+# x = pkg_sizes(pkgs_all )
+
+#################### #  #################### #  #################### #
+
 # REPORT WHAT R VERSION IS ALREADY THE MINIMUM REQUIREMENT ACROSS THE PACKAGE EJAM DEPENDS UPON?
 
 ## based on https://www.r-bloggers.com/2022/09/minimum-r-version-dependency-in-r-packages/
@@ -1199,23 +1272,23 @@ find_transitive_minR <- function(package = 'EJAM', recursive_deps = NULL) {
 
   if (is.null(recursive_deps)) {
 
-  if (package == "EJAM") {
-    msg = paste0("Try this after installing the packrat package:
+    if (package == "EJAM") {
+      msg = paste0("Try this after installing the packrat package:
     recursive_deps <- packrat",
-                 ":::",
-                 "recursivePackageDependencies('EJAM', lib.loc = .libPaths(), ignores = NULL)
+                   ":::",
+                   "recursivePackageDependencies('EJAM', lib.loc = .libPaths(), ignores = NULL)
 
                  find_transitive_minR(recursive_deps = recursive_deps)"
-                  )
-    cat(msg, "\n\n")
-    stop("EJAM package does not require packrat so you might need to install that separately")
-  } else {
-    recursive_deps <- tools::package_dependencies(
-      package = package,
-      recursive = TRUE,
-      db = db
-    )[[1]]
-  }
+      )
+      cat(msg, "\n\n")
+      stop("EJAM package does not require packrat so you might need to install that separately")
+    } else {
+      recursive_deps <- tools::package_dependencies(
+        package = package,
+        recursive = TRUE,
+        db = db
+      )[[1]]
+    }
   }
 
   # These code chunks are detailed below in the 'Minimum R dependencies in CRAN
