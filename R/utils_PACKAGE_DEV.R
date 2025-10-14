@@ -1136,33 +1136,54 @@ pkg_dependencies <- function(localpkg = "EJAM", depth = 6, ignores_grep = "09128
 
   # This may be useful to see dependencies of a package like EJAM:
 
+x1 = renv::dependencies()
+
 x = sort(packrat", ":::", "recursivePackageDependencies('",
              localpkg,
              "', lib.loc = .libPaths(), ignores = NULL))
 
+# but note that https://rstudio.github.io/renv/articles/packrat.html explains that
+# the renv package has replaced the packrat package
 
 # For example try this:
 
 pkgs_needed = sort(packrat:::recursivePackageDependencies('EJAM', lib.loc = .libPaths(), ignores = NULL))
-pkgs_in_imports = desc::desc_get('Imports', file = system.file('DESCRIPTION', package='EJAM'))
-pkgs_in_imports = gsub(' .*', '', trimws(as.vector(unlist(strsplit(pkgs_in_imports,',\n')))))
-pkgs_in_suggests = desc::desc_get('Suggests', file = system.file('DESCRIPTION', package='EJAM'))
-pkgs_in_suggests = gsub(' .*', '', trimws(as.vector(unlist(strsplit(pkgs_in_suggests,',\n')))))
-pkgs_missing_from_description =  setdiff(pkgs_needed, c(pkgs_in_imports, pkgs_in_suggests))
-pkgs_in_desc_supposedly_not_needed = setdiff(c(pkgs_in_imports, pkgs_in_suggests), pkgs_needed)
-pkgs_all = unique(c(pkgs_in_imports, pkgs_in_suggests, pkgs_needed))
-pkgs_all_sizes = pkg_sizes(pkgs_all ) # e.g., nearly 1 GB
+# shorter list because direct not all recursive, but provides rationale for each inference:
+pkgs_needed_newerinfo = renv::dependencies()
+pkgs_needed2 = sort(unique(pkgs_needed_newerinfo$Package))
 
-pkgs_missing_from_description # but supposedly needed
+pkgs_in_imports  = desc::desc_get('Imports',  file = system.file('DESCRIPTION', package='EJAM'))
+pkgs_in_suggests = desc::desc_get('Suggests', file = system.file('DESCRIPTION', package='EJAM'))
+cleanit = function(x) {
+ x = gsub('\n', '', x)
+ x = trimws(as.vector(unlist(strsplit(x, ','))))
+ x = gsub(' .*', '', x)
+ return(x)
+}
+pkgs_in_imports = cleanit(pkgs_in_imports)
+pkgs_in_suggests = cleanit(pkgs_in_suggests)
+pkgs_missing_from_desc_supposedly_needed = sort(setdiff(pkgs_needed, c(pkgs_in_imports, pkgs_in_suggests)))
+pkgs_in_desc_supposedly_not_needed       = sort(setdiff(c(pkgs_in_imports, pkgs_in_suggests), pkgs_needed))
+
+pkgs_missing_from_desc_supposedly_needed
 pkgs_in_desc_supposedly_not_needed
-# largest packages:  (size of folder once installed)
-tail(pkgs_all_sizes, 20)
+setdiff(pkgs_needed2, pkgs_needed) # found by renv but not by packrat
+
+# > setdiff(setdiff(pkgs_needed2, pkgs_needed), pkgs_in_desc_supposedly_not_needed)
+#  [1] 'base'               'census2020download' 'EJAM'               'githubr'            'graphics'           'grDevices'          'parallel'           'plumber'
+#  [9] 'roxygen2'           'rsconnect'          'stats'              'svglite'            'tools'              'utils'
+# > setdiff(pkgs_in_desc_supposedly_not_needed, setdiff(pkgs_needed2, pkgs_needed))
+# [1] 'datasets'      'fipio'         'rnaturalearth' 'tidygeocoder'
 
 # but should confirm these truly reflect what is actually needed and not needed
 # for web app to work,
 # functions used by analysts but not web app, and
 # functions only used in maintaining the pkg!
-
+pkgs_all = unique(c(pkgs_in_imports, pkgs_in_suggests, pkgs_needed))
+pkgs_all_sizes = EJAM:::pkg_sizes(pkgs_all, quiet=T) # e.g., nearly 1 GB
+# Largest packages:  (size of folder once installed)
+cat(length(pkgs_all), ' packages appear to be needed.\n')
+tail(pkgs_all_sizes, 15)
 
 
 # and see EJAM:::find_transitive_minR() to see what version of R those collectively need at minimum
@@ -1214,7 +1235,7 @@ tail(pkgs_all_sizes, 20)
 
 #################### #  #################### #  #################### #
 
-pkg_sizes = function(pkgs) {
+pkg_sizes = function(pkgs, quiet=FALSE) {
 
   get_directory_size <- function(path, recursive = TRUE) {
     # Ensure the provided path is a character string
@@ -1235,11 +1256,20 @@ pkg_sizes = function(pkgs) {
 
   x = vector(length = length(pkgs))
   for (i in seq_along(pkgs)) {
-    x[i] <- get_directory_size(find.package(pkgs[i])[1])
+    loc <- try(find.package(pkgs[i])[1], silent = TRUE)
+    if (inherits(loc, "try-error")) {
+      x[i] <- NA
+    } else {
+      x[i] <- get_directory_size(loc)
+    }
+    if (!quiet) {
     cat(paste0(i, "/", length(pkgs), " ", pkgs[i], " size = ", round(x[i], 2), " MB\n"))
+    }
   }
   y = data.frame(meg = round(x, 3), pkg = pkgs)
-  cat("\n\nTOTAL: ", round(sum(y$meg), 1), "MB\n\n")
+  cat("\n\nTOTAL: ", round(sum(y$meg, na.rm = TRUE), 1), "MB in ", length(y$meg)," packages. \n\n")
+  y = y[order(-y$meg), ]
+  rownames(y) <- NULL
   y = y[order(y$meg), ]
   return(y)
 
