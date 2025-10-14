@@ -24,8 +24,27 @@
 # find names of functions with @export or other tag
 
 #  exported_functions <- pkg_functions_by_roxygen_tag()
+#
+## 252 functions with export tag per this approach  ***********
+#
 ####################################################### #
+## a newer function to compare to others
+#
+# x <- pkg_functions_preceding_lines()
+# tail(x)
+# colSums(x[,2:6])
 
+# 562 functions found by this approach (seems to miss some)
+# 104 functions lack documentation because have no roxygen tags
+# 458 functions have roxygen tags per this approach
+#  53 functions lack documentation because have a noRd tag
+#    table(EXPORT = x$export, NORD= x$nord) # >50 say noRd (but just 1 is exported)
+# 405 functions have roxygen tags and do create documentation as .Rd file
+# 237 functions have export tag per this approach ***********
+# 219 functions have keywords internal tag
+# table(EXPORT = x$export, x$internal) # some are exported but "internal" in sense of not being listed in the index of functions
+
+####################################################### #
 ##   look for those tagged as export, or keywords internal
 #
 # pkg_functions_export_tag <-
@@ -35,21 +54,27 @@
 #  keywords_internal  <- pkg_functions_by_roxygen_tag(tagpattern = "#' @keywords internal")
 #
 #   length(unique(union(exported_functions, keywords_internal)))
-## [1] 430 functions have 1 or both of those tags
-## 56 have both.
+## [1] 440 functions have 1 or both of those tags
+## 55 have both.
 #     length(exported_functions)
-## [1] 249
+## [1] 252
 #  length(keywords_internal)
-## [1] 237
+## [1] 243
 #  length(
 #    intersect(exported_functions, keywords_internal)
 #   )
-## [1] 56
+## [1] 55
 #
 ## pkg_functions_found_in_files() ### #
 #
 ################################ #
-
+# others
+#
+# y = pkg_functions_and_data()
+#
+# z = pkg_functions_and_sourcefiles()
+#
+####################################################### #
 # any_functions = pkg_functions_found_in_files()
 # length(z)
 # # [1] 614 total
@@ -79,6 +104,7 @@
 ## package directory ####
 
 pkg_dir_installed = function(pkg="EJAM") {find.package(pkg, lib.loc = .libPaths())}
+
 pkg_dir_loaded_from = function(pkg="EJAM") {find.package(pkg, lib.loc = NULL)}
 
 ##################################################################################### #
@@ -807,6 +833,76 @@ pkg_functions_found_in_files <- function(
   z = z[!(z %in% "")]
   return(z)
 }
+################################ #
+
+## view a few lines of code just above a function definition,
+## to see if it has any roxygen comments at all
+## or says #' @keywords internal  or whatever
+
+pkg_functions_preceding_lines = function(path = "./R") {
+
+  n <- 0
+  info_roxy_nobreak <- vector()
+  info_roxy <- vector()
+  info_roxy <- vector()
+  info_func <- vector()
+  info_internal <- vector()
+  info_nord <- vector()
+  info_export <- vector()
+
+  query = "^[^ #]* *<- *function"
+  files_defining_functions <- EJAM:::find_in_files(query, path = path, quiet = TRUE)
+  filenames = (names(files_defining_functions))
+
+  for (thisfile in seq_along(files_defining_functions)) {
+
+    textrows = readLines(filenames[thisfile])
+    linenums = as.numeric(names(files_defining_functions[[thisfile]]))
+    funcnames = as.vector(gsub("^([^ ]*) .*", "\\1", files_defining_functions[[thisfile]]))
+
+    for (thisfunction in 1:length(funcnames)) {
+      n = n + 1
+      priorlinenums = (linenums[thisfunction] - (5:0))
+      priorlinenums[priorlinenums < 1] <- 1
+      priorlinenums <- unique(priorlinenums)
+
+      text2show = textrows[priorlinenums]
+      # show just the function name not that whole line
+      funcname <- gsub(" .*", "", text2show[length(text2show)])
+      # text2show[length(text2show)] <- paste0(funcname, " <- ")
+      # drop func definition line itself
+      text2show <- text2show[1:(length(text2show) - 1)]
+      # drop all but blank and #' roxygen lines, for display purposes
+      text2show <- text2show[nchar(text2show) == 0 | grepl("^#' [^ ]", text2show)]
+      text2show[nchar(text2show) == 0] <- "     [just a blank line is here]"
+      text2show <- unique(text2show)
+
+      priorlinetext = textrows[max(priorlinenums)]
+      info_roxy_nobreak[n] <- substr(priorlinetext,1,2) == "#'" # only in the last row
+      info_roxy[n] <- any(grepl("#'", text2show)) # any of last few rows
+      info_func[n] <- funcname
+      info_internal[n] <- any(grepl("@keywords internal", text2show))
+      info_nord[n]     <- any(grepl("@noRd", text2show))
+      info_export[n]   <- any(grepl("@export", text2show))
+
+      cat("------------------ File: ", as.vector(basename(filenames[thisfile])),
+          "--------- Func: ", paste0(funcname, "() "), "\n")
+
+      cat(text2show, sep = "\n")
+      # cat("\n")
+    }
+  }
+  return(
+    data.frame(
+      func = info_func,
+      roxy_nobreak = info_roxy_nobreak,
+      roxy = info_roxy,
+      export = info_export,
+      internal = info_internal,
+      nord = info_nord
+    )
+  )
+}
 ################################ ################################# #
 # . ####
 ################################ ################################# #
@@ -1263,7 +1359,7 @@ pkg_sizes = function(pkgs, quiet=FALSE) {
       x[i] <- get_directory_size(loc)
     }
     if (!quiet) {
-    cat(paste0(i, "/", length(pkgs), " ", pkgs[i], " size = ", round(x[i], 2), " MB\n"))
+      cat(paste0(i, "/", length(pkgs), " ", pkgs[i], " size = ", round(x[i], 2), " MB\n"))
     }
   }
   y = data.frame(meg = round(x, 3), pkg = pkgs)
