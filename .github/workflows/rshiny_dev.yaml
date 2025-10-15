@@ -17,13 +17,13 @@ env:
 
   # ECR
   ECR_REGISTRY: 516937823875.dkr.ecr.us-east-1.amazonaws.com
-  ECR_REPOSITORY: ep_app_service_ejam3
+  ECR_REPOSITORY: ep_app_service_ejam
 
   # ECS
   ECS_CLUSTER_NAME: ep_core__dev_us-east-1
-  ECS_FAMILY: ejam3
-  ECS_SERVICE_NAME: ejam3
-  ECS_SERVICE_SHORT_NAME: ejm3
+  ECS_FAMILY: ejam
+  ECS_SERVICE_NAME: ejam
+  ECS_SERVICE_SHORT_NAME: ejm
   ECR_SERVICE_BUILDER_IMAGE: 516937823875.dkr.ecr.us-east-1.amazonaws.com/ep_service_builder:latest
 
   EC2_SERVICE_INSTANCE_TYPE: c6i.xlarge

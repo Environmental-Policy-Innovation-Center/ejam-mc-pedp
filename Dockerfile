@@ -28,6 +28,9 @@ WORKDIR /home/epic
 
 # Install required R packages from CRAN
 RUN install2.r --error \
+    s2 \
+    sf \
+    tidyverse \
     arrow \
     attempt \
     collapse \
@@ -60,13 +63,11 @@ RUN install2.r --error \
     RMySQL \
     SearchTrees \
     shinydisconnect \
-    sf \
     shiny \
     shinycssloaders \
     shinyjs \
     sp \
     tidyr \
-    tidyverse \
     viridis \
     webshot \
     knitr \
