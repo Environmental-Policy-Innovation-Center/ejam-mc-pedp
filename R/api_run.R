@@ -25,7 +25,7 @@
 #'  s2b
 #'
 #'
-#' @returns NA
+#' @return NA
 #'
 #' @export
 #'

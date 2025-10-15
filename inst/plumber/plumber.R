@@ -550,7 +550,9 @@ function(
 #*
 #* @param lat Latitude decimal degrees (single point only, or vector of comma-separated values like lat=34,35,32)
 #* @param lon Longitude decimal degrees (single point only, for now)
-#* @param sitepoints NOTE USED HERE - optional way to provide lat,lon: a data.table with columns lat, lon giving point locations of sites or facilities around which are circular buffers
+#* @param sitepoints NOT USED HERE - optional way to provide lat,lon: a data.table with columns lat, lon giving point locations of sites or facilities around which are circular buffers
+#* @param sitenumber to get a report on just 1 of the submitted sites
+#*   but note it is more efficient to pass just the 1 site in the API call
 #* @param radius Radius in miles]
 #*
 #* @param fips Census fips code for Census unit(s) of
@@ -567,7 +569,9 @@ function(
 #* @serializer html
 #* @post /reportpost
 #*
-function(lat = "", lon = "", sitepoints = "", radius = "", shapefile = "", fips = "", ..., attachment = "true", res) {
+function(lat = "", lon = "", sitepoints = "", radius = "", shapefile = "", fips = "",
+         sitenumber = "",
+         ..., attachment = "true", res) {
 
   filename <- "EJAM_results.html"
 
@@ -577,6 +581,7 @@ function(lat = "", lon = "", sitepoints = "", radius = "", shapefile = "", fips 
   shapefile <- api2rnulltf(shapefile)
   fips <- api2rnulltf(fips)
   sitepoints <- api2rnulltf(sitepoints)
+  sitenumber <- api2rnulltf(sitenumber)
 
   lat <- as.numeric(lat)
   lon <- as.numeric(lon)
@@ -969,10 +974,13 @@ function(polys,
          dissolved = FALSE,
          safety_margin_ratio = 1.10,
          crs = 4269,
+         attachment = "false",
          res
 ) {
 
-  return("not working yet for shapefile inputs")
+  warning("not working yet for shapefile inputs?")
+
+  fname = "s2b.json"
 
   # require(EJAM)
   # if (!exists("blockwts"))  {dataload_dynamic('blockwts)}
