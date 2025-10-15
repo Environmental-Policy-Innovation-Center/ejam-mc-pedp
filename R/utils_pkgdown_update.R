@@ -237,7 +237,7 @@ pkgdown_update = function(
     if (doask && interactive()  && rstudioapi::isAvailable()) {
       cat('\n\n')
       yn <- utils::askYesNo("Halt now to edit/fix _pkgdown.yml etc. ?")
-      if (is.na(yn) || yn == TRUE) {
+      if (is.na(yn) || isTRUE(yn)) {
         if (file.exists('_pkgdown.yml')) {rstudioapi::documentOpen('_pkgdown.yml')}
         message('stopped to fix _pkgdown.yml')
         cat('\n\n MISSING according to dataset_pkgdown_yaml_check() are the following: \n\n')
@@ -255,6 +255,7 @@ pkgdown_update = function(
     if (doclean_man ) {
       cat('deleting all .Rd (help) files in ./man folder \n')
       file.remove(list.files('./man', full.names = TRUE, include.dirs = FALSE)) # leave the figures directory that has a logo in it
+      ## might
     }
     # notes on doclean_man:
     # # MAYBE NEED TO DELETE ALL IN THE man/ FOLDER TO REMOVE OBSOLETE .Rd files like no longer documented or renamed functions ?
@@ -262,7 +263,7 @@ pkgdown_update = function(
   }
   # if dodocument, README & DOCUMENT via via render() & document() ####
 
-  if (dodocument) {
+  if (dodocument || doclean_man) {
     cat('rendering README.Rmd to .md  \n')
     print(Sys.time())
     rmarkdown::render("README.Rmd")  # renders .Rmd to create a  .md file that works in github as a webpage

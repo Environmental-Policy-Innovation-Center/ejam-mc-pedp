@@ -16,8 +16,8 @@ footer:
     left: [datefooter]
     right: [package, versionmsg]
   components:
-    datefooter: September 2025
-    versionmsg: Version 2.32.6
+    datefooter: October 2025
+    versionmsg: Version 2.32.6.001
 development:
   mode: release
   destination:
@@ -44,6 +44,7 @@ articles:
   - '`testdata`'
   - '`distances`'
   - '`naics`'
+  - '`counties`'
   - '`zipcodes`'
 - title: Developing & Hosting
   desc: For package/app developers
@@ -444,13 +445,11 @@ reference:
   - names_d
   - names_e
   - map_headernames
-- title: "EJSCREEN API"
-  desc: "EJAM-EJSCREEN and using the EJSCREEN API"
-  contents:
-  - ejscreenit_for_ejam
-  - ejscreenit
 - title: internal
   contents:
+  - api_run
+  - ejscreenit_for_ejam
+  - ejscreenit
   - state_from_sitetable
   - fips2state_abbrev
   - fips2state_fips

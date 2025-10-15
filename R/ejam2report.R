@@ -144,7 +144,8 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
   # overall vs 1-site ####
 
   sitenumber <- as.numeric(sitenumber)
-  if (all(is.na(sitenumber)) || is.null(sitenumber) || length(sitenumber) == 0 || all(sitenumber %in% "") || all(sitenumber) %in% 0 || all(sitenumber) < 0) {
+  if (all(is.na(sitenumber)) || is.null(sitenumber) || length(sitenumber) == 0 ||
+      all(sitenumber %in% "") || all(sitenumber %in% 0) || all(sitenumber < 0)) {
     sitenumber <- 0
   }
   ### > nsites ####
@@ -236,11 +237,11 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
     # report_setup_temp_files() copies files to where they need to be for rendering ####
     ## returns path to .Rmd template copied to a temp folder, but
     ## tempReport is not used - report_setup_temp_files() is used for side efx
-    tempReport <- report_setup_temp_files(
+    tempReport <- report_setup_temp_files()
       # Rmd_name = 'community_report_template.Rmd', # default, for summary report
       # # Rmd_name = 'barplot_report_template.Rmd' # for single site barplot report
       # Rmd_folder = 'report/community_report/'
-    )
+
 
     # use create_filename() here like server does:
     if (!is.null(selected_location_name_react)) {
@@ -361,7 +362,7 @@ ejam2report <- function(ejamitout = testoutput_ejamit_10pts_1miles,
         quiet = TRUE
       )
       output_file <- normalizePath(output_file) # allows it to work on MacOS, e.g.
-      if (interactive() & !shiny::isRunning()) {
+      if (interactive() && !shiny::isRunning()) {
         cat("file saved at", output_file, '\n')
         cat("To open that folder from R, you could copy/paste this into the RStudio console:\n")
         cat(paste0("browseURL('", dirname(output_file),"')"), '\n')

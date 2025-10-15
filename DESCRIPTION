@@ -1,7 +1,7 @@
 Package: EJAM
 Title: Environmental Justice Analysis Multisite tool
-Version: 2.32.6
-VersionDate: September 2025
+Version: 2.32.6.001
+VersionDate: October 2025
 Description: Actively maintained non-EPA version of EJAM, the web app
     and set of tools that supported the EJSCREEN multisite capability.
     EJAM lets you easily summarize demographic and environmental indicators
@@ -24,7 +24,7 @@ VersionACS: 2018-2022
 ReleaseDateACS: 2023-12-07
 VersionCensus: 2020
 Depends: 
-    R (>= 4.1)
+    R (>= 4.1.0)
 Imports:
     arrow (>= 20.0.0),
     collapse (>= 2.1.0),
@@ -70,10 +70,11 @@ Imports:
     tibble (>= 3.3.0),
     tidycensus (>= 1.6),
     tidyr (>= 1.3),
+    viridisLite,
     webshot (>= 0.5.5),
-    writexl(>= 1.5.3),
+    writexl (>= 1.5.3),
     XML (>= 3.99-0.18)
-Suggests: 
+Suggests:
     AOI,
     beepr,
     bookdown,
@@ -100,7 +101,7 @@ Suggests:
     terra,
     testthat (>= 3.0.0),
     tidygeocoder,
-    tigris,
+    tigris (>= 2.2.1),
     units,
     usethis
 Remotes:

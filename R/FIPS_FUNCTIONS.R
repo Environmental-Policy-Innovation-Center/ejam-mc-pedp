@@ -1183,7 +1183,7 @@ fips_place_from_placename = function(place_st, geocoding = FALSE, exact = FALSE,
 
   rownames(results) <- NULL
 
-  if (verbose & NROW(results) > 0) {
+  if (verbose && NROW(results) > 0) {
     cat("\nCities/CDPs including NA values but only 1 best guess per queried place:\n\n")
     print(results)
   }
@@ -1859,13 +1859,13 @@ fips2countyname <- function(fips, includestate = c("ST", "Statename", "")[1]) {
       substr(blockgroupstats$bgfips, 1, 5)
       )]
 
-  if (includestate == TRUE) {includestate <- "Statename"}
+  if (isTRUE(includestate)) {includestate <- "Statename"}
   if (includestate == "Statename") {addon <- fips2statename(cfips)} else {
     if (includestate == "ST") {addon <- fips2state_abbrev(cfips)} else {
       addon <- ""
     }
   }
-  if (all(addon == "") | all(is.na(out))) {
+  if (all(addon == "") || all(is.na(out))) {
     return(out)
   } else {
     out[!is.na(out)] <- paste(out[!is.na(out)], addon[!is.na(out)], sep = ", ")
@@ -1972,7 +1972,7 @@ fips2tractname <- function(fips, ftype = 'tract', prefix = "tract ") {
 #'
 #' @export
 #'
-fips2name  <- function(fips, ...) {
+fips2name <- function(fips, ...) {
 
   suppressWarnings({
     #   # more general than fips2countyname() or fips2statename() ... does either/both
@@ -2186,7 +2186,7 @@ pre_comma = function(x, lastcomma = TRUE, if_no_comma_do_nothing = TRUE, trim = 
       ## eg. see results for case 14,  x = "before1st of many,after1st of many,beforelast of many,afterlast of many"
       # based on gsub from post_comma(x, lastcomma = TRUE, if_no_comma_do_nothing = TRUE, trim = FALSE)
       gsub("(.*),([^,]*)", '\\1', x),  # <<<<<<<<<<<<<<<<<<<<<
-      # precomma  = function(x) {trimws(
+      # precomma <- function(x) {trimws(
       #     gsub("(.*),(.*)", "\\1", x, ignore.case = T))} # simplistic version
 
       no_comma_output
