@@ -860,7 +860,7 @@ function(lat = 40.81417, lon = -96.69963, radius = 1, shapefile = "", fips = "",
 #*
 function(lat = 40.81417, lon = -96.69963, radius = 1, shapefile = "", fips = "", names = "long", test = "false", res) {
 
-  shapefile <- api2nulltf(shapefile)
+  shapefile <- api2rnulltf(shapefile)
   fips <- api2rnulltf(fips)
 
   # fname <- "EJAM_results.csv"
