@@ -550,7 +550,7 @@ function(
 #*
 #* @param lat Latitude decimal degrees (single point only, or vector of comma-separated values like lat=34,35,32)
 #* @param lon Longitude decimal degrees (single point only, for now)
-#* @param sitepoints NOTE USED HERE - optional way to provide lat,lon: a data.table with columns lat, lon giving point locations of sites or facilities around which are circular buffers
+#* @param sitepoints NOT USED HERE - optional way to provide lat,lon: a data.table with columns lat, lon giving point locations of sites or facilities around which are circular buffers
 #* @param sitenumber to get a report on just 1 of the submitted sites
 #*   but note it is more efficient to pass just the 1 site in the API call
 #* @param radius Radius in miles]
