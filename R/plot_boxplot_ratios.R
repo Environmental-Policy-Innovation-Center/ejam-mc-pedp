@@ -60,13 +60,13 @@
 plot_boxplot_ratios <- function(x, selected_dvar_colname=varlist2names('names_d')[1], selected_dvar_nicename=selected_dvar_colname, towhat_nicename='US average',
                             maxratio = 5, wheretext="Near") {
 
-  if (is.list(x) & "results_bysite" %in% names(x)) {
+  if (is.list(x) && "results_bysite" %in% names(x)) {
     x <- x$results_bysite
     if (selected_dvar_colname)
     x <- as.data.frame(x)[, selected_dvar_colname]
   } # for convenience, in case x was output of ejamit()
   if (is.data.table(x)) {x <- as.data.frame(x)}
-  if (is.list(x) & is.data.frame(x[[1]]) & "ratios_d" %in% names(x)) {x <- x$ratios_d } # for convenience, in case you said  plot_boxplot_ratios(calc_ratios_to_avg(out))
+  if (is.list(x) && is.data.frame(x[[1]]) && "ratios_d" %in% names(x)) {x <- x$ratios_d } # for convenience, in case you said  plot_boxplot_ratios(calc_ratios_to_avg(out))
 
 
 
@@ -127,9 +127,9 @@ plot_boxplot_ratios <- function(x, selected_dvar_colname=varlist2names('names_d'
     ggplot2::scale_fill_viridis_d(alpha = 0.6) +
     ggplot2::geom_jitter(color = "black", size = 0.4, alpha = 0.9) +
     ggplot2::theme_bw() +
-    # hrbrthemes xxx :: xxx theme_ipsum() +
-    # NOTE: Either Arial Narrow or Roboto Condensed fonts are required to use hrbrthemes themes.
-    # Use hrbrthemes xxx :: xxx import_roboto_condensed() to install Roboto Condensed and if Arial Narrow is not on your system, please see https://bit.ly/arialnarrow
+    #   theme_ipsum() +  # that func was from the hrbrthemes pkg, not imported here, now unused - will not rely on that pkg. it was to ensure narrow font in plot
+    #    NOTE: Either Arial Narrow or Roboto Condensed fonts are required to use hrbrthemes themes.
+    #    Would need to use  hrbrthemes function import_roboto_condensed() to install Roboto Condensed and if Arial Narrow is not on your system (but that was unlikely). see https://bit.ly/arialnarrow
     ggplot2::xlab("") +
     ggplot2::geom_abline(slope = 0, intercept = 1)
 }

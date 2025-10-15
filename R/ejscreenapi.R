@@ -60,7 +60,7 @@
 #' @param shapefile not implemented
 #' @param namestr optional text
 #' @param report_every_n Should it report ETA snd possibly save interim file after every n points
-#' @param save_when_report optional, write .rdata file to working directory
+#' @param save_when_report optional, write .rda file to working directory
 #'   with results so far, after ever n points, to have most results even if it crashes
 #' @param format_report_or_json  default is pjson but could modify to allow it to be report to get just a pdf URL
 #'   but that also can be gotten via [url_ejscreen_report()]
@@ -128,7 +128,7 @@ ejscreenapi <- function(lon, lat, radius = 3, unit = 'miles', wkid = 4326 ,
       lat[!ok_point] <- NA; lon[!ok_point] <- NA
       # rather than drop those rows, try to return NA values
     }
-    if (any(is.na(radius)) | any(radius <= 0) | any(radius > 100)) {stop('radius outside allowed range')}
+    if (any(is.na(radius)) || any(radius <= 0) || any(radius > 100)) {stop('radius outside allowed range')}
   }
 
   if (!(unit %in% c('miles', 'kilometers'))) {stop('unit must be miles or kilometers')}
@@ -181,8 +181,8 @@ ejscreenapi <- function(lon, lat, radius = 3, unit = 'miles', wkid = 4326 ,
   finished_without_crashing <- FALSE
   on.exit({if (!finished_without_crashing) {
     if (!on_server_so_dont_save_files) {
-      save(outlist, file = file.path(tdir, 'saved_this_before_crash.rdata'))
-      cat("see ", file.path(tdir, 'saved_this_before_crash.rdata'), "\n")
+      save(outlist, file = file.path(tdir, 'saved_this_before_crash.rda'))
+      cat("see ", file.path(tdir, 'saved_this_before_crash.rda'), "\n")
     }
   } })
 
@@ -255,7 +255,7 @@ ejscreenapi <- function(lon, lat, radius = 3, unit = 'miles', wkid = 4326 ,
       # )))
       ej.data <- try(ejscreenRESTbroker2table(ej.data, getstatefromplacename = getstatefromplacename)) # now it is one data.frame
 
-      if (failed | inherits(ej.data, 'try-error')) {
+      if (failed || inherits(ej.data, 'try-error')) {
         failed <- TRUE; warning('error in parsing JSON returned by API for point number ', i, ' - Returning no result for that point.')
         ej.data <- emptyresults
       }
@@ -300,21 +300,21 @@ ejscreenapi <- function(lon, lat, radius = 3, unit = 'miles', wkid = 4326 ,
     hrsleft <- remaining / hourly
     exact_minutes_to_go <- hrsleft * 60
     minutes_to_go <- round(exact_minutes_to_go, 0)
-    if (i == 10 & n > 19) {
-      if (verbose | n > 19) {
+    if (i == 10 && n > 19) {
+      if (verbose || n > 19) {
         cat('    Estimated', minutes_to_go, 'minutes remaining for ejscreenapi() at the rate so far.\n', file = stderr())
       }
     }
     # CAN SAVE INTERIM RESULTS IF NEEDED, in case it fails after a large number were done.
 
-    if (i %% report_every_n == 0 | (i > report_every_n & i == n)) {
+    if (i %% report_every_n == 0 || (i > report_every_n && i == n)) {
       # this is end of a group of report_every_n points or is the last incomplete chunk assuming we had a big enough n to bother chunking at all
       chunknum <- ceiling(i/report_every_n)
       chunkstart <- ((chunknum - 1) * report_every_n) + 1  #( i + 1 - report_every_n)
       chunkend <- i
-      if (save_when_report & (!on_server_so_dont_save_files) ) {
+      if (save_when_report && (!on_server_so_dont_save_files) ) {
         x <- outlist[chunkstart:chunkend]
-        save(x, file = file.path(tdir, paste('temp_ejscreenapibatch_outlist_chunk', chunknum, '.rdata', sep = '')))
+        save(x, file = file.path(tdir, paste('temp_ejscreenapibatch_outlist_chunk', chunknum, '.rda', sep = '')))
       }
       # Report speed so far in loop####
       if (verbose) {
@@ -346,11 +346,11 @@ ejscreenapi <- function(lon, lat, radius = 3, unit = 'miles', wkid = 4326 ,
   #################################################  #################################################
 
   # Save to local file the interim results if still need to  ####
-  if (n < report_every_n & save_when_report & (!on_server_so_dont_save_files) ) {
+  if (n < report_every_n && save_when_report && (!on_server_so_dont_save_files) ) {
     # we did not save any chunks, so save whole, in case rbind fails
-    save(outlist, file = file.path(tdir, 'temp_ejscreenapibatch_outlist_full.rdata'))
+    save(outlist, file = file.path(tdir, 'temp_ejscreenapibatch_outlist_full.rda'))
     if (verbose) {
-      cat("see ", file.path(tdir, 'temp_ejscreenapibatch_outlist_full.rdata'), "\n")
+      cat("see ", file.path(tdir, 'temp_ejscreenapibatch_outlist_full.rda'), "\n")
     }}
 
   # *** Compile results in a data.table *** (like a data.frame) ####

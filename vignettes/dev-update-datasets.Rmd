@@ -49,6 +49,16 @@ x <- EJAM:::pkg_data()
 x$Item[!grepl("names_|^test", x$Item)]
 ```
 
+### Where the datasets are stored
+
+EJAM relies on datasets mostly stored in the package itself or in a separate, data-related repository:
+
+- Datasets stored within the EJAM package (.rda files): [Documentation](https://ejanalysis.github.io/EJAM/reference/index.html#datasets-with-indicators-etc-) and [access to data files](https://github.com/ejanalysis/EJAM/tree/main/data)
+
+- Datasets used by EJAM but stored separately (large .arrow files): [Documentation](https://ejanalysis.github.io/EJAM/reference/index.html#datasets-with-indicators-etc-) and [access to data files](https://github.com/ejanalysis/ejamdata/tree/main/data)
+
+### Key datasets
+
 Some notable data files, code details, and other objects that may need to be changed ANNUALLY or more often:
 
 -   ***Blockgroup Datasets***: These include datasets included with the package `?blockgroupstats`, [usastats](../reference/usastats.html), `?statestats`, etc.) as well as larger tables stored in a separate repository and downloaded by the EJAM package (`?bgpts`, `?bgej`, `?bgid2fips`, `?bg_cenpop2020`, etc.). They are all created or modified using scripts/functions organized from within *`/data-raw/datacreate_0_UPDATE_ALL_DATASETS.R`*.
@@ -57,9 +67,9 @@ Some notable data files, code details, and other objects that may need to be cha
 
 -   ***Block Datasets***: The *block* (not blockgroup) tables might be updated less often, but Census fips codes do change yearly so the `?blockwts`, `?blockpoints`, `?quaddata`, `?blockid2fips`, and related additional data.tables should be updated as needed. This is also done from within *`/data-raw/datacreate_0_UPDATE_ALL_DATASETS.R`* See package `census2020download` on github for the function `census2020_get_data()` that may be useful.
 
--   ***Facilities Datasets***: EPA-regulated facilities or other types of sites, and their *NAICS/SIC/MACT/program* information, may need frequent updates, ideally, since facilities open, close, relocate, or have their information corrected or otherwise updated. EPA's FRS is the source for much of this information stored in tables EJAM uses, such as these: `?frs`, `?frs_by_programid`, `?frs_by_naics`, `?frs_by_sic`, and `?frs_by_mact`, `?NAICS`, `?SIC`, `?naics_counts`, `?naicstable`, `?SIC`, `?sictable`, `?mact_table`, and `?epa_programs`, `?frsprogramcodes`, etc. Again these are updated from within *`/data-raw/datacreate_0_UPDATE_ALL_DATASETS.R`*
+-   ***Facilities Datasets***: EPA-regulated facilities or other types of sites, and their *NAICS/SIC/MACT/program* information, may need frequent updates, ideally, since facilities open, close, relocate, or have their information corrected or otherwise updated. EPA's FRS is the source for much of this information and the FRS is updated by EPA frequently and is available via an API. Through at least v2.32.6, EJAM (and therefore the community reports in EJSCREEN) used a snapshot of the EPA FRS data rather than using an API to obtain the latest info on demand -- that is something that could be changed in a future version. Facility-related info is stored in tables EJAM uses, such as these: `?frs`, `?frs_by_programid`, `?frs_by_naics`, `?frs_by_sic`, and `?frs_by_mact`, `?NAICS`, `?SIC`, `?naics_counts`, `?naicstable`, `?SIC`, `?sictable`, `?mact_table`, and `?epa_programs`, `?frsprogramcodes`, etc. These FRS, MACT, and Program info tables of EPA-relevant data are updated in the EJAM package from within *`/data-raw/datacreate_0_UPDATE_ALL_DATASETS.R`* The `?NAICS`, `?naicstable`, and `?sictable` objects (viewable using `naics_categories()` and `sic_categories()` utilities) have no EPA-specific data so they do not need frequent updates -- The NAICS data object stores just the name of each NAICS code number, and new codes/names are published every five years, such as in 2017 and 2022, so a new version would typically be expected in 2027. The tables called `?SIC` (unlike the NAICS table) and `?naics_counts` (which has no analogous sic version), however, contain counts of EPA FRS facilities, so they need updates when FRS data are updated. The inconsistency in how NAICS vs SIC tables and the naics_counts table were named and defined was by historical accident, not intentional, so it would be OK if refactoring later made them consistent or even switched entirely to more frequent automated updates or even reliance on the FRS API.
 
--   `?map_headernames` and associated .xlsx, etc. are critical. This needs to updated especially if indicator names change or are added, for example. `?map_headernames` holds most of the useful metadata about each variable (each indicator, like %low income) -- e.g., how many digits to use in rounding, units, a long name of indicator, the type or category of indicator, sort order to use in reports, method of calculating aggregations of the indicator over blockgroups, etc. This is modified directly in the spreadsheet map_headernames, and then functions/scripts read that .xlsx to create the map_headernames dataset. See *`/data-raw/datacreate_0_UPDATE_ALL_DATASETS.R`*
+-   `?map_headernames` and associated .xlsx, etc. store critical metadata. This needs to updated especially if indicator names change or are added, for example. `?map_headernames` holds most of the useful metadata about each variable (each indicator, like %low income) -- e.g., how many digits to use in rounding, units, a long name of indicator, the type or category of indicator, sort order to use in reports, method of calculating aggregations of the indicator over blockgroups, etc. This is modified directly in the spreadsheet  at data-raw/map_headernames____.xlsx (renamed for each package version), and then functions or scripts read that .xlsx to create the map_headernames dataset. See *`/data-raw/datacreate_0_UPDATE_ALL_DATASETS.R`*
 
 -   [Test data (inputs) and examples of outputs](testdata.Rmd) may have to be updated (every time parameters change & when outputs returned change). Those are generated by scripts/functions referred to from *`/data-raw/datacreate_0_UPDATE_ALL_DATASETS.R`*
 
@@ -79,7 +89,7 @@ The information below focuses on the other type of data objects -- the set of la
 
 Several large `{data.table}` files are not installed as part of the R package in the typical /data/ folder that contains .rda files lazyloaded by the package. Instead, they are kept in a separate github repository that we refer to here as the data repository.
 
-*IMPORTANT:* The name of the *data* repository (as distinct from the *package code* repository) must be recorded/ updated in the EJAM package DESCRIPTION file, so that the package will know where to look for the data files if the datasets were moved to a new repository, for example. The current (either installed or loaded source version) of that repository is `r docs_reponame_url` (which can be checked via `desc::desc(file = system.file("DESCRIPTION", package = "EJAM"))$get("ejam_data_repo")`)
+*IMPORTANT:* The name of the *data* repository (as distinct from the *package code* repository) must be recorded/ updated in the EJAM package DESCRIPTION file, so that the package will know where to look for the data files if the datasets were moved to a new repository, for example. The current (either installed or loaded source version) of that repository is `r data_reponame_with_owner` (which can be checked via `desc::desc(file = system.file("DESCRIPTION", package = "EJAM"))$get("ejam_data_repo")`)
 
 ### arrow package and arrow file format
 
@@ -89,7 +99,7 @@ Earlier version of EJAM did not use the actual arrow format, so there still may 
 
 The names of these tables should be listed in a file called `R/arrow_ds_names.R` and the global variable called .arrow_ds_names that is used by functions like `dataload_dynamic()` and `dataload_from_local()`.
 
-As of mid-2025, there were 11 arrow files used by EJAM:
+As of EJAM version v2.32.6, there were 11 arrow files used by EJAM:
 
 ### Blockgroup and block-level arrow files
 
