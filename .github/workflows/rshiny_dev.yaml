@@ -2,7 +2,7 @@ name: dev
 
 on:
   push:
-    branches: [production]
+    branches: [production-rollback]
     # paths:
     #  - "**"
 
