@@ -43,7 +43,6 @@ RUN install2.r --error \
     ggridges \
     glue \
     golem \
-    hrbrthemes \
     htmltools \
     leaflet \
     leaflet.extras2 \
