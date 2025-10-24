@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">EJAM</a>
 
-    <small class="nav-text text-warning me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.32.6.001</small>
+    <small class="nav-text text-warning me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.32.6.002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -136,15 +136,15 @@ by default – only shows top n groups.</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span> <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="ejamit_compare_types_of_places.html">ejamit_compare_types_of_places</a></span><span class="op">(</span><span class="va">testpoints_10</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="op">]</span>,</span></span>
 <span class="r-in"><span>   <span class="va">typeofsite</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Type 1 of 3 = A  -- doaggregate is predicted to take 24 seconds </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finished 1 of 1 sites. Rate of 1,868 buffers per hour: 1 lat/long pairs took 2 seconds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Finished 1 of 1 sites. Rate of 813 buffers per hour: 1 lat/long pairs took 4 seconds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Type 2 of 3 = B  -- </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Note that ejam_uniq_id was already in sitepoints, and might not be 1:NROW(sitepoints), which might cause issues</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> doaggregate is predicted to take 24 seconds </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finished 3 of 3 sites. Rate of 2,085 buffers per hour: 3 lat/long pairs took 5 seconds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Finished 3 of 3 sites. Rate of 1,418 buffers per hour: 3 lat/long pairs took 8 seconds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Type 3 of 3 = C  -- </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Note that ejam_uniq_id was already in sitepoints, and might not be 1:NROW(sitepoints), which might cause issues</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> doaggregate is predicted to take 24 seconds </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finished 4 of 4 sites. Rate of 2,031 buffers per hour: 4 lat/long pairs took 7 seconds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Finished 4 of 4 sites. Rate of 1,512 buffers per hour: 4 lat/long pairs took 10 seconds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   type valid sitecount pctvalid     pop pop_persite pctofallpop</span>
@@ -180,7 +180,7 @@ by default – only shows top n groups.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  4 sites in 3 groups (types of sites).</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Rate of 2,028 buffers per hour: 4 lat/long pairs took 7 seconds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Rate of 1,511 buffers per hour: 4 lat/long pairs took 10 seconds</span>
 <span class="r-in"><span>   <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>Rows_or_length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">NROW</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  Rows_or_length</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> types                         3</span>
@@ -208,7 +208,7 @@ by default – only shows top n groups.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>EJAM Version 2.32.6.001</p>
+  <p>EJAM Version 2.32.6.002</p>
 </div>
 
     </footer></div>
