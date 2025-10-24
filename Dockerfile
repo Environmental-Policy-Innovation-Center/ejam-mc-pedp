@@ -1,5 +1,6 @@
 FROM rocker/rstudio:latest
 
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     unzip \
@@ -11,10 +12,22 @@ RUN apt-get update && apt-get install -y \
     protobuf-compiler \
     libproj-dev \
     libgdal-dev \
+    libgeos-dev \
+    libgeos++-dev \
+    libsqlite3-dev \
     libmagick++-dev \
-    texlive \
-    texlive-latex-extra \
-    texlive-fonts-extra \
+    libfreetype6-dev \
+    libfontconfig1-dev \
+    libfribidi-dev \
+    libharfbuzz-dev \
+    libtiff5-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libgit2-dev \
+    libjq-dev \
+    libv8-dev \
+    cmake \
+    git \
     && rm -rf /var/lib/apt/lists/*
     
 # Install AWS CLI v2
@@ -26,75 +39,83 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/aws
 RUN mkdir -p /home/epic
 WORKDIR /home/epic
 
-# Install required R packages from CRAN
-RUN install2.r --error \
+# Install core spatial dependencies first
+RUN install2.r --error --skipinstalled \
+    sf \
+    units \
+    && rm -rf /tmp/downloaded_packages
+
+# Install all EJAM dependencies
+RUN install2.r --error --skipinstalled \
     arrow \
-    attempt \
     collapse \
+    colorspace \
     config \
+    curl \
     data.table \
-    DBI \
-    desc \
-    doSNOW \
+    digest \
     dplyr \
     DT \
-    foreach \
+    fs \
     ggplot2 \
-    ggridges \
+    gh \
     glue \
     golem \
-    htmltools \
+    gt \
+    httr \
+    httr2 \
     leaflet \
     leaflet.extras2 \
-    leaflet.extras \
     magrittr \
     methods \
     openxlsx \
     pdist \
-    pins \
     piggyback \
-    pkgload \
+    pkgdown \
+    plotly \
+    purrr \
+    readr \
     readxl \
-    rhandsontable \
+    rlang \
     rmarkdown \
-    RMySQL \
+    rstudioapi \
+    scales \
     SearchTrees \
-    shinydisconnect \
-    sf \
     shiny \
     shinycssloaders \
+    shinydisconnect \
     shinyjs \
-    sp \
+    stringr \
+    tibble \
+    tidycensus \
     tidyr \
-    tidyverse \
-    viridis \
     webshot \
-    knitr \
-    spelling \
-    testthat \
-    beepr \
-    datasets \
-    fipio \
-    htmlwidgets \
-    jsonlite \
-    mapview \
-    rnaturalearth \
-    rvest \
-    terra \
-    tidygeocoder \
-    units \
-    remotes 
+    writexl \
+    XML \
+    && rm -rf /tmp/downloaded_packages
+
+# Install geojsonio (has tricky dependencies)
+RUN install2.r --error --skipinstalled \
+    V8 \
+    jqr \
+    geojson \
+    geojsonio \
+    && rm -rf /tmp/downloaded_packages
     
+RUN install2.r --error --skipinstalled \
+    remotes \
+    && rm -rf /tmp/downloaded_packages
 
-#adding Areas of Interest
-RUN R -e "remotes::install_github('mikejohnson51/AOI')"
-
-#Copying folder contents 
+# Copy folder contents 
 ADD . /home/epic/
 
-RUN R -e "remotes::install_local('/home/epic/')"
+RUN R -e "remotes::install_github('mikejohnson51/AOI')"
 
+# Install EJAM package
+RUN R -e "remotes::install_local('/home/epic/', dependencies = TRUE)"
 
+# Verify EJAM installed successfully
+RUN R -e "library(EJAM); cat('EJAM loaded successfully\n')"
 
 # Expose ports
 EXPOSE 2000 2001

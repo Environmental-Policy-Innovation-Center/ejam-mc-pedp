@@ -8,7 +8,7 @@
 #  here _disable_autoload.R is used to avoid that 
 
 options( "golem.app.prod" = TRUE)
-
+library(EJAM)
 if (!exists("blockgroupstats")) {library(EJAM)} # to use installed version only if not already attached
 
 run_app(isPublic = TRUE)
