@@ -1,6 +1,5 @@
 FROM rocker/rstudio:latest
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     unzip \
@@ -12,22 +11,10 @@ RUN apt-get update && apt-get install -y \
     protobuf-compiler \
     libproj-dev \
     libgdal-dev \
-    libgeos-dev \
-    libgeos++-dev \
-    libsqlite3-dev \
     libmagick++-dev \
-    libfreetype6-dev \
-    libfontconfig1-dev \
-    libfribidi-dev \
-    libharfbuzz-dev \
-    libtiff5-dev \
-    libpng-dev \
-    libjpeg-dev \
-    libgit2-dev \
-    libjq-dev \
-    libv8-dev \
-    cmake \
-    git \
+    texlive \
+    texlive-latex-extra \
+    texlive-fonts-extra \
     && rm -rf /var/lib/apt/lists/*
     
 # Install AWS CLI v2
@@ -39,87 +26,81 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/aws
 RUN mkdir -p /home/epic
 WORKDIR /home/epic
 
-# Install core spatial dependencies first
-RUN install2.r --error --skipinstalled \
+# Install required R packages from CRAN
+RUN install2.r --error \
+    s2 \
     sf \
-    units \
-    && rm -rf /tmp/downloaded_packages
-
-# Install all EJAM dependencies
-RUN install2.r --error --skipinstalled \
+    tidyverse \
     arrow \
+    attempt \
     collapse \
-    colorspace \
     config \
-    curl \
     data.table \
-    digest \
+    DBI \
+    desc \
+    doSNOW \
     dplyr \
     DT \
-    fs \
+    foreach \
     ggplot2 \
-    gh \
+    ggridges \
     glue \
     golem \
-    gt \
-    httr \
-    httr2 \
+    htmltools \
     leaflet \
     leaflet.extras2 \
+    leaflet.extras \
     magrittr \
     methods \
     openxlsx \
     pdist \
+    pins \
     piggyback \
-    pkgdown \
-    plotly \
-    purrr \
-    readr \
+    pkgload \
     readxl \
-    rlang \
+    rhandsontable \
     rmarkdown \
-    rstudioapi \
-    scales \
+    RMySQL \
     SearchTrees \
+    shinydisconnect \
     shiny \
     shinycssloaders \
-    shinydisconnect \
     shinyjs \
-    stringr \
-    tibble \
-    tidycensus \
+    sp \
     tidyr \
+    viridis \
     webshot \
-    writexl \
-    XML \
-    && rm -rf /tmp/downloaded_packages
-
-# Install geojsonio (has tricky dependencies)
-RUN install2.r --error --skipinstalled \
-    V8 \
-    jqr \
-    geojson \
-    geojsonio \
-    && rm -rf /tmp/downloaded_packages
+    knitr \
+    spelling \
+    testthat \
+    beepr \
+    datasets \
+    fipio \
+    htmlwidgets \
+    jsonlite \
+    mapview \
+    rnaturalearth \
+    rvest \
+    terra \
+    tidygeocoder \
+    units \
+    remotes 
     
-RUN install2.r --error --skipinstalled \
-    remotes \
-    && rm -rf /tmp/downloaded_packages
 
-# Copy folder contents 
-ADD . /home/epic/
-
+#adding Areas of Interest
 RUN R -e "remotes::install_github('mikejohnson51/AOI')"
 
-# Install EJAM package
+RUN R -e "remotes::install_github('hrbrmstr/hrbrthemes')"
+
+#Copying folder contents 
+ADD . /home/epic/
+
 RUN R -e "remotes::install_local('/home/epic/', dependencies = TRUE)"
 
-# Verify EJAM installed successfully
-RUN R -e "library(EJAM); cat('EJAM loaded successfully\n')"
 
 # Expose ports
 EXPOSE 2000 2001
 
 # Set the working directory and command to run the app
 WORKDIR /home/epic
-CMD ["R", "-e", "httpuv::startServer('0.0.0.0', 2001, list(call = function(req) { list(status = 200, body = 'OK', headers = list('Content-Type' = 'text/plain')) })); shiny::runApp('/home/epic/app.R', port = 2000, host = '0.0.0.0')"]
+CMD ["R", "-e", "httpuv::startServer('0.0.0.0', 2001, list(call = function(req) { list(status = 200, body = 'OK', headers = list('Content-Type' = 'text/plain')) })); library(EJAM); EJAM::run_app(isPublic = TRUE, options = list(host = '0.0.0.0', port = 2000))"]
