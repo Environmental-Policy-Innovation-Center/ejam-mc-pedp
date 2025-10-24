@@ -13,7 +13,7 @@ but it is not coded to be able to check attributes without doing that."><meta pr
 
     <a class="navbar-brand me-2" href="../index.html">EJAM</a>
 
-    <small class="nav-text text-warning me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.32.6</small>
+    <small class="nav-text text-warning me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.32.6.001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,7 @@ but it is not coded to be able to check attributes without doing that."><meta pr
     <li><a class="dropdown-item" href="../articles/testdata.html">Examples of Input/Output Files &amp; Data</a></li>
     <li><a class="dropdown-item" href="../articles/distances.html">Comparing Distances (Choosing a Radius)</a></li>
     <li><a class="dropdown-item" href="../articles/naics.html">NAICS (Industries)</a></li>
+    <li><a class="dropdown-item" href="../articles/counties.html">Counties</a></li>
     <li><a class="dropdown-item" href="../articles/zipcodes.html">Zipcodes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>For package/app developers</h6></li>
@@ -115,7 +116,7 @@ via grep to identify which datasets to check. It always uses ignore.case=TRUE fo
 </dl></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="metadata_check_print.html">metadata_check_print()</a></code> <code>metadata_check()</code> <code><a href="metadata_add.html">metadata_add()</a></code> <code><a href="metadata_update_attr.html">metadata_update_attr()</a></code>
+    <div class="dont-index"><p><code><a href="metadata_check_print.html">metadata_check_print()</a></code> <code>metadata_check()</code> <code><a href="metadata_add.html">metadata_add()</a></code> <code><a href="metadata_update_attr.html">metadata_update_attr()</a></code> <code><a href="metadata_add_and_use_this.html">metadata_add_and_use_this()</a></code> <code><a href="dataset_documenter.html">dataset_documenter()</a></code>
 <code><a href="pkg_functions_and_data.html">pkg_functions_and_data()</a></code></p></div>
     </div>
 
@@ -186,6 +187,8 @@ via grep to identify which datasets to check. It always uses ignore.case=TRUE fo
 <span class="r-in"><span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">EJAM</span><span class="fu">:::</span><span class="fu"><a href="metadata_check_print.html">metadata_check_print</a></span><span class="op">(</span><span class="st">"EJAM"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Also see ?metadata_check_print() ?metadata_check() ?metadata_add() ?metadata_update_attr() ?metadata_add_and_use_this() ?dataset_documenter()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Also see</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     x = EJAM:::pkg_functions_and_data(pkg = "EJAM",</span>
@@ -215,186 +218,274 @@ via grep to identify which datasets to check. It always uses ignore.case=TRUE fo
 <span class="r-out co"><span class="r-pr">#&gt;</span> has_metadata          "TRUE"  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: EJAM:::metadata_check_print("EJAM")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: cat("\n\n See which data objects have outdated or missing metadata about ejam_package_version, etc. \n\n")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  See which data objects have outdated or missing metadata about ejam_package_version, etc. </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: cat("but omit atomic vectors since adding attributes to those makes them nonvectors and messier to print \n")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> but omit atomic vectors since adding attributes to those makes them nonvectors and messier to print </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: print(y[y$is.atomic != "TRUE", intersect(c("item", "is.atomic", </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     "ejam_package_version", "date_saved_in_package", "has_metadata"), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     names(y))])</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                              item is.atomic ejam_package_version</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 default_points_shown_at_startup     FALSE               2.32.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3                     islandareas     FALSE               2.32.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4                   metadata4pins     FALSE               2.32.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5                modelDoaggregate     FALSE               2.32.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                     modelEjamit     FALSE               2.32.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7                        sictable     FALSE               2.32.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9                ejamdata_version     FALSE                 &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   date_saved_in_package has_metadata</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2                  &lt;NA&gt;         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3                  &lt;NA&gt;         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4                  &lt;NA&gt;         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5                  &lt;NA&gt;         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                  &lt;NA&gt;         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7                  &lt;NA&gt;         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9                  &lt;NA&gt;        FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: cat("\n\n")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                         item is.atomic ejam_package_version</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                                  avg.in.us     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                              bg_cenpop2020     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                                      bgpts     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                            blockgroupstats     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                               censusplaces     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8         ejscreenRESTbroker2table_na_filler     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10                      epa_programs_defined     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13                           frsprogramcodes     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                high_pctiles_tied_with_min     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15                                mact_table     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16                           map_headernames     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17                              naics_counts     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18                                naicstable     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19                                     namez     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20                                 stateinfo     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21                                stateinfo2     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22                          states_shapefile     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23                                statestats     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24                   testinput_address_table     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25                 testinput_address_table_9     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26         testinput_address_table_goodnames     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27          testinput_address_table_withfull     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28                  testinput_program_sys_id     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29                        testinput_shapes_2     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30     testoutput_doaggregate_1000pts_1miles     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31      testoutput_doaggregate_100pts_1miles     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32       testoutput_doaggregate_10pts_1miles     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33          testoutput_ejamit_1000pts_1miles     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34           testoutput_ejamit_100pts_1miles     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35            testoutput_ejamit_10pts_1miles     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36             testoutput_ejamit_fips_cities     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37           testoutput_ejamit_fips_counties     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38                testoutput_ejamit_shapes_2     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39 testoutput_ejscreenRESTbroker_1pts_1miles     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40        testoutput_ejscreenapi_1pts_1miles     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41             testoutput_ejscreenapi_plus_5     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42                   testoutput_ejscreenit_5     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43                  testoutput_ejscreenit_50     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44                 testoutput_ejscreenit_500     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45 testoutput_getblocksnearby_1000pts_1miles     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46  testoutput_getblocksnearby_100pts_1miles     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47   testoutput_getblocksnearby_10pts_1miles     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48                             testpoints_10     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49                            testpoints_100     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50                           testpoints_1000     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51                          testpoints_10000     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52                         testpoints_100_dt     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53                              testpoints_5     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54                             testpoints_50     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55                            testpoints_500     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56                            testpoints_bad     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57                       testpoints_overlap3     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58                              testshapes_2     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59                                  usastats     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61           default_points_shown_at_startup     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62                               islandareas     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63                             metadata4pins     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64                          modelDoaggregate     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65                               modelEjamit     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66                                  sictable     FALSE               2.32.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 68                          ejamdata_version     FALSE                 &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    date_saved_in_package has_metadata</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2             2024-10-12         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3             2024-08-22         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4             2024-08-22         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5             2024-12-13         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6             2024-09-26         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8             2024-12-11         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10            2024-11-15         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13            2025-02-12         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14            2024-10-12         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15            2025-02-12         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16            2025-08-26         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17            2025-02-12         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18            2024-10-12         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19            2025-08-26         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20            2024-08-22         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21            2024-08-22         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22            2024-08-22         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23            2024-08-22         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24            2025-05-01         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25            2025-05-01         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26            2025-05-01         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27            2025-05-01         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28            2025-02-12         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29            2025-05-30         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30            2025-09-22         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31            2025-09-22         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32            2025-09-22         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33            2025-09-19         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34            2025-09-19         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35            2025-09-19         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36            2025-09-23         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37            2025-09-23         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38            2025-09-23         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39            2024-12-11         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40            2024-12-11         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41            2024-12-11         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42            2024-12-11         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43            2024-12-11         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44            2024-12-11         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45            2025-09-19         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46            2025-09-19         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47            2025-09-19         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48            2025-09-19         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49            2025-09-19         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50            2025-09-19         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51            2025-09-19         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52            2025-02-14         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53            2024-09-20         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54            2024-09-20         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55            2024-09-20         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56            2025-09-19         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57            2024-09-05         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58            2025-05-30         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59            2024-08-22         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61                  &lt;NA&gt;         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62                  &lt;NA&gt;         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63                  &lt;NA&gt;         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64                  &lt;NA&gt;         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65                  &lt;NA&gt;         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66                  &lt;NA&gt;         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 68                  &lt;NA&gt;        FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: cat("atomic: \n\n")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> atomic: </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: print(y$item[y$is.atomic == "TRUE"])</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1] "NAICS"                                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2] "x_anyother"                                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [3] "ejampackages"                              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [4] "lat_alias"                                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [5] "lon_alias"                                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [6] "meters_per_mile"                           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [7] "names_age"                                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [8] "names_age_count"                           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [9] "names_all"                                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [10] "names_all_r"                               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [11] "names_climate"                             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [12] "names_climate_avg"                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [13] "names_climate_pctile"                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [14] "names_climate_state_avg"                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [15] "names_climate_state_pctile"                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [16] "names_community"                           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [17] "names_community_count"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [18] "names_countabove"                          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [19] "names_criticalservice"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [20] "names_criticalservice_avg"                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [21] "names_criticalservice_pctile"              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [22] "names_criticalservice_state_avg"           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [23] "names_criticalservice_state_pctile"        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [24] "names_d"                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [25] "names_d_avg"                               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [26] "names_d_count"                             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [27] "names_d_demogindexstate"                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [28] "names_d_extra"                             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [29] "names_d_extra_count"                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [30] "names_d_language"                          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [31] "names_d_language_count"                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [32] "names_d_languageli"                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [33] "names_d_languageli_count"                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [34] "names_d_other_count"                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [35] "names_d_pctile"                            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [36] "names_d_ratio_to_avg"                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [37] "names_d_ratio_to_state_avg"                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [38] "names_d_state_avg"                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [39] "names_d_state_pctile"                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [40] "names_d_subgroups"                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [41] "names_d_subgroups_alone"                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [42] "names_d_subgroups_alone_avg"               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [43] "names_d_subgroups_alone_count"             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [44] "names_d_subgroups_alone_pctile"            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [45] "names_d_subgroups_alone_ratio_to_avg"      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [46] "names_d_subgroups_alone_ratio_to_state_avg"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [47] "names_d_subgroups_alone_state_avg"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [48] "names_d_subgroups_alone_state_pctile"      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [49] "names_d_subgroups_avg"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [50] "names_d_subgroups_count"                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [51] "names_d_subgroups_nh"                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [52] "names_d_subgroups_nh_avg"                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [53] "names_d_subgroups_nh_count"                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [54] "names_d_subgroups_nh_pctile"               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [55] "names_d_subgroups_nh_ratio_to_avg"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [56] "names_d_subgroups_nh_ratio_to_state_avg"   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [57] "names_d_subgroups_nh_state_avg"            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [58] "names_d_subgroups_nh_state_pctile"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [59] "names_d_subgroups_pctile"                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [60] "names_d_subgroups_ratio_to_avg"            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [61] "names_d_subgroups_ratio_to_state_avg"      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [62] "names_d_subgroups_state_avg"               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [63] "names_d_subgroups_state_pctile"            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [64] "names_e"                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [65] "names_e_avg"                               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [66] "names_e_other"                             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [67] "names_e_pctile"                            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [68] "names_e_ratio_to_avg"                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [69] "names_e_ratio_to_state_avg"                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [70] "names_e_state_avg"                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [71] "names_e_state_pctile"                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [72] "names_ej"                                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [73] "names_ej_pctile"                           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [74] "names_ej_state"                            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [75] "names_ej_state_pctile"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [76] "names_ej_supp"                             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [77] "names_ej_supp_pctile"                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [78] "names_ej_supp_state"                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [79] "names_ej_supp_state_pctile"                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [80] "names_featuresinarea"                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [81] "names_flag"                                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [82] "names_geo"                                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [83] "names_health"                              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [84] "names_health_avg"                          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [85] "names_health_count"                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [86] "names_health_pctile"                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [87] "names_health_ratio_to_avg"                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [88] "names_health_ratio_to_state_avg"           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [89] "names_health_state_avg"                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [90] "names_health_state_pctile"                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [91] "names_misc"                                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [92] "names_pct_as_fraction_blockgroupstats"     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [93] "names_pct_as_fraction_ejamit"              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [94] "names_pct_as_fraction_ejscreenit"          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [95] "names_sitesinarea"                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [96] "names_these"                               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [97] "names_these_avg"                           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [98] "names_these_ratio_to_avg"                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [99] "names_these_ratio_to_state_avg"            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [100] "names_these_state_avg"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [101] "names_wts"                                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [102] "testinput_address_2"                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [103] "testinput_address_9"                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [104] "testinput_address_parts"                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [105] "testinput_fips_blockgroups"                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [106] "testinput_fips_cities"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [107] "testinput_fips_counties"                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [108] "testinput_fips_mix"                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [109] "testinput_fips_states"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [110] "testinput_fips_tracts"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [111] "testinput_mact"                            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [112] "testinput_naics"                           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [113] "testinput_program_name"                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [114] "testinput_regid"                           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [115] "testinput_registry_id"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [116] "testinput_sic"                             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: cat("\n\n")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1] "SIC"                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2] "custom"                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [3] "epa_programs"                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [4] "formulas_all"                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [5] "formulas_d"                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [6] "NAICS"                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [7] "x_anyother"                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [8] "ejampackages"                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [9] "lat_alias"                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [10] "lon_alias"                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [11] "meters_per_mile"                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [12] "names_age"                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [13] "names_age_count"                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [14] "names_all"                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [15] "names_all_r"                               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [16] "names_climate"                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [17] "names_climate_avg"                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [18] "names_climate_pctile"                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [19] "names_climate_state_avg"                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [20] "names_climate_state_pctile"                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [21] "names_community"                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [22] "names_community_count"                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [23] "names_countabove"                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [24] "names_criticalservice"                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [25] "names_criticalservice_avg"                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [26] "names_criticalservice_pctile"              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [27] "names_criticalservice_state_avg"           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [28] "names_criticalservice_state_pctile"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [29] "names_d"                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [30] "names_d_avg"                               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [31] "names_d_count"                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [32] "names_d_demogindexstate"                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [33] "names_d_extra"                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [34] "names_d_extra_count"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [35] "names_d_language"                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [36] "names_d_language_count"                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [37] "names_d_languageli"                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [38] "names_d_languageli_count"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [39] "names_d_other_count"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [40] "names_d_pctile"                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [41] "names_d_ratio_to_avg"                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [42] "names_d_ratio_to_state_avg"                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [43] "names_d_state_avg"                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [44] "names_d_state_pctile"                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [45] "names_d_subgroups"                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [46] "names_d_subgroups_alone"                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [47] "names_d_subgroups_alone_avg"               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [48] "names_d_subgroups_alone_count"             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [49] "names_d_subgroups_alone_pctile"            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [50] "names_d_subgroups_alone_ratio_to_avg"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [51] "names_d_subgroups_alone_ratio_to_state_avg"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [52] "names_d_subgroups_alone_state_avg"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [53] "names_d_subgroups_alone_state_pctile"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [54] "names_d_subgroups_avg"                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [55] "names_d_subgroups_count"                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [56] "names_d_subgroups_nh"                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [57] "names_d_subgroups_nh_avg"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [58] "names_d_subgroups_nh_count"                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [59] "names_d_subgroups_nh_pctile"               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [60] "names_d_subgroups_nh_ratio_to_avg"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [61] "names_d_subgroups_nh_ratio_to_state_avg"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [62] "names_d_subgroups_nh_state_avg"            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [63] "names_d_subgroups_nh_state_pctile"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [64] "names_d_subgroups_pctile"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [65] "names_d_subgroups_ratio_to_avg"            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [66] "names_d_subgroups_ratio_to_state_avg"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [67] "names_d_subgroups_state_avg"               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [68] "names_d_subgroups_state_pctile"            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [69] "names_e"                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [70] "names_e_avg"                               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [71] "names_e_other"                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [72] "names_e_pctile"                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [73] "names_e_ratio_to_avg"                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [74] "names_e_ratio_to_state_avg"                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [75] "names_e_state_avg"                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [76] "names_e_state_pctile"                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [77] "names_ej"                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [78] "names_ej_pctile"                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [79] "names_ej_state"                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [80] "names_ej_state_pctile"                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [81] "names_ej_supp"                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [82] "names_ej_supp_pctile"                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [83] "names_ej_supp_state"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [84] "names_ej_supp_state_pctile"                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [85] "names_featuresinarea"                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [86] "names_flag"                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [87] "names_geo"                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [88] "names_health"                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [89] "names_health_avg"                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [90] "names_health_count"                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [91] "names_health_pctile"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [92] "names_health_ratio_to_avg"                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [93] "names_health_ratio_to_state_avg"           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [94] "names_health_state_avg"                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [95] "names_health_state_pctile"                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [96] "names_misc"                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [97] "names_pct_as_fraction_blockgroupstats"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [98] "names_pct_as_fraction_ejamit"              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [99] "names_pct_as_fraction_ejscreenit"          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [100] "names_sitesinarea"                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [101] "names_these"                               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [102] "names_these_avg"                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [103] "names_these_ratio_to_avg"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [104] "names_these_ratio_to_state_avg"            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [105] "names_these_state_avg"                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [106] "names_wts"                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [107] "testinput_address_2"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [108] "testinput_address_9"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [109] "testinput_address_parts"                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [110] "testinput_fips_blockgroups"                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [111] "testinput_fips_cities"                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [112] "testinput_fips_counties"                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [113] "testinput_fips_mix"                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [114] "testinput_fips_states"                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [115] "testinput_fips_tracts"                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [116] "testinput_mact"                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [117] "testinput_naics"                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [118] "testinput_program_name"                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [119] "testinput_regid"                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [120] "testinput_registry_id"                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [121] "testinput_sic"                             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: print(table(How.many.have.ejscreen_info = x$ejscreen_version, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     useNA = "always"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> How.many.have.ejscreen_info</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2.32 &lt;NA&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   42  140 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: cat("\n\n")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if ("acs_version" %in% names(x)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     print(table(How.many.have.acs_version = x$acs_version, useNA = "always"))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     z = x[is.na(x$acs_version), intersect(c("item", "date_saved_in_package", </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         "acs_version"), names(x))]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     cat("\n\n see where is ACS version info missing, and date saved \n\n")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     print(z[order(z$item), ])</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: print(table(How.many.have.acs_version = x$acs_version, useNA = "always"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> How.many.have.acs_version</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2018-2022      &lt;NA&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        41       141 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: z = x[is.na(x$acs_version), intersect(c("item", "date_saved_in_package", </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     "acs_version"), names(x))]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: cat("\n\n see where is ACS version info missing, and date saved \n\n")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  see where is ACS version info missing, and date saved </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: print(z[order(z$item), ])</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                           item date_saved_in_package</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1                                        NAICS                  &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2                                          SIC            2025-02-12</span>
@@ -679,7 +770,6 @@ via grep to identify which datasets to check. It always uses ignore.case=TRUE fo
 <span class="r-out co"><span class="r-pr">#&gt;</span> 174        &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 180        &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 182        &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: invisible(x)</span>
 <span class="r-in"><span>  <span class="va">x</span><span class="op">[</span><span class="va">x</span><span class="op">$</span><span class="va">has_metadata</span> <span class="op">==</span> <span class="cn">TRUE</span>, <span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     package                                      item ejam_package_version</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1      EJAM                                     NAICS               2.32.6</span>
@@ -897,11 +987,11 @@ via grep to identify which datasets to check. It always uses ignore.case=TRUE fo
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>September 2025</p>
+  <p>October 2025</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>EJAM Version 2.32.6</p>
+  <p>EJAM Version 2.32.6.001</p>
 </div>
 
     </footer></div>

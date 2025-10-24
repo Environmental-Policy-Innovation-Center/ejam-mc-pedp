@@ -5,6 +5,7 @@
 <url><loc>https://ejanalysis.github.io/EJAM/LICENSE.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/articles/analyzing.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/articles/basics.html</loc></url>
+<url><loc>https://ejanalysis.github.io/EJAM/articles/counties.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/articles/dev-app-settings.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/articles/dev-deploy-app.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/articles/dev-future-plans.html</loc></url>
@@ -32,6 +33,7 @@
 <url><loc>https://ejanalysis.github.io/EJAM/reference/acsendyear.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/address_from_table.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/address_from_table_goodnames.html</loc></url>
+<url><loc>https://ejanalysis.github.io/EJAM/reference/api_run.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/app_server.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/app_ui.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/area_sqmi.html</loc></url>
@@ -44,6 +46,7 @@
 <url><loc>https://ejanalysis.github.io/EJAM/reference/bg_cenpop2020.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/bgej.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/bgid2fips.html</loc></url>
+<url><loc>https://ejanalysis.github.io/EJAM/reference/bgid_from_blockid.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/bgpts.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/blockgroupstats.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/blockid2fips.html</loc></url>
@@ -84,6 +87,7 @@
 <url><loc>https://ejanalysis.github.io/EJAM/reference/dataload_dynamic.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/dataload_from_local.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/dataload_from_package.html</loc></url>
+<url><loc>https://ejanalysis.github.io/EJAM/reference/dataset_documenter.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/default_points_shown_at_startup.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/dir2.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/distance_by_group1.html</loc></url>
@@ -297,6 +301,7 @@
 <url><loc>https://ejanalysis.github.io/EJAM/reference/mapfastej.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/mapfastej_counties.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/metadata_add.html</loc></url>
+<url><loc>https://ejanalysis.github.io/EJAM/reference/metadata_add_and_use_this.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/metadata_check.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/metadata_check_print.html</loc></url>
 <url><loc>https://ejanalysis.github.io/EJAM/reference/metadata_update_attr.html</loc></url>
