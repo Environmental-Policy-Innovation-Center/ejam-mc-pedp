@@ -6,7 +6,7 @@
 \usage{
 fill_tbl_full_ej(
   output_df,
-  title = "EJScreen environmental and socioeconomic indicators data",
+  title = "EJSCREEN environmental and socioeconomic indicators data",
   title_top_row = ""
 )
 }

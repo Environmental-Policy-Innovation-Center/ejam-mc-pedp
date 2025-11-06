@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreenit.R
 \name{ejscreenit}
 \alias{ejscreenit}
-\title{Get EJScreen results near each site, compiled as a table, with map and plot}
+\title{Get EJSCREEN results near each site, compiled as a table, with map and plot}
 \usage{
 ejscreenit(
   x,
@@ -102,22 +102,22 @@ using the normal name and a synonym name.
 }
 \description{
 This is the main high-level function that does all the work involved in
-using the EJScreen API outside of the web app to get results for
+using the EJSCREEN API outside of the web app to get results for
 multiple locations compiled in one table.
 }
 \details{
-This function provides EJScreen indicator results near each of a list of sites,
+This function provides EJSCREEN indicator results near each of a list of sites,
 all in one function, for those who want to do so in RStudio (for interactive analysis)
 or via their own software/apps (programmatically)
 rather than through the web app interface. It is an alternative to EJAM, as
 explained below.
 
-Based on a set of places, \code{ejscreenit()} requests an EJScreen standard report for each place
+Based on a set of places, \code{ejscreenit()} requests an EJSCREEN standard report for each place
 and assembles all those results as a single spreadsheet. The indicators include
 residential population and environmental indicators as well as Summary Indexes that combine them,
 and some geospatial information about each site.
 
-\code{ejscreenit()} is the basic, high-level tool that enables easy access to the EJScreen API
+\code{ejscreenit()} is the basic, high-level tool that enables easy access to the EJSCREEN API
 for a list of sites, outside the context of a web app. It accepts lat/lon values
 flexibly and interactively in the R console,
 and then uses the helper functions below to return a list of 3 objects:
@@ -130,29 +130,29 @@ and then uses the helper functions below to return a list of 3 objects:
 The table it provides uses plain-English column headers, such as
 "Traffic Proximity and Volume (daily traffic count/distance to road)"
 }
-\section{EJAM vs EJScreen}{
+\section{EJAM vs EJSCREEN}{
 To obtain \emph{overall summary} statistics (and faster results) use ejamit()
 from the EJAM package instead of ejscreenit().
 The two tools, ejamit() and ejscreenit(), are different, and have pros and cons:
 
 The key advantages of EJAM are
 \enumerate{
-\item \emph{ejscreenit / EJScreen API is much, much slower than EJAM}
+\item \emph{ejscreenit / EJSCREEN API is much, much slower than EJAM}
 \item \emph{ejscreenit cannot provide an overall summary across sites, while EJAM can}
 }
 
 An "overall summary" here means, for example, the overall percent low income
 among all unique residents near any one or more of the sites.
 This inability to provide an overall summary aggregating across sites
-is due to limitations of the EJScreen API
+is due to limitations of the EJSCREEN API
 -- it does not provide all data needed to correctly aggregate across sites
 (see detailed explanation in the ejscreenapi About document).
 }
 
 \section{Inputs and Outputs}{
 The ejscreenit() function accepts a set of points (locations) and a radius, and then
-accesses EJScreen (the server via API) to assemble a list of results
-similar to the EJScreen standard report but for each of many sites.
+accesses EJSCREEN (the server via API) to assemble a list of results
+similar to the EJSCREEN standard report but for each of many sites.
 
 Points can be specified in several ways:
 \itemize{
@@ -162,7 +162,7 @@ Points can be specified in several ways:
 
 The function returns a list of items: table, map, plot
 \itemize{
-\item a table of scores that are like the EJScreen standard buffer report, but with one row per site (input point)
+\item a table of scores that are like the EJSCREEN standard buffer report, but with one row per site (input point)
 \itemize{
 \item and as a set of columns in that table, a set of ratios, which are the
 indicator value nearby a site divided by the indicator value in the US overall
@@ -176,17 +176,17 @@ offering a summary statistic that is complementary to the percentile but may be 
 
 \section{Details of helper functions used}{
 This function works by requesting each site report from EPA servers
-via the \href{https://ejscreen.epa.gov/mapper/ejscreenapi1.html}{EJScreen API}
+via the \href{https://ejscreen.epa.gov/mapper/ejscreenapi1.html}{EJSCREEN API}
 using various helper functions.
 It uses functions including the following:
 \itemize{
-\item \code{\link[=ejscreenit]{ejscreenit()}} is the basic, high-level tool that enables access to the EJScreen API
+\item \code{\link[=ejscreenit]{ejscreenit()}} is the basic, high-level tool that enables access to the EJSCREEN API
 for a list of sites, outside the context of a web app. It accepts lat/lon values flexibly and interactively in the R console,
 and then uses the helper functions below to return a list of 3 objects: a table, interactive map, and plot.
 The table it provides uses plain-English column headers, such as
 "Traffic Proximity and Volume (daily traffic count/distance to road)"
 \itemize{
-\item \code{\link[=ejscreenapi_plus]{ejscreenapi_plus()}} can accept a file of point data, uses \code{\link[=ejscreenapi]{ejscreenapi()}} to get EJScreen stats,
+\item \code{\link[=ejscreenapi_plus]{ejscreenapi_plus()}} can accept a file of point data, uses \code{\link[=ejscreenapi]{ejscreenapi()}} to get EJSCREEN stats,
 and then prepends input table and renames columns as R variables like "traffic.score"
 \itemize{
 \item \code{\link[=ejscreenapi]{ejscreenapi()}}  gets EJ stats for many points as a data.table of many rows.
@@ -197,7 +197,7 @@ and then prepends input table and renames columns as R variables like "traffic.s
 }
 
 Also used are
-\code{\link[=ejscreenapi_plus]{ejscreenapi_plus()}}, \code{\link[=ejscreenapi]{ejscreenapi()}}, \code{\link[=urls_clusters_and_sort_cols]{urls_clusters_and_sort_cols()}},
+\code{\link[=ejscreenapi_plus]{ejscreenapi_plus()}}, \code{\link[=ejscreenapi]{ejscreenapi()}}, \code{\link[=url_ejscreenapi_clusters_and_sort_cols]{url_ejscreenapi_clusters_and_sort_cols()}},
 \code{\link[=fixcolnames]{fixcolnames()}}, \code{\link[=url_linkify]{url_linkify()}}, \code{\link[=popup_from_ejscreen]{popup_from_ejscreen()}}, \code{\link[=calc_ratios_to_avg]{calc_ratios_to_avg()}}, \code{\link[=plot_boxplot_ratios]{plot_boxplot_ratios()}}
 }
 
@@ -205,56 +205,56 @@ Also used are
 \donttest{
  pts <- testpoints_50[1:3, ] # sample data from package
  mapfast(pts)
- #pts <- system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM") 
+ #pts <- system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM")
  if (interactive)
- 
- x <- ejscreenit(pts, 
+
+ x <- ejscreenit(pts,
    save_map = F, save_plot = F, save_table = F, folder = "~", see_table = T)
- 
+
  myradius <- 1 # in miles
  # myradius <- 5000 / meters_per_mile # 5 kilometer radius, approx 3.1 miles
- # Get results from server by using API 
+ # Get results from server by using API
  x <- ejscreenit(
    pts=pts, radius = myradius,
    save_table = FALSE, save_map = FALSE, save_plot = FALSE)
-  
+
  # see format of output results
  names(x) # [1] "table" "map"   "plot"
- 
+
  y = ejscreenapi_plus(pts, radius = myradius)
  all.equal(x$table, y)
- 
- # For this table view, remove map and pdf URL columns 
- y <- x$table[ , !grepl("EJScreen", names(x$table))] 
+
+ # For this table view, remove map and pdf URL columns
+ y <- x$table[ , !grepl("EJSCREEN", names(x$table))]
  t(y[1, ])  # see one column of results
  DT::datatable(y)  # see interactive data table view in viewer of RStudio
- 
- # View links in RStudio Viewer window rather than shiny app or Excel 
- html_print(HTML(paste(paste(x$table[,"EJScreen Report"], collapse="<br>"),
-    "<p></p>", paste(x$table[,"EJScreenMAP"], collapse="<br>") )  ))
- 
+
+ # View links in RStudio Viewer window rather than shiny app or Excel
+ html_print(HTML(paste(paste(x$table[,"EJSCREEN Report"], collapse="<br>"),
+    "<p></p>", paste(x$table[,"EJSCREEN_MAP"], collapse="<br>") )  ))
+
  # View the boxplots of results
  x$plot
- 
+
  # Save the plot as a file:
- 
+
  # You can save it while running ejscreenit()
  # by including the parameters save_map = T, nosave = F, folder = "."
  # or afterwords like this:
- 
- png(filename = file.path(folder,"Boxplot of EJ stats.png"), 
+
+ png(filename = file.path(folder,"Boxplot of EJ stats.png"),
    width = 1200, height = 600)
  x$plot
  dev.off()
- 
+
  # Save the map as a file:
- 
+
  # You can save the map while running ejscreenit()
  # by including the parameters save_plot = T, nosave = F, folder = "."
  # or afterwords save as an interactive HTML webpage, like this:
- 
+
  # htmltools::save_html(x$map, "mapfile.html")
- 
+
  # or make it printable as a static file like this:
  x$map \%>\% leaflet.extras2::easyprintMap(
    filename = file.path(folder, "map.png"), exportOnly = TRUE)

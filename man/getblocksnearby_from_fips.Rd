@@ -9,7 +9,8 @@ getblocksnearby_from_fips(
   in_shiny = FALSE,
   need_blockwt = TRUE,
   return_shp = FALSE,
-  allow_multiple_fips_types = TRUE
+  allow_multiple_fips_types = TRUE,
+  radius = 0
 )
 }
 \arguments{
@@ -27,6 +28,8 @@ or comparing whole counties to each other, within a State.}
 or FALSE to get the pts data.table much like output of \code{\link[=getblocksnearby]{getblocksnearby()}} or  \code{\link[=get_blockpoints_in_shape]{get_blockpoints_in_shape()}}}
 
 \item{allow_multiple_fips_types}{if enabled, set TRUE to allow mix of blockgroup, tract, city, county, state fips}
+
+\item{radius}{CURRENTLY NOT IMPLEMENTED - NO BUFFER IS ADDED}
 }
 \value{
 \itemize{

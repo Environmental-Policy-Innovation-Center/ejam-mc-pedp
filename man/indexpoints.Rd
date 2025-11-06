@@ -27,7 +27,7 @@ so \code{\link[=getpointsnearby]{getpointsnearby()}} can find them very quickly
 \details{
 This creates a spatial index
 to be used by \code{\link[=getpointsnearby]{getpointsnearby()}} to support \code{\link[=proxistat]{proxistat()}},
-to create a new proximity score for every block and block group in the US.
+to create a new proximity score for every block and blockgroup in the US.
 It relies on \code{\link[=create_quaddata]{create_quaddata()}} for one step, then \code{\link[SearchTrees:createTree]{SearchTrees::createTree()}}
 }
 \examples{

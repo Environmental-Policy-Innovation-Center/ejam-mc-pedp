@@ -15,7 +15,7 @@
 #'
 table_gt_from_ejamit <- function(ejamitoutput = NULL, type = c("demog", "envt")[1]) {
 
-  if (!is.list(ejamitoutput) | !("results_overall" %in% names(ejamitoutput))) {
+  if (!is.list(ejamitoutput) || !("results_overall" %in% names(ejamitoutput))) {
     warning('RETURNING NA VALUES FOR ALL INDICATORS - Data must be a list of results exactly like the output of ejamit() such as testoutput_ejamit_10pts_1miles')
     return(
       table_gt_from_ejamit_overall(NULL, type = type)
@@ -84,7 +84,7 @@ table_gt_from_ejamit_1site <- function(...) {
 #'
 table_validated_ejamit_row <- function(ejamit_results_1row = NULL) {
 
-  if (!is.data.frame(ejamit_results_1row) | NROW(ejamit_results_1row) != 1) {
+  if (!is.data.frame(ejamit_results_1row) || NROW(ejamit_results_1row) != 1) {
     warning('RETURNING NA VALUES FOR ALL INDICATORS - Data must be a 1-row table like testoutput_ejamit_10pts_1miles$results_bysite[1, ] or testoutput_ejamit_10pts_1miles$results_overall')
     ejamit_results_1row <- testoutput_ejamit_10pts_1miles$results_overall # used as a template here, but will be filled with NA values
     ejamit_results_1row[ , ] <- NA
@@ -182,7 +182,7 @@ table_gt_format_step1 <- function(ejamit_results_1row = NULL, type = "demog") {
 ############################################################################# #
 
 
-#' Format a table of demog or envt scores, percentiles, etc. to look similar to EJScreen report tables
+#' Format a table of demog or envt scores, percentiles, etc. to look similar to EJSCREEN report tables
 #'
 #' @param df A data frame from table_gt_format_step1
 #'
@@ -196,7 +196,7 @@ table_gt_format_step1 <- function(ejamit_results_1row = NULL, type = "demog") {
 #'    and one row per indicator, where varnames_shown are longer indicator names for use in report.
 #'
 #'    The sort order in this df is ignored!  Instead, the variables are shown in the same order as
-#'    shown in EJScreen reports, as recorded in map_headernames and checked here via varinfo(varnames_r, "reportsort"), etc.
+#'    shown in EJSCREEN reports, as recorded in map_headernames and checked here via varinfo(varnames_r, "reportsort"), etc.
 #'
 #'    Uses gt R package for formatting.
 #'
@@ -207,7 +207,7 @@ table_gt_format_step1 <- function(ejamit_results_1row = NULL, type = "demog") {
 #'   (rounding info is drawn from map_headernames$decimals)
 #'
 #' @seealso [table_gt_from_ejamit()]
-#' @return a gt-style table with formatting to closely match EJScreen standard report formatting
+#' @return a gt-style table with formatting to closely match EJSCREEN standard report formatting
 #' @export
 #'
 table_gt_format_step2 <- function(df, type = c("demog", "envt")[1], my_cell_color =  '#dce6f0', my_border_color = '#aaaaaa',
@@ -249,7 +249,7 @@ table_gt_format_step2 <- function(df, type = c("demog", "envt")[1], my_cell_colo
   ############################# #
 
   # SORT TABLE ####
-  #  to show in the same sort order as EJScreen reports use, acc to metadata in map_headernames
+  #  to show in the same sort order as EJSCREEN reports use, acc to metadata in map_headernames
   df <- df[ order(as.numeric(
     as.vector(
       unlist(varinfo(df$varnames_r, "reportsort"))))), ] # items not found are just "" which is ok
@@ -270,7 +270,7 @@ table_gt_format_step2 <- function(df, type = c("demog", "envt")[1], my_cell_colo
 
   # new rounding code rounds each indicator based on digits specified in metadata table:
 
-  # rounding for RAW values - get number of decimal places to use as in EJScreen reports, acc to metadata in map_headernames
+  # rounding for RAW values - get number of decimal places to use as in EJSCREEN reports, acc to metadata in map_headernames
   df$digits_raw <- table_rounding_info(df$varnames_r) # returns NA for nonmatches
   df$digits_raw[is.na(df$digits_raw)] <- digits_default # default if no match
   digits_raw <- df$digits_raw

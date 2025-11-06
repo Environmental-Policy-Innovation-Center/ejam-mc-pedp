@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs_ejam_alreadyrun}
 \alias{ejscreen_vs_ejam_alreadyrun}
-\title{EJAM/EJSCREEN comparisons - used by ejscreen_vs()}
+\title{EJAM / EJSCREEN comparisons - used by ejscreen_vs()}
 \usage{
 ejscreen_vs_ejam_alreadyrun(
   apisite,
@@ -18,7 +18,7 @@ or ejscreenapi_plus(), and also see \code{\link[=ejscreenit_for_ejam]{ejscreenit
 
 \item{ejamsite}{table output of ejamit()$results_bysite}
 
-\item{nadrop}{optional, whether to drop indicators for which EJScreen API returns NA}
+\item{nadrop}{optional, whether to drop indicators for which EJSCREEN API returns NA}
 
 \item{x100fix}{optional, whether to multiply x100 the names_d and names_d_subgroups
 indicator scores to convert fractions 0 to 1 into percentages of 0 to 100,
@@ -40,7 +40,7 @@ and rows represent sites analyzed.
 See \code{\link[=ejscreen_vs]{ejscreen_vs()}} for a more complete, interactive way to do this.
 }
 \description{
-Compare EJScreen API vs EJAM stats at tested sites (after results already run)
+Compare EJSCREEN API vs EJAM stats at tested sites (after results already run)
 }
 \examples{
   vs = ejscreen_vs_ejam_alreadyrun(

@@ -50,16 +50,17 @@ So the output table might not have the same number of rows as the input fips vec
 When using tigris package ("tiger" as service-related parameter here),
 it uses the year that is the default in the version of the tigris package that is installed.
 You can use options(tigris_year = 2022) for example to specify it explicitly.
-This function also sets options(tigris_use_cache = TRUE), but each individual shapes_xyz_from_ function may not specify.
 
 Blocks are not implemented yet here. For info on blocks bounds, see  \code{\link[tigris:block_groups]{tigris::block_groups()}}
 Also note the \link{blockwts} dataset had a placeholder column block_radius_miles that as of
 v2.32.5 was just zero values, but see notes in EJAM/data-raw/datacreate_blockwts.R on how it could be obtained.
 If it were used, it could be a way to quickly get the area of each block,
 using the formula  area = pi * (block_radius_miles^2)
+
+For zip code boundaries, see the \href{ejanalysis.org/ejamdocs}{EJAM documentation} article on zipcodes.
 }
 \examples{
- # shp2 = shapes_from_fips("10001", "10005")
+ # shp2 = shapes_from_fips("10001", "10005") # Counties not zip codes!
 
  fipslist = list(
   statefips = name2fips(c('DE', 'RI')),

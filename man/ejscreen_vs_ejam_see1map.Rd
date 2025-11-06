@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs_ejam_see1map}
 \alias{ejscreen_vs_ejam_see1map}
-\title{EJAM/EJSCREEN comparisons - Try to explain discrepancy in pop and blocks via map and tables of blocks near a site}
+\title{EJAM / EJSCREEN comparisons - Try to explain discrepancy in pop and blocks via map and tables of blocks near a site}
 \usage{
 ejscreen_vs_ejam_see1map(
   vs,
@@ -44,7 +44,7 @@ between ejscreen api and ejam estimate,
 but you may also want the output of ejscreen_vs_ejam_see1()
 }
 \description{
-EJAM/EJSCREEN comparisons - Try to explain discrepancy in pop and blocks via map and tables of blocks near a site
+EJAM / EJSCREEN comparisons - Try to explain discrepancy in pop and blocks via map and tables of blocks near a site
 }
 \examples{
  radius = 3; n = 3

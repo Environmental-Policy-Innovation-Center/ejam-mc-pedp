@@ -2,7 +2,7 @@
 % Please edit documentation in R/FIPS_FUNCTIONS.R
 \name{fips2pop}
 \alias{fips2pop}
-\title{Get population counts (ACS EJScreen) by FIPS
+\title{Get population counts (ACS EJSCREEN) by FIPS
 Utility to aggregate just population count for each FIPS Census unit}
 \usage{
 fips2pop(fips)
@@ -16,6 +16,6 @@ If city/cdp, it returns NA currently since those pop counts are not in blockgrou
 vector of population counts same length as fips vector
 }
 \description{
-Get population counts (ACS EJScreen) by FIPS
+Get population counts (ACS EJSCREEN) by FIPS
 Utility to aggregate just population count for each FIPS Census unit
 }

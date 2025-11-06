@@ -10,6 +10,7 @@ shapefile_from_any(
   crs = 4269,
   layer = NULL,
   inputname = NULL,
+  silentinteractive = FALSE,
   ...
 )
 }
@@ -41,6 +42,8 @@ default is crs = 4269 or Geodetic CRS NAD83}
 \item{layer}{optional layer name passed to \code{\link[sf:st_read]{sf::st_read()}}}
 
 \item{inputname}{vector of shiny fileInput uploaded filenames}
+
+\item{silentinteractive}{set to TRUE to NOT prompt for a file/folder when one is not specified}
 
 \item{...}{passed to \code{\link[sf:st_read]{sf::st_read()}}}
 }

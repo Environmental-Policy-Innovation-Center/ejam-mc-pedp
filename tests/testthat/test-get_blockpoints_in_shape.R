@@ -6,7 +6,7 @@
 test_that("get_blockpoints_in_shape() normal large shapefile", {
 
   junk = capture_output({
-    shp = shapefile_from_any(testdata("gdb", quiet = T)[1])
+    shp = shapefile_from_any(testdata("gdb", quiet = T, silentinteractive=TRUE)[1])
     expect_no_error({
       suppressWarnings({
         s2b <- get_blockpoints_in_shape(polys = shp)

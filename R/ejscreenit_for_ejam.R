@@ -1,6 +1,6 @@
 
 
-#' Get EJScreen results directly from EJScreen servers via their API
+#' Get EJSCREEN results directly from EJSCREEN servers via their API
 #' 
 #' A wrapper for EJAM to use ejscreenit() 
 #' 
@@ -11,7 +11,7 @@
 #' @param namestr optional text
 #' @param fillmissingcolumns optional. set to TRUE if you want the output
 #'   to have exactly all the same columns as the EJAM table would, and
-#'   fill in with NA values all the columns not provided by EJScreen API.
+#'   fill in with NA values all the columns not provided by EJSCREEN API.
 #' @param nosave passed to [ejscreenit()]
 #' @param nosee passed to [ejscreenit()]
 #' @param fillmissingcolumns passed to [ejscreenapi2ejam_format()]
@@ -46,9 +46,9 @@ ejscreenit_for_ejam <- function(sitepoints, radius=3,
 ############################################################ #
 
 
-#' EJAM/EJSCREEN comparisons - Convert output of ejscreenapi_plus to format of ejamit table of sites
+#' EJAM / EJSCREEN comparisons - Convert output of ejscreenapi_plus to format of ejamit table of sites
 #' 
-#' Used by [ejscreenit_for_ejam()] to make it easier to compare EJScreen and EJAM results
+#' Used by [ejscreenit_for_ejam()] to make it easier to compare EJSCREEN and EJAM results
 #' 
 #' @param ejscreenapi_plus_out results of ejscreenapi_plus() or also 
 #'   could be results of ejscreenit()$table even though the colnames differ,
@@ -58,7 +58,7 @@ ejscreenit_for_ejam <- function(sitepoints, radius=3,
 #' 
 #' @param fillmissingcolumns optional. set to TRUE if you want the output
 #'   to have exactly all the same columns as the EJAM table would, and
-#'   fill in with NA values all the columns not provided by EJScreen API.
+#'   fill in with NA values all the columns not provided by EJSCREEN API.
 #' @param ejamcolnames optional. if specified as vector of colnames, it 
 #'   overrides the assumed colnames that would have been taken to be
 #'   colnames(testoutput_ejamit_10pts_1miles$results_bysite). 

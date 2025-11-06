@@ -3,7 +3,7 @@
 #' @title blockid2fips (DATA) Census FIPS codes of blocks
 #' @details
 #'   This is a VERY large file, used only when essential.
-#'   For documentation on EJScreen, see [EJScreen documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen)
+#'   For documentation on EJSCREEN, see [EJSCREEN documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen)
 #'   
 #'   blockid2fips is a table of all census blocks, with the FIPS codes.
 #'   

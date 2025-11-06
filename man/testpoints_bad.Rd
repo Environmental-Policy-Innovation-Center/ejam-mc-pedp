@@ -4,6 +4,12 @@
 \name{testpoints_bad}
 \alias{testpoints_bad}
 \title{test points data.frame with columns note, lat, lon}
+\format{
+An object of class \code{data.frame} with 9 rows and 3 columns.
+}
+\usage{
+testpoints_bad
+}
 \description{
 test points data.frame with columns note, lat, lon
 }
@@ -12,3 +18,4 @@ examples of test points for testing functions that need lat lon,
 with some invalid or tricky cases like rural (no blocks nearby), outside US,
 on edge of two states, NA values, etc.
 }
+\keyword{datasets}

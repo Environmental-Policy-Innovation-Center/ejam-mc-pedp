@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs_ejam_summary}
 \alias{ejscreen_vs_ejam_summary}
-\title{EJAM/EJSCREEN comparisons - see summary stats after using ejscreen_vs_ejam()}
+\title{EJAM / EJSCREEN comparisons - see summary stats after using ejscreen_vs_ejam()}
 \usage{
 ejscreen_vs_ejam_summary(
   vs = NULL,
@@ -63,7 +63,7 @@ i.e., the reported, rounded value.
 
 "max.abs.diff"
 
-"mean.pct.diff" Percent difference 0-100\% is absolute value of 100*(ratio - 1), and ratio is EJAM/EJSCREEN
+"mean.pct.diff" Percent difference 0-100\% is absolute value of 100*(ratio - 1), and ratio is EJAM / EJSCREEN
 
 "median.pct.diff" 0-100\%
 
@@ -76,14 +76,14 @@ where x is one of the actual values of abspctdiff found * 100.
 It uses 100 * quantile(y, probs = prob, type = 1)
 }
 \description{
-EJAM/EJSCREEN comparisons - see summary stats after using ejscreen_vs_ejam()
+EJAM / EJSCREEN comparisons - see summary stats after using ejscreen_vs_ejam()
 }
 \examples{
   radius = 3
   \donttest{
   pts <- testpoints_n(100, weighting = 'frs')
 
-  # This step can take a long time, almost 1 minute per 20 points, as it uses the EJScreen API:
+  # This step can take a long time, almost 1 minute per 20 points, as it uses the EJSCREEN API:
   vs100 <- ejscreen_vs_ejam(pts, radius = radius, include_ejindexes = TRUE)
 
   ejscreen_vs_ejam_see1(vs100, mysite = 1)
@@ -105,7 +105,7 @@ EJAM/EJSCREEN comparisons - see summary stats after using ejscreen_vs_ejam()
   sum100_within5pct[sum100_within5pct$indicator \%in\% names_these, ][ , c(1, 6:12)]
 
   ## longer analysis (45 minutes perhaps)
-  # This step can take a long time, almost 1 minute per 20 points, as it uses the EJScreen API:
+  # This step can take a long time, almost 1 minute per 20 points, as it uses the EJSCREEN API:
   # pts <- testpoints_n(1000, weighting = 'frs')
   # vs1000pts3miles <- ejscreen_vs_ejam(pts, radius = 3, include_ejindexes = TRUE)
   # sum_vs1000pts3miles <- ejscreen_vs_ejam_summary(vs1000pts3miles)

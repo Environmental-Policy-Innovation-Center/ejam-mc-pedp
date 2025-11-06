@@ -1,5 +1,5 @@
 
-#' Low-level utility to convert result of EJScreen API query into table format
+#' Low-level utility to convert result of EJSCREEN API query into table format
 #' 
 #' Convert json output of [ejscreenRESTbroker()] to a simple 1-row data.frame
 #' 
@@ -118,7 +118,7 @@ ejscreenRESTbroker2table <- function(brokeroutput, getstatefromplacename = TRUE)
   }
   if (getstatefromplacename) {
     ## instead of stateAbbr and stateName info directly from the API, which was sometimes wrong and may get phased out
-    ## per EJScreen tech support suggestion 8/2024:
+    ## per EJSCREEN tech support suggestion 8/2024:
     # results$placename = "Beaver County, OK" # example
     if (!("placename" %in% names(results))) {
       warning("API did not return placename, so cannot infer stateAbbr and stateName from placename, so just returning whatever API provided")

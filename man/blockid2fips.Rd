@@ -8,7 +8,7 @@ blockid2fips (DATA) Census FIPS codes of blocks
 }
 \details{
 This is a VERY large file, used only when essential.
-For documentation on EJScreen, see \href{https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen}{EJScreen documentation}
+For documentation on EJSCREEN, see \href{https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen}{EJSCREEN documentation}
 
 blockid2fips is a table of all census blocks, with the FIPS codes.
 

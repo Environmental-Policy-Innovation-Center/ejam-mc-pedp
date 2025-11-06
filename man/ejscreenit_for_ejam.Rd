@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreenit_for_ejam.R
 \name{ejscreenit_for_ejam}
 \alias{ejscreenit_for_ejam}
-\title{Get EJScreen results directly from EJScreen servers via their API}
+\title{Get EJSCREEN results directly from EJSCREEN servers via their API}
 \usage{
 ejscreenit_for_ejam(
   sitepoints,

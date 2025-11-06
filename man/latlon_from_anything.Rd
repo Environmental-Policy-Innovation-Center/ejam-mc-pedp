@@ -17,7 +17,7 @@ latlon_from_anything(
 this can be a filename (csv or xlsx, with path), or data.frame/ data.table/ matrix,
 or vector of longitudes (in which case y must be the latitudes).
 File or data.frame/data.table/matrix must have columns called lat and lon, or names that can
-be inferred to be that by latlon_infer()}
+be inferred to be that by \code{\link[=latlon_infer]{latlon_infer()}}}
 
 \item{lon_if_used}{If anything parameter is a vector of longitudes, lon_if_used must be the latitudes. Ignored otherwise.}
 
@@ -26,7 +26,7 @@ will prompt user for file if "anything" is missing.}
 
 \item{invalid_msg_table}{Set to TRUE to add columns "valid" and "invalid_msg" to output}
 
-\item{set_invalid_to_na}{used by latlon_df_clean()}
+\item{set_invalid_to_na}{used by \code{\link[=latlon_df_clean]{latlon_df_clean()}}}
 }
 \value{
 A data.frame that has at least columns lon and lat (and others if they were in anything),
@@ -45,19 +45,6 @@ This function relies on
 
 \code{\link[=latlon_df_clean]{latlon_df_clean()}}
 which in turn uses \code{\link[=latlon_infer]{latlon_infer()}} \code{\link[=latlon_as.numeric]{latlon_as.numeric()}} \code{\link[=latlon_is.valid]{latlon_is.valid()}}
-
-A draft function \code{\link[=read_and_clean_points]{read_and_clean_points()}} would a more general way to get points,
-
-but is still work in progress... it is similar to latlon_from_anything()
-
-except it also uses these functions:
-
-\code{\link[=latlon_from_regid]{latlon_from_regid()}},  \code{\link[=latlon_from_programid]{latlon_from_programid()}}
-
-and could eventually use  _from_naics() etc.
-
-Even more generally, FIPS and shapefile inputs could be read through a
-single wrapper function at some point.
 }
 \examples{
  latlon_from_anything(testpoints_10)
@@ -81,5 +68,6 @@ single wrapper function at some point.
 }
 \seealso{
 \code{\link[=sitepoints_from_any]{sitepoints_from_any()}} which is like this but also adds ejam_uniq_id column,
+\code{\link[=latlon_from_fips]{latlon_from_fips()}} and \code{\link[=latlon_from_shapefile_centroids]{latlon_from_shapefile_centroids()}} that find centroids,
 and see \code{\link[=read_csv_or_xl]{read_csv_or_xl()}} and \code{\link[=latlon_df_clean]{latlon_df_clean()}}
 }

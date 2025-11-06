@@ -27,9 +27,11 @@ test_that("still same exact results_overall as previously saved", {
     x <- doaggregate(testoutput_getblocksnearby_10pts_1miles,
                      sites2states_or_latlon = testpoints_10,
                      radius = 1, include_ejindexes = TRUE)
-    overall_has_changed <- !isTRUE(all.equal(
+    overall_has_changed <- !isTRUE(
+      all.equal(
       testoutput_doaggregate_10pts_1miles$results_overall,
-      x$results_overall))
+      x$results_overall)
+      )
   })
   expect_equal(
     testoutput_doaggregate_10pts_1miles$results_overall,
@@ -69,7 +71,7 @@ inputfips = "01117030701"
 bgfips_in = fips_bgs_in_fips(inputfips) #
 junk = capture_output({suppressMessages({
   s2b = getblocksnearby_from_fips(inputfips)
-  bysite = doaggregate(s2b)$results_bysite
+  bysite = doaggregate(s2b)$results_bysite  # finds bysite$state.pctile.Demog.Index 26, bysite$state.pctile.Demog.Index.Supp 25
 })})
 bgstats <- copy(blockgroupstats[bgfips %in% bgfips_in])
 
@@ -159,26 +161,35 @@ forpctilecols = gsub("state.pctile.", "", statepctilecols)
 ################### #
 test_that("replicate percentiles STATE", {
 
-  # account for pctile.Demog.Index      since it does not use Demog.Index      as basis, but needs Demog.Index.State  ??
-  # account for pctile.Demog.Index.Supp since it does not use Demog.Index.Supp as basis, but needs Demog.Index.Supp.State ??
-  # forpctilecols[forpctilecols == "Demog.Index"]      <-   "Demog.Index.State"
-  # forpctilecols[forpctilecols == "Demog.Index.Supp"] <-   "Demog.Index.Supp.State"
+  ## created test data like this:
+  ## analyze 1 site that is a tract that contains 5 blockgroups and 230 blocks
+  # inputfips = "01117030701"
+  # bgfips_in = fips_bgs_in_fips(inputfips)
+  # s2b = getblocksnearby_from_fips(inputfips)
+  # bysite = doaggregate(s2b)$results_bysite
+
   suppressWarnings({
-    x_calculated_here = as.vector(pctile_from_raw_lookup(bysite[, ..forpctilecols],
-                                                         varname.in.lookup.table = forpctilecols,
+    x_calculated_here = as.vector(pctile_from_raw_lookup(bysite[, ..forpctilecols], # this would use Demog.Index, Demog.Index.Supp, but need .State after those here
+                                                         varname.in.lookup.table = forpctilecols, # ok
                                                          lookup = statestats,
                                                          zone = bysite$ST))
+
+    # account for pctile.Demog.Index      since it does not use Demog.Index      as basis, but needs Demog.Index.State
+    # account for pctile.Demog.Index.Supp since it does not use Demog.Index.Supp as basis, but needs Demog.Index.Supp.State
+    forpctilecols_fixed = gsub("(Demog.Index.*)", "\\1.State", forpctilecols)
+    x_calculated_here_fixed = as.vector(pctile_from_raw_lookup(bysite[, ..forpctilecols_fixed],  # fixed
+                                                               varname.in.lookup.table = forpctilecols,
+                                                               lookup = statestats,
+                                                               zone = bysite$ST))
+
   })
   x_doag = as.vector(unlist(bysite[, ..statepctilecols]))
-  expect_equal(x_calculated_here, x_doag)
 
-  ## if not changing demog index ones, only the "Demog.Index.Supp" pctile fails to replicate:
-  # `actual[1:5]`:   26.0  29.0  25.0 0.0 62.0
-  # `expected[1:5]`: 26.0  25.0  25.0 0.0 62.0
-
-  ## if changed as above,
-  # `actual[1:5]`:     NA   NA   25.0 0.0 62.0  # "pctile.Demog.Index"  "pctile.Demog.Index.Supp" fail to replicate
-  # `expected[1:5]`: 26.0 25.0   25.0 0.0 62.0
+  expect_equal(x_calculated_here_fixed, x_doag)
+  #expect_equal(x_calculated_here,       x_doag)
+  ## if not fixed by changing demog index ones for calculation here (as done in doaggregate() code),  the "Demog.Index.Supp" pctile fails to replicate:
+  # `actual[1:5]`:   26.0  **29.0  25.0 0.0 62.0
+  # `expected[1:5]`: 26.0  **25.0  25.0 0.0 62.0
 })
 ################### # ################### #
 ## can we replicate averages?  ratios?

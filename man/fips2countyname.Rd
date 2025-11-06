@@ -2,7 +2,7 @@
 % Please edit documentation in R/FIPS_FUNCTIONS.R
 \name{fips2countyname}
 \alias{fips2countyname}
-\title{FIPS - Get county names from county FIPS codes}
+\title{FIPS - Get names for the Counties CONTAINING the given census units (of any type)}
 \usage{
 fips2countyname(fips, includestate = c("ST", "Statename", "")[1])
 }
@@ -12,10 +12,11 @@ fips2countyname(fips, includestate = c("ST", "Statename", "")[1])
 \item{includestate}{can be ST, Statename, "", or TRUE to specify what if anything comes after county name and comma}
 }
 \value{
-vector of county names, optionally with comma and 2-character abbreviation or full state name.
+vector of county names, same length as input fips vector,
+optionally with comma and 2-character abbreviation or full state name.
 }
 \description{
-FIPS - Get county names from county FIPS codes
+FIPS - Get names for the Counties CONTAINING the given census units (of any type)
 }
 \details{
 NOTE THAT ISLAND AREAS WORK DIFFERENTLY SINCE THEIR FIPS ARE NOT QUITE LIKE COUNTY FIPS
@@ -24,8 +25,18 @@ NOTE THAT ISLAND AREAS WORK DIFFERENTLY SINCE THEIR FIPS ARE NOT QUITE LIKE COUN
 }
 }
 \examples{
-  # names of all counties in ME and NY
-  fips2countyname(fips_counties_from_state_abbrev(c("ME", "NY")), includestate = "ST")
-   fips_counties_from_state_abbrev(c("AK", "LA"))
+cbind(
+  fips = fipsmix,
+  type = fipstype(fipsmix),
+  cfips = fips2countyfips(fipsmix),
+  countyname = fips2countyname(fipsmix)
+)
+
+cfips = fips_counties_from_state_abbrev("RI")
+fips2countyname(cfips, includestate = "Statename")
+fips2countyname(cfips)
+fips2name(cfips)
+fips2name(10001)
+fips2name(fips_counties_from_statename(c("Delaware", "Rhode Island")))
 
 }

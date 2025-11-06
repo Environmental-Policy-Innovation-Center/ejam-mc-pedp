@@ -28,7 +28,7 @@ custom_ejamit(
 \item{shapefile}{see \code{\link[=ejamit]{ejamit()}}}
 
 \item{custom_blockgroupstats}{like blockgroupstats but with custom
-indicators, one value per block group, with colnames bgid, bgfips, pop}
+indicators, one value per blockgroup, with colnames bgid, bgfips, pop}
 
 \item{countcols}{vector of colnames in custom_blockgroupstats to be
 aggregated as sums of counts, like population counts}

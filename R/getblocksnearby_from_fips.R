@@ -14,6 +14,8 @@
 #'   or FALSE to get the pts data.table much like output of [getblocksnearby()] or  [get_blockpoints_in_shape()]
 #' @param allow_multiple_fips_types if enabled, set TRUE to allow mix of blockgroup, tract, city, county, state fips
 #'
+#' @param radius CURRENTLY NOT IMPLEMENTED - NO BUFFER IS ADDED
+#'
 #' @return
 #' - if return_shp=F, returns just a sites2blocks data.table with colnames ejam_uniq_id, blockid, distance, blockwt, bgid, fips.
 #'  This is like the [getblocksnearby()] and [get_blockpoints_in_shape()] outputs.
@@ -37,8 +39,12 @@
 #' @export
 #'
 getblocksnearby_from_fips <- function(fips, in_shiny = FALSE, need_blockwt = TRUE,
-                                      return_shp = FALSE, allow_multiple_fips_types = TRUE) {
+                                      return_shp = FALSE, allow_multiple_fips_types = TRUE,
+                                      radius = 0) {
 
+  if (!is.null(radius) && radius > 0 && radius != 999) {
+    warning("adding buffer around fips is not yet implemented")
+  }
   ## NOTE       getblocksnearby_from_fips()           was using fips as the output ejam_uniq_id but now will use 1:NROW() like other getblock... functions do
   ## AND NOW,   getblocksnearby_from_fips_noncity()   same
   ## AND NOW,   getblocksnearby_from_fips_cityshape() same
@@ -327,7 +333,7 @@ getblocksnearby_from_fips_noncity <- function(fips, return_shp = FALSE, in_shiny
       shiny::validate('No blockgroups found for noncity FIP codes.')
       return(NULL)
     } else {
-      warning('No blockgroups found for noncity FIP codes.') #  just give a warning so that mix of valid city and no valid noncity can continue
+      cat('No blockgroups found for noncity FIP codes.\n') # maybe  give a warning so that mix of valid city and no valid noncity can continue
       return(NULL)
     }
   } else {

@@ -1,12 +1,266 @@
 
 # Functions related to managing the EJAM package, names of its functions and datasets, etc.
 
+################################ ################################# #
+# . ####
+# Notes on finding/counting global functions  ####
+## different ways of finding pkg functions:
+## 614-622 global functions found ####
+
+# one way - using  getNamespace() within pkg_functions_and_data()
+#
+## 622 exported? or total global?
+# y <- EJAM:::pkg_functions_and_data('EJAM', internal_included = F, data_included = F, alphasort_table = T, vectoronly = T)
+# length(y)
+##[1] 622
+### yy <- pkg_functions_and_data(); table(yy[!yy$data,]$exported) # about 622 but maybe because after load_all()
+### yy <- yy[!yy$data,]$object
+
+# second way - by searching for text in source files:
+#
+### 249 exported + 365 global internal = 614 ####
+## 614 global functions?
+##
+# find names of functions with @export or other tag
+
+#  exported_functions <- pkg_functions_by_roxygen_tag()
+#
+## 252 functions with export tag per this approach  ***********
+#
+####################################################### #
+## a newer function to compare to others
+#
+# x <- pkg_functions_preceding_lines()
+# tail(x)
+# colSums(x[,2:6])
+
+# 562 functions found by this approach (seems to miss some)
+# 104 functions lack documentation because have no roxygen tags
+# 458 functions have roxygen tags per this approach
+#  53 functions lack documentation because have a noRd tag
+#    table(EXPORT = x$export, NORD= x$nord) # >50 say noRd (but just 1 is exported)
+# 405 functions have roxygen tags and do create documentation as .Rd file
+# 237 functions have export tag per this approach ***********
+# 219 functions have keywords internal tag
+# table(EXPORT = x$export, x$internal) # some are exported but "internal" in sense of not being listed in the index of functions
+
+####################################################### #
+##   look for those tagged as export, or keywords internal
+#
+# pkg_functions_export_tag <-
+#  exported_functions <- pkg_functions_by_roxygen_tag()
+#
+# pkg_functions_internal_tag <-
+#  keywords_internal  <- pkg_functions_by_roxygen_tag(tagpattern = "#' @keywords internal")
+#
+#   length(unique(union(exported_functions, keywords_internal)))
+## [1] 440 functions have 1 or both of those tags
+## 55 have both.
+#     length(exported_functions)
+## [1] 252
+#  length(keywords_internal)
+## [1] 243
+#  length(
+#    intersect(exported_functions, keywords_internal)
+#   )
+## [1] 55
+#
+## pkg_functions_found_in_files() ### #
+#
+################################ #
+# others
+#
+# y = pkg_functions_and_data()
+#
+# z = pkg_functions_and_sourcefiles()
+#
+####################################################### #
+# any_functions = pkg_functions_found_in_files()
+# length(z)
+# # [1] 614 total
+#
+# length(exported_functions)
+## [1] 249  exported
+#
+# unexported_functions <- sort(unique(setdiff(any_functions, exported_functions)))
+# length(unexported_functions)
+## ## 365  unexported (of which 237 tagged as keywords internal)
+##
+# length(unique(union(c(exported_functions, keywords_internal), any_functions)))
+# untagged = setdiff(any_functions, unique(union(exported_functions, keywords_internal)))
+# length(untagged)
+## [1] 184
+# length(setdiff(c(exported_functions, keywords_internal), any_functions) )
+## 0
+# . ####
+################################ ################################# #
 
 
-# GET FUNCTIONS, DATA, SOURCEFILES, ETC. ####
+# LISTING PKG  FUNCTIONS, DATA, SOURCEFILES, ETC. ####
 
 ##################################################################################### #
 # . ####
+
+## package directory ####
+
+pkg_dir_installed = function(pkg="EJAM") {find.package(pkg, lib.loc = .libPaths())}
+
+pkg_dir_loaded_from = function(pkg="EJAM") {find.package(pkg, lib.loc = NULL)}
+
+##################################################################################### #
+
+## searching text in source files ####
+
+# helper for find_in_files()
+
+grab_hits = function(pattern, x, ignore.case = TRUE, ignorecomments = FALSE, value = TRUE) {
+
+  # use grepl to find all members of character vector z where the character string "h" appears in the string
+  # but the string does not start with zero or more spaces followed by the character "#"
+  # ## example
+  #   xx = c("   ej", "ej", "#ej", "   #ej", "asdf#ej", "   asdf#ej", "#   ej", "#   xej", "x#  ej", "  x#ej")
+  #
+  # cbind(xx, grab_hits("ej", xx, ignorecomments = TRUE,  value = F))
+  # cbind(xx, grab_hits("ej", xx, ignorecomments = FALSE, value = F))
+  #
+  # cbind(  grab_hits("ej", xx, ignorecomments = TRUE,    value = T))
+  # cbind(  grab_hits("ej", xx, ignorecomments = FALSE,   value = T))
+
+  hit_line = grepl(pattern = pattern, x = x, ignore.case = ignore.case)
+  commented_line = grepl("^\\s*#", x = x)
+  if (ignorecomments) {
+    hits  = hit_line & !commented_line
+  } else {
+    hits = hit_line
+  }
+  which_hit = which(hits)
+  if (value) {
+    out = x[hits]
+  } else {
+    out = hits # like grepl
+  }
+  names(out) <- which_hit # names(out) are the file's line numbers if looking in a file via find_in_files()
+  return(out)
+}
+################################ #
+
+
+#' utility to do global search/find in full text of the files in a folder, like source code files or unit tests
+#'
+#' @param pattern regular expression to look for
+#' @param path can change it to e.g., "./R"
+#' @param filename_pattern query regex on file names, default is R code files
+#' @param ignorecomments omit hits from commented out lines
+#' @param ignore.case as in grep
+#' @param value logical as in [grep()] if TRUE returns matching text;
+#'    if FALSE, returns logical vectors like [grepl()]
+#' @param whole_line set it to FALSE to see only the matching fragments
+#'   vs entire line of text that has a match in it
+#' @param quiet whether to print results or just invisibly return
+#' @returns list of named vectors,
+#'   where names are file paths with hits, elements are vectors of text with hits
+#' @examples
+#' EJAM:::find_in_files("[^_]logo_....",    path = "./R", whole_line = FALSE, quiet = F)
+#' EJAM:::find_in_files("report_logo.....", path = "./R", whole_line = FALSE, quiet = F)
+#' EJAM:::find_in_files("app_logo......",   path = "./R", whole_line = FALSE, quiet = F)
+#'
+#' EJAM:::find_in_files("latlon_from_.{18}", quiet = FALSE, whole_line = F)
+#' EJAM:::find_in_files("latlon_from_s.{9}", quiet = FALSE, whole_line = F)
+#' EJAM:::find_in_files("latlon_from_mact.{9}", quiet = FALSE, whole_line = F)
+#'
+#' @keywords internal
+#'
+find_in_files <- function(pattern, path = "./tests/testthat", filename_pattern = "\\.R$|\\.r$",
+                          ignorecomments = FALSE,
+                          ignore.case = TRUE,
+                          value = TRUE, whole_line = TRUE, quiet=TRUE) {
+  if (!quiet) {
+    cat("\nSearching in ", path, ' to find files containing ', pattern, '\n')
+    # or e.g., find_in_files(pattern = "^#'.*[^<]http", path = "./R")
+  }
+  x <- list.files(path = path, pattern = filename_pattern, recursive = TRUE, full.names = TRUE)
+  names(x) <- x
+  if (ignorecomments) {
+    pattern <- paste0("(^|[^#])", pattern) # ignore comments, so only match if not preceded by a #
+  }
+  found <- x |>
+    purrr::map(
+      # ~grep(    pattern, readLines(.x, warn = FALSE), value = value, ignore.case = ignore.case)
+      ~grab_hits(pattern, readLines(.x, warn = FALSE), value = value, ignore.case = ignore.case,
+                 ignorecomments = ignorecomments)
+    ) |>
+    purrr::keep(~length(.x) > 0)
+  if (!whole_line) {
+    # return just the matching part, not text before or after that on a given line of text
+    found <- lapply(found, function(z) as.vector(gsub(paste0(".*(", pattern, ").*"), "\\1",  z)))
+  }
+  if (!quiet) {
+    if (length(found) > 0) {
+      if (!whole_line) {
+        print(sapply(found, cbind))
+      } else {
+        print(sapply(found, function(y) cbind(linenumber = names(y), text = y)))
+      }
+      cat("\n------------------------------------------------------------------------- \n")
+      cat("------------------------------------------------------------------------- \n")
+    }
+    if (value) {
+      print(cbind(hits_in_file = sort(sapply(found[sapply(found, NROW) > 0], NROW))))
+    } else {
+      print(cbind(hits_in_file = sort(sapply(found[sapply(found, sum) > 0], sum))) )
+    }
+  }
+  invisible(found)
+}
+################################ #
+
+# search for vector of query terms, to see which ones are found in any of the files
+# ... passed to find_in_files() can be ignore.case, filename_pattern
+# ignorecomments = TRUE IS NOT DEFAULT IN find_in_files() but is here
+
+found_in_files <- function(pattern_vector, path = "./R", ignorecomments = TRUE, ...) {
+
+  found = vector(length = length(pattern_vector))
+  for (i in seq_along(pattern_vector)) {
+    hits = find_in_files(pattern_vector[i], path = path, ignorecomments=ignorecomments, ...)
+    found[i] <- length(hits) > 0
+  }
+  foundones = pattern_vector[found]
+  print(foundones)
+  return(found) # logical vector
+}
+################################ #
+
+# frequency of occurrences of each term within a list of files
+# actually how many lines of code does it appear in so counts as 1 each line where it appears even if it appears >1x in that line
+# ignorecomments = TRUE IS NOT DEFAULT IN find_in_files() but is here
+
+found_in_N_files_T_times <- function(pattern_vector, path = "./R", ignorecomments = TRUE, ...) {
+
+  nfiles <- vector(length = length(pattern_vector))
+  nhits <- vector(length = length(pattern_vector))
+  for (i in seq_along(pattern_vector)) {
+    hits <- find_in_files(pattern_vector[i], path = path, ignorecomments = ignorecomments, ...)
+    nfiles[i] <- length(hits)
+    nhits[i] <- length(as.vector(unlist(hits)))
+    # found[i] <- length(hits) > 0
+  }
+  # foundones <- pattern_vector[found]
+  out <- data.frame(term = pattern_vector,
+                    nfiles = nfiles,
+                    nhits = nhits
+  )
+  print(head(
+    out[order(out$nfiles, out$nhits, decreasing = TRUE), ]
+  ), 10)
+  invisible(out)
+}
+################################ ################################# #
+# . ####
+## package's functions & datasets####
+
+
+
 # get functions, datasets, filenames - exported & internal
 
 #' utility to see which objects in a loaded/attached package are functions or datasets, exported or not (internal)
@@ -33,12 +287,16 @@
 #'
 #' @keywords internal
 #'
-pkg_functions_and_data <- function(pkg,
+pkg_functions_and_data <- function(pkg = "EJAM",
                                    alphasort_table = FALSE,
                                    internal_included = TRUE,
                                    exportedfuncs_included = TRUE,
                                    data_included = TRUE,
                                    vectoronly = FALSE) {
+
+  if (!paste0("package:", pkg) %in% search()) {
+    stop(paste0("package:", pkg), " is not found in search() -- this function needs the package attached via library() or require() or possibly via devtools::load_all()")
+  }
 
   ## (helpers) ### #
   if (!internal_included) {
@@ -312,6 +570,7 @@ pkg_data <- function(pkg = 'EJAM', len=30, sortbysize=TRUE, simple = TRUE) {
   }
 }
 ##################################################################################### #
+# . ####
 
 # # utility to get the filename where a function is defined PLUS other info
 # #
@@ -337,7 +596,7 @@ pkg_functions_and_sourcefiles <- function(pkg = "EJAM",
   if (basename(getwd()) != pkg) {stop("working directory must be the source package folder for pkg", pkg)}
   x <- pkg_functions_with_keywords_internal_tag(loadagain = loadagain, quiet = quiet) # DOES load_all() again if loadagain==TRUE
   fnames <- x$func
-  fnames <- fnames[match(funcnames, fnames)] # match to ensure same order as info$object, but check how extra or missing ones are handled
+  fnames <- x$file[match(funcnames, fnames)] # match to ensure same order as info$object, but check how extra or missing ones are handled
   if (vectoronly) {
     return(fnames)
   } else {
@@ -412,7 +671,11 @@ pkg_functions_and_sourcefiles2 <- function(funcnames, pkg = "EJAM", full.names =
 
 # NOTE THIS IS SLOW SINCE by default IT LOADS THE PACKAGE (AND PARSES ALL ROXYGEN TAGS)
 
-pkg_functions_with_keywords_internal_tag <- function(package.dir = ".", loadagain = TRUE, quiet = FALSE) {
+## compare this to   pkg_functions_by_roxygen_tag()
+
+pkg_functions_with_keywords_internal_tag <- function(
+
+  package.dir = ".", loadagain = TRUE, quiet = FALSE) {
 
   # Does load_all() first if loadagain==TRUE so even unexported functions will seem exported, fyi
   #
@@ -427,7 +690,7 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".", loadagai
   base_path <- normalizePath(package.dir)
   is_first <- roxygen2:::roxygen_setup(base_path)
   roxygen2:::roxy_meta_load(base_path)
-  packages <- roxygen2:::roxy_meta_get("packages")
+  packages <- roxygen2::roxy_meta_get("packages")
   lapply(packages, loadNamespace)
   if (loadagain) {
     load_code <- roxygen2:::find_load_strategy(load_code)
@@ -437,7 +700,7 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".", loadagai
   }
   roxygen2:::local_roxy_meta_set("env", env)
 
-  blocks <- roxygen2:::parse_package(base_path, env = NULL)  # slow step
+  blocks <- roxygen2::parse_package(base_path, env = NULL)  # slow step
 
   results <- list()
   i <- 0
@@ -448,7 +711,7 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".", loadagai
     # block <- blocks[[671]]
     # block <- blocks[[1]]
 
-    object_name <- roxygen2:::block_get_tag_value(block, 'name')
+    object_name <- roxygen2::block_get_tag_value(block, 'name')
     if (is.null(object_name) || length(object_name) == 0 || any(is.na(object_name))) {
       object_name <- NA
       # cat("cannot find name in this block: \n")
@@ -473,7 +736,7 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".", loadagai
     if (!quiet) {
       cat(paste0(i, ". ", paste0(object_call, " / ", object_name), " "))
     }
-    tags <- roxygen2:::block_get_tags(block, "keywords")
+    tags <- roxygen2::block_get_tags(block, "keywords")
 
     if (length(tags) == 0) {
       if (!quiet) {cat(' \n')}
@@ -481,7 +744,7 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".", loadagai
     } else {
       if (length(tags) > 1) {
         if (!quiet) {cat("   MULTIPLE KEYWORDS TAGS FOUND - showing 1st only\n")}
-        }
+      }
       if (!quiet) {cat(' @keywords ')}
       # for (tag in tags) {
       #    keyword <- roxygen2:::block_get_tag_value(block, 'keywords')  # or
@@ -511,6 +774,138 @@ pkg_functions_with_keywords_internal_tag <- function(package.dir = ".", loadagai
   # return(list(blocks = blocks, results = results) ) # for troubleshooting
 }
 ##################################################################### #
+
+################################ #
+
+
+pkg_functions_by_roxygen_tag <- function(
+    tagpattern = "#' @export",
+    path="./R"
+) {
+
+  x = find_in_files(tagpattern, path = path)
+  n = length(x)
+  fname = vector(length = n); rownums = list()
+  funcname <- NULL
+
+  for (i in seq_along(x)) {
+    fname[i] = names(x[i])
+    rownums[[i]] = names(x[[i]] )
+    taglinenumbers = as.numeric(rownums[[i]])
+    txt = readLines(fname[i])
+    for (ii in 1:length(taglinenumbers)) {
+      nextfuncname <-
+        grep(pattern = "^([^# ]*) .*function\\(",
+             x = txt[   taglinenumbers[ii]:(4 + taglinenumbers[ii]) ],
+             value = TRUE)
+      nextfuncname <- gsub("^([^ #]*) .*function\\(.*", "\\1", nextfuncname)
+      if (is.null(nextfuncname)
+          # || (0 %in% length(nextfuncname) )
+      ) {
+        cat("no function definition found just after line ", taglinenumbers[ii], " in file ", fname[i])
+        nextfuncname <- NULL
+      } else {
+        if ("" %in% nextfuncname) { nextfuncname <- NULL} else {
+          if (length(nextfuncname) == 0) { nextfuncname <- NULL}
+        }
+      }
+      funcname <- c(funcname, nextfuncname)
+    }
+  }
+  return(funcname)
+}
+################################ #
+
+## Roughly  how many internal global functions are loaded with no @keywords internal tag?
+## This just counts source code lines where a function definition seems to start on
+## a line with no leading spaces or # signs (not a commented line)
+## so it probably avoids functions defined within other functions
+##
+pkg_functions_found_in_files <- function(
+
+  pattern = "^([^# ]*) .*function\\(",
+  pattern_gsub =  "^([^# ]*) .*function\\(.*",
+  path= "./R") {
+
+  z = find_in_files( pattern = pattern, path = path)
+  z = as.vector(unlist(z))
+  z = gsub(pattern_gsub,  "\\1", z)
+  z = z[!(z %in% "")]
+  return(z)
+}
+################################ #
+
+## view a few lines of code just above a function definition,
+## to see if it has any roxygen comments at all
+## or says #' @keywords internal  or whatever
+
+pkg_functions_preceding_lines = function(path = "./R") {
+
+  n <- 0
+  info_roxy_nobreak <- vector()
+  info_roxy <- vector()
+  info_roxy <- vector()
+  info_func <- vector()
+  info_internal <- vector()
+  info_nord <- vector()
+  info_export <- vector()
+
+  query = "^[^ #]* *<- *function"
+  files_defining_functions <- EJAM:::find_in_files(query, path = path, quiet = TRUE)
+  filenames = (names(files_defining_functions))
+
+  for (thisfile in seq_along(files_defining_functions)) {
+
+    textrows = readLines(filenames[thisfile])
+    linenums = as.numeric(names(files_defining_functions[[thisfile]]))
+    funcnames = as.vector(gsub("^([^ ]*) .*", "\\1", files_defining_functions[[thisfile]]))
+
+    for (thisfunction in 1:length(funcnames)) {
+      n = n + 1
+      priorlinenums = (linenums[thisfunction] - (5:0))
+      priorlinenums[priorlinenums < 1] <- 1
+      priorlinenums <- unique(priorlinenums)
+
+      text2show = textrows[priorlinenums]
+      # show just the function name not that whole line
+      funcname <- gsub(" .*", "", text2show[length(text2show)])
+      # text2show[length(text2show)] <- paste0(funcname, " <- ")
+      # drop func definition line itself
+      text2show <- text2show[1:(length(text2show) - 1)]
+      # drop all but blank and #' roxygen lines, for display purposes
+      text2show <- text2show[nchar(text2show) == 0 | grepl("^#' [^ ]", text2show)]
+      text2show[nchar(text2show) == 0] <- "     [just a blank line is here]"
+      text2show <- unique(text2show)
+
+      priorlinetext = textrows[max(priorlinenums)]
+      info_roxy_nobreak[n] <- substr(priorlinetext,1,2) == "#'" # only in the last row
+      info_roxy[n] <- any(grepl("#'", text2show)) # any of last few rows
+      info_func[n] <- funcname
+      info_internal[n] <- any(grepl("@keywords internal", text2show))
+      info_nord[n]     <- any(grepl("@noRd", text2show))
+      info_export[n]   <- any(grepl("@export", text2show))
+
+      cat("------------------ File: ", as.vector(basename(filenames[thisfile])),
+          "--------- Func: ", paste0(funcname, "() "), "\n")
+
+      cat(text2show, sep = "\n")
+      # cat("\n")
+    }
+  }
+  return(
+    data.frame(
+      func = info_func,
+      roxy_nobreak = info_roxy_nobreak,
+      roxy = info_roxy,
+      export = info_export,
+      internal = info_internal,
+      nord = info_nord
+    )
+  )
+}
+################################ ################################# #
+# . ####
+################################ ################################# #
 
 # conflicting sourcefile names ####
 
@@ -684,7 +1079,7 @@ pkg_functions_all_equal <- function(fun="latlon_infer", package1="EJAM", package
 
   # 1) Normally it checks the first two cases of dupe named functions from 2 packages,
   # and answers with FALSE or TRUE (1 value).
-  # But it returns FALSE 3 times only in the case of run_app (but not latlon_is.valid)
+  # But it returns FALSE 3 times for some?
   # pkg_dupenames(ejampackages) # or just pkg_dupenames()
 
   # 2) ### error when checking a package that is loaded but not attached.
@@ -697,7 +1092,7 @@ pkg_functions_all_equal <- function(fun="latlon_infer", package1="EJAM", package
   #                                                                   distances.all not found in proxistat
   #                                                                Called from: pkg_functions_all_equal(fun = var, package1 = ddd$package[ddd$variable ==
 
-  if (!(is.character(fun) & is.character(package1) & is.character(package2))) {
+  if (!(is.character(fun) && is.character(package1) && is.character(package2))) {
     warning("all params must be quoted ")
     return(NA)
   }
@@ -727,7 +1122,7 @@ pkg_functions_all_equal <- function(fun="latlon_infer", package1="EJAM", package
   }
   if (!(is.function(f2))) {warning(package2, "::", fun, " is not a function");return(NA)}
 
-  x <- (TRUE == all.equal(body(f1), body(f2))) & (TRUE == all.equal(formals(f1), formals(f2)))
+  x <- isTRUE(all.equal(body(f1), body(f2))) && isTRUE(all.equal(formals(f1), formals(f2)))
   return(x)
 }
 ##################################################################################### #
@@ -759,7 +1154,7 @@ pkg_functions_all_equal <- function(fun="latlon_infer", package1="EJAM", package
 pkg_functions_that_use <- function(text = "stop\\(", pkg = "EJAM", ignore_comments = TRUE) {
 
 
-  if (grepl("\\(", text) & !grepl("\\\\\\(", text)) {warning('to look for uses of stop(), for example, use two slashes before the open parens, etc. as when using grepl()')}
+  if (grepl("\\(", text) && !grepl("\\\\\\(", text)) {warning('to look for uses of stop(), for example, use two slashes before the open parens, etc. as when using grepl()')}
 
   stops <- NULL
   if (inherits(try(find.package(pkg), silent = TRUE), "try-error")) {
@@ -789,7 +1184,7 @@ pkg_functions_that_use <- function(text = "stop\\(", pkg = "EJAM", ignore_commen
     }
   } else {
     # it is an installed package
-    if (ignore_comments == FALSE) {warning('always ignores commented lines when checking exported functions of an installed package')}
+    if (!ignore_comments) {warning('always ignores commented lines when checking exported functions of an installed package')}
     for (this in getNamespaceExports(pkg)) {
 
       text_lines_of_function_body <- as.character(functionBody(get(this)))
@@ -835,16 +1230,79 @@ pkg_dependencies <- function(localpkg = "EJAM", depth = 6, ignores_grep = "09128
 
   cat(paste0("
 
-  # This may be useful to see dependencies of a package like EJAM:
+  # Some notes on ways to see dependencies of a package like EJAM:
 
-x = sort(packrat", ":::", "recursivePackageDependencies('",
+x1 = renv::dependencies()
+
+x2 = sort(packrat", ":::", "recursivePackageDependencies('",
              localpkg,
              "', lib.loc = .libPaths(), ignores = NULL))
 
-x
+# but note that https://rstudio.github.io/renv/articles/packrat.html explains that
+# the renv package has replaced the packrat package
+
+# For example try this for the EJAM package:
+
+
+# from root of source pkg:
+x1 = renv::dependencies() ; x1 = unique(x1$Package)
+x2 = sort(packrat:::recursivePackageDependencies('EJAM', lib.loc = .libPaths(), ignores = NULL))
+x3 = attachment::att_from_rscripts()
+x4 = attachment::att_from_examples()
+x5 = attachment::att_from_description()
+x6 = attachment::att_from_rmds()
+xl = list(x1,x2,x3,x4,x5,x6)
+names(xl) <- c('renv', 'packrat', 'rscripts', 'examples', 'desc', 'rmds')
+print(sapply(xl, length))
+length(setdiff(xl$renv, xl$packrat))
+length(setdiff(xl$packrat, xl$rscripts))
+length(intersect(xl$packrat, xl$rscripts))
+length(setdiff(xl$rscripts, xl$packrat))
+
+
+pkgs_needed = sort(packrat:::recursivePackageDependencies('EJAM', lib.loc = .libPaths(), ignores = NULL))
+# shorter list because direct not all recursive, but provides rationale for each inference:
+pkgs_needed_newerinfo = renv::dependencies()
+pkgs_needed2 = sort(unique(pkgs_needed_newerinfo$Package))
+
+pkgs_in_imports  = desc::desc_get('Imports',  file = system.file('DESCRIPTION', package='EJAM'))
+pkgs_in_suggests = desc::desc_get('Suggests', file = system.file('DESCRIPTION', package='EJAM'))
+cleanit = function(x) {
+ x = gsub('\n', '', x)
+ x = trimws(as.vector(unlist(strsplit(x, ','))))
+ x = gsub(' .*', '', x)
+ return(x)
+}
+pkgs_in_imports = cleanit(pkgs_in_imports)
+pkgs_in_suggests = cleanit(pkgs_in_suggests)
+pkgs_missing_from_desc_supposedly_needed = sort(setdiff(pkgs_needed, c(pkgs_in_imports, pkgs_in_suggests)))
+pkgs_in_desc_supposedly_not_needed       = sort(setdiff(c(pkgs_in_imports, pkgs_in_suggests), pkgs_needed))
+
+pkgs_missing_from_desc_supposedly_needed
+pkgs_in_desc_supposedly_not_needed
+setdiff(pkgs_needed2, pkgs_needed) # found by renv but not by packrat
+
+# > setdiff(setdiff(pkgs_needed2, pkgs_needed), pkgs_in_desc_supposedly_not_needed)
+#  [1] 'base'               'census2020download' 'EJAM'               'githubr'            'graphics'           'grDevices'          'parallel'           'plumber'
+#  [9] 'roxygen2'           'rsconnect'          'stats'              'svglite'            'tools'              'utils'
+# > setdiff(pkgs_in_desc_supposedly_not_needed, setdiff(pkgs_needed2, pkgs_needed))
+# [1] 'datasets'      'fipio'         'rnaturalearth' 'tidygeocoder'
+
+# but should confirm these truly reflect what is actually needed and not needed
+# for web app to work,
+# functions used by analysts but not web app, and
+# functions only used in maintaining the pkg!
+pkgs_all = unique(c(pkgs_in_imports, pkgs_in_suggests, pkgs_needed))
+pkgs_all_sizes = EJAM:::pkg_sizes(pkgs_all, quiet=T) # e.g., nearly 1 GB
+# Largest packages:  (size of folder once installed)
+cat(length(pkgs_all), ' packages appear to be needed.\n')
+tail(pkgs_all_sizes, 15)
+
+
+# and see EJAM:::find_transitive_minR() to see what version of R those collectively need at minimum
       "))
 
-  #################### #
+
 
   #   cat(paste0("
   #
@@ -885,4 +1343,109 @@ x
   ## for some reason this 1 package is identified as a dependency one way but not the other way
 
   invisible()
+}
+##################################################################################### #
+
+#################### #  #################### #  #################### #
+
+pkg_sizes = function(pkgs, quiet=FALSE) {
+
+  get_directory_size <- function(path, recursive = TRUE) {
+    # Ensure the provided path is a character string
+    stopifnot(is.character(path))
+
+    # List all files within the directory, including subdirectories if recursive is TRUE
+    # full.names = TRUE ensures the full path is returned for each file
+    files <- list.files(path, full.names = TRUE, recursive = recursive)
+
+    # Get file information for all listed files
+    # The 'size' column contains the size of each file in bytes
+    file_details <- file.info(files)
+
+    # Sum the sizes of all files to get the total directory size
+    total_size <- sum(file_details$size, na.rm = TRUE)
+    return(total_size / 1e6)
+  }
+
+  x = vector(length = length(pkgs))
+  for (i in seq_along(pkgs)) {
+    loc <- try(find.package(pkgs[i])[1], silent = TRUE)
+    if (inherits(loc, "try-error")) {
+      x[i] <- NA
+    } else {
+      x[i] <- get_directory_size(loc)
+    }
+    if (!quiet) {
+      cat(paste0(i, "/", length(pkgs), " ", pkgs[i], " size = ", round(x[i], 2), " MB\n"))
+    }
+  }
+  y = data.frame(meg = round(x, 3), pkg = pkgs)
+  cat("\n\nTOTAL: ", round(sum(y$meg, na.rm = TRUE), 1), "MB in ", length(y$meg)," packages. \n\n")
+  y = y[order(-y$meg), ]
+  rownames(y) <- NULL
+  y = y[order(y$meg), ]
+  return(y)
+
+  # # Save directory
+  # save.dir = "F:/CRANMirror"
+  #
+  # # Create a directory to store package .tar.gz
+  # dir.create(save.dir)
+  #
+  # # Obtain a list of packages
+  # pkgs = available.packages()[,'Package']
+  #
+  # # Download those packages
+  # download.packages(pkgs = pkg$package.list, destdir = save.dir)
+  # pkg.files = list.files(save.dir)
+  # pkg.sizes = round(file.size(file.path(save.dir,pkg.files))/ 1024^2,2) # Convert to MB from Bytes
+}
+
+# x = pkg_sizes(pkgs_all )
+
+#################### #  #################### #  #################### #
+
+# REPORT WHAT R VERSION IS ALREADY THE MINIMUM REQUIREMENT ACROSS THE PACKAGE EJAM DEPENDS UPON?
+
+## based on https://www.r-bloggers.com/2022/09/minimum-r-version-dependency-in-r-packages/
+
+find_transitive_minR <- function(package = 'EJAM', recursive_deps = NULL) {
+
+  db <- tools::CRAN_package_db()
+
+  if (is.null(recursive_deps)) {
+
+    if (package == "EJAM") {
+      msg = paste0("Try this after installing the packrat package:
+    recursive_deps <- packrat",
+                   ":::",
+                   "recursivePackageDependencies('EJAM', lib.loc = .libPaths(), ignores = NULL)
+
+                 find_transitive_minR(recursive_deps = recursive_deps)"
+      )
+      cat(msg, "\n\n")
+      stop("EJAM package does not require packrat so you might need to install that separately")
+    } else {
+      recursive_deps <- tools::package_dependencies(
+        package = package,
+        recursive = TRUE,
+        db = db
+      )[[1]]
+    }
+  }
+
+  # These code chunks are detailed below in the 'Minimum R dependencies in CRAN
+  # packages' section
+  r_deps <- db |>
+    dplyr::filter(Package %in% recursive_deps) |>
+    # We exclude recommended pkgs as they're always shown as depending on R-devel
+    dplyr::filter(is.na(Priority) | Priority != "recommended") |>
+    dplyr::pull(Depends) |>
+    strsplit(split = ",") |>
+    purrr::map(~ grep("^R ", .x, value = TRUE)) |>
+    unlist()
+
+  r_vers <- trimws(gsub("^R \\(>=?\\s(.+)\\)", "\\1", r_deps))
+
+  return(max(package_version(r_vers)))
 }

@@ -31,7 +31,7 @@ ejam2report(
     names_d_other_count),
   extratable_hide_missing_rows_for = as.vector(unlist(extratable_list_of_sections)),
   report_title = NULL,
-  logo_path = NULL,
+  logo_path = EJAM:::global_or_param("report_logo"),
   logo_html = NULL
 )
 }
@@ -40,7 +40,7 @@ ejam2report(
 if sitenumber parameter is used, or a data.table called \code{results_overall} otherwise}
 
 \item{sitenumber}{If a number is provided, the report is about
-\code{ejamitout$results_bysite[sitenumber, ]} and if no number is provided (param is NULL)
+\code{ejamitout$results_bysite[sitenumber, ]} and if no number is provided (param is NULL or "")
 then the report is about \code{ejamitout$results_overall}}
 
 \item{analysis_title}{optional title of analysis}
@@ -80,7 +80,7 @@ as with many of names_d_language, in extra table of demog. subgroups, etc.}
 \item{report_title}{optional generic name of this type of report, to be shown at top, like "EJAM Multisite Report"}
 
 \item{logo_path}{optional relative path to a logo for the upper right of the overall header.
-Ignored if logo_html is specified and not NULL, but otherwise uses default or param set in run_app()}
+Ignored if logo_html is specified and not NULL, but otherwise uses default or param set in ejamapp()}
 
 \item{logo_html}{optional HTML for img of logo for the upper right of the overall header.
 If specified, it overrides logo_path. If omitted, gets created based on logo_path.}
@@ -90,8 +90,8 @@ URL of temp file or object depending on return_html,
 and has side effect of launching browser to view it depending on return_html
 }
 \description{
-Get URL for and view in browser a 2-page summary report similar to the
-EJScreen Community Report
+Get URL for and view in browser a summary report (similar to used to be called the
+EJSCREEN Community Report)
 }
 \details{
 This relies on \code{\link[=build_community_report]{build_community_report()}} as used in web app

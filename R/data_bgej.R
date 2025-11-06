@@ -4,13 +4,13 @@
 
 #' @name bgej
 #' @docType data
-#' @title bgej (DATA) Summary Indexes for Census block groups
+#' @title bgej (DATA) Summary Indexes for Census blockgroups
 #' @description bgej is a table of all blockgroups, with the raw scores of the Summary Indexes
 #'   and Supplemental Summary Indexes for all the environmental indicators.
 #' @details This file is not stored in the package.
 #'
 #'   For documentation on the residential population and environmental data and indicators,
-#'   see [EJScreen documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/understanding-ejscreen-results).
+#'   see [EJSCREEN documentation](https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/understanding-ejscreen-results).
 #'
 #'   The column names are these:
 #'

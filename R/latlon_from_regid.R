@@ -1,24 +1,26 @@
 
-#' Get lat lon (and NAICS) via Facility Registry ID
-#' 
-#' @param regid Facility Registry Service ID like 110010052520
+#' Get latitude, longitude (and NAICS) via EPA Facility Registry ID
+#' See FRS Facility Registry Service data on EPA-regulated sites
 #'
-#' @return data.table with columns 
-#'   lat,lon,REGISTRY_ID,PRIMARY_NAME,NAICS,PGM_SYS_ACRNMS
-#' @examples 
+#' @aliases frs_from_regid
+#' @seealso [url_frs_facility()]
+#'
+#' @param regid vector of one or more EPA Facility Registry Service IDs like 110010052520
+#' @return data.table drawn from [frs] dataset, with columns
+#'   "lat" "lon" "REGISTRY_ID" "PRIMARY_NAME" "NAICS" "PGM_SYS_ACRNMS"
+#'
+#' @examples
+#'  latlon_from_regid("110070874073")
 #'  latlon_from_regid(110070874073)
-#' x = latlon_from_regid(
-#'     c(110071293460, 110070874073, 110070538057, 110044340807,
-#'        110030509215, 110019033810, 110056111559, 110056982323)
-#'         )
-#' 
+#'  frs_from_regid(110070874073)
+#'  frs_from_regid(testinput_registry_id)
+#'
 #' @export
 #'
-latlon_from_regid <- function(regid) {
-  
-  if (missing(regid)) {return(NULL)} else if (all(is.na(regid)) | is.null(regid)){return(NULL)}
-  
+latlon_from_regid <- function(regid = NULL) {
+
+  if (all(is.na(regid)) || is.null(regid) || length(regid) == 0) {return(NULL)}
   if (!exists("frs")) dataload_dynamic("frs")
-  
-  frs[match(regid, frs$REGISTRY_ID), ] # slower but retains order
+  if (!exists("frs")) {stop('unable to load frs dataset to look up lat,lon for given regid(s)')}
+  frs[match(regid, frs$REGISTRY_ID), ] # retains order
 }

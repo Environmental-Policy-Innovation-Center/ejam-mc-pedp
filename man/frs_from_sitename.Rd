@@ -27,5 +27,5 @@ VERY SLOW search within PRIMARY_NAME of facilities for matching text
  nrow(x)
  head(x)
 }
-  
+
 }

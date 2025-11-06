@@ -2,6 +2,7 @@
 cat('\ntesting ejscreenapi1()\n')
 
 apiok = EJAM:::ejscreenapi_online() # for   skip_if_not(apiok, message = "ejscreen API not available")
+if (is.na(apiok)) {apiok <- FALSE}
 
 # testlat <-  38.8959  # testpoints_50$lat[1]
 # testlon <- -77.02985 # testpoints_50$lon[1]

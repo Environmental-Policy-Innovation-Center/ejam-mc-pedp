@@ -28,4 +28,7 @@ Note \code{sitetype} is not quite the same as the \code{site_method} parameter u
 \code{sitetype} can be latlon, fips, or shp as returned by \code{\link[=ejamit]{ejamit()}}, but can include
 lowercase versions of site_method values too within server code and some function parameters!
 }
+\seealso{
+\code{\link[=sites_from_input]{sites_from_input()}}
+}
 \keyword{internal}

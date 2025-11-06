@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs_ejam_summary_quantiles}
 \alias{ejscreen_vs_ejam_summary_quantiles}
-\title{EJAM/EJSCREEN comparisons - see quantiles over tested sites, of a stat like ratio of EJAM/EJSCREEN}
+\title{EJAM / EJSCREEN comparisons - see quantiles over tested sites, of a stat like ratio of EJAM / EJSCREEN}
 \usage{
 ejscreen_vs_ejam_summary_quantiles(
   vs,
@@ -33,6 +33,6 @@ table of percentiles across analyzed locations, of a stat like the ratio of
 EJAM estimates over EJSCREEN estimates, for specified list of indicators like in names_d
 }
 \description{
-EJAM/EJSCREEN comparisons - see quantiles over tested sites, of a stat like ratio of EJAM/EJSCREEN
+EJAM / EJSCREEN comparisons - see quantiles over tested sites, of a stat like ratio of EJAM / EJSCREEN
 }
 \keyword{internal}

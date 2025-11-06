@@ -23,7 +23,7 @@ myst <- "NY"
 dat <- bgpts[fips2state_abbrev(substr(bgfips,1,2)) == myst, ]
 mapfast(dat, radius = 0.1)
 
-# same but popups have all the indicators from EJScreen
+# same but popups have all the indicators from EJSCREEN
 myst <- "NY"
 dat <- copy(blockgroupstats[ST == myst, ])
 # add latlon cols by reference:

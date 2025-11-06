@@ -4,15 +4,18 @@
 \alias{shape2zip}
 \title{Save spatial data.frame as shapefile.zip}
 \usage{
-shape2zip(shp, file = "shapefile.zip")
+shape2zip(
+  shp,
+  filename = create_filename(file_desc = "shapefile", ext = ".zip")
+)
 }
 \arguments{
 \item{shp}{a spatial data.frame as from \code{\link[=shapefile_from_any]{shapefile_from_any()}} or \code{\link[sf:st_read]{sf::st_read()}}}
 
-\item{file}{full path to and name of the .zip file to create}
+\item{filename}{optional, full path to and name of the .zip file to create}
 }
 \value{
-normalized path of the cleaned up file param (path and name of .zip)
+normalized path of the cleaned up filename param (path and name of .zip)
 }
 \description{
 Save spatial data.frame as shapefile.zip
@@ -22,7 +25,7 @@ Save spatial data.frame as shapefile.zip
 shp <- testshapes_2
 \donttest{
 fname <- file.path(tempdir(), "myfile.zip")
-fpath <- shape2zip(shp = shp, file = fname)
+fpath <- shape2zip(shp = shp, filename = fname)
 file.exists(fpath)
 zip::zip_list(fpath)
 # read it back in

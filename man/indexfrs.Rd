@@ -29,7 +29,7 @@ so \code{\link[=getfrsnearby]{getfrsnearby()}} can find them very quickly
 This creates a quadtree spatial index of some or all facilities,
 to be used by \code{\link[=getfrsnearby]{getfrsnearby()}},
 such as to count the regulated facilities near some other specified sites, or to
-create a new proximity score for every block and block group in the US,
+create a new proximity score for every block and blockgroup in the US,
 via \code{\link[=proxistat]{proxistat()}}
 }
 \keyword{internal}

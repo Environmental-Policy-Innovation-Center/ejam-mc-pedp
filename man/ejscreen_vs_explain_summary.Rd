@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs_explain_summary}
 \alias{ejscreen_vs_explain_summary}
-\title{EJAM/EJSCREEN comparisons - Summarize explanations for discrepancies in pop
+\title{EJAM / EJSCREEN comparisons - Summarize explanations for discrepancies in pop
 Summarize output of ejscreen_vs_explain()}
 \usage{
 ejscreen_vs_explain_summary(
@@ -26,7 +26,7 @@ ejscreen_vs_explain_summary(
 summary table of info, on how many sites had each type of explanation
 }
 \description{
-EJAM/EJSCREEN comparisons - Summarize explanations for discrepancies in pop
+EJAM / EJSCREEN comparisons - Summarize explanations for discrepancies in pop
 Summarize output of ejscreen_vs_explain()
 }
 \examples{

@@ -118,7 +118,7 @@ wtscols = varinfo(wtdmeancols, "denominator")$denominator
 # pctapi_li     = ifelse(lingiso == 0, 0, api_li      /  lingiso), # blockgroupstats has
 # pctother_li   = ifelse(lingiso == 0, 0, other_li    /  lingiso)  # blockgroupstats has
 
-##   missing from blockgroupstats 2.2, but in map_headernames and in EJScreen reports:
+##   missing from blockgroupstats 2.2, but in map_headernames and in EJSCREEN reports:
 # "p_english"      "p_spanish"      "p_french"       "p_rus_pol_slav" "p_other_ie"     "p_vietnamese"   "p_other_asian"  "p_arabic"       "p_other"        "p_non_english" 
 
 ################################ # 

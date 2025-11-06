@@ -1,7 +1,7 @@
 
-#' Low-level utility to query EJScreen API for one circular buffer - API may or may not be available
+#' Low-level utility to query EJSCREEN API for one circular buffer - API may or may not be available
 #'
-#' @description Use EJScreen API to get raw json-format response, ready to be
+#' @description Use EJSCREEN API to get raw json-format response, ready to be
 #' parsed by [ejscreenRESTbroker2table()]. This function underlies higher level
 #' functions like [ejscreenapi()] and overall [ejscreenit()]
 #'
@@ -11,41 +11,52 @@
 #'
 #'    - <https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/ejscreen-api>
 #'
-#'    API URL was <https://ejscreen.epa.gov/mapper/ejscreenRESTbroker1.aspx?geometry={%22spatialReference%22:{%22wkid%22:4326},%22x%22:-100.2,%22y%22:36}&distance=1&unit=9035&f=json>
+#'    API URL was
+#'    https://ejscreen.epa.gov/mapper/ejscreenRESTbroker1.aspx?
+#'      geometry={
+#'      %22spatialReference%22:{%22wkid%22:4326},%22x%22:-100.2,%22y%22:36
+#'      }
+#'      &distance=1&unit=9035&f=json
 #'
 #'    for example of json output format, or see source code of this function.
 #'
-#'    API URL was <https://ejscreen.epa.gov/mapper/EJscreen_SOE_report.aspx?namestr=&geometry={%22spatialReference%22:{%22wkid%22:4326},%22x%22:-100.12811027526683,%22y%22:36.6582500495267}&distance=10&unit=9035&areatype=&areaid=&f=report>
+#'    API URL was
+#'    https://ejscreen.epa.gov/mapper/EJscreen_SOE_report.aspx?namestr=
+#'      &geometry={
+#'      %22spatialReference%22:{%22wkid%22:4326},%22x%22:-100.12811027526683,%22y%22:36.6582500495267
+#'      }
+#'      &distance=10&unit=9035&areatype=&areaid=&f=report
+#'
 #'     for an example of the pdf report output.
 #'
 #'    Note some variables are duplicated in outputs.
 #'
 #'    API: Simple web interface to try out the API and learn how parameters can be specified in URL:
 #'
-#'    - 2023_07         ver 2.2 was at        <https://ejscreen.epa.gov/mapper/ejscreenapi1.html>
-#'    - old style/mini ver 2.2 (fewer indicators) was at <https://ejscreen.epa.gov/mapper/ejscreenapi.html>
+#'    - 2023_07         ver 2.2 was at        "https://ejscreen.epa.gov/mapper/ejscreenapi1.html"
+#'    - old style/mini ver 2.2 (fewer indicators) was at "https://ejscreen.epa.gov/mapper/ejscreenapi.html"
 #'
 #'    API: REST endpoint:
 #'
-#'    - 2023_07  ver 2.2 was at <https://ejscreen.epa.gov/mapper/ejscreenRESTbroker1.aspx?namestr=>
-#'    - old style/mini ver 2.2 was at <https://ejscreen.epa.gov/mapper/ejscreenRESTbroker.aspx?namestr=>
+#'    - 2023_07  ver 2.2 was at "https://ejscreen.epa.gov/mapper/ejscreenRESTbroker1.aspx?namestr="
+#'    - old style/mini ver 2.2 was at "https://ejscreen.epa.gov/mapper/ejscreenRESTbroker.aspx?namestr="
 #'
 #'    csv/gdb files: Data dictionary for downloadable dataset:
 #'
-#'    - 2023_07  ver 2.2 was at <https://gaftp.epa.gov/EJScreen/2023/EJSCREEN_2023_BG_Columns.xlsx>
+#'    - 2023_07  ver 2.2 was at "https://gaftp.epa.gov/EJScreen/2023/EJSCREEN_2023_BG_Columns.xlsx"
 #'
 #'    API: Data dictionary of variable names:
 #'
-#'    - 2023_07  ver 2.2 was at <https://ejscreen.epa.gov/mapper/ejsoefielddesc1.html>
-#'    - old style/mini ver 2.2 was at <https://ejscreen.epa.gov/mapper/ejsoefielddesc.html>
+#'    - 2023_07  ver 2.2 was at "https://ejscreen.epa.gov/mapper/ejsoefielddesc1.html"
+#'    - old style/mini ver 2.2 was at "https://ejscreen.epa.gov/mapper/ejsoefielddesc.html"
 #'
 #'    Webpage explaining the indicators
 #'
-#'    - ver 2.2 was at <https://origin-awswest-www.epa.gov/ejscreen/ejscreen-map-descriptions>
+#'    - ver 2.2 was at "https://origin-awswest-www.epa.gov/ejscreen/ejscreen-map-descriptions"
 #'
 #'    Web tool user guide:
 #'
-#'    - 2023_07         ver 2.2 was at <https://ejscreen.epa.gov/mapper/help/ejscreen_help.pdf>
+#'    - 2023_07         ver 2.2 was at "https://ejscreen.epa.gov/mapper/help/ejscreen_help.pdf"
 #'
 #' @param lon a longitude
 #' @param lat a latitude
@@ -57,7 +68,7 @@
 #'   where newer 2023 version is default, using ejscreenRESTbroker1.aspx,
 #'   and old style/mini version is at ejscreenRESTbroker.aspx
 #' @param ipurl fixed ip or domain/URL to try
-#' @param reportstyle EJscreen_SOE_report for the full community profile that was new as of 7/2023,
+#' @param reportstyle EJscreen_SOE_report for the full community profile that was new as of 7/2023, but went down 1/2025,
 #'   or EJSCREEN_report for the older style standard report (which has fewer indicators on it).
 #' @param fips If specified, lon and lat are ignored, and the one fips code must be the
 #'   FIPS code of a blockgroup or tract, or county (5 digits with leading zero)
@@ -106,13 +117,13 @@ ejscreenRESTbroker <- function(lon = NULL, lat = NULL, radius = 3,
   url <- sub('(https://).*?(/mapper)', paste0('\\1',ipurl,'\\2'), url)
   if (!url_online(url)) {stop("API URL does not seem to be accessible")}
 
-  if (!missing(shapefile) & !is.null(shapefile)) {
+  if (!missing(shapefile) && !is.null(shapefile)) {
     sitetype <- 'shp'
   } else {
     if (!is.null(fips)) {
       sitetype <- 'fips'
     } else {
-      if (!is.null(lon) & !is.null(lat)) {
+      if (!is.null(lon) && !is.null(lat)) {
         sitetype <- 'latlon'
       } else {
         # no type found
@@ -125,7 +136,7 @@ ejscreenRESTbroker <- function(lon = NULL, lat = NULL, radius = 3,
 
   # shapefile ####
 
-  # Example of how theEJScreen API could be used to analyze a polygon, which must use POST not GET:
+  # Example of how the EJSCREEN API could be used to analyze a polygon, which must use POST not GET:
   # HTTP POST URL: https://ejscreen.epa.gov/mapper/ejscreenRESTbroker.aspx
   # HTTP POST Body:
   #   namestr=
@@ -162,7 +173,7 @@ ejscreenRESTbroker <- function(lon = NULL, lat = NULL, radius = 3,
   if (sitetype == 'latlon') {
 
     if (any(NROW(lon) > 1, NROW(lat) > 1, NROW(radius) > 1 )) {stop('input must be only one point with one distance, so lat, lon, and radius must each be a single number')}
-    if (all(is.na(lat)) | all(is.na(lon))) {stop('lat and lon must not be NA values')}
+    if (all(is.na(lat)) || all(is.na(lon))) {stop('lat and lon must not be NA values')}
 
     # MAY WANT TO SPLIT THIS OUT AS A FUNCTION, TO MAKE IT EASIER TO GET JSON AND ALSO APPEND THE PDF URL TO THAT
     # see url_ejscreen_report() for obtaining a vector of URLs, with more options and error-handling
@@ -187,18 +198,6 @@ ejscreenRESTbroker <- function(lon = NULL, lat = NULL, radius = 3,
                           '&unit=', unit,
                           '&f=', f
   )
-
-  ## Alternative method of crafting the request:
-  #
-  # url <- urltools  ::  param_set(url, key = "areatype", value = areatype)
-  # url <- urltools  ::  param_set(url, key = "areaid",   value = fips)
-  # url <- urltools  ::  param_set(url, key = "namestr",  value = namestr)
-  # url <- urltools  ::  param_set(url, key = "geometry", value = geometry)
-  # url <- urltools  ::  param_set(url, key = "distance", value = radius)
-  # url <- urltools  ::  param_set(url, key = "unit",     value = unit)
-  # url <- urltools  ::  param_set(url, key = "f",        value = f)
-  # this_request <- url
-
 
   if (f == 'report') {
 

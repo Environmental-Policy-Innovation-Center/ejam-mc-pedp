@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs_explain}
 \alias{ejscreen_vs_explain}
-\title{EJAM/EJSCREEN comparisons - loop or interactively step through sites to see which blocks may explain difference in population count}
+\title{EJAM / EJSCREEN comparisons - loop or interactively step through sites to see which blocks may explain difference in population count}
 \usage{
 ejscreen_vs_explain(
   vs,
@@ -26,7 +26,7 @@ population counts agreed to zero decimal places}
 same
 }
 \description{
-EJAM/EJSCREEN comparisons - loop or interactively step through sites to see which blocks may explain difference in population count
+EJAM / EJSCREEN comparisons - loop or interactively step through sites to see which blocks may explain difference in population count
 }
 \seealso{
 uses \code{\link[=ejscreen_vs_explain_summary]{ejscreen_vs_explain_summary()}} to show summary

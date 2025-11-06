@@ -122,9 +122,9 @@ test_that("mapfast works", {
   expect_true("leaflet" %in% class(x))
 })
 
-test_that("mapfast messages if forget specify table", {
+test_that("mapfast works given ejamit() output list not table", {
   suppressWarnings({
-    expect_message({
+    expect_no_error({
       mapfast(testoutput_ejamit_10pts_1miles) # if forgot to specify table $results_bysite
     })
   })
@@ -152,30 +152,7 @@ test_that("mapfastej() works", {
   expect_true("leaflet" %in% class(y))
 })
 ############################################## #
-############################################## #
 
-test_that("ejam2map() works", {
-  expect_no_error({
-    suppressWarnings({
-      x = ejam2map(testoutput_ejamit_10pts_1miles)
-    })
-  })
-  expect_true("leaflet" %in% class(x))
-})
-############################################## #
-
-test_that("map2browser() works", {
-  testthat::skip_if_not(interactive(), message = "skipping because browse only works when interactive()")
-  expect_no_error({
-    suppressWarnings(
-      x <-  map2browser(ejam2map(testoutput_ejamit_10pts_1miles))
-    )
-    # file.exists(x) # tricky to test for that
-  })
-  expect_true(is.character(x))
-  expect_true(length(x) == 1)
-})
-############################################## #
 ############################################## #
 
 test_that("map_facilities_proxy() works", {
@@ -210,7 +187,7 @@ test_that("map_facilities_proxy() works", {
 
 ############################################## #
 
-test_that("mapfastej_counties() works", {
+test_that("mapfastej_counties() works", {     # slow
 
   # getblocksnearby_from_fips() has warnings here
   suppressMessages({

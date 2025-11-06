@@ -58,7 +58,7 @@ but only if demogvarname is not specified as a parameter.}
 
 \item{returnwhat}{If returnwhat is "table", invisibly returns a
 full table of sorted distances of blockgroups,
-cumulative count of demog groups at that block group's distance.
+cumulative count of demog groups at that blockgroup's distance.
 If returnwhat is "plotfilename" then it returns the full path including filename of a .png in a tempdir
 If returnwhat is "plot" then it returns the plot object as needed for \code{\link[=ejam2excel]{ejam2excel()}} or related functions}
 
@@ -71,8 +71,8 @@ If returnwhat is "plot" then it returns the plot object as needed for \code{\lin
 \value{
 see returnwhat parameter
 
-invisibly returns full table of sorted distances of blockgroups, cumulative count of demog group at that block group's distance,
-and cumulative count of everyone else in that block group
+invisibly returns full table of sorted distances of blockgroups, cumulative count of demog group at that blockgroup's distance,
+and cumulative count of everyone else in that blockgroup
 
 see \code{\link[=distance_by_group_plot]{distance_by_group_plot()}}
 }
@@ -84,7 +84,7 @@ This plots the cumulative share of residents found within each distance,
 for a single population group.
 
 This function, distance_cdf_by_group_plot(), is based on ejamit()$results_bybg_people,
-which provides only block group resolution information about distance.
+which provides only blockgroup resolution information about distance.
 For block resolution analysis of distance by group, see \code{\link[=plot_distance_by_pctd]{plot_distance_by_pctd()}}.
 }
 \details{

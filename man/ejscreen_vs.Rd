@@ -2,8 +2,8 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs}
 \alias{ejscreen_vs}
-\title{EJAM/EJSCREEN comparisons - Key function
-Best starting point for comparing single-site (EJScreen API) and multisite (EJAM) results}
+\title{EJAM / EJSCREEN comparisons - Key function
+Best starting point for comparing single-site (EJSCREEN API) and multisite (EJAM) results}
 \usage{
 ejscreen_vs(
   defdir = ".",
@@ -57,28 +57,28 @@ For each data.frame, colnames are indicators like pop, blockcount_near_site, etc
 and rows represent sites analyzed.
 }
 \description{
-EJAM/EJSCREEN comparisons - Key function
-Best starting point for comparing single-site (EJScreen API) and multisite (EJAM) results
+EJAM / EJSCREEN comparisons - Key function
+Best starting point for comparing single-site (EJSCREEN API) and multisite (EJAM) results
 }
 \details{
 THIS IS FOR INTERACTIVE RSTUDIO CONSOLE USE
 TO RUN A SET OF POINTS THROUGH BOTH
-EJScreen and the EJAM multisite tool
+EJSCREEN and the EJAM multisite tool
 AND SAVE STATS ON THE DIFFERENCES
 
 Also lets you use saved ejscreenapi results and input points
 so you can iterate and rerun just the EJAM portion and compare to the saved benchmark data.
 
 The EJAM tool/ function called \code{\link[=ejamit]{ejamit()}}
-does not rely on EJScreen's typical single-location approach to do the calculations
-and instead tries to replicate what the EJScreen single-site report would do.
+does not rely on the original EJSCREEN python code to do the calculations
+and instead tries to replicate in R what the EJSCREEN single-site report would do.
 As a result, while
 \itemize{
 \item \emph{\code{\link[=ejamit]{ejamit()}} is much, much faster than \code{\link[=ejscreenit_for_ejam]{ejscreenit_for_ejam()}}} and
 \item \emph{provides additional information} (distribution of distances by group, etc.)
 \item \emph{features} (histograms, spreadsheet with heatmaps, etc.)
 \item \emph{flexibility} (easy for analysts using R to customize analysis, etc.),
-\emph{\code{\link[=ejamit]{ejamit()}} does not always exactly replicate EJScreen} --
+*\code{\link[=ejamit]{ejamit()}} does not always exactly replicate EJSCREEN * --
 does not provide 100\% identical results (percentiles, etc.) for
 every indicator in every analysis at every location.
 For almost all indicators, at 97\% of sites tested, the difference is
@@ -87,7 +87,7 @@ There may be edge cases where an indicator differs significantly.
 Any differences are due to slight variations in
 \item details of the spatial calculations (which blocks are nearby,
 sometimes counting 1 extra block as 2.995 miles away while
-EJScreen counts it as outside the 3 mile radius, e.g.,
+EJSCREEN counts it as outside the 3 mile radius, e.g.,
 often differing by just <50 feet out of 3 miles).
 and possibly other factors like
 \item rounding  (how many digits are retained during calculations,

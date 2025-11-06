@@ -30,7 +30,6 @@ Each popup is made from one row of the data.frame.
 Each popup has one row of text per column of the data.frame
 }
 \examples{
- 
  df <- structure(list(
    RegistryId = c("110071102551", "110015787683"),
    FacilityName = c("USDOI FWS AK MARITIME NWR etc", "ADAK POWER PLANT"),
@@ -43,7 +42,7 @@ Each popup has one row of text per column of the data.frame
    lat = c(51.671389,51.8703), lon = c(-178.051111, -176.659),
    SupplementalLocation = c(NA_character_,NA_character_)),
    row.names = 1:2, class = "data.frame")
- leaflet::leaflet(df) |> leaflet::addTiles() |> 
+ leaflet::leaflet(df) |> leaflet::addTiles() |>
    leaflet::addPopups(popup = popup_from_df(df))
 
 }

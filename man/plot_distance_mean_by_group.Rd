@@ -71,13 +71,13 @@ so values below 1 mean the given group lives closer to facilities.
 A value of 0.85 would mean the group is only 85\% as far from a site as everyone else.
 
 Note it is in miles assuming input was in miles, and the distance for each resident is
-actually the average distance of all residents within their Census block (not block group),
+actually the average distance of all residents within their Census block (not blockgroup),
 and when a site is very close to the block internal point (like a centroid)
 relative to the size of the block, the distance to the average resident in the block is
 estimated as 90 percent of the effective radius, which is what the radius of the block
 would be if it were the same area in square meters or miles but circular in shape.
 
-This is the approach used in EJScreen to estimate average proximity of a block resident in
+This is the approach used in EJSCREEN to estimate average proximity of a block resident in
 cases where the block is extremely close to the site or the site may actually be inside the block,
 or exactly on top of the internal point of the block, in which case zero would not be an
 appropriate estimate of the distance, hence this adjustment is made in EJAM \code{\link[=getblocksnearby]{getblocksnearby()}}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreenit_for_ejam.R
 \name{ejscreenapi2ejam_format}
 \alias{ejscreenapi2ejam_format}
-\title{EJAM/EJSCREEN comparisons - Convert output of ejscreenapi_plus to format of ejamit table of sites}
+\title{EJAM / EJSCREEN comparisons - Convert output of ejscreenapi_plus to format of ejamit table of sites}
 \usage{
 ejscreenapi2ejam_format(
   ejscreenapi_plus_out,
@@ -19,7 +19,7 @@ not just ejscreenit()$table, which this function will figure out.}
 
 \item{fillmissingcolumns}{optional. set to TRUE if you want the output
 to have exactly all the same columns as the EJAM table would, and
-fill in with NA values all the columns not provided by EJScreen API.}
+fill in with NA values all the columns not provided by EJSCREEN API.}
 
 \item{ejamcolnames}{optional. if specified as vector of colnames, it
 overrides the assumed colnames that would have been taken to be
@@ -33,7 +33,7 @@ A data.table not just data.frame, with some or all of the columns
 found in output of ejamit()$results_bysite
 }
 \description{
-Used by \code{\link[=ejscreenit_for_ejam]{ejscreenit_for_ejam()}} to make it easier to compare EJScreen and EJAM results
+Used by \code{\link[=ejscreenit_for_ejam]{ejscreenit_for_ejam()}} to make it easier to compare EJSCREEN and EJAM results
 }
 \examples{
 \donttest{

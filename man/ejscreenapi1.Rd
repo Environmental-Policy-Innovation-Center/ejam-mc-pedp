@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreenapi1.R
 \name{ejscreenapi1}
 \alias{ejscreenapi1}
-\title{Use EJScreen API to get stats on ONLY ONE circular buffer}
+\title{Use EJSCREEN API to get stats on ONLY ONE circular buffer}
 \usage{
 ejscreenapi1(
   lon,
@@ -45,13 +45,13 @@ TRUE if you want to try to extract ST abbrev and statename from the placename fi
 which is more likely to be correct than the stateAbbr and stateName fields in the API output.}
 }
 \description{
-Get EJScreen report results for one circular buffer, as a data.frame
+Get EJSCREEN report results for one circular buffer, as a data.frame
 }
 \details{
 Specify a radius and vector of latitude longitude points,
 and get for a buffer the population weighted mean value of each raw indicator
 like percent low-income, and total population count, and percentiles for those
-raw indicator scores, all from EJScreen, as in an EJScreen standard report.
+raw indicator scores, all from EJSCREEN, as in an EJSCREEN standard report.
 
 Note that this API is fairly slow, so it is fine for 10 sites, but not large numbers.
 
@@ -72,21 +72,20 @@ using the normal name and a synonym name, as with TOTALPOP and "totalPop"
 See  (https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/ejscreen-api)
 }
 \examples{
- 
  \donttest{
  # Specify size of buffer circle and pick random points as example data
  myradius <- 1
- pts <- structure(list(lon = c(-96.4798957, -111.7674343, -75.4173589, 
- -95.9573172, -87.8402677, -77.9996191, -73.920702, -79.9545638, 
- -76.0638877, -114.9881473), lat = c(31.782716, 33.7522735, 39.8697972, 
- 33.2522474, 41.9763992, 38.4661259, 41.2940801, 32.8099327, 40.9888266, 
+ pts <- structure(list(lon = c(-96.4798957, -111.7674343, -75.4173589,
+ -95.9573172, -87.8402677, -77.9996191, -73.920702, -79.9545638,
+ -76.0638877, -114.9881473), lat = c(31.782716, 33.7522735, 39.8697972,
+ 33.2522474, 41.9763992, 38.4661259, 41.2940801, 32.8099327, 40.9888266,
  36.0043628), id = 1:10), row.names = c(NA, -10L), class = "data.frame")
  out1 <- ejscreenapi1(lon = pts$lon[1], lat=pts$lat[1], radius = myradius)
  t(out1)
  #out <- ejscreenapi(lon=pts$lon, lat=pts$lat, radius = myradius)
  #t(out[1:2,])
  }
- 
+
 }
 \seealso{
 \code{\link[=ejscreenit]{ejscreenit()}} \code{\link[=ejscreenapi_plus]{ejscreenapi_plus()}} \code{\link[=ejscreenapi]{ejscreenapi()}}

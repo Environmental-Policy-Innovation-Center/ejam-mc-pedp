@@ -5,19 +5,48 @@
 \title{utility to show path to testdata folders
 see folder that has samples of input files to try in EJAM, and output examples from EJAM functions}
 \usage{
-testdatafolder(installed = TRUE)
+testdatafolder(pattern = NULL, installed = TRUE, quiet = FALSE)
 }
 \arguments{
+\item{pattern}{optional query regular expression, used as filter using when getting dirnames.
+If NULL, returns only root testdata folder, otherwise matching subfolder(s)}
+
 \item{installed}{If you are a developer who has the local source package,
 you can set this parameter to FALSE if you want to work with the
 local source package version of the testdata folders
 rather than the locally installed version.}
+
+\item{quiet}{whether to print info, but always TRUE if pattern is provided}
 }
 \value{
-path to local testdata folder comes with the EJAM package
+path(s) to local testdata folder(s) from the EJAM package
 }
 \description{
 utility to show path to testdata folders
 see folder that has samples of input files to try in EJAM, and output examples from EJAM functions
+}
+\examples{
+x = testdatafolder("shape" )
+x
+x["testdata" == basename(dirname(x))]
+
+#   Compare versions of the HTML summary report:
+
+fname = "examples_of_output/testoutput_ejam2report_10pts_1miles.html"
+repo = "https://github.com/ejanalysis/EJAM"
+\dontrun{
+# in latest main branch on GH (but map does not render using this tool)
+url_github_preview(file.path(repo, "blob/main/inst/testdata", fname))
+
+# from a specific release on GH (but map does not render using this tool)
+url_github_preview(file.path(repo, "blob/v2.32.5/inst/testdata", fname))
+
+# local installed version
+browseURL( system.file(file.path("testdata", fname), package="EJAM") )
+
+# local source package version in checked out branch
+browseURL( file.path(testdatafolder(installed = F), fname) )
+}
+
 }
 \keyword{internal}

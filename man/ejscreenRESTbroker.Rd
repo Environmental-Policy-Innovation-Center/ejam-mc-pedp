@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreenRESTbroker.R
 \name{ejscreenRESTbroker}
 \alias{ejscreenRESTbroker}
-\title{Low-level utility to query EJScreen API for one circular buffer - API may or may not be available}
+\title{Low-level utility to query EJSCREEN API for one circular buffer - API may or may not be available}
 \usage{
 ejscreenRESTbroker(
   lon = NULL,
@@ -48,7 +48,7 @@ and old style/mini version is at ejscreenRESTbroker.aspx}
 
 \item{f}{pjson for results in JSON format, or report for the URL of the pdf report}
 
-\item{reportstyle}{EJscreen_SOE_report for the full community profile that was new as of 7/2023,
+\item{reportstyle}{EJscreen_SOE_report for the full community profile that was new as of 7/2023, but went down 1/2025,
 or EJSCREEN_report for the older style standard report (which has fewer indicators on it).}
 }
 \value{
@@ -56,7 +56,7 @@ Returns JSON by default. See source code of this function for notes on format.
 status_code
 }
 \description{
-Use EJScreen API to get raw json-format response, ready to be
+Use EJSCREEN API to get raw json-format response, ready to be
 parsed by \code{\link[=ejscreenRESTbroker2table]{ejscreenRESTbroker2table()}}. This function underlies higher level
 functions like \code{\link[=ejscreenapi]{ejscreenapi()}} and overall \code{\link[=ejscreenit]{ejscreenit()}}
 }
@@ -68,46 +68,58 @@ API: Introduction to how the API works:
 \item \url{https://web.archive.org/web/20250118193121/https://www.epa.gov/ejscreen/ejscreen-api}
 }
 
-API URL was \url{https://ejscreen.epa.gov/mapper/ejscreenRESTbroker1.aspx?geometry={\%22spatialReference\%22:{\%22wkid\%22:4326},\%22x\%22:-100.2,\%22y\%22:36}&distance=1&unit=9035&f=json}
+API URL was
+https://ejscreen.epa.gov/mapper/ejscreenRESTbroker1.aspx?
+geometry={
+\%22spatialReference\%22:{\%22wkid\%22:4326},\%22x\%22:-100.2,\%22y\%22:36
+}
+&distance=1&unit=9035&f=json
 
 for example of json output format, or see source code of this function.
 
-API URL was \url{https://ejscreen.epa.gov/mapper/EJscreen_SOE_report.aspx?namestr=&geometry={\%22spatialReference\%22:{\%22wkid\%22:4326},\%22x\%22:-100.12811027526683,\%22y\%22:36.6582500495267}&distance=10&unit=9035&areatype=&areaid=&f=report}
-for an example of the pdf report output.
+API URL was
+https://ejscreen.epa.gov/mapper/EJscreen_SOE_report.aspx?namestr=
+&geometry={
+\%22spatialReference\%22:{\%22wkid\%22:4326},\%22x\%22:-100.12811027526683,\%22y\%22:36.6582500495267
+}
+&distance=10&unit=9035&areatype=&areaid=&f=report
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{for an example of the pdf report output.
+}\if{html}{\out{</div>}}
 
 Note some variables are duplicated in outputs.
 
 API: Simple web interface to try out the API and learn how parameters can be specified in URL:
 \itemize{
-\item 2023_07         ver 2.2 was at        \url{https://ejscreen.epa.gov/mapper/ejscreenapi1.html}
-\item old style/mini ver 2.2 (fewer indicators) was at \url{https://ejscreen.epa.gov/mapper/ejscreenapi.html}
+\item 2023_07         ver 2.2 was at        "https://ejscreen.epa.gov/mapper/ejscreenapi1.html"
+\item old style/mini ver 2.2 (fewer indicators) was at "https://ejscreen.epa.gov/mapper/ejscreenapi.html"
 }
 
 API: REST endpoint:
 \itemize{
-\item 2023_07  ver 2.2 was at \url{https://ejscreen.epa.gov/mapper/ejscreenRESTbroker1.aspx?namestr=}
-\item old style/mini ver 2.2 was at \url{https://ejscreen.epa.gov/mapper/ejscreenRESTbroker.aspx?namestr=}
+\item 2023_07  ver 2.2 was at "https://ejscreen.epa.gov/mapper/ejscreenRESTbroker1.aspx?namestr="
+\item old style/mini ver 2.2 was at "https://ejscreen.epa.gov/mapper/ejscreenRESTbroker.aspx?namestr="
 }
 
 csv/gdb files: Data dictionary for downloadable dataset:
 \itemize{
-\item 2023_07  ver 2.2 was at \url{https://gaftp.epa.gov/EJScreen/2023/EJSCREEN_2023_BG_Columns.xlsx}
+\item 2023_07  ver 2.2 was at "https://gaftp.epa.gov/EJScreen/2023/EJSCREEN_2023_BG_Columns.xlsx"
 }
 
 API: Data dictionary of variable names:
 \itemize{
-\item 2023_07  ver 2.2 was at \url{https://ejscreen.epa.gov/mapper/ejsoefielddesc1.html}
-\item old style/mini ver 2.2 was at \url{https://ejscreen.epa.gov/mapper/ejsoefielddesc.html}
+\item 2023_07  ver 2.2 was at "https://ejscreen.epa.gov/mapper/ejsoefielddesc1.html"
+\item old style/mini ver 2.2 was at "https://ejscreen.epa.gov/mapper/ejsoefielddesc.html"
 }
 
 Webpage explaining the indicators
 \itemize{
-\item ver 2.2 was at \url{https://origin-awswest-www.epa.gov/ejscreen/ejscreen-map-descriptions}
+\item ver 2.2 was at "https://origin-awswest-www.epa.gov/ejscreen/ejscreen-map-descriptions"
 }
 
 Web tool user guide:
 \itemize{
-\item 2023_07         ver 2.2 was at \url{https://ejscreen.epa.gov/mapper/help/ejscreen_help.pdf}
+\item 2023_07         ver 2.2 was at "https://ejscreen.epa.gov/mapper/help/ejscreen_help.pdf"
 }
 }
 \examples{

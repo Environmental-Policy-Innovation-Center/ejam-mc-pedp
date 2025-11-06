@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs_ejam_1var}
 \alias{ejscreen_vs_ejam_1var}
-\title{EJAM/EJSCREEN comparisons - see results at every site, for 1 INDICATOR after using ejscreen_vs_ejam()}
+\title{EJAM / EJSCREEN comparisons - see results at every site, for 1 INDICATOR after using ejscreen_vs_ejam()}
 \usage{
 ejscreen_vs_ejam_1var(
   vs,
@@ -26,7 +26,7 @@ diff, absdiff, pctdiff, etc.
 and rows represent sites analyzed.
 }
 \description{
-EJAM/EJSCREEN comparisons - see results at every site, for 1 INDICATOR after using ejscreen_vs_ejam()
+EJAM / EJSCREEN comparisons - see results at every site, for 1 INDICATOR after using ejscreen_vs_ejam()
 }
 \seealso{
 \code{\link[=ejscreen_vs_ejam_1var_cdf]{ejscreen_vs_ejam_1var_cdf()}} \code{\link[=ejscreen_vs]{ejscreen_vs()}}

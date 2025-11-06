@@ -2,7 +2,7 @@
 % Please edit documentation in R/shapefile_xyz.R
 \name{shapefile_from_sitepoints}
 \alias{shapefile_from_sitepoints}
-\title{Convert table of lat,lon points/sites into sf:: shapefile}
+\title{Convert table of lat,lon points/sites into spatial data.frame / shapefile}
 \usage{
 shapefile_from_sitepoints(sitepoints, crs = 4269, ...)
 }

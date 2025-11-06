@@ -10,8 +10,8 @@
 ## TASKS:
 ##
 ## - ANNUALLY PRECALCULATE for FRS  (& MAYBE SUBSETS BY PROGRAM TYPE?)
-##      - "FACILITY DENSITY SCORE" (#/SQMI) PER BLOCK GROUP IN US
-##      - "PROXIMITY SCORE" PER BLOCK GROUP IN US
+##      - "FACILITY DENSITY SCORE" (#/SQMI) PER BLOCKGROUP IN US
+##      - "PROXIMITY SCORE" PER BLOCKGROUP IN US
 ## - ON-DEMAND-PRECALCULATED AFTER USER REQUEST (FOR USER PROVIDED FEATURES):
 ##      - "site density score" per bg?? in US (#/sqmi within a large raster cell or within x miles of grid of points?? or per block or bg?)
 ##      - "PROXIMITY SCORE" per bg in US (just like RMP,TSDF,etc.)
@@ -119,7 +119,7 @@
 #' @param fips  see [ejamit()]
 #' @param shapefile  see [ejamit()]
 #' @param custom_blockgroupstats like blockgroupstats but with custom
-#'   indicators, one value per block group, with colnames bgid, bgfips, pop
+#'   indicators, one value per blockgroup, with colnames bgid, bgfips, pop
 #' @param countcols vector of colnames in custom_blockgroupstats to be
 #'   aggregated as sums of counts, like population counts
 #' @param popmeancols vector of colnames in custom_blockgroupstats to be
@@ -219,10 +219,10 @@ create_quaddata <- function(pts,
     }
   }
   if (!is.null(idcolname)) {
-    if (idcolname == "blockid") {
+    if (idcolname %in% "blockid") {
       cols_kept <-  c("lat", "lon", "blockid")
     }
-    if (idcolname == "id") {
+    if (idcolname %in% "id") {
       cols_kept <-  c("lat", "lon", "id")
     }
   }
@@ -267,7 +267,7 @@ create_quaddata <- function(pts,
 #'
 #' @details This creates a spatial index
 #'   to be used by [getpointsnearby()] to support [proxistat()],
-#'   to create a new proximity score for every block and block group in the US.
+#'   to create a new proximity score for every block and blockgroup in the US.
 #'   It relies on [create_quaddata()] for one step, then [SearchTrees::createTree()]
 #'
 #' @param pts a data.frame or data.table with columns name lat and lon,
@@ -339,7 +339,7 @@ indexpoints <- function(pts, indexname = "custom_index", envir = globalenv()) {
 #' @details This creates a quadtree spatial index of some or all facilities,
 #'   to be used by [getfrsnearby()],
 #'   such as to count the regulated facilities near some other specified sites, or to
-#'   create a new proximity score for every block and block group in the US,
+#'   create a new proximity score for every block and blockgroup in the US,
 #'   via [proxistat()]
 #'
 #' @param frspts optional, default is the frs table from the EJAM package,
@@ -424,7 +424,7 @@ indexfrs <- function(frspts = NULL, indexname = "frs_index", envir = globalenv()
 #'
 #' @export
 #'
-getpointsnearby  <- function(frompoints, topoints,
+getpointsnearby <- function(frompoints, topoints,
                              radius = 3, maxradius = 31.07, avoidorphans = FALSE, retain_unadjusted_distance = TRUE,
                              quadtree = NULL,
                              quaddatatable = NULL,
@@ -497,7 +497,7 @@ getpointsnearby  <- function(frompoints, topoints,
 #'
 #' @export
 #'
-getfrsnearby  <- function(frompoints,
+getfrsnearby <- function(frompoints,
                           radius = 3, maxradius = 31.07,
                           avoidorphans = FALSE,
                           quadtree = NULL,
@@ -705,11 +705,11 @@ if (1 == 0) {
     lat = c(39.7397, 38.56097, 39.061297, 39.83495, 39.159),
     lon = c(-75.72528, -75.2003, -75.397816, -75.6045, -75.52477
     ),
-    sitenumber = c(49L, 174L, 626L, 646L, 824L),
+    sitenum = c(49L, 174L, 626L, 646L, 824L),
     sitename = c("Example Site 49", "Example Site 174", "Example Site 626", "Example Site 646", "Example Site 824")),
     date_saved_in_package = "2025-02-14",
     row.names = c(49L, 174L, 626L, 646L, 824L), class = "data.frame")
-  delaware_testpoints$sitenumber = 1:nrow(delaware_testpoints)
+  delaware_testpoints$sitenum = 1:nrow(delaware_testpoints)
   delaware_testpoints$sitename = NULL
 
   ## use all 20,198 blocks in the state?
@@ -739,7 +739,7 @@ if (1 == 0) {
 # PROXISTAT DRAFT METHOD 2 ####
 
 
-#' DRAFT - Create a custom proximity score for every block group, representing count and proximity of specified points
+#' DRAFT - Create a custom proximity score for every blockgroup, representing count and proximity of specified points
 #' Indicator of proximity of residents in each US blockgroup to a custom set of facilities or sites
 #'
 #' @details Tries to use getblocksnearby() normally
@@ -750,9 +750,9 @@ if (1 == 0) {
 #' @param pts data.table with lat lon column names
 #' @param countradius distance within in which nearby sites are counted to create proximity score.
 #'   In miles, and default is 5 km (5000 / meters_per_mile = 3.106856 miles)
-#'   which is the EJScreen zone for proximity scores based on counts.
+#'   which is the EJSCREEN zone for proximity scores based on counts.
 #' @param maxradius max distance in miles to search for nearest single facility,
-#'   if none found within countradius. EJScreen seems to use 1,000 km as the max to search,
+#'   if none found within countradius. EJSCREEN seems to use 1,000 km as the max to search,
 #'   since the lowest scores for proximity scores of RMP, TSDF, or NPL are ROUGHLY 0.001,
 #'   (exactly 0.000747782)
 #'   meaning approx. 1/1000 km and km_per_mile = 1.609344 = meters_per_mile / 1000
@@ -760,7 +760,7 @@ if (1 == 0) {
 #'   However, the exact min value implies 1337.288 kilometers, or 830.9523 miles?
 #'
 #'
-#' @return data.table of block groups, with proximityscore, bgfips, lat, lon, etc.
+#' @return data.table of blockgroups, with proximityscore, bgfips, lat, lon, etc.
 #'
 #' @export
 #'
@@ -827,7 +827,7 @@ proxistat_via_getblocks <- function(pts, countradius=5, maxradius=31) {
 
 
   # 1 score per BLOCK ####
-  # convert from 1 row per distance pair, into 1 row (score) per BLOCK (not block group, yet)
+  # convert from 1 row per distance pair, into 1 row (score) per BLOCK (not blockgroup, yet)
   # by aggregating the 1 or more sites near a given block
 
   s2b[ , distance.km :=  distance *  meters_per_mile / 1000]
@@ -839,7 +839,7 @@ proxistat_via_getblocks <- function(pts, countradius=5, maxradius=31) {
     nearestsite_distance = min(distance.km, na.rm = TRUE)
   ), by = blockid]
 
-  # 1 score per BLOCK GROUP ####
+  # 1 score per BLOCKGROUP ####
   #  = popwtd mean of block scores in bg
 
   bgscore <- blockscores[, .(proximityscore = sum(blockscore * blockwt, na.rm = TRUE) / sum(blockwt, na.rm = TRUE)), by = bgid]
@@ -858,7 +858,7 @@ proxistat_via_getblocks <- function(pts, countradius=5, maxradius=31) {
 # PROXISTAT DRAFT METHOD 1 ####
 
 
-#' DRAFT - Create a custom proximity score for every block group, representing count and proximity of specified points
+#' DRAFT - Create a custom proximity score for every blockgroup, representing count and proximity of specified points
 #' Indicator of proximity of residents in each US blockgroup to a custom set of facilities or sites
 #'
 #' @details Tries to use getpointsnearby() for one batch of blocks at a time,
@@ -876,17 +876,17 @@ proxistat_via_getblocks <- function(pts, countradius=5, maxradius=31) {
 #'   The formula for this proximity score is the sum of (1/d)
 #'   where each d is distance of a given site in kilometers,
 #'   summed over all sites that are within 5 km (or the single
-#'   closest site if none are within 5 km), just as in EJScreen proximity scores
+#'   closest site if none are within 5 km), just as in EJSCREEN proximity scores
 #'   like the TSDF or RMP scores.
 #'
 #'   Any custom user-provided set of points can be turned into a proximity score,
 #'   such as locations of all industrial sites of a certain type,
 #'   or all grocery stores, or all schools. A proximity score can be
-#'   created for all blocks and block groups in the US (or just one State or Region).
+#'   created for all blocks and blockgroups in the US (or just one State or Region).
 #'   Then the proximity scores can be analyzed in a tool like EJAM, just as the
 #'   existing pre-calculated proximity scores are analyzed to represent the
 #'   number of nearby hazardous waste treatment storage and disposal facilities,
-#'   weighted by how far away each one is, as provided in the EJScreen proximity
+#'   weighted by how far away each one is, as provided in the EJSCREEN proximity
 #'   score for TSDFs.
 #'
 #'   A custom user-specified proximity score might focus on schools, for example.
@@ -895,7 +895,7 @@ proxistat_via_getblocks <- function(pts, countradius=5, maxradius=31) {
 #'   That would provide statistics demonstrating which places have more schools
 #'   closer to them (or inside the areas defined by polygons or FIPS codes, for example).
 #'
-#'   To create the proximity score, EJAM uses the same method EJScreen used
+#'   To create the proximity score, EJAM uses the same method EJSCREEN used
 #'   to create proximity scores. The specified points first get indexed
 #'   by a utility function called indexpoints() and are searched for and counted near
 #'   every block and blockgroup in the US via a function called getpointsnearby().
@@ -910,15 +910,15 @@ proxistat_via_getblocks <- function(pts, countradius=5, maxradius=31) {
 #'   a data.table of Census block points lat lon, representing where residents are,
 #'   for the entire US (or at least a whole State, for example -- it should be all blocks for which you need a proximity score).
 #'   The score is calculated for a given block based on all topoints near the block,
-#'   and then summarized over all blocks in a given block group to create a score for that block group.
+#'   and then summarized over all blocks in a given blockgroup to create a score for that blockgroup.
 #'
 #' @param blocks_per_batch number of blocks to process in each batch, defaults to 1000
 #'
 #' @param countradius distance within in which nearby sites are counted to create proximity score.
 #'   In miles, and default is 5 km (5000 / meters_per_mile = 3.106856 miles)
-#'   which is the EJScreen zone for proximity scores based on counts.
+#'   which is the EJSCREEN zone for proximity scores based on counts.
 #' @param maxradius max distance in miles to search for nearest single facility,
-#'   if none found within countradius. EJScreen seems to use 1,000 km as the max to search,
+#'   if none found within countradius. EJSCREEN seems to use 1,000 km as the max to search,
 #'   since the lowest scores for proximity scores of RMP, TSDF, or NPL are ROUGHLY 0.001,
 #'   (exactly 0.000747782)
 #'   meaning approx. 1/1000 km and km_per_mile = 1.609344 = meters_per_mile / 1000
@@ -933,7 +933,7 @@ proxistat_via_getblocks <- function(pts, countradius=5, maxradius=31) {
 #' @param quaddatatable optional, created from pts if not passed,
 #'   created by create_quaddata() utility, and used to create quadtree
 #'
-#' @return data.table of block groups, with proximityscore, bgfips, lat, lon, etc.
+#' @return data.table of blockgroups, with proximityscore, bgfips, lat, lon, etc.
 #'
 #' @import data.table
 #'
@@ -959,7 +959,7 @@ proxistat <- function(topoints, bpoints = NULL,
                       quadtree = NULL,
                       quaddatatable = NULL) {
 
-  if (missing(bpoints) | is.null(bpoints)) {
+  if (missing(bpoints) || is.null(bpoints)) {
     warning('using Delaware just as an example/demo since bpoints was not specified')
     bpoints <- blockpoints[state_from_blockid(blockpoints$blockid) == "DE", ]
   }
@@ -1040,7 +1040,7 @@ proxistat <- function(topoints, bpoints = NULL,
     ## MUST  HANDLE THOSE CASES HERE, SINCE THIS IS FINDING THE NEAREST topoint WHEN A GIVEN block found no topoint (site) so far (in search radius).
     ##
 
-    # *** and do we want min distance for each block and later for each bg? per EJScreen possible new approach
+    # *** and do we want min distance for each block and later for each bg? per EJSCREEN possible new approach
 
     ######################################## #
   }
@@ -1104,7 +1104,7 @@ proxistat <- function(topoints, bpoints = NULL,
 
   blockscores <- b2s[ , .(proximityscore = sum(1 / distance.km, na.rm = TRUE), blockwt, bgid), by = blockid]
 
-  # create score per BLOCK GROUP = popwtd mean of block scores ####
+  # create score per BLOCKGROUP = popwtd mean of block scores ####
 
   bgscore <- blockscores[ , .(proximityscore = sum(proximityscore * blockwt, na.rm = TRUE) / sum(blockwt, na.rm = TRUE)), by = bgid]
 
@@ -1142,7 +1142,7 @@ proxistat <- function(topoints, bpoints = NULL,
 # ################################################################# #
 
 
-#' proximity.score.in.miles - convert EJScreen proximity scores to miles per site instead of sites per kilometer
+#' proximity.score.in.miles - convert EJSCREEN proximity scores to miles per site instead of sites per kilometer
 #' Shows US percentiles if no arguments used
 #' @param scoresdf data.frame of simple proximity scores like for tsdf, rmp, npl
 #'   but not traffic.score or npdes one since those are weighted and not just count per km
@@ -1211,12 +1211,12 @@ calc_bgwts_bysite <- function(sites2blocks) {
 #'   or input to [doaggregate()] or [custom_doaggregate()]
 #' @seealso [custom_doaggregate()]
 #' @return data.table, 1 row per blockgroup (even if bg is near 2+ sites),
-#'   so it is a table of all the unique block groups in the overall
+#'   so it is a table of all the unique blockgroups in the overall
 #'   analysis (merged across all sites), with a weight that indicates
 #'   what fraction of that bg population is included in the overall
 #'   analysis. This can be used to get overall results if it is
-#'   joined to block group residential population data, etc.,
-#'   to aggregate each indicator over all block groups using the weights.
+#'   joined to blockgroup residential population data, etc.,
+#'   to aggregate each indicator over all blockgroups using the weights.
 #'
 #' @keywords internal
 #'
@@ -1269,7 +1269,7 @@ calcweight <- function(varnames) {
 #######################################################################  #
 
 
-#' DRAFT - Calculate (aggregate) county scores from block group scores
+#' DRAFT - Calculate (aggregate) county scores from blockgroup scores
 #' @description Redo as more generic and TO HANDLE >1 INDICATOR AT A TIME ! See other functions in PROXIMITY_FUNCTIONS.R !
 #'
 #' @param childDT data.table (or data.frame)
@@ -1355,7 +1355,7 @@ calc_counties_from_bg = function(childDT, score_colname, wt_colname = 'pop', bgf
 #' @param sites2blocks see [doaggregate()]
 #'
 #' @param custom_blockgroupstats like blockgroupstats but with custom
-#'   indicators, one value per block group, with colnames bgid, bgfips, pop
+#'   indicators, one value per blockgroup, with colnames bgid, bgfips, pop
 #' @param countcols vector of colnames in custom_blockgroupstats to be
 #'   aggregated as sums of counts, like population counts
 #' @param popmeancols vector of colnames in custom_blockgroupstats to be
@@ -1414,7 +1414,7 @@ custom_doaggregate <- function(sites2blocks,
   ##            *** the code below should be made available on its own without the part above here.
   #
   # for example, if you had done this:
-  # x = EJAM::counties_as_sites(fips_counties_from_state_abbrev("DE"))
+  # x =  counties_as_sites(fips_counties_from_state_abbrev("DE"))
   # > x
   # ejam_uniq_id countyfips  bgid
   # <int>     <char> <int>
@@ -1436,7 +1436,7 @@ custom_doaggregate <- function(sites2blocks,
   bybg_overall <- merge(bybg_overall, custom_blockgroupstats, by = "bgid")
 
   #################### #
-  # calculations just for EACH block group
+  # calculations just for EACH blockgroup
   #  No aggregation yet (sum of counts, percentage as ratio, avg of 2 values, etc.)
   if (!is.null(custom_formulas)) {
     bybg_bysite   <- calc_ejam(bybg_bysite,  keep.old = c("ejam_uniq_id", "bgid", "pop", "bgwt"), keep.new = "all", formulas = custom_formulas)
@@ -1448,7 +1448,7 @@ custom_doaggregate <- function(sites2blocks,
   #################### #
   # calculations that AGGREGATE across all blockgroups within each site and overall
   # wtd mean of bgs, sum of counts at bgs, or min or max of bgs.
-  # bgwt is the block group weight to use since some bg are only partially included in zone
+  # bgwt is the blockgroup weight to use since some bg are only partially included in zone
 
   #################### #
   ## sums of counts
@@ -1516,11 +1516,11 @@ custom_doaggregate <- function(sites2blocks,
     #   # to be written...
     #   ## *** PROBLEM HOW TO ALLOW CUSTOM FORMULAS THAT
     #   ##  ALSO WILL  INCORPORATE THE bgwt multiplication
-    #   ##   needed to rollup across block groups correctly??
+    #   ##   needed to rollup across blockgroups correctly??
     #
     #
     #   if (is.null(custom_cols)) {
-    #     custom_cols = EJAMformula_varname(custom_formulas)
+    #     custom_cols = EJAM:::formula_varname(custom_formulas)
     #   }
     #
     # results_bysite_custom  <-  bybg_bysite[ , calc_ejam( ..???? ), by = "ejam_uniq_id"]
@@ -1733,14 +1733,14 @@ if (1 == 0) {
 #' For user-provided indicators and formulas, aggregate at each site and overall
 #'
 #' Like doaggregate() but for any user-provided indicator available for all
-#' block groups (nationwide so that US percentiles make sense, or at least statewide)
+#' blockgroups (nationwide so that US percentiles make sense, or at least statewide)
 #'
 #' @param sites2blocks output of [getblocksnearby()], as for [doaggregate()]
 #'
 #' @param userstats like blockgroupstats but data.frame or data.table of all US
 #'   blockgroups and one or more columns of user provided raw indicator scores
 #'   and any other variables needed for formulas to aggregate indicators
-#'   across block groups in each site.
+#'   across blockgroups in each site.
 #'
 #' @param formulas a character vector of formulas in R code (see formulas_d for
 #'   an example), that use variables in userstats to calculate any
@@ -1809,11 +1809,11 @@ doaggregate_newscores <- function(
   data.table::setDT(userstats)
 
   # use a join to get bgid if only fips was provided
-  if (!("bgid" %in% names(userstats)) & !("bgfips" %in% names(userstats))) {
+  if (!("bgid" %in% names(userstats)) && !("bgfips" %in% names(userstats))) {
     userstats[ , bgid := .I]  # not the true bgid though !
     warning("unique bgid column had to be invented, as 1:N since not provided and bgid2fips missing. This means you cannot join to other blockgroup tables simply on bgid. Use bgfips if available.")
   }
-  if (!("bgid" %in% names(userstats)) & "bgfips" %in% names(userstats)) {
+  if (!("bgid" %in% names(userstats)) && "bgfips" %in% names(userstats)) {
     if (exists("bgid2fips")) {
       userstats[bgid2fips, bgid := bgid, on = "bgfips"]
     } else {
@@ -1866,7 +1866,7 @@ doaggregate_newscores <- function(
   # }
 
   # weighted means ####
-  if (length(popmeancols_inbgstats) > 0 & "pop" %in% names(sites2bgs_plusblockgroupdata_bysite)) {
+  if (length(popmeancols_inbgstats) > 0 && "pop" %in% names(sites2bgs_plusblockgroupdata_bysite)) {
     results_bysite_popmeans <- sites2bgs_plusblockgroupdata_bysite[   ,  lapply(.SD, FUN = function(x) {
       collapse::fmean(x, w = bgwt * pop)   # stats::weighted.mean(x, w = bgwt * pop, na.rm = TRUE)
     }), .SDcols = popmeancols_inbgstats, by = .(ejam_uniq_id) ]
@@ -1915,12 +1915,12 @@ doaggregate_newscores <- function(
 
   ################################################################################# #
   # WHAT STATE IS EACH SITE IN? (TO ENABLE STATE PERCENTILE LOOKUP) ####
-  if (missing(sites2states_or_latlon) | !("ST" %in% names(sites2states_or_latlon))) { # must or should figure out state based on blockid -> blockfips -> ST
+  if (missing(sites2states_or_latlon) || !("ST" %in% names(sites2states_or_latlon))) { # must or should figure out state based on blockid -> blockfips -> ST
     sites2states <- ST_by_site_from_sites2blocks(sites2blocks)
     # returns a data.table with these columns:  siteid, ST  (and only 1 row per siteid! It is just to know the ST of each unique siteid)
     if (!missing(sites2states_or_latlon)) {
       # add in the lat,lon columns - this is always available if ejamit() called this since it passes the pts as sites2states_or_latlon
-      if ("ejam_uniq_id" %in% names(sites2states_or_latlon) & "ejam_uniq_id" %in% names(sites2states)) {
+      if ("ejam_uniq_id" %in% names(sites2states_or_latlon) && "ejam_uniq_id" %in% names(sites2states)) {
         #if ("siteid" %in% names(sites2states_or_latlon) & "siteid" %in% names(sites2states)) {
         sites2states <- merge(sites2states, sites2states_or_latlon, by = 'ejam_uniq_id') #  error if  ejam_uniq_id is not there
         #sites2states <- merge(sites2states, sites2states_or_latlon, by = 'siteid') #  error if  siteid is not there
@@ -1978,7 +1978,7 @@ doaggregate_newscores <- function(
   # SLOW:
   for (i in seq_along(varsneedpctiles)) {
     myvar <- varsneedpctiles[i]
-    if ((myvar %in% names(usastats_newscores)) & (myvar %in% names(results_bysite)) & (myvar %in% names(results_overall))) {  # use this function to look in the lookup table to find the percentile that corresponds to each raw score value:
+    if ((myvar %in% names(usastats_newscores)) && (myvar %in% names(results_bysite)) && (myvar %in% names(results_overall))) {  # use this function to look in the lookup table to find the percentile that corresponds to each raw score value:
       us.pctile.cols_bysite[    , varnames.us.pctile[[i]]]    <- pctile_from_raw_lookup(
         unlist(results_bysite[  , ..myvar]), varname.in.lookup.table = myvar, lookup = usastats_newscores)
       us.pctile.cols_overall[   , varnames.us.pctile[[i]]]    <- pctile_from_raw_lookup(
@@ -1988,7 +1988,7 @@ doaggregate_newscores <- function(
       us.pctile.cols_bysite[    , varnames.us.pctile[[i]]] <- NA
       us.pctile.cols_overall[   , varnames.us.pctile[[i]]] <- NA
     }
-    if ((myvar %in% names(statestats_newscores)) & (myvar %in% names(results_bysite)) ) {
+    if ((myvar %in% names(statestats_newscores)) && (myvar %in% names(results_bysite)) ) {
       state.pctile.cols_bysite[ , varnames.state.pctile[[i]]] <- pctile_from_raw_lookup(    ### VERY SLOW STEP 289 msec
         unlist(results_bysite[  , ..myvar]), varname.in.lookup.table = myvar, lookup = statestats_newscores, zone =  results_bysite$ST)
       ## These must be done later, as avg of sites:
@@ -2042,7 +2042,7 @@ doaggregate_newscores <- function(
     results_bybg_people = sites2bgs_plusblockgroupdata_bysite,  # each indicator, at each BG-site combo, not just each UNIQUE BG !!
     #  That allows one to see distrib within each demog at each site, not just overall,
     #  but need be careful when looking at that stat overall to not count some bgs twice. ?
-    longnames = longnames,
+    longnames = longnames
   )
 
   return(results)

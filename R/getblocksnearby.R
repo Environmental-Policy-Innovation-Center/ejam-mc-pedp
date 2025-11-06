@@ -15,9 +15,9 @@
 #'   residents live.
 #'
 #'   Finding which blocks have their internal points in a circle provides
-#'   a way to quickly estimate what fraction of a block group is
+#'   a way to quickly estimate what fraction of a blockgroup is
 #'   inside the circular buffer more accurately and more quickly than
-#'   areal apportionment of block groups would provide.
+#'   areal apportionment of blockgroups would provide.
 #'
 #' @details
 #'  See [ejamit()] for examples.
@@ -43,7 +43,7 @@
 #'
 #' @export
 #'
-getblocksnearby  <- function(sitepoints, radius = 3, maxradius = 31.07, radius_donut_lower_edge = 0,
+getblocksnearby <- function(sitepoints, radius = 3, maxradius = 31.07, radius_donut_lower_edge = 0,
                              avoidorphans = FALSE,
                              # indexgridsize,
                              quadtree = NULL,
@@ -53,7 +53,7 @@ getblocksnearby  <- function(sitepoints, radius = 3, maxradius = 31.07, radius_d
                              use_unadjusted_distance = TRUE,
                              # a new approach that just uses the distance between site and block when determining which blocks (residents) are within radius
                              # relevant if a block is huge relative to the radius or a block contains a site
-                             # might match EJScreen better?
+                             # might match EJSCREEN better?
                              # and might be a bit faster,
                              # and might find different pop and block count nearby a site
                              # and might give smaller estimates of distance of site to avg person, etc.
@@ -90,7 +90,7 @@ getblocksnearby  <- function(sitepoints, radius = 3, maxradius = 31.07, radius_d
     if (exists("localtree")) {
       quadtree <- localtree
     } else {    #  SEE IF WE EVER NEED TO OR EVEN CAN CREATE THIS ON THE FLY HERE FOR SOME INTERACTIVE USERS, BUT SHOULD NOT BE AN ISSUE IF PKG LOADED
-      if (!exists("quaddata") | !exists("blockwts") | !exists("blockpoints") ) {  #| !exists("bgid2fips")
+      if (!exists("quaddata") || !exists("blockwts") || !exists("blockpoints") ) {  #| !exists("bgid2fips")
         # should
         cat('census block data file(s) not already loaded, so key data will now be downloaded (or loaded from a local copy if possible)...\n')
         # loads quaddata needed to make localtree index, and several other large files pkg uses.

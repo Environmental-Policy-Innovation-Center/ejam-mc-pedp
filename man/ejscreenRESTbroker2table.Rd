@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreenRESTbroker2table.R
 \name{ejscreenRESTbroker2table}
 \alias{ejscreenRESTbroker2table}
-\title{Low-level utility to convert result of EJScreen API query into table format}
+\title{Low-level utility to convert result of EJSCREEN API query into table format}
 \usage{
 ejscreenRESTbroker2table(brokeroutput, getstatefromplacename = TRUE)
 }

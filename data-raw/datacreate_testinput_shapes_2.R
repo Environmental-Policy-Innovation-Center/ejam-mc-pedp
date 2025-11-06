@@ -25,6 +25,6 @@ dataset_documenter('testinput_shapes_2', description = "Sample shapefile/polygon
                    seealso = "same as [testshapes_2]")
 
 # save as .zip shapefile in testdatafolder()
-shape2zip(testinput_shapes_2, './inst/testdata/shapes/testinput_shapes_2.zip')
+shape2zip(testinput_shapes_2, filename = './inst/testdata/shapes/testinput_shapes_2.zip')
 
 ################################# #

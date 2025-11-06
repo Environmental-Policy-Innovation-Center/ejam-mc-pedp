@@ -46,7 +46,7 @@ radius requested, even if avoidorphans is FALSE. That must be because the
 reported distance is adjusted when it is small relative to the whole block, to
 better estimate distance to average resident in the block rather than reporting
 distance to the point that is the block internal point (centroid essentially).
-As documented in the EJScreen information about creating proximity scores,
+As documented in the EJSCREEN information about creating proximity scores,
 a facility exactly on top of the block internal point has distance zero to the point but
 that is not the actual distance to the average resident in the block, hence the adjustment.
 Some blocks in low density areas are huge so a relatively small circular buffer (small radius)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/PROXIMITY_FUNCTIONS.R
 \name{calc_counties_from_bg}
 \alias{calc_counties_from_bg}
-\title{DRAFT - Calculate (aggregate) county scores from block group scores}
+\title{DRAFT - Calculate (aggregate) county scores from blockgroup scores}
 \usage{
 calc_counties_from_bg(
   childDT,

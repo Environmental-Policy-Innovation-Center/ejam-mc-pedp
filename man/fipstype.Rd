@@ -20,6 +20,8 @@ NOTE: Does NOT check if fips is a real fips. For that, use \code{\link[=fips_val
 
 Note a number of length 11 is an ambiguous case this is able to resolve as
 either a complete tract fips or a blockgroup fips with a missing leading zero.
+An 11-character string starting in 3, 7, or 0 cannot be a bg missing a leading zero, so could only be a tract (if valid).
+Since a 12-character bg fips never starts with 03, 07, or 00.
 }
 \examples{
  fips_counties_from_statename("Delaware")

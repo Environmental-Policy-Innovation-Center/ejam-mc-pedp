@@ -12,7 +12,7 @@ junk1 <- function() {
   for (i in seq_along(fnames)) {
     cat("Trying to read #", i, ":", fnames[i], "\n")
     trash <- capture.output({
-      sh[[i]] <- try({shapefile_from_any(fnames[i])})
+      sh[[i]] <- try({shapefile_from_any(fnames[i], silentinteractive=TRUE)})
     })
     if (inherits(sh[[i]], "try-error")) {
       warning("failed to read ", fnames[i])

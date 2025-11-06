@@ -2,25 +2,30 @@
 % Please edit documentation in R/latlon_from_regid.R
 \name{latlon_from_regid}
 \alias{latlon_from_regid}
-\title{Get lat lon (and NAICS) via Facility Registry ID}
+\alias{frs_from_regid}
+\title{Get latitude, longitude (and NAICS) via EPA Facility Registry ID
+See FRS Facility Registry Service data on EPA-regulated sites}
 \usage{
-latlon_from_regid(regid)
+latlon_from_regid(regid = NULL)
 }
 \arguments{
-\item{regid}{Facility Registry Service ID like 110010052520}
+\item{regid}{vector of one or more EPA Facility Registry Service IDs like 110010052520}
 }
 \value{
-data.table with columns
-lat,lon,REGISTRY_ID,PRIMARY_NAME,NAICS,PGM_SYS_ACRNMS
+data.table drawn from \link{frs} dataset, with columns
+"lat" "lon" "REGISTRY_ID" "PRIMARY_NAME" "NAICS" "PGM_SYS_ACRNMS"
 }
 \description{
-Get lat lon (and NAICS) via Facility Registry ID
+Get latitude, longitude (and NAICS) via EPA Facility Registry ID
+See FRS Facility Registry Service data on EPA-regulated sites
 }
 \examples{
+ latlon_from_regid("110070874073")
  latlon_from_regid(110070874073)
-x = latlon_from_regid(
-    c(110071293460, 110070874073, 110070538057, 110044340807,
-       110030509215, 110019033810, 110056111559, 110056982323)
-        )
+ frs_from_regid(110070874073)
+ frs_from_regid(testinput_registry_id)
 
+}
+\seealso{
+\code{\link[=url_frs_facility]{url_frs_facility()}}
 }

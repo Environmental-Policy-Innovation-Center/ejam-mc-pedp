@@ -36,7 +36,7 @@ also provide search by NAICS or SIC, and by MACT subpart.
   frs_from_naics(21222)
   regid_from_naics(21222)
   latlon_from_naics(21222)
-  
+
 }
 \seealso{
 \code{\link[=latlon_from_naics]{latlon_from_naics()}} \code{\link[=latlon_from_sic]{latlon_from_sic()}} \code{\link[=frs_from_sic]{frs_from_sic()}} \code{\link[=regid_from_naics]{regid_from_naics()}} \code{\link[=naics_from_any]{naics_from_any()}}

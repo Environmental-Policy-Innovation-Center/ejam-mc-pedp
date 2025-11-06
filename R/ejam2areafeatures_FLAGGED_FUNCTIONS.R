@@ -11,38 +11,37 @@
 #'
 #' These are the indicator summary stats shown:
 #'
-#'  - [1,] "Number of Schools"
+#'  -  "Number of Schools"
 #'
-#'  - [2,] "Number of Hospitals"
+#'  -  "Number of Hospitals"
 #'
-#'  - [3,] "Number of Worship Places"
+#'  -  "Number of Worship Places"
 #'
-#'  - [4,] "Flag for Overlapping with Tribes"
+#'  -  "Flag for Overlapping with Tribes"
 #'
-#'  - [5,] "Flag for Overlapping with Non-Attainment Areas"
+#'  -  "Flag for Overlapping with Non-Attainment Areas"
 #'
-#'  - [6,] "Flag for Overlapping with Impaired Waters"
+#'  -  "Flag for Overlapping with Impaired Waters"
 #'
-#'  - [7,] "Flag for Overlapping with CEJST Disadvantaged Communities"
+#'  -  "Flag for Overlapping with CEJST Disadvantaged Communities"
 #'
-#'  - [8,] "Flag for Overlapping with EPA IRA Disadvantaged Communities"
+#'  -  "Flag for Overlapping with EPA IRA Disadvantaged Communities"
 #'
-#'  - [9,] "Flag for Overlapping with Housing Burden Communities"
+#'  -  "Flag for Overlapping with Housing Burden Communities"
 #'
-#'  - [10,] "Flag for Overlapping with Transportation Disadvantaged Communities"
+#'  -  "Flag for Overlapping with Transportation Disadvantaged Communities"
 #'
-#'  - [11,] "Flag for Overlapping with Food Desert Areas"
+#'  -  "Flag for Overlapping with Food Desert Areas"
 #'
-#'  - [12,] "% Households without Broadband Internet"
+#'  -  "% Households without Broadband Internet"
 #'
-#'  - [13,] "% Households without Health Insurance"
+#'  -  "% Households without Health Insurance"
 #'
 #'
 #' @param ejamitout output from ejamit()
 #' @param main optional title for plot
 #' @param ylab optional y axis label
 #' @param shortlabels optional alternative labels for the bars
-#' @param caption left blank to avoid default caption used in [plot_barplot_ratios()]
 #' @seealso [ejam2areafeatures()] [batch.summarize()]
 #' @examples
 #' out <- testoutput_ejamit_1000pts_1miles

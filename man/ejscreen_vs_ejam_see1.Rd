@@ -2,7 +2,7 @@
 % Please edit documentation in R/ejscreen_vs_ejam_.R
 \name{ejscreen_vs_ejam_see1}
 \alias{ejscreen_vs_ejam_see1}
-\title{EJAM/EJSCREEN comparisons - see results for 1 site after using ejscreen_vs_ejam()}
+\title{EJAM / EJSCREEN comparisons - see results for 1 site after using ejscreen_vs_ejam()}
 \usage{
 ejscreen_vs_ejam_see1(
   vs,
@@ -33,7 +33,7 @@ a table showing one row per indicator, and columns like EJSCREEN, EJAM, ratio, e
 but see str() because it is a list in matrix form
 }
 \description{
-EJAM/EJSCREEN comparisons - see results for 1 site after using ejscreen_vs_ejam()
+EJAM / EJSCREEN comparisons - see results for 1 site after using ejscreen_vs_ejam()
 }
 \details{
 see also ejscreen_vs_ejam_1var_bysite() and ejscreen_vs_explain()

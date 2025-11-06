@@ -15,31 +15,32 @@
 #'   Results are the sites2blocks table that would be used by doaggregate(),
 #'   with distance in miles as one output column of data.table.
 #'   Adjusts distance to avg resident in block when it is very small relative to block size,
-#'   the same way EJScreen adjusts distances in creating proximity scores.
+#'   the same way EJSCREEN adjusts distances in creating proximity scores.
 #'
 #'   Each point can be the location of a regulated facility or other type of site, and
 #'   the blocks are a high-resolution source of information about where
 #'   residents live.
 #'
 #'   Finding which blocks have their internal points in a circle provides
-#'   a way to quickly estimate what fraction of a block group is
+#'   a way to quickly estimate what fraction of a blockgroup is
 #'   inside the circular buffer more accurately and more quickly than
-#'   areal apportionment of block groups would provide.
+#'   areal apportionment of blockgroups would provide.
 #'
 #' @param sitepoints data.table with columns lat, lon giving point locations of sites or facilities around which are circular buffers
 #' @param radius in miles, defining circular buffer around a site point
 #' @param radius_donut_lower_edge radius of lower edge of ring if analyzing ring not full circle
 #' @param maxradius miles distance (max distance to check if not even 1 block point is within radius)
-#' @param avoidorphans logical If TRUE, then where not even 1 BLOCK internal point is within radius of a SITE,
+#' @param avoidorphans MAY BE OBSOLETE/UNUSED NOW.
+#'   logical If TRUE, then where not even 1 BLOCK internal point is within radius of a SITE,
 #'   it keeps looking past radius, up to maxradius, to find nearest 1 BLOCK.
-#'   What EJScreen does in that case is report NA, right? So,
+#'   What EJSCREEN does in that case is report NA, right? So,
 #'   does EJAM really need to report stats on residents presumed to be within radius,
 #'    if no block centroid is within radius?
 #'   Best estimate might be to report indicators from nearest block centroid which is
 #'   probably almost always the one your site is sitting inside of,
 #'   but ideally would adjust total count to be a fraction of blockwt based on
 #'   what is area of circular buffer as fraction of area of block it is apparently inside of.
-#'   Setting this to TRUE can produce unexpected results, which will not match EJScreen numbers.
+#'   Setting this to TRUE can produce unexpected results, which will not match EJSCREEN numbers.
 #'
 #'   Note that if creating a proximity score, by contrast, you instead want to find nearest 1 SITE if none within radius of this BLOCK.
 #' @param quadtree (a pointer to the large quadtree object)
@@ -57,7 +58,7 @@
 #'   -- the distance column always represents distance to average resident in the block, which is
 #'   estimated by adjusting the site to block distance in cases where it is small relative to the
 #'   size of the block, to put a lower limit on it, which can result in a large estimate of distance
-#'   if the block is very large. See EJScreen documentation.
+#'   if the block is very large. See EJSCREEN documentation.
 #' @param updateProgress, optional function to update Shiny progress bar
 #'
 #' @examples
@@ -69,7 +70,7 @@
 #' @export
 #' @keywords internal
 #'
-getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_lower_edge = 0, maxradius = 31.07, avoidorphans = FALSE,
+getblocksnearbyviaQuadTree <- function(sitepoints, radius = 3, radius_donut_lower_edge = 0, maxradius = 31.07, avoidorphans = FALSE,
                                         report_progress_every_n = 500, quiet = FALSE,
                                         use_unadjusted_distance = FALSE,
                                         retain_unadjusted_distance = TRUE,
@@ -142,7 +143,7 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
 
   # LOOP OVER SITES ####
 
-  res <- lapply(1:nRowsDf, FUN = function(a){
+  res <- lapply(1:nRowsDf, FUN = function(a) {
 
     ### * FAST SEARCH - WHICH BLOCKS ARE APPROX NEARBY ####
 
@@ -164,7 +165,7 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
     tmp[, ejam_uniq_id := sitepoints[a, .(ejam_uniq_id)]]
 
     ### progress bar ####
-    ## add check that data has enough points to show increments with rounding
+    ## could add check that data has enough points to show increments with rounding ***
     ## i.e. if 5% increments, need at least 20 points or %% will return NaN
     if (((a %% report_progress_every_n) == 0) & interactive()) {cat(paste("Finished finding blocks near ",a ," of ", nRowsDf),"\n" ) }   # i %% report_progress_every_n indicates i mod report_progress_every_n (“i modulo report_progress_every_n”)
     pct_inc <- 5
@@ -201,10 +202,10 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
     #getblocks_diagnostics(sites2blocks) # returns NA if no blocks nearby
   }
 
-  # distance can get adjusted to a minimum possible value,  0.9 * effective radius of block_radius_miles (see EJScreen Technical Documentation discussion of proximity analysis for rationale)
+  # distance can get adjusted to a minimum possible value,  0.9 * effective radius of block_radius_miles (see EJSCREEN Technical Documentation discussion of proximity analysis for rationale)
   # See notes in the file EJAM/data-raw/datacreate_blockwts.R
   # use block_radius_miles here, to correct the distances that are small relative to a block size.
-  # This adjusts distance the way EJScreen does for proximity scores - so distance reflects distance of sitepoint to avg resident in block
+  # This adjusts distance the way EJSCREEN does for proximity scores - so distance reflects distance of sitepoint to avg resident in block
   # (rather than sitepoint's distance to the block internal point),
   # including e.g., where distance to block internal point is so small the site is inside the block.
   # This also avoids infinitely small or zero distances.
@@ -219,7 +220,7 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
     if (!quiet) {  cat("\n\nAdjusting upwards the very short distances now...\n ")}
     # 2 ways considered here for how exactly to make the adjustment:
     sites2blocks[distance < block_radius_miles, distance := 0.9 * block_radius_miles]  # assumes distance is in miles
-    # or a more continuous but slower (and nonEJScreen way?) adjustment for when dist is between 0.9 and 1.0 times block_radius_miles:
+    # or a more continuous but slower (and non EJSCREEN way?) adjustment for when dist is between 0.9 and 1.0 times block_radius_miles:
     # sites2blocks_dt[ , distance  := pmax(block_radius_miles, distance, na.rm = TRUE)] # assumes distance is in miles
   }
   # now drop that info about area or size of block to save memory. do not need it later in sites2blocks
@@ -241,20 +242,14 @@ getblocksnearbyviaQuadTree  <- function(sitepoints, radius = 3, radius_donut_low
     getblocks_diagnostics(sites2blocks)
     cat("\n")
   }
-  ### and with above idea, cant we subset to keep only distance <=  radius here, instead of inside the loop ? Or do it even later, after adjusting short distances? What would make sense to report as distance to avg resident if the effective radius happends to be > radius specified, as with small radius circle in rural huge block?
-  # sites2blocks <- sites2blocks[distance <= truedistance, ]
   ########################################################################### ##
 
-  # if (interactive() & !quiet) {
-  #   cat("You can use  getblocks_diagnostics(sites2blocks)  to see this info on distances found:\n\n")
-  #   getblocks_diagnostics(sites2blocks)
-  # }
-
-  # SORT OUTPUT LIKE INPUT ####
+  # SORT OUTPUT LIKE INPUT ? ####
   # >sort again to return sites in same sort order as inputs were in
-  # sitespoints$ejam_uniq_id is vector of ids in correct order, original order. do not assume they are sorted as 1:N
+  # sitepoints$ejam_uniq_id is vector of ids in correct order, original order. do not assume they are sorted as 1:N
   # do join to return sites2blocks with ejam_unique_id in the order in which they are found in sitepoints, and the .SD prevents it from pulling in the lat lon cols from sitepoints
-# but also omit invalid and no-block sites:
+
+
   # > DROP from s2b SITES WITH NO BLOCKS FOUND ####
   sites2blocks <- sites2blocks[sitepoints, .SD, on = "ejam_uniq_id"][!is.na(blockid), ]
 

@@ -6,22 +6,22 @@
 \usage{
 ejam2map(
   ejamitout,
-  radius = NULL,
   column_names = "ej",
   launch_browser = TRUE,
-  shp = NULL
+  shp = NULL,
+  sitenumber = NULL
 )
 }
 \arguments{
 \item{ejamitout}{output of ejamit()}
-
-\item{radius}{radius in miles}
 
 \item{column_names}{can be "ej", passed to \code{\link[=mapfast]{mapfast()}}}
 
 \item{launch_browser}{logical optional whether to open the web browser to view the map}
 
 \item{shp}{shapefile it can map if analysis was for polygons, for example}
+
+\item{sitenumber}{as used in \code{\link[=ejam2report]{ejam2report()}}}
 }
 \value{
 like what \code{\link[=mapfastej]{mapfastej()}} returns

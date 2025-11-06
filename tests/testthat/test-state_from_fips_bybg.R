@@ -10,9 +10,9 @@ test_that('lookup works correctly',{
 
 # it uses fips_bgs_in_fips to check if it's valid.
 # any warnings should be added there not to this function
-test_that('actually does not warn but does not crash, for invalid fips',{
+test_that('not warn but not crash, IF invalid fips', {
   suppressWarnings({
-    
+
   expect_no_error({
     val <- state_from_fips_bybg("452")
     })

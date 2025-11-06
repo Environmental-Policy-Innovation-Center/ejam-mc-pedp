@@ -65,7 +65,7 @@ See more about NAICS industry codes at \url{https://www.naics.com/search}
   head(regid_from_naics(c(3366, 33661, 336611)))
   head(regid_from_naics(3366, children = TRUE))
   # mapfast(frs_from_naics(336611)) # simple map
-  
+
   # get name from one code
   naics_from_code(336)$name
   # get the name from each code
@@ -75,7 +75,7 @@ See more about NAICS industry codes at \url{https://www.naics.com/search}
   naics_counts[NAICS \%in\% mycode, ]
   # see parent codes that contain each code
   naicstable[code \%in\% mycode, ]
-  
+
   # how many were found via each naics code?
   found = latlon_from_naics(c(211,331))
   x = table( found$naics_found, found$naics_query)
