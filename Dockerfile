@@ -1,5 +1,6 @@
 FROM rocker/rstudio:latest
 
+# Install system dependencies including those needed for sf
 RUN apt-get update && apt-get install -y \
     curl \
     unzip \
@@ -11,10 +12,14 @@ RUN apt-get update && apt-get install -y \
     protobuf-compiler \
     libproj-dev \
     libgdal-dev \
+    libgeos-dev \
+    libgeos++-dev \
     libmagick++-dev \
     texlive \
     texlive-latex-extra \
     texlive-fonts-extra \
+    libjq-dev \
+    libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
     
 # Install AWS CLI v2
@@ -27,6 +32,7 @@ RUN mkdir -p /home/epic
 WORKDIR /home/epic
 
 # Install required R packages from CRAN
+# Remove methods and datasets from the list as they are base packages
 RUN install2.r --error \
     s2 \
     sf \
@@ -51,7 +57,6 @@ RUN install2.r --error \
     leaflet.extras2 \
     leaflet.extras \
     magrittr \
-    methods \
     openxlsx \
     pdist \
     pins \
@@ -74,7 +79,6 @@ RUN install2.r --error \
     spelling \
     testthat \
     beepr \
-    datasets \
     fipio \
     htmlwidgets \
     jsonlite \
@@ -86,17 +90,13 @@ RUN install2.r --error \
     units \
     remotes 
     
-
 #adding Areas of Interest
 RUN R -e "remotes::install_github('mikejohnson51/AOI')"
-
 RUN R -e "remotes::install_github('hrbrmstr/hrbrthemes')"
 
 #Copying folder contents 
 ADD . /home/epic/
-
 RUN R -e "remotes::install_local('/home/epic/', dependencies = TRUE)"
-
 
 # Expose ports
 EXPOSE 2000 2001
