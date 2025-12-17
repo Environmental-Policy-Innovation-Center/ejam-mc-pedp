@@ -97,7 +97,7 @@
 #' @param dobuild_site should leave this TRUE
 #'
 #' @examples
-#'   # pkgdown_update(doask = TRUE)
+#'   # EJAM:::pkgdown_update(doask = TRUE)
 #'
 #' @returns NULL
 #'
@@ -223,6 +223,9 @@ pkgdown_update = function(
   # if doyamlcheck, _pkgdown.yml check ####
 
   if (doyamlcheck) {
+    # first just check if any .Rd files should get deleted as obsolete
+    pkg_clean_stale_rd(dry_run = TRUE, verbose=TRUE)
+
     #cat('Using load_all() 1st, before using dataset_pkgdown_yaml_check() ... \n')
     #devtools::load_all(quiet = T, helpers = F, export_all = T)
     #    dataset_pkgdown_yaml_check() will not work without the unexported dataset_pkgdown_yaml_check() available
@@ -257,7 +260,7 @@ pkgdown_update = function(
       file.remove(list.files('./man', pattern = ".*[^figures]$", full.names = TRUE, include.dirs = FALSE)) # leave the figures directory that has a logo in it
       ## might
     }
-    # notes on doclean_man:
+    # notes on doclean_man:   but see  EJAM:::pkg_clean_stale_rd()
     # # MAYBE NEED TO DELETE ALL IN THE man/ FOLDER TO REMOVE OBSOLETE .Rd files like no longer documented or renamed functions ?
     # cat("You might need to do something like  \n  file.remove(list.files('./man', full.names = TRUE, include.dirs = FALSE)) \nto delete all of /man/*.* to be sure there is nothing obsolete like renamed or deleted or no-longer-documented functions. \n")
   }
@@ -336,7 +339,7 @@ pkgdown_update = function(
     golem::detach_all_attached()
     library(devtools) # library() stops with error where require() would only warn
     library(pkgdown)
-    devtools::load_all() # got error lazy-load database ... corrupt
+    devtools::load_all() # doing load_all() without having done library() first might fail to do some of what is needed?
   } else {
     cat('doing library(EJAM) \n')
     x = try( library(EJAM) ) # library() stops with error where require() would only warn
