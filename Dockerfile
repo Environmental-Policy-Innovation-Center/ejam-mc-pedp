@@ -4,6 +4,8 @@ FROM rocker/rstudio:latest
 RUN apt-get update && apt-get install -y \
     curl \
     unzip \
+    cmake \
+    libabsl-dev \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
