@@ -17,9 +17,9 @@
 #'
 #'  The source of data for each indicator was documented by EJSCREEN, as archived on these pages:
 #'
-#'  - [EJSCREEN Change Log - newest indicators, etc.](https://web.archive.org/web/20250124090116/https://www.epa.gov/ejscreen/ejscreen-change-log)
-#'  - [Full list of indicators, with definitions](https://web.archive.org/web/20250123161322/https://www.epa.gov/ejscreen/ejscreen-map-descriptions)
-#'  - [Year and source of each environmental indicator](https://web.archive.org/web/20250123162159/https://www.epa.gov/ejscreen/overview-environmental-indicators-ejscreen)
+#'  - [EJSCREEN Change Log - newest indicators, etc.](https://web.archive.org/web/20250124090116/https://www.epa.gov/ejscreen/ejscreen-change-log){target="_blank"}
+#'  - [Full list of indicators, with definitions as archived](https://web.archive.org/web/20250123161322/https://www.epa.gov/ejscreen/ejscreen-map-descriptions){target="_blank"}.
+#'  - [Year and source of each environmental indicator](https://web.archive.org/web/20250123162159/https://www.epa.gov/ejscreen/overview-environmental-indicators-ejscreen){target="_blank"}
 #'
 #'  More about blockgroupstats
 #'

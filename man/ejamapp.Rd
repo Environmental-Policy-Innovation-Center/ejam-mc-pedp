@@ -2,8 +2,6 @@
 % Please edit documentation in R/ejamapp.R
 \name{ejamapp}
 \alias{ejamapp}
-\alias{app_run_EJAM}
-\alias{run_app}
 \title{Launch EJAM as Shiny web app (e.g. to run it locally in RStudio)}
 \usage{
 ejamapp(
@@ -103,29 +101,33 @@ i.e., via \code{\link[=require]{require()}} or \code{\link[=library]{library()}}
  # Note some of these settings/ parameters may get renamed to harmonize and simplify names.
 
  ## Provide input sites to app (skip the web app upload clicks),
- ## using parameters called `sitepoints` and `shapefile` as in `ejamit()`
+ ## using parameters called `sitepoints` and `shapefile` as in [ejamit()]
 
  #  data.frame with latitude, longitude
  ejamapp(sitepoints = testpoints_10[1:2,], radius = 3.1)
 
- #  file with latitude, longitude
- ejamapp(sitepoints = system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM"))
+ #  file with latitude, longitude ("pts" is an alias for "sitepoints")
+ ejamapp(pts = system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM"))
 
  #  spatial data.frame with polygons
  ejamapp(shapefile = testshapes_2)
 
- # file with polygons
- ejamapp(shapefile = system.file("testdata/shapes/testinput_shapes_2.zip", package="EJAM"))
+ # file with polygons ("shp" is an alias for "shapefile")
+ ejamapp(shp = system.file("testdata/shapes/testinput_shapes_2.zip", package="EJAM"))
 
  # a vector or file with fips codes
  ejamapp(fips = testinput_fips_counties)
  ejamapp(fips = testinput_fips_cities)
 
+ # all Counties in one State
+ejamapp(fips = fips_counties_from_state_abbrev("RI"),
+        analysis_title = "Rhode Island Counties",
+        report_title = "Overall Summary Report")
 
  ## Use preferred settings, for your set of analyses:
 
 ejamapp(
-  default_standard_analysis_title = "PREFERRED REPORT TITLE FOR THESE ANALYSES",
+  analysis_title = "PREFERRED REPORT TITLE FOR THESE ANALYSES",
   radius = 3.1, # PREFERRED RADIUS
   default_max_miles = 31,      # to raise the radius cap
   default_max_mb_upload = 100, # to raise the file upload size cap
@@ -141,7 +143,7 @@ ejamapp(
   ##   defines the range of options
 
 ejamapp(
-  default_standard_analysis_title="Custom NAICS Analysis",
+  analysis_title="Custom NAICS Analysis",
   default_upload_dropdown="dropdown",
   default_selected_type_of_site_category="NAICS",
   default_naics_digits_shown="detailed", # if default_naics is >3 digits, this has to be "detailed" not "basic"

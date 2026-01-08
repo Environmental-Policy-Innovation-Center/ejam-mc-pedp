@@ -316,7 +316,7 @@ url_ejscreenmap <- function(sitepoints = NULL, lat = NULL, lon = NULL,
   ######################## #  ######################## #  ######################## #
   ######################## #  ######################## #  ######################## #
 
-  ## if both APIs are down, return NAs ### #
+  ## if new API is down, return general links to info page ### #
   if (TRUE) { # was checking old epa api now obsolete
     if (EJAM:::global_or_param("ejamapi_is_down")) {
       urlx <- rep('https://ejanalysis.org', length(urlx))
@@ -335,6 +335,7 @@ url_ejscreenmap <- function(sitepoints = NULL, lat = NULL, lon = NULL,
   baseurl_query <- paste0(baseurl, "?wherestr=")
   whereq <- ""
   if (!is.null(lat)) {
+    # Note slight changes can occur in lat,lon values if using paste(lat,lon,sep=',) instead of format() as per ?as.character()
     whereq <- paste( lat,  lon, sep = ',') # points (or centroids of polygons)
     whereq[is.na(lat) | is.na(lon)] <- NA
   }
@@ -465,7 +466,7 @@ url_enviromapper <- function(sitepoints = NULL, lon = NULL, lat = NULL, shapefil
   ######################## #  ######################## #  ######################## #
 
   ## > MAKE URL ####
-
+  # Note slight changes can occur in lat,lon values if using paste(lat,lon,sep=',) instead of format() as per ?as.character()
   urlx <- paste0(baseurl, zoom, ",", lat, ",", lon)
 
   ######################## #
