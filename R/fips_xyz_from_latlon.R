@@ -37,17 +37,17 @@
 #' @param nbg number of candidate blockgroups to download for each site
 #' @param radius1 initial search radius for relevant block points
 #' @param quiet whether to print more while it downloads etc.
-#' @returns vector of blockgroup FIPS codes, same length as NROW(df)
+#' @return vector of blockgroup FIPS codes, same length as NROW(df)
 #'
 #' @examples
 #' \dontrun{
 #' # Looks like it finds the right blockgroup:
-#' x10 = fips_bg_from_latlon(testpoints_10)
+#' x10 = EJAM:::fips_bg_from_latlon(testpoints_10)
 #' mapfast( data.frame(ejam_uniq_id = x10[3]) )
 #' mapfast(testpoints_10[3, ], radius = 0.1)
 #'
 #' # Looks like it finds the right blockgroup:
-#' x100 = fips_bg_from_latlon(testpoints_100)
+#' x100 = EJAM:::fips_bg_from_latlon(testpoints_100)
 #' mapfast( data.frame(ejam_uniq_id = x100[34]) )
 #' mapfast(testpoints_100[34, ], radius = 0.1)
 #'   }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/shapefile_xyz.R
 \name{latlon_from_shapefile}
 \alias{latlon_from_shapefile}
-\alias{[shapefile2latlon()]}
+\alias{shapefile2latlon}
 \title{Convert shapefile (class sf) to data.table of lat and lon columns
 Makes lat and lon columns, from a sfc_POINT class geometry field, or finds centroids of POLYGONS}
 \usage{
@@ -18,7 +18,7 @@ lat lon columns plus all of columns in shp. If TRUE, just returns
 lat lon columns.}
 }
 \value{
-data.table with columns named lat and lon,
+\href{https://r-datatable.com}{data.table} with columns named lat and lon,
 and optionally all from shp as well,
 as can be used as input to \code{\link[=ejamit]{ejamit()}}, \code{\link[=mapfast]{mapfast()}}, etc.
 }

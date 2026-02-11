@@ -15,15 +15,11 @@
 #'
 #'   - The EJ Indexes (Summary Indexes) are stored in a separate table, [bgej]
 #'
-#'  The source of data for each indicator was documented by EJSCREEN, as archived on these pages:
-#'
-#'  - [EJSCREEN Change Log - newest indicators, etc.](https://web.archive.org/web/20250124090116/https://www.epa.gov/ejscreen/ejscreen-change-log)
-#'  - [Full list of indicators, with definitions](https://web.archive.org/web/20250123161322/https://www.epa.gov/ejscreen/ejscreen-map-descriptions)
-#'  - [Year and source of each environmental indicator](https://web.archive.org/web/20250123162159/https://www.epa.gov/ejscreen/overview-environmental-indicators-ejscreen)
+#'  The [source of data for each indicator was documented by EJSCREEN](https://ejanalysis.github.io/EJAM/articles/ejscreen.html){target="_blank"}.
 #'
 #'  More about blockgroupstats
 #'
-#'   - Version 2.32.6 of EJAM used EPA environmental indicators along with population indicators derived
+#'   - During 2025, EJAM used EPA environmental indicators along with population indicators derived
 #'   from 2018-2022 ACS data. Each year this should be re-created as for the latest version.
 #'
 #'   - See `attributes(blockgroupstats)` to confirm vintage of each dataset
@@ -56,9 +52,9 @@
 #'
 #'   - List of key datasets used by EJAM and details about annual updates: [technical article on updating datasets](https://ejanalysis.github.io/EJAM/articles/dev-update-datasets.html).
 #'
-#'   - Datasets stored within the EJAM package (.rda files): [Documentation](https://ejanalysis.github.io/EJAM/reference/index.html#datasets-with-indicators-etc-) and [access to data files](https://github.com/ejanalysis/EJAM/tree/main/data)
+#'   - Datasets stored within the EJAM package (.rda files): [Documentation](https://ejanalysis.github.io/EJAM/reference/index.html#datasets-with-indicators-raw-data-means-percentiles-) and [access to data files](https://github.com/ejanalysis/EJAM/tree/main/data)
 #'
-#'   - Datasets used by EJAM but stored separately (large .arrow files): [Documentation](https://ejanalysis.github.io/EJAM/reference/index.html#datasets-with-indicators-etc-) and [access to data files](https://github.com/ejanalysis/ejamdata/tree/main/data)
+#'   - Datasets used by EJAM but stored separately (large .arrow files): [Documentation](https://ejanalysis.github.io/EJAM/reference/index.html#datasets-with-indicators-raw-data-means-percentiles-) and [access to data files](https://github.com/ejanalysis/ejamdata/tree/main/data)
 #'
 #'   - Also see [ejanalysis.com/status](https://ejanalysis.com/status)
 #'

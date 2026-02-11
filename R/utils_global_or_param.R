@@ -25,16 +25,16 @@
 #' even if a shiny app has not yet launched.
 #'
 #' Then as a last resort, check if the param called vname is
-#' defined in the search path such as in the
-#' calling or global envt already somehow,
+#' defined in the
+#' calling envt already somehow,
 #' and return that value if it exists.
-#' But if it is not in golem options and not found in search path,
+#' But if it is not in golem options and not found,
 #' this returns NULL
 #'
 #' @param vname a global default or user param - do a global find in files
 #'   of source code for this function to see how / where it is used.
 #'
-#' @returns value of the param, or NULL if not found
+#' @return value of the param, or NULL if not found
 #'
 #' @keywords internal
 #'
@@ -60,14 +60,16 @@ global_or_param = function(vname) {
       }
     }
     ################################ #
-    ## 3d, as last resort, check global env for the variable/option/param name
-
-    x <- try(get(vname), silent = TRUE)
+    ## 3d, as last resort, check calling env (not global envt) for the variable/option/param name
+# this is a hack to look in the envt that called the function global_or_param()... there is a simpler way but for now this works
+# helps to find isPublic parameter, e.g.
+        x <- try(get(vname, envir = sys.frames()[[sys.nframe() - 1]]), silent = TRUE)
 
     if (inherits(x, "try-error")) {
       return(NULL)
     } else {
-      get(vname) # from the global envt
+      x
+      #get(vname) # from the global envt
     }
   }
 }

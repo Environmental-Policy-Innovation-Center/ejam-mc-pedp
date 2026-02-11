@@ -80,29 +80,39 @@
 #'  # Note some of these settings/ parameters may get renamed to harmonize and simplify names.
 #'
 #'  ## Provide input sites to app (skip the web app upload clicks),
-#'  ## using parameters called `sitepoints` and `shapefile` as in `ejamit()`
+#'  ## using parameters called `sitepoints` and `shapefile` and `fips` as in [ejamit()]
 #'
 #'  #  data.frame with latitude, longitude
 #'  ejamapp(sitepoints = testpoints_10[1:2,], radius = 3.1)
 #'
-#'  #  file with latitude, longitude
-#'  ejamapp(sitepoints = system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM"))
+#'  #  file with latitude, longitude ("pts" is an alias for "sitepoints")
+#'  ejamapp(pts = system.file("testdata/latlon/testpoints_10.xlsx", package="EJAM"))
 #'
 #'  #  spatial data.frame with polygons
 #'  ejamapp(shapefile = testshapes_2)
 #'
-#'  # file with polygons
-#'  ejamapp(shapefile = system.file("testdata/shapes/testinput_shapes_2.zip", package="EJAM"))
+#'  # file with polygons ("shp" is an alias for "shapefile")
+#'  ejamapp(shp = system.file("testdata/shapes/testinput_shapes_2.zip", package="EJAM"))
+#'
 #'
 #'  # a vector or file with fips codes
 #'  ejamapp(fips = testinput_fips_counties)
 #'  ejamapp(fips = testinput_fips_cities)
 #'
+#'  # all Counties in one State
+#' ejamapp(fips = fips_counties_from_state_abbrev("RI"),
+#'         analysis_title = "Rhode Island Counties",
+#'         report_title = "Overall Summary Report")
+#'
+#'  # FIPS based on names, but note matching by name is imperfect
+#'  # see [name2fips()] for details
+#' ejamapp(fips = name2fips(c("akutan,ak", "syracuse city,ny")))
+#'
 #'
 #'  ## Use preferred settings, for your set of analyses:
 #'
 #' ejamapp(
-#'   default_standard_analysis_title = "PREFERRED REPORT TITLE FOR THESE ANALYSES",
+#'   analysis_title = "PREFERRED REPORT TITLE FOR THESE ANALYSES",
 #'   radius = 3.1, # PREFERRED RADIUS
 #'   default_max_miles = 31,      # to raise the radius cap
 #'   default_max_mb_upload = 100, # to raise the file upload size cap
@@ -118,13 +128,13 @@
 #'   ##   defines the range of options
 #'
 #' ejamapp(
-#'   default_standard_analysis_title="Custom NAICS Analysis",
+#'   analysis_title="Custom NAICS Analysis",
 #'   default_upload_dropdown="dropdown",
 #'   default_selected_type_of_site_category="NAICS",
 #'   default_naics_digits_shown="detailed", # if default_naics is >3 digits, this has to be "detailed" not "basic"
 #'   default_naics="562211",
 #'   radius=3.1,
-#'   default_show_advanced_settings=TRUE
+#'   default_show_advanced_settings=TRUE # to make advanced tab visible at start
 #' )
 #'
 #'   ## Cities dropdown list as default shown at launch:
@@ -134,6 +144,20 @@
 #'   default_selected_type_of_site_category = "FIPS_PLACE",
 #'   fipspicker_fips_type2pick_default = "Cities or Places"
 #' )
+#'
+#'   ## Specific cities are preselected at launch
+#'
+#'   ejamapp(
+#'   default_upload_dropdown = "dropdown",
+#'   default_selected_type_of_site_category = "FIPS_PLACE",
+#'   fipspicker_fips_type2pick_default = "Cities or Places",
+#'   default_cities_picked = name2fips(c("akutan,ak", "syracuse city,ny") )
+#'   )
+#'  ## compare to this which is easier to write,
+#'  ## but acts as if they were uploaded so
+#'  ## this does not show a dropdown menu where one could revise selections:
+#'  ejamapp(fips = name2fips(c("akutan,ak", "syracuse city,ny")))
+#'
 #'   #default_choices_for_type_of_site_category = c(
 #'   #  'by Census place name (Cities, Counties, States)' = 'FIPS_PLACE',
 #'   #  'by Industry (NAICS) Code' = 'NAICS',
@@ -184,17 +208,18 @@
 #'  # will launch a simpler version of the web app
 #'  # (e.g., for more general public use rather than the full set of complicated
 #'  # features that are used less often).
+#'
 #'  # To make a hosted app default to the full set of features
 #'  # edit app.R to override/change its default,
-#'  #  and to disable and hide Advanced tab (even though isPublic=FALSE)
+#'  #  and to still disable and hide Advanced tab
 #'  #  and perhaps hide histograms since they are complicated,
-#'  #  note these settings:
+#'  #  try these settings:
 #'
 #'  ejamapp(
-#'   isPublic = FALSE,
-#'   default_show_advanced_settings = FALSE, # hides Advanced tab when app launches
+#'   isPublic = FALSE, # to allow full set of features (menus)
 #'   default_can_show_advanced_settings = FALSE, # removes user's ability to show Advanced tab
-#'   default_hide_plot_histo_tab = TRUE
+#'   default_show_advanced_settings = FALSE, # just confirms default -- hiding Advanced tab when app launches
+#'   default_hide_plot_histo_tab = TRUE # to hide just this feature
 #'   )
 #'
 #'  ## Other options:
@@ -218,8 +243,6 @@
 #'   passing it to [runApp()] will run the app, as would just typing
 #'   [run_app()] or [ejamapp()] in the console.
 #'
-#' @seealso [ejamapp()], [run_app()], and [app_run_EJAM()] are synonymous
-#' @aliases app_run_EJAM run_app
 #'
 #' @export
 #'
@@ -237,7 +260,7 @@ ejamapp <- function(
   on.exit(options(shiny.autoload.r=FALSE)) # restore normal behavior for rest of R session once app halts
 
   ################### #
-  # handle some key convenient parameters that are special cases, not inputs and not defaults:
+  # handle some key convenient aliases as parameters that are special cases, not inputs and not defaults:
 
   dots = rlang::list2(...)
 
@@ -246,20 +269,55 @@ ejamapp <- function(
     dots$default_upload_dropdown <- "upload"
     dots$default_selected_type_of_site_upload <- "FIPS"
   }
+
+  if ("shp" %in% names(dots) && !("shapefile" %in% names(dots))) {
+    # dots$shp will be used
+    dots$shapefile <- dots$shp # convenient alias
+    dots$default_upload_dropdown = "upload"
+    dots$default_selected_type_of_site_upload = "SHP"
+  }
   if ("shapefile" %in% names(dots)) {
     # dots$shapefile will be used
     dots$default_upload_dropdown = "upload"
     dots$default_selected_type_of_site_upload = "SHP"
   }
-  if ("sitepoints" %in% names(dots)) {
-    dots$default_upload_dropdown = "upload"
-    dots$default_selected_type_of_site_upload = "latlon"
+
+  if ("pts" %in% names(dots) && !("sitepoints" %in% names(dots))) {
+    dots$sitepoints <- dots$pts # convenient alias
   }
   if ("lat" %in% names(dots) && "lon" %in% names(dots) && !("sitepoints" %in% names(dots))) {
     dots$sitepoints = data.frame(lat=dots$lat, lon = dots$lon)
   }
+  if ("sitepoints" %in% names(dots)) {
+    dots$default_upload_dropdown = "upload"
+    dots$default_selected_type_of_site_upload = "latlon"
+  }
+
+  if ("default_radius" %in% names(dots)) {
+    dots$radius_default <- dots$default_radius
+  }
   if ("radius" %in% names(dots)) {
     dots$radius_default <- dots$radius
+  }
+
+  # more aliases
+  if ("default_report_title_multisite" %in% names(dots) && !("report_title_multisite" %in% names(dots))) {
+    dots$report_title_multisite <- dots$default_report_title_multisite
+  }
+  if ("default_report_title" %in% names(dots) && !("report_title_multisite" %in% names(dots))) {
+    dots$report_title_multisite <- dots$default_report_title
+  }
+  if ("report_title" %in% names(dots) && !("report_title_multisite" %in% names(dots))) {
+    # assume they intended to use that for multisite version (also)
+    dots$report_title_multisite <- dots$report_title
+    #
+  }
+
+  if ("default_analysis_title" %in% names(dots)) {
+    dots$default_standard_analysis_title <- dots$default_analysis_title
+  }
+  if ("analysis_title" %in% names(dots)) {
+    dots$default_standard_analysis_title <- dots$analysis_title # it is also an input but this allows it to work
   }
   ################### #
 
@@ -282,6 +340,8 @@ ejamapp <- function(
 }
 ###################################### ###################################### #
 
+#' @inherit ejamapp
+#'
 #' @export
 #' @keywords internal
 #'
@@ -296,6 +356,8 @@ run_app <- function(
 }
 ###################################### ###################################### #
 
+#' @inherit ejamapp
+#'
 #' @export
 #' @keywords internal
 #'

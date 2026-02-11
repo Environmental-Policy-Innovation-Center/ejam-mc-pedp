@@ -8,6 +8,40 @@
 
 ## see also   ?testdata()
 
+################################################################################### #
+##  ## in case you needed to just recreate/resave only these 3 testoutput files (and keep their existing metadata like date added to pkg etc.)
+#
+# ejamitoutnow  <- try( ejamit(
+#   testpoints_10,
+#   radius = 1, quiet = TRUE, silentinteractive = TRUE, include_ejindexes = TRUE)
+#   )
+# oldone <-  testoutput_ejamit_10pts_1miles
+#            testoutput_ejamit_10pts_1miles  <- ejamitoutnow
+# attributes(testoutput_ejamit_10pts_1miles) <- attributes(oldone)
+# usethis::use_data(
+#            testoutput_ejamit_10pts_1miles, overwrite = TRUE)
+# ################################### #
+# ejamitoutnow  <- try( ejamit(
+#   testpoints_100,
+#   radius = 1, quiet = TRUE, silentinteractive = TRUE, include_ejindexes = TRUE)
+# )
+# oldone <-  testoutput_ejamit_100pts_1miles
+#            testoutput_ejamit_100pts_1miles  <- ejamitoutnow
+# attributes(testoutput_ejamit_100pts_1miles) <- attributes(oldone)
+# usethis::use_data(
+#            testoutput_ejamit_100pts_1miles, overwrite = TRUE)
+# ################################### #
+# ejamitoutnow  <- try( ejamit(
+#   testpoints_1000,
+#   radius = 1, quiet = TRUE, silentinteractive = TRUE, include_ejindexes = TRUE)
+# )
+# oldone <-  testoutput_ejamit_1000pts_1miles
+# testoutput_ejamit_1000pts_1miles  <- ejamitoutnow
+# attributes(testoutput_ejamit_1000pts_1miles) <- attributes(oldone)
+# usethis::use_data(
+#   testoutput_ejamit_1000pts_1miles, overwrite = TRUE)
+################################################################################### #
+
 pkg_update_testpoints_testoutputs <- function(
 
   do_load_all = TRUE,
@@ -37,9 +71,8 @@ pkg_update_testpoints_testoutputs <- function(
   resaving_ejamit_rda           = TRUE,
   resaving_ejamit_helpdocs      = TRUE,
   resaving_ejam2excel         = TRUE,
-  resaving_ejam2report        = TRUE,
+  resaving_ejam2report        = TRUE
 
-  redoing_ejscreenit_10_for_ejam_to_have  = FALSE # no longer in the mid-2025 version of EJAM (it had been outdated)
   # and  there are these:  5, 50, 500  ## handled by a separate file
 
 ) {
@@ -87,7 +120,7 @@ pkg_update_testpoints_testoutputs <- function(
       row.names = c(1L, 2L, 3L),
       class = "data.frame")
     # mapfast(pts,radius = 1)
-    # plotblocksnearby(pts,radius = 1)
+    # plot_blocks_nearby(pts,radius = 1)
 
     ############# #
     ### save ####
@@ -110,7 +143,7 @@ pkg_update_testpoints_testoutputs <- function(
 #'
 #'   mapfast(pts, radius = 1)
 #'
-#'   plotblocksnearby(pts, radius = 1)
+#'   plot_blocks_nearby(pts, radius = 1)
 #'  ```"
     )
     ############# #
@@ -399,7 +432,7 @@ pkg_update_testpoints_testoutputs <- function(
         fname <- paste0("testoutput_ejam2excel_", n, "pts_", myrad, "miles")
         junk <- ejam2excel(
           get(out_varname_ejamit),
-          in.analysis_title = "Example of outputs of ejamit() being formatted and saved using ejam2excel()",
+          analysis_title = "Example of outputs of ejamit() being formatted and saved using ejam2excel()",
           radius_or_buffer_in_miles = myrad,
           # buffer_desc = paste0("Within ", myrad, " miles"),
           fname = paste0("./inst/testdata/examples_of_output/", fname, ".xlsx"),
@@ -427,43 +460,6 @@ pkg_update_testpoints_testoutputs <- function(
 
   } # end of loop over point counts
 
-  ############################################# #
-  # _ ####
-  # >_____ejscreenit() output examples _____________________ ####
-
-  ## save as DATA IN PACKAGE ####
-  if (redoing_ejscreenit_10_for_ejam_to_have) {  ## NO LONGER USED IN MID-2025 VERSION OF EJAM
-    # using the API that EJSCREEN provides, for comparison, to have available as data saved in EJAM pkg:
-    testpoints_name <- "testpoints_10"
-    myrad = 1
-    testoutput_ejscreenit_10pts_1miles <- ejscreenit(
-      testpoints_10, radius = 1, calculate_ratios = TRUE,
-      nosave = TRUE, nosee = TRUE,
-      interactiveprompt = FALSE)
-
-    metadata_add_and_use_this("testoutput_ejscreenit_10pts_1miles")
-    # text_to_do <- paste0(
-    #   "", "testoutput_ejscreenit_10pts_1miles", " = metadata_add(", "testoutput_ejscreenit_10pts_1miles", ")"
-    # )
-    # eval(parse(text = text_to_do))
-    # usethis::use_data(testoutput_ejscreenit_10pts_1miles, overwrite = TRUE)
-
-    ## save as DOCUMENTATION ####
-
-    dataset_documenter("testoutput_ejscreenit_10pts_1miles",
-                       title = "test output of ejscreenit(), using the EJSCREEN API",
-                       details = "This is the output of
-#'
-#'  ejscreenit(
-#'    testpoints_10, radius = 1,
-#'    nosave = T, nosee = T, interactiveprompt = F, calculate_ratios = T
-#'  )
-#'
-#'  See testoutput_ejscreenit_10pts_1miles$table
-#'  See testoutput_ejamit_10pts_1miles$results_bysite",
-                       seealso = "[ejscreenit_for_ejam()]"
-    )
-  }
 ############################################# #
 
   cat('

@@ -111,7 +111,13 @@ pkg_dir_loaded_from = function(pkg="EJAM") {find.package(pkg, lib.loc = NULL)}
 
 ## searching text in source files ####
 
-# helper for find_in_files()
+# Helper for EJAM:::find_in_files()
+#
+# Undocumented related functions:
+# EJAM:::found_in_files()
+# EJAM:::found_in_N_files_T_times()
+# EJAM:::grab_hits()
+# EJAM:::grepn()
 
 grab_hits = function(pattern, x, ignore.case = TRUE, ignorecomments = FALSE, value = TRUE) {
 
@@ -148,84 +154,140 @@ grab_hits = function(pattern, x, ignore.case = TRUE, ignorecomments = FALSE, val
 #' utility to do global search/find in full text of the files in a folder, like source code files or unit tests
 #'
 #' @param pattern regular expression to look for
-#' @param path can change it to e.g., "./R"
-#' @param filename_pattern query regex on file names, default is R code files
+#' @param path can be e.g., "./R" or "./tests/testthat" or "."
+#' @param recursive if TRUE, search includes subfolders (passed to `list.files()`)
+#' @param filename_pattern default is R code files only! A regular expression that would limit file names to search
+#' @param full.names if TRUE, returns paths not just filenames (passed to `list.files()`)
 #' @param ignorecomments omit hits from commented out lines
 #' @param ignore.case as in grep
-#' @param value logical as in [grep()] if TRUE returns matching text;
-#'    if FALSE, returns logical vectors like [grepl()]
 #' @param whole_line set it to FALSE to see only the matching fragments
 #'   vs entire line of text that has a match in it
 #' @param quiet whether to print results or just invisibly return
-#' @returns list of named vectors,
-#'   where names are file paths with hits, elements are vectors of text with hits
-#' @examples
-#' EJAM:::find_in_files("[^_]logo_....",    path = "./R", whole_line = FALSE, quiet = F)
-#' EJAM:::find_in_files("report_logo.....", path = "./R", whole_line = FALSE, quiet = F)
-#' EJAM:::find_in_files("app_logo......",   path = "./R", whole_line = FALSE, quiet = F)
+#' @return a list of named vectors,
+#'   where names are file paths with hits, elements are vectors of text with hits.
 #'
-#' EJAM:::find_in_files("latlon_from_.{18}", quiet = FALSE, whole_line = F)
-#' EJAM:::find_in_files("latlon_from_s.{9}", quiet = FALSE, whole_line = F)
-#' EJAM:::find_in_files("latlon_from_mact.{9}", quiet = FALSE, whole_line = F)
+#' @details
+#' Also see undocumented related functions
+#' EJAM:::found_in_N_files_T_times() and
+#' EJAM:::found_in_files() and
+#' EJAM:::grab_hits() and
+#' EJAM:::grepn()
+#'
+#' @examples
+#' EJAM:::find_in_files("[^_]logo_....",    path = "./R", whole_line = FALSE)
+#' EJAM:::find_in_files("report_logo.....", path = "./R", whole_line = FALSE)
+#' EJAM:::find_in_files("app_logo......",   path = "./R", whole_line = FALSE)
+#'
+#' EJAM:::find_in_files("latlon_from_.{18}",    whole_line = F)
+#' EJAM:::find_in_files("latlon_from_s.{9}",    whole_line = F)
+#' EJAM:::find_in_files("latlon_from_mact.{9}", whole_line = F)
 #'
 #' @keywords internal
 #'
-find_in_files <- function(pattern, path = "./tests/testthat", filename_pattern = "\\.R$|\\.r$",
+find_in_files <- function(pattern,
+                          path = ".", # "./tests/testthat",
+                          recursive = TRUE,
+                          filename_pattern = "\\.R$|\\.r$",
+                          full.names = TRUE,
                           ignorecomments = FALSE,
                           ignore.case = TRUE,
-                          value = TRUE, whole_line = TRUE, quiet=TRUE) {
+                          whole_line = TRUE,
+                          quiet = FALSE) {
+
   if (!quiet) {
     cat("\nSearching in ", path, ' to find files containing ', pattern, '\n')
     # or e.g., find_in_files(pattern = "^#'.*[^<]http", path = "./R")
   }
-  x <- list.files(path = path, pattern = filename_pattern, recursive = TRUE, full.names = TRUE)
+  x <- list.files(path = path, pattern = filename_pattern, recursive = recursive, full.names = full.names)
   names(x) <- x
   if (ignorecomments) {
     pattern <- paste0("(^|[^#])", pattern) # ignore comments, so only match if not preceded by a #
   }
   found <- x |>
     purrr::map(
-      # ~grep(    pattern, readLines(.x, warn = FALSE), value = value, ignore.case = ignore.case)
-      ~grab_hits(pattern, readLines(.x, warn = FALSE), value = value, ignore.case = ignore.case,
+      ~grab_hits(pattern, readLines(.x, warn = FALSE), value = TRUE, ignore.case = ignore.case,
                  ignorecomments = ignorecomments)
     ) |>
     purrr::keep(~length(.x) > 0)
+  rownumbers_with_hits <- sapply(found, names)
+
   if (!whole_line) {
     # return just the matching part, not text before or after that on a given line of text
+    ## but does not quite work right if the line has quote marks inside it
     found <- lapply(found, function(z) as.vector(gsub(paste0(".*(", pattern, ").*"), "\\1",  z)))
+    #  now for each element in the list called "found" we have to fix names of its vector to be the line numbers again
+    for (i in seq_along(found)) {
+      names(found[[i]]) <- rownumbers_with_hits[[i]]
+      rownames(found[[i]]) <- NULL
+    }
+  } else {
+    for (i in seq_along(found)) {
+      rownames(found[[i]]) <- NULL
+    }
   }
+
   if (!quiet) {
     if (length(found) > 0) {
-      if (!whole_line) {
-        print(sapply(found, cbind))
-      } else {
-        print(sapply(found, function(y) cbind(linenumber = names(y), text = y)))
-      }
       cat("\n------------------------------------------------------------------------- \n")
-      cat("------------------------------------------------------------------------- \n")
-    }
-    if (value) {
-      print(cbind(hits_in_file = sort(sapply(found[sapply(found, NROW) > 0], NROW))))
-    } else {
-      print(cbind(hits_in_file = sort(sapply(found[sapply(found, sum) > 0], sum))) )
+      cat("Which line numbers contain a match to this pattern, within each file?\n")
+      cat(  "------------------------------------------------------------------------- \n\n")
+      printable <- sapply(found, function(y) {
+        prt <- cbind(linenumber = names(y), text = y)
+        rownames(prt) <- NULL
+        prt
+      })
+      for (i in seq_along(printable)) {
+        printable[[i]] <- as.data.frame(printable[[i]])
+        printable[[i]]$file <- names(found)[i]
+        printable[[i]]$filenumber <- i
+      }
+
+      printable <- do.call(rbind, printable)
+      printable <- printable[, c("filenumber", "file", "linenumber", "text")]
+      rownames(printable) <- NULL
+      if (!whole_line) {
+        print(printable)
+      } else {
+        # looks better if whole lines all start in same vertical alignment
+        print(cbind(filenumber = printable$filenumber, file = printable$file, linenumber = printable$linenumber, text = printable$text))
+      }
+
+      cat("\n")
+      cat(  "------------------------------------------------------------------------- \n")
+      cat("How many times does the pattern appear in a given file?\n")
+      cat(  "------------------------------------------------------------------------- \n\n")
+      print(cbind(hits_in_file = sort(sapply(found, NROW), decreasing = TRUE), file_rank = 1:length(found)))
+      cat("\n------------------------------------------------------------------------- \n")
     }
   }
+  if (length(found) == 0) {found <- NULL}
+
+  # sapply(x, function(z) cbind(linenumber=names(z), text = z))
+
   invisible(found)
 }
 ################################ #
 
 # search for vector of query terms, to see which ones are found in any of the files
-# ... passed to find_in_files() can be ignore.case, filename_pattern
+# ... passed to find_in_files() can be ignore.case, filename_pattern, etc.
 # ignorecomments = TRUE IS NOT DEFAULT IN find_in_files() but is here
+
+# Uses EJAM:::find_in_files()
+#
+# Undocumented related functions:
+# EJAM:::found_in_files()
+# EJAM:::found_in_N_files_T_times()
+# EJAM:::grab_hits()
+# EJAM:::grepn()
 
 found_in_files <- function(pattern_vector, path = "./R", ignorecomments = TRUE, ...) {
 
-  found = vector(length = length(pattern_vector))
+  found <- vector(length = length(pattern_vector))
   for (i in seq_along(pattern_vector)) {
-    hits = find_in_files(pattern_vector[i], path = path, ignorecomments=ignorecomments, ...)
+    hits <- find_in_files(pattern = pattern_vector[i], path = path, ignorecomments=ignorecomments, ...)
     found[i] <- length(hits) > 0
   }
-  foundones = pattern_vector[found]
+  foundones <- pattern_vector[found]
   print(foundones)
   return(found) # logical vector
 }
@@ -235,12 +297,20 @@ found_in_files <- function(pattern_vector, path = "./R", ignorecomments = TRUE, 
 # actually how many lines of code does it appear in so counts as 1 each line where it appears even if it appears >1x in that line
 # ignorecomments = TRUE IS NOT DEFAULT IN find_in_files() but is here
 
+# Uses EJAM:::find_in_files()
+#
+# Undocumented related functions:
+# EJAM:::found_in_files()
+# EJAM:::found_in_N_files_T_times()
+# EJAM:::grab_hits()
+# EJAM:::grepn()
+
 found_in_N_files_T_times <- function(pattern_vector, path = "./R", ignorecomments = TRUE, ...) {
 
   nfiles <- vector(length = length(pattern_vector))
   nhits <- vector(length = length(pattern_vector))
   for (i in seq_along(pattern_vector)) {
-    hits <- find_in_files(pattern_vector[i], path = path, ignorecomments = ignorecomments, ...)
+    hits <- find_in_files(pattern = pattern_vector[i], path = path, ignorecomments = ignorecomments, ...)
     nfiles[i] <- length(hits)
     nhits[i] <- length(as.vector(unlist(hits)))
     # found[i] <- length(hits) > 0
@@ -258,7 +328,6 @@ found_in_N_files_T_times <- function(pattern_vector, path = "./R", ignorecomment
 ################################ ################################# #
 # . ####
 ## package's functions & datasets####
-
 
 
 # get functions, datasets, filenames - exported & internal
@@ -281,9 +350,9 @@ found_in_N_files_T_times <- function(pattern_vector, path = "./R", ignorecomment
 #' @param vectoronly set to TRUE to just get a character vector of object names instead of the data.frame table output
 #' @seealso [ls()] [getNamespace()] [getNamespaceExports()] [loadedNamespaces()]
 #'
-#' @return data.table with colnames object, exported, data  where exported and data are 1 or 0 for T/F,
+#' @return table in [data.table](https://r-datatable.com) format with colnames object, exported, data  where exported and data are 1 or 0 for T/F,
 #'   unless vectoronly = TRUE in which case it returns a character vector
-#' @examples  # pkg_functions_and_data("datasets")
+#' @examples  # EJAM:::pkg_functions_and_data("datasets")
 #'
 #' @keywords internal
 #'
@@ -421,14 +490,14 @@ pkg_functions_and_data <- function(pkg = "EJAM",
 #'  data(package = "EJAM")$results[, 'Item']
 #'
 #'  # not actually sorted within each pkg by default
-#'  pkg_data()
+#'  EJAM:::pkg_data()
 #'  # not actually sorted by default
-#'  pkg_data("EJAM")$Item
-#'  ##pkg_data("MASS", simple=T)
+#'  EJAM:::pkg_data("EJAM")$Item
+#'  ##EJAM:::pkg_data("MASS", simple=T)
 #'
 #'  # sorted by size if simple=F
-#'  ##pkg_data("datasets", simple=F)
-#'  x <- pkg_data(simple = F)
+#'  ##EJAM:::pkg_data("datasets", simple=F)
+#'  x <- EJAM:::pkg_data(simple = F)
 #'  # sorted by size already, to see largest ones among all these pkgs:
 #'  tail(x[, 1:3], 20)
 #'
@@ -851,7 +920,7 @@ pkg_functions_preceding_lines = function(path = "./R") {
   info_export <- vector()
 
   query = "^[^ #]* *<- *function"
-  files_defining_functions <- EJAM:::find_in_files(query, path = path, quiet = TRUE)
+  files_defining_functions <- EJAM:::find_in_files(pattern = query, path = path, quiet = TRUE)
   filenames = (names(files_defining_functions))
 
   for (thisfile in seq_along(files_defining_functions)) {
@@ -1061,7 +1130,7 @@ pkg_dupenames <- function(pkg = EJAM::ejampackages, sortbypkg=FALSE, compare.fun
 ## (helper for pkg_dupenames) ### #
 
 #' UTILITY - check different versions of function with same name in 2 packages
-#' obsolete since EJAMejscreenapi phased out? was used by pkg_dupenames() to check different versions of function with same name in 2 packages
+#' obsolete since old EPA ejscreen api functions were phased out - was used by pkg_dupenames() to check different versions of function with same name in 2 packages
 #' @param fun quoted name of function, like "latlon_infer"
 #' @param package1 quoted name of package, like "EJAM"
 #' @param package2 quoted name of other package
@@ -1086,11 +1155,6 @@ pkg_functions_all_equal <- function(fun="latlon_infer", package1="EJAM", package
   # eg doing this:
   # pkg_functions_all_equal("get.distance.all", "proxistat", "EJAM") # something odd about proxistat pkg
   #   and note there is now a function called proxistat()
-  ### or
-  # pkg_dupenames(c("proxistat", "EJAMejscreenapi"), compare.functions = T)
-  # Error in pkg_functions_all_equal(fun = var, package1 = ddd$package[ddd$variable ==  :
-  #                                                                   distances.all not found in proxistat
-  #                                                                Called from: pkg_functions_all_equal(fun = var, package1 = ddd$package[ddd$variable ==
 
   if (!(is.character(fun) && is.character(package1) && is.character(package2))) {
     warning("all params must be quoted ")
@@ -1230,18 +1294,36 @@ pkg_dependencies <- function(localpkg = "EJAM", depth = 6, ignores_grep = "09128
 
   cat(paste0("
 
-  # This may be useful to see dependencies of a package like EJAM:
+  # Some notes on ways to see dependencies of a package like EJAM:
 
-x1 = renv::dependencies()
-
-x = sort(packrat", ":::", "recursivePackageDependencies('",
+# x1 = renv::dependencies()
+#
+x2 = sort(packrat", ":::", "recursivePackageDependencies('",
              localpkg,
              "', lib.loc = .libPaths(), ignores = NULL))
 
 # but note that https://rstudio.github.io/renv/articles/packrat.html explains that
 # the renv package has replaced the packrat package
+# But note Posit Connect does not seem to work with renv? it uses rsconnect etc.
 
-# For example try this:
+# For example try this for the EJAM package:
+
+
+# from root of source pkg:
+x1 = renv::dependencies() ; x1 = unique(x1$Package)
+x2 = sort(packrat:::recursivePackageDependencies('EJAM', lib.loc = .libPaths(), ignores = NULL))
+x3 = attachment::att_from_rscripts()
+x4 = attachment::att_from_examples()
+x5 = attachment::att_from_description()
+x6 = attachment::att_from_rmds()
+xl = list(x1,x2,x3,x4,x5,x6)
+names(xl) <- c('renv', 'packrat', 'rscripts', 'examples', 'desc', 'rmds')
+print(sapply(xl, length))
+length(setdiff(xl$renv, xl$packrat))
+length(setdiff(xl$packrat, xl$rscripts))
+length(intersect(xl$packrat, xl$rscripts))
+length(setdiff(xl$rscripts, xl$packrat))
+
 
 pkgs_needed = sort(packrat:::recursivePackageDependencies('EJAM', lib.loc = .libPaths(), ignores = NULL))
 # shorter list because direct not all recursive, but provides rationale for each inference:
@@ -1265,11 +1347,13 @@ pkgs_missing_from_desc_supposedly_needed
 pkgs_in_desc_supposedly_not_needed
 setdiff(pkgs_needed2, pkgs_needed) # found by renv but not by packrat
 
-# > setdiff(setdiff(pkgs_needed2, pkgs_needed), pkgs_in_desc_supposedly_not_needed)
-#  [1] 'base'               'census2020download' 'EJAM'               'githubr'            'graphics'           'grDevices'          'parallel'           'plumber'
-#  [9] 'roxygen2'           'rsconnect'          'stats'              'svglite'            'tools'              'utils'
-# > setdiff(pkgs_in_desc_supposedly_not_needed, setdiff(pkgs_needed2, pkgs_needed))
-# [1] 'datasets'      'fipio'         'rnaturalearth' 'tidygeocoder'
+ setdiff(setdiff(pkgs_needed2, pkgs_needed), pkgs_in_desc_supposedly_not_needed)
+### e.g.,
+#  [1] 'base' 'census2020download' 'EJAM' 'githubr' 'graphics' 'grDevices' 'parallel' 'plumber'
+#  [9] 'roxygen2' 'rsconnect' 'stats' 'svglite' 'tools' 'utils'
+setdiff(pkgs_in_desc_supposedly_not_needed, setdiff(pkgs_needed2, pkgs_needed))
+### e.g.,
+# [1] 'datasets' 'fipio' 'rnaturalearth' 'tidygeocoder'
 
 # but should confirm these truly reflect what is actually needed and not needed
 # for web app to work,
@@ -1432,3 +1516,54 @@ find_transitive_minR <- function(package = 'EJAM', recursive_deps = NULL) {
 
   return(max(package_version(r_vers)))
 }
+############################ #
+
+
+pkg_available <- function(pkg,
+                          if_not_installed = c("stop", "warning", "message", "cat")[2],
+                          if_not_loaded = c("stop", "warning", "message", "cat")[2]
+                          # ,if_not_attached =  c("stop", "warning", "message", "cat")[2]
+) {
+
+  # is a package loaded or just installed or not even installed?
+
+  stopifnot(!missing(pkg), !is.null(pkg), length(pkg) == 1)
+  stopifnot(length(if_not_installed) == 1, if_not_installed %in% c("stop", "warning", "message", "cat"),
+            length(if_not_loaded) == 1, if_not_loaded %in% c("stop", "warning", "message", "cat")
+            # ,length(if_not_attached) == 1, if_not_attached %in% c("stop", "warning", "message", "cat")
+  )
+
+  installed <- !inherits(try(find.package(pkg), silent = TRUE), "try-error")
+  loaded <- isNamespaceLoaded(pkg)
+  # attached <- paste0("package:", pkg) %in% search()
+
+  ## isNamespaceLoaded()  checks if loaded but does not check if also attached.
+  ##  if library() or require() has been used, it will be both loaded and attached.
+  ##  A package that is loaded by EJAM even though not attached is still available for use by functions,
+  ##  so being loaded should be sufficient even if not attached.
+
+  # if (!attached) {
+  #   msg <- paste0(pkg, " package is needed here but is not attached")
+
+  if (loaded) {
+
+    return(TRUE)
+
+  } else {
+    # msg <- paste0(pkg, " package is needed here but is not loaded")
+
+    if (!installed) {
+      msg <- paste0(pkg, " package is needed for this but does not appear to be installed \n")
+      get(if_not_installed)(msg) # stop or warning or message or cat()
+
+      return(FALSE)
+
+    } else {
+      msg <- paste0(pkg, " package must be loaded for this and appears to be installed but not loaded. Try using library(", pkg,") or require(", pkg,") \n")
+      get(if_not_loaded)(msg) # stop or warning or message or cat()
+
+      return(FALSE)
+    }
+  }
+}
+############################ #

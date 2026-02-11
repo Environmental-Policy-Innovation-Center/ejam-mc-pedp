@@ -1,3 +1,112 @@
+# EJAM 2.32.7 (February 2026)
+
+- Bug fixes: 
+
+  - Fixed a bug where the community report in version 2.32.6.003 incorrectly showed results rounded to zero decimal places. The bug was in `fixcolnames()` and had been introduced 3 weeks earlier while a separate issue was being fixed.
+  - Fixed a bug where some latitude or longitude values could get somewhat rounded off in the URL from `url_ejamapi()` linking to the API to get a single-site report, so a report would show a very slightly different point and population count, for example, for some sites, versus what was intended.
+  - Fixed bug in hosted app where uploads and downloads sometimes failed.
+  - Fixed various other/ misc small issues.
+  
+- Improved the Community Report, Multisite Report, Spreadsheet
+
+  - Report footer was edited, and can be customized now via `ejam2report()`
+  - Report Title was revised: FIPS place name shown in header, lat/lon coordinates shown in 1-site report header, 1-site vs multisite named differently, says "EJSCREEN"" not "EJAM" in header as new defaults.
+  - Analysis Title (on reports) revised also
+  - Report Footer was revised (new params in `ejam2report()` now define footer in community report, via new `generate_report_footer()` helper)
+  - Multisite report is now rendered as html file automatically as soon as results are ready (and if analysis title is changed afterwards),
+  so it will be available immediately if/when a user decides to download it. And spreadsheet download may be faster, as 
+  the server now does not have to re-render report for use in spreadsheet.
+  - Multisite report and spreadsheet download buttons now disabled until each is ready.
+  - Spreadsheet file is now created automatically when results are done, so it will be available immmediately if/when a user decides to download it. 
+  - Client side user's timezone is now used by shiny app to use the correct date for report footer. Otherwise a report run late in the day 
+  might incorrectly say it was created the next day if the app is running on a server in a timezone east of the user, for example. 
+  
+- Raised some limits on number of sites one can upload, map, analyze
+
+  - Number of uploaded points
+    - cap was 5,0000 (or 10,000 via advanced tab)
+    - cap now 10,000 (or 35,000 via advanced tab) Now just omits 8111 Automotive Repair and Maintenance (58,132 sites) and a few overly broad groups like "Manufacturing"
+  - Number of selected points based on NAICS, etc.
+    - cap was 5,0000 (or 10,000 via advanced tab)
+    - cap now 10,000 (or 35,000 via advanced tab)
+  - Number of points it will map
+    - cap was 5,0000 (or 15,000 via advanced tab)
+    - no change
+  - Number of polygons it will map
+    - cap was 159 (or 254 via advanced tab)
+    - no change e.g., TX has 254 counties, but no other state exceeds 159 counties
+  - Number of sites you can analyze
+    - cap was 10,000 (or 15,000 via advanced tab)
+    - cap now 10,000 (or 35,000 via advanced tab)
+  - Number of sites shown in table of all the sites one per row
+    - cap was 1,000 (or 5,000 via advanced tab)
+    - no change
+  - Size of uploaded file
+    - cap was 50 MB (or 350 MB via advanced tab)
+    - no change
+
+- Other changes:
+
+  - Changed links in header at top right of the webpages, to link to "Share data feedback" and "Help improve the tool" forms just like CEJST has and EJSCREEN is adding. The "Contact Us" link to an email address was removed.
+  - Updated text in the "About" tab, to refer to and link to EJSCREEN, and to refer to EJAM in terms of EJSCREEN.
+  - Updated text in README
+  - Updated text in the [Future Plans](https://ejanalysis.github.io/EJAM/articles/dev-future-plans.html) and other vignettes/articles.
+  - Renamed `ejam2excel()` parameters (in.analysis_title changed to analysis_title) to be consistent with `ejam2report()` parameter, or to simplify (react.v1_summary_plot changed to report_plot).
+  - `ejamapp()` now lets you specify the city/cities to analyze (to show as preselected upon launch), via default_cities_picked parameter
+  - `ejamapp()` has new parameter aliases: "pts" is short for "sitepoints", "shp" is short for "shapefile", "analysis_title" or "default_analysis_title" will set analysis title in report header, and "report_title" or "default_report_title" will set overall title in topmost part of report header.
+  - `url_ejscreentechdoc()` was added to easily get URL of EJSCREEN documentation pages and docs
+
+# EJAM 2.32.6.003 (November 2025)
+
+- Bug fixes:
+  - Fixed bug where States could not be analyzed in the web app.
+  - Fixed bug where size of circular buffer at each point on map in a report did not reflect actual radius.
+  - Fixed limitation affecting API where a request to find all blockgroups in a city did not work.
+  - Fixed bug where `ejamapp()` settings/parameters isPublic and default_show_advanced_settings were ignored and advanced tab was being shown even if isPublic=TRUE and default_show_advanced_settings=FALSE.
+  - Fixed examples in documentation of all functions.
+  - Fixed bug in `plot_barplot_ratios()` that could affect `ejam2barplot()`
+  - Fixed bug in `popshare_p_lives_at_what_pct()`, which reports info in notes tab of excel download
+  - Fixed bug in utility `EJAM:::find_in_files()`
+  - Fixed bug affecting geocoding in `names2fips()` based on fips_place_from_placename() 
+  - Fixed bug in `fixcolnames()` that was only renaming the first instance of any duplicated inputs
+  - Fixed various smaller issues like edge cases or typos in comments or messages.
+- Added (strong) recommendation that you obtain a Census API key, in the [guide to installing the package](https://ejanalysis.github.io/EJAM/articles/installing.html). Also added warnings when envt var CENSUS_API_KEY not found before trying to use [tidycensus package](https://walker-data.com/tidycensus/) / [tidycensus on CRAN](https://cran.r-project.org/web/packages/tidycensus/index.html) or [tigris package](https://cran.r-project.org/web/packages/tigris/index.html) downloads of ACS Info or Census unit boundaries, e.g., in `shapes_from_fips()` and elsewhere.
+- Specified R version 4.3 as the minimum required per the DESCRIPTION file. Although older versions like 4.1 may work for most of what EJAM does, installation can be complicated depending on the platform (windows, macos, ubuntu) since building from source and installing some of the dependencies that require compilation can create varying requirements. A future release might use something like the renv package to simplify installation. Deployment to Posit Connect Cloud handles dependencies well, but individual users may find installation tricky because of dependencies. Putting the package on the [R universe platform](https://ropensci.org/r-universe/) and maybe eventually [CRAN](https://cran.r-project.org) are other options.
+- Removed dependency on a few packages rarely needed.
+- Removed all files, functions, datasets related to old ejscreenapi app that relied on EPA API for EJSCREEN pre-2025, like ejscreenit__, ejscreenapi__, ejscreen_vs__, ejscreenREST__, testoutput___, etc.
+- Stopped exporting several shapefile_from_XYZ helper functions since shapefile_from_any() can be used.
+
+- Hosting:
+  - Added Dockerfile used to deploy the shiny app to a server.
+  - Added notes on hosting on Posit connect cloud
+  - Revised article (vignette) on hosting, to add posit vs docker info, and updated files supporting deployment of shiny app to Posit Connect Cloud (manifest.json, etc.).
+  - Fixed dependency issue where package [geojsonsf](https://github.com/SymbolixAU/geojsonsf) used in draft API code (plumber.R) had a typo so deployment to posit would fail due to not finding a package of that name.
+  - Edited apparently problematic file data_names_all.R and may add back the _disable_autoload.R file
+  - Added example of using `api_run()` to locally run API draft in background 
+  - Revised github actions; Added a github action workflow to run R CMD check, via `rcmdcheck::rcmdcheck()` to find various problems in package.
+- Added article (vignette) about [speed -- how long it takes to analyze thousands of sites](https://ejanalysis.github.io/EJAM/articles/dev-speed.html)
+- Improved `acs_bybg()` for creating new indicators based on Census Bureau ACS data
+- Improved `popshare_p_lives_at_what_n()` for reporting how most of the residents are at a few key sites typically
+- Added `sites_only()` helper; added `sites_from_input()` examples
+- In `ejam2map()`, added a radius parameter
+- Added `calc_pctile_columns()`, `calc_avg_columns()`, `calc_ratio_columns()` -- Added (or renamed to be consistent) these helper functions to make columns of averages, ratios to average, and percentiles (all of which can be used later to replace parts of `doaggregate()`). Old, now-removed function avg_from_raw_lookup() was renamed as `calc_avg_columns()`. New function `calc_pctile_columns()` is vectorized form of retained function `pctile_from_raw_lookup()`. `calc_ratio_columns()` is new. Removed/replaced the old, obsolete function calc_ratios_to_avg().
+- Stopped exporting plot_boxplot_ratios() since 'ejam2boxplot_ratios()' and 'plot_boxplot_pctiles()' work better.
+
+
+# EJAM 2.32.6.002 (October 2025)
+
+This update does not add any web app features. 
+
+Changes:
+
+- Started rounding off the radius shown in the report header
+- Fixed some small bugs in `ejam2report()`, `ejamit()`, `ejam2map()`, `ejam2tableviewer()`, `report_residents_within_xyz()`, and some helper functions related to report creation, etc. to support new API and R users, for handling sitenumber, missing shapefile, etc. For example, ejamit(fips=x) had a problem if x was a fips missing a needed leading zero.
+- Fixed some obstacles to using the package and/or app locally from a working directory other than root of source pkg
+- Fixed misc minor issues in reference documentation
+- Deleted obsolete file and function report_community_download
+- Changed github actions that run tests of ability to install the package on various R versions, operating systems, etc.
+
+
 # EJAM 2.32.6.001 (October 2025)
 
 This update does not add any web app features.

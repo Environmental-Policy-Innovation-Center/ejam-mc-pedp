@@ -35,11 +35,11 @@ utility - How many blocks and many other stats about blocks and sites
     x[ , .(lat, lon)])
  z <- getblocksnearbyviaQuadTree(pts, 1, quadtree = localtree, quiet = T)
  z[ , .(blocks = .N) , keyby = 'ejam_uniq_id']
- plotblocksnearby(pts, radius = 1, sites2blocks = z)
+ plot_blocks_nearby(pts, radius = 1, sites2blocks = z)
  zz <- getblocks_diagnostics(z, detailed = T, see_pctiles = T)
 cbind(stats = zz)
 
-  getblocks_diagostics(testoutput_getblocksnearby_1000pts_1miles, see_distanceplot = TRUE)
+  getblocks_diagnostics(testoutput_getblocksnearby_1000pts_1miles, see_distanceplot = TRUE)
 
 }
 \seealso{

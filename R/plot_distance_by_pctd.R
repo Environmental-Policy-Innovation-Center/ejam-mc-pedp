@@ -28,7 +28,7 @@
 #'   aggregated across blocks and blockgroups as a weighted mean
 #' @param scorewts_colname colname in blockgroupstats -- like "pop" -- for the weight
 #'   to use in aggregating the scores referred to by score_colname
-#' @param score_label optional friendly label for the variable
+#' @param score_label optional plain-English/alternative label for the variable
 #'
 #' @param radius optional radius to use as maximum analyzed or shown --
 #'   if s2b was provided, this caps what is used and only shorter radii get shown
@@ -51,7 +51,7 @@
 #'
 #'  # Example of area that has higher %Hispanic as you go
 #'  # 10 to 30 miles away from this specific point
-#'  pts = data.table(lat = 45.75464, lon = -94.36791)
+#'  pts = data.table::data.table(lat = 45.75464, lon = -94.36791)
 #'  plot_distance_by_pctd(pts,
 #'    sitenumber = 1, score_colname = "pcthisp")
 #'  # browseURL(url_ejamapi(sitepoints = pts, radius = 10))
@@ -78,6 +78,7 @@ plot_distance_by_pctd <- function(s2b = NULL, sitenumber = 1, #  NULL,
     } else {
       warning('s2b not provided, so showing random example data only')
       pts = suppressWarnings(testpoints_n(1))
+      # Note slight changes can occur in lat,lon values if using paste(lat,lon,sep=',) instead of format() as per ?as.character()
       cat(paste0("site: ", pts$lat, ", ", pts$lon, "\n"))
       s2b <- getblocksnearby(pts, radius = radius, quiet = T)
       sitenumber <- 1
@@ -92,6 +93,7 @@ plot_distance_by_pctd <- function(s2b = NULL, sitenumber = 1, #  NULL,
       } else {
         warning("s2b must be results of getblocksnearby() or else a table of points with lat,lon columns and 1 row per point")
         pts = suppressWarnings(testpoints_n(1))
+        # Note slight changes can occur in lat,lon values if using paste(lat,lon,sep=',) instead of format() as per ?as.character()
         cat(paste0("site: ", pts$lat, ", ", pts$lon, "\n"))
         s2b <- getblocksnearby(pts, radius = radius, quiet = T)
         sitenumber <- 1
@@ -100,6 +102,7 @@ plot_distance_by_pctd <- function(s2b = NULL, sitenumber = 1, #  NULL,
       warning("s2b must be results of getblocksnearby() or else a table of points with lat,lon columns and 1 row per point")
       warning('s2b not provided, so showing sample data only')
       pts = suppressWarnings(testpoints_n(1))
+      # Note slight changes can occur in lat,lon values if using paste(lat,lon,sep=',) instead of format() as per ?as.character()
       cat(paste0("site: ", pts$lat, ", ", pts$lon, "\n"))
       s2b <- getblocksnearby(pts, radius = radius, quiet = T)
       sitenumber <- 1

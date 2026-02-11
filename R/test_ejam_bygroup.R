@@ -9,6 +9,14 @@ test_ejam_1group <- function(fnames,
                              stop_on_failure = FALSE, timebyfile = NULL, timebygroup = NULL,
                              truncate_test_name_nchar = 60
 ) {
+  ## prevent warning/error in R CMD check about supposedly undefined global variables in data.table code
+  # utils::globalVariables(c(
+  #   "total", "passed",  "testgroup",
+  #   "flagged", "flagged_byfile", "flagged_bygroup",
+  #   "failed", "failed_byfile", "failed_bygroup",
+  #   "seconds_bygroup", "seconds_byfile", "seconds_bygroup_predicted",
+  #   "untested_cant", "untested_skipped", "warned"
+  # ))
   xtable <- list()
   for (i in 1:length(fnames)) {
     seconds_byfile <- 0
@@ -102,6 +110,14 @@ test_ejam_bygroup <- function(testlist,
                               reporter = "minimal", # this may be the only option that works now
                               timebyfile = NULL, timebygroup = NULL
 ) {
+  ## prevent warning/error in R CMD check about supposedly undefined global variables in data.table code
+  # utils::globalVariables(c(
+  #   "total", "passed",  "testgroup",
+  #   "flagged", "flagged_byfile", "flagged_bygroup",
+  #   "failed", "failed_byfile", "failed_bygroup",
+  #   "seconds_bygroup", "seconds_byfile", "seconds_bygroup_predicted",
+  #   "untested_cant", "untested_skipped", "warned"
+  # ))
   # probably cannot now, but used to be able to use  reporter=default_compact_reporter()
   try({suppressWarnings(suppressMessages({beepr_available <- require(beepr)}))}, silent = TRUE)
   xtable <- list()
@@ -155,12 +171,12 @@ test_ejam_bygroup <- function(testlist,
       if (interactive() && beepr_available) {beepr::beep(10)}
       if (sum(xtable[[i]]$failed) > 0) {
         cat(paste0("     ***      Some FAILED in ", tgroupname, ": ",
-                   paste0(unique(xtable[[i]]$file[xtable[[i]]$failed > 0]), collapse = ","), "\n"))
+                   "'", paste0(unique(xtable[[i]]$file[xtable[[i]]$failed > 0]), collapse = "','"), "'\n"))
         cat(paste0("tests failed: ",
-                   paste0(unique(xtable[[i]]$test[xtable[[i]]$failed > 0]), collapse = ","), "\n"))
+                   "'", paste0(unique(xtable[[i]]$test[xtable[[i]]$failed > 0]), collapse = "','"), "'\n"))
       } else {
         cat(paste0("     ***      Some UNTESTED or WARNED in ", tgroupname, ": ",
-                   paste0(unique(xtable[[i]]$file[xtable[[i]]$flagged > 0]), collapse = ","), "\n"))
+                   "'", paste0(unique(xtable[[i]]$file[xtable[[i]]$flagged > 0]), collapse = "','"), "'\n"))
       }
     }
   } # looped over groups of test files

@@ -16,18 +16,24 @@ footer:
     left: [datefooter]
     right: [package, versionmsg]
   components:
-    datefooter: October 2025
-    versionmsg: Version 2.32.6.001
+    datefooter: February 2026
+    versionmsg: Version 2.32.7
 development:
   mode: release
   destination:
   version_label: warning
 home:
   title: EJAM Environmental Justice Analysis Multisite tool
-  description: Webapp and tools summarizing residential population and environmental data for hundreds of places quickly and accurately
+  description: Webapp & tools summarizing residential population & environmental data for hundreds of places quickly & accurately
   sidebar:
     structure: [dev, citation, license, community]
 articles:
+- title: EJSCREEN Documentation
+  desc: EJSCREEN Indicators & Reports
+  navbar: EJSCREEN Indicators & Reports
+  contents:
+  - ejscreen
+  - ejscreen-map-descriptions
 - title: The EJAM Web App
   desc: Overview for EJAM Users
   navbar: Overview for EJAM Users
@@ -50,6 +56,7 @@ articles:
   desc: For package/app developers
   navbar: For package/app developers
   contents:
+  - dev-speed
   - dev-app-settings
   - dev-deploy-app
   - dev-run-shinytests
@@ -58,8 +65,9 @@ articles:
   - dev-update-documentation
   - dev-update-package
   - dev-future-plans
+  - dev-speed
 reference:
-- title: "Key Functions for Starting an Analysis"
+- title: "Start an Analysis - Key Functions"
   desc: "Starting the Analysis"
   contents:
   - EJAM
@@ -67,8 +75,7 @@ reference:
   - ejamit
   - ejamit_compare_distances
   - ejamit_compare_types_of_places
-  - ejscreenit_for_ejam
-- title: "Key Functions for Viewing Results"
+- title: "View Results - Key Functions"
   desc: "Viewing the Results"
   contents:
   - ejam2excel
@@ -113,7 +120,7 @@ reference:
   - frs_from_sitename
   - frs
   - frs_by_programid
-- title: "Specify Facility Type"
+- title: "Specify Facilities by Type"
   desc: "NAICS, SIC, MACT, or EPA Program"
 - subtitle: "Choosing NAICS/SIC Industry Codes"
   contents:
@@ -166,15 +173,8 @@ reference:
   contents:
   - testinput_shapes_2
   - shapefile_from_any
-  - shapefile_from_folder
-  - shapefile_from_filepaths
-  - shapefile_from_zip
-  - shapefile_from_gdb
-  - shapefile_from_gdbzip
-  - shapefile_filepaths_from_folder
-  - shapefile_filepaths_valid
-  - shapefile_clean
   - shapefile_from_sitepoints
+  - shapefile_clean
   - shape_buffered_from_shapefile
   - shape_buffered_from_shapefile_points
   - shapes_from_fips
@@ -187,9 +187,9 @@ reference:
   - latlon_from_shapefile_centroids
 - title: "Specify Counties etc."
   desc: >
-    Tools to work with Census units and FIPS codes
+    Tools to work with Census units & FIPS codes
     - blockgroups, tracts, counties, states,
-    and EPA Regions
+    & EPA Regions
 - subtitle: "FIPS tools"
   contents:
   - name2fips
@@ -234,11 +234,11 @@ reference:
 - subtitle: "Regions"
   contents:
   - fips_st2eparegion
-- title: "Finding Blocks, Distances, and Residents"
+- title: "Residents, Blocks, & Distances"
   desc: >
-    GIS tools calculating which blocks (and residents)
+    GIS tools calculating which blocks (& residents)
     are in or near each place (within given radius of point
-    or in FIPS or polygon), and their distances
+    or in FIPS or polygon), & their distances
   contents:
   - getblocksnearby
   - getblocksnearby_from_fips
@@ -252,39 +252,49 @@ reference:
   - indexfrs
   - convert_units
   - fips2pop
-- title: "Calculating and Aggregating"
-  desc: >
-    Tools that Calculate and Aggregate Indicators
-    at each Place and Overall, and Report Percentiles
-  contents:
-  - doaggregate
-  - calc_ejam
-  - calc_byformula
-  - pctile_from_raw_lookup
-  - lookup_pctile
-  - high_pctiles_tied_with_min
-- subtitle: "Datasets with Indicators, etc."
+- subtitle: "Datasets with Indicators (raw data, means, percentiles)"
   contents:
   - blockgroupstats
   - bgej
   - bgpts
   - bg_cenpop2020
   - acs_bybg
+  - acs_table_info
+  - tables_ejscreen_acs
   - avg.in.us
   - usastats
+  - stateinfo
+  - stateinfo2
+  - statestats
+  - modelDoaggregate
+  - modelEjamit
+- title: "Calculations & Aggregation"
+  desc: >
+    Tools that Create or Aggregate Indicators
+    at each Place & Overall, & Report Percentiles or Means
+  contents:
+  - doaggregate
+  - calc_ejam
+  - calc_byformula
+  - lookup_pctile
   - usastats_means
   - usastats_query
   - usastats_queryd
   - usastats_querye
-  - stateinfo
-  - stateinfo2
-  - statestats
   - statestats_means
   - statestats_query
   - statestats_queryd
   - statestats_querye
-  - modelDoaggregate
-  - modelEjamit
+- subtitle: "Calculating Summary Stats, etc."
+  contents:
+  - count_sites_with_n_high_scores
+  - count_high_scores_by_site
+  - colcounter_summary_all
+  - popshare_at_top_n
+  - popshare_at_top_x_pct
+  - popshare_p_lives_at_what_n
+  - popshare_p_lives_at_what_pct
+  - distance_trends
 - subtitle: "Comparing Distances / Multiple Radius Values"
   contents:
   - ejamit_compare_distances
@@ -296,18 +306,20 @@ reference:
   - distance_mean_by_group
   - distance_by_group
   - distance_trends
-- subtitle: "Calculating Summary Stats, etc."
+- title: "Viewing Results - Deep Dive"
+- subtitle: "Tables"
   contents:
-  - count_sites_with_n_high_scores
-  - count_high_scores_by_site
-  - colcounter_summary_all
-  - popshare_at_top_n
-  - popshare_at_top_x_pct
-  - popshare_p_lives_at_what_n
-  - popshare_p_lives_at_what_pct
-  - distance_trends
-  - batch.summarize
-- title: "Viewing Results"
+  - ejam2report
+  - ejam2excel
+  - ejam2ratios
+  - ejam2areafeatures
+  - ejam2means
+  - ejam2tableviewer
+  - ejam2table_tall
+  - table_ratios_from_ejamit
+  - table_gt_from_ejamit
+  - table_gt_from_ejamit_1site
+  - table_gt_from_ejamit_overall
 - subtitle: "Maps of Points"
   contents:
   - ejam2map
@@ -317,7 +329,7 @@ reference:
   - map2browser
   - map_google
   - mapfast_gg
-  - plotblocksnearby
+  - plot_blocks_nearby
 - subtitle: "Maps of Shapes (Polygons)"
   contents:
   - mapfastej_counties
@@ -351,14 +363,13 @@ reference:
   contents:
   - ejam2histogram
   - ejam2boxplot_ratios
-  - plot_boxplot_ratios
   - plot_boxplot_pctiles
   - plot_ridgeline_ratios_ez
   - plot_ridgeline_ratios
 - subtitle: "Plots: Distance(s) for each population/group"
   contents:
   - ejam2barplot_distances
-- subtitle: "Plots: Indicator as a function of distance (comparing distances and indicators)"
+- subtitle: "Plots: Indicator as a function of distance (comparing distances & indicators)"
   contents:
   - ejam2barplot_distances
   - plot_distance_by_pctd
@@ -367,21 +378,7 @@ reference:
   - plot_distance_cdf_by_group
   - plot_demogshare_by_distance
   - plot_lorenz_distance_by_dcount
-- subtitle: "Tables"
-  contents:
-  - ejam2report
-  - ejam2excel
-  - ejam2ratios
-  - ejam2areafeatures
-  - ejam2means
-  - ejam2tableviewer
-  - ejam2table_tall
-  - ejscreenit_see_table
-  - table_ratios_from_ejamit
-  - table_gt_from_ejamit
-  - table_gt_from_ejamit_1site
-  - table_gt_from_ejamit_overall
-- title: "Test Data"
+- title: "Examples of Input & Output Data"
 - subtitle: "Finding Examples of Inputs/Outputs"
   contents:
   - testdata
@@ -426,7 +423,7 @@ reference:
   - testoutput_ejamit_shapes_2
   - testoutput_ejamit_fips_cities
   - testoutput_ejamit_fips_counties
-- title: "Utilities for finding URL or API info"
+- title: "Utilities providing URL or API info"
   contents:
   - url_ejamapi
   - url_ejscreenmap
@@ -438,18 +435,25 @@ reference:
   - url_county_equityatlas
   - url_state_equityatlas
   - url_naics.com
+  - url_ejscreentechdoc
 - title: "Utilities handling variable names"
   desc: "Utilities to handle variable names, indicator metadata, formulas, etc."
   contents:
   - fixcolnames
+  - fixcolnames_anyoldtype
   - names_d
   - names_e
   - map_headernames
 - title: internal
   contents:
+  - calc_avg_columns
+  - calc_ratio_columns
+  - calc_pctile_columns
+  - batch.summarize
+  - plot_boxplot_ratios
+  - high_pctiles_tied_with_min
+  - pctile_from_raw_lookup
   - api_run
-  - ejscreenit_for_ejam
-  - ejscreenit
   - state_from_sitetable
   - fips2state_abbrev
   - fips2state_fips
@@ -461,10 +465,7 @@ reference:
   - testoutput_doaggregate_10pts_1miles
   - testoutput_doaggregate_100pts_1miles
   - testoutput_doaggregate_1000pts_1miles
-  - testoutput_ejscreenit_5
-  - testoutput_ejscreenit_50
-  - testoutput_ejscreenit_500
-  - acsendyear
+  - acs_endyear
   - app_run_EJAM
   - app_server
   - app_ui
@@ -476,18 +477,11 @@ reference:
   - dataload_from_local
   - dataload_dynamic
   - download_latest_arrow_data
-  - default_points_shown_at_startup
   - getpointsnearbyviaQuadTree
   - proxistat_via_getblocks
   - colcounter
   - plot_st_v_us
   - plot_vs_us
-  - url_ejscreen_report
-  - ejscreen_vs
-  - ejscreen_vs_ejam_1var
-  - ejscreen_vs_ejam
-  - ejscreenapi2ejam_format
-  - ejscreenRESTbroker2table_na_filler
   - frs_get
   - frs_download
   - frs_drop_inactive
@@ -514,6 +508,7 @@ reference:
   - custom
   - formula_varname
   - formulas_all
+  - formulas_ejscreen_acs
   - formulas_d
   - batch.clean
   - rowMaxs2
@@ -530,8 +525,15 @@ reference:
   - fips_counties_from_countyname
   - fips_place_from_placename
   - shapefile2blockpoints
-  - shapefile_filepaths_validize
+  - shapefile_from_gdb
+  - shapefile_from_gdbzip
+  - shapefile_from_zip
   - shapefile_from_json
+  - shapefile_from_filepaths
+  - shapefile_from_folder
+  - shapefile_filepaths_from_folder
+  - shapefile_filepaths_valid
+  - shapefile_filepaths_validize
   - state_from_s2b_bysite
   - state_from_blockid_table
   - state_from_blockid
@@ -565,10 +567,7 @@ reference:
   - testinput_address_table_9
   - testinput_address_table_goodnames
   - testinput_address_table_withfull
-  - testoutput_ejscreenapi_1pts_1miles
-  - testoutput_ejscreenRESTbroker_1pts_1miles
   - testpoints_100_dt
-  - testoutput_ejscreenapi_plus_5
   - namez
   - names_age
   - names_age_count
@@ -655,7 +654,6 @@ reference:
   - names_misc
   - names_pct_as_fraction_blockgroupstats
   - names_pct_as_fraction_ejamit
-  - names_pct_as_fraction_ejscreenit
   - names_sitesinarea
   - names_these
   - names_these_avg
@@ -663,3 +661,5 @@ reference:
   - names_these_ratio_to_state_avg
   - names_these_state_avg
   - names_wts
+  - formulas_ejscreen_acs_disability
+  - formulas_ejscreen_demog_index

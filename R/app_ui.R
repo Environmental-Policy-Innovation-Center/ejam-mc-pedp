@@ -44,6 +44,15 @@ app_ui <- function(request) {
 
       ## title, favicon, etc. ####
 
+      ## local user date/timezone ####
+      # JavaScript to detect timezone and send to Shiny
+      # allowing correct local date in report footer (in case the server is in some other time zone)
+      tags$script('
+            $(document).on("shiny:sessioninitialized", function(event) {
+            var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            Shiny.setInputValue("client_tz", tz);
+            });
+                      '),
       ############################################################# #
 
       # TABS:   ####
@@ -68,7 +77,7 @@ app_ui <- function(request) {
                           conditionalPanel(
                             # So that About tab can be shown without necessarily allowing users to show/hide the advanced tab,
                             ## button to show/hide Advanced tab  ####
-                            condition = "input.can_show_advanced_settings == 'TRUE'",
+                            condition = "input.can_show_advanced_settings == 'TRUE'", # javascript syntax supposedly says true but 'TRUE' is what works here
                             actionButton(inputId = 'ui_show_advanced_settings','Show Advanced Settings Tab', class = 'usa-button'),
                             actionButton(inputId = 'ui_hide_advanced_settings','Hide Advanced Settings Tab', class = 'usa-button')
                           ),
@@ -143,21 +152,21 @@ app_ui <- function(request) {
               # _________ wellPanel start ___----------------------------------------------------------------------
 
               wellPanel(
-                style = 'background-color: #e5f2f5; min-height: 500px',
+                style = 'background-color: #e5f2f5; min-height: 300px',
 
                 fluidRow(
                   column(
                     12,
                     #offset=3,
                     ################################################################# #
-                    br(),
-
-                    wellPanel(
-                      style = 'background-color: #e5f2f5; min-height: 500px',
-
-                      fluidRow(
-                        column(
-                          12,
+#                    br(),
+#
+#                    wellPanel(
+#                      style = 'background-color: #e5f2f5; min-height: 300px',
+#
+#                      fluidRow(
+#                        column(
+#                          12,
                           ################################################################# #
 
                           ################################################################# #
@@ -399,14 +408,14 @@ app_ui <- function(request) {
 
                           ),  # end FIPS_PLACE conditionalPanel
                           ################################################################# #
-                          br()
-
-                        ) # end column
-                      ) # end fluidRow
-                    ),
+#                          br()
+#
+#                        ) # end column
+#                      ) # end fluidRow
+#                    ), # end well panel
 
                     # . ##  ##
-                    br(), #br(),
+#                    br(), #br(),
 
                     ## input: Button to return to previous results  ####
                     shinyjs::hidden(
@@ -515,7 +524,7 @@ app_ui <- function(request) {
                                #includeCSS('inst/report/community_report/communityreport.css'),
                                #includeCSS('inst/report/community_report/main.css'),
                                ############################## #
-                               ###               > TABLES       ####
+                               ###               > HEADER AND TABLES       ####
                                uiOutput('comm_report_html'),
                                br(),
                                ############################## #
@@ -532,21 +541,19 @@ app_ui <- function(request) {
                                    12, align = 'center',
                                    br(),br(),
                                    shinycssloaders::withSpinner(
-                                     plotOutput(outputId = 'view1_summary_plot', width = '100%', height = '400px')  # {{ demog_plot }} goes in .html template
+                                     plotOutput(outputId = 'report_plot_output', width = '100%', height = '400px')  # {{ demog_plot }} goes in .html template
                                    )
                                  )
                                ),
                                ############################## #
                                ###              > FOOTER  (version, date)    ####
-                               div(
-                                 style = "background-color: #edeff0; color: black; width: 100%; padding: 10px 20px; text-align: right; margin: 10px 0;",
-                                 uiOutput("report_version_date")
-                               ),
+
+                               uiOutput("report_footer_version_date"),  # now via generate_report_footer() which wraps it in div
                                br(),
+                               ############################## #
+                               ###              > DOWNLOAD BUTTON    ####
                                tags$div(
-                                 shiny::downloadButton(
-                                   outputId = 'community_download_all',
-                                   label = 'Download Community Report', class = 'usa-button'), style = 'text-align: center;'
+                                 downloadButton('download_report_multisite', label = 'Download Multisite Summary Report', class = 'usa-button'), style = 'text-align: center;'
                                )
                              ),  # end report tab
 
@@ -586,7 +593,7 @@ app_ui <- function(request) {
                                                        ),
                                                        column(6,
                                                               ## button to download excel Table of Sites/Results - uses ejam2excel()
-                                                              downloadButton('download_results_table', 'Download Results Table', class = 'usa-button')
+                                                              downloadButton('download_results_spreadsheet', label = 'Download Results Table', class = 'usa-button')
                                                        )
                                                      ),
                                                      br(), ## vertical space
@@ -717,9 +724,7 @@ app_ui <- function(request) {
                                             ),
                                             column(6,
                                                    ## output: button to download static report
-                                                   shiny::downloadButton(outputId = 'rg_download',
-                                                                         label = 'Download report',
-                                                                         class = 'usa-button')
+                                                   downloadButton('download_report_long', label = 'Download report', class = 'usa-button')
                                             )
                                           ), ######################################################### #
 
@@ -1025,9 +1030,14 @@ app_ui <- function(request) {
                  ## BOOKMARKS button ####
                  h2("Bookmarking to save settings and inputs"),
 
-                 conditionalPanel(condition = 'EJAM:::global_or_param("bookmarking_allowed") != "disable"', {
-                   bookmarkButton()  # https://mastering-shiny.org/action-bookmark.html
+                 conditionalPanel(condition = 'input.bookmarking_allowed_input == true', {
+                   fluidRow(
+                     column(3,
+                   bookmarkButton()   # https://mastering-shiny.org/action-bookmark.html
+                     ))
                  }),
+                 shiny::checkboxInput("bookmarking_allowed_input", "Allow bookmarking?",
+                                      value = EJAM:::global_or_param("bookmarking_allowed") != 'disable'),
                  ######################################################## #
                  ## ------------------------ app title ### #
                  # will not be editable here. defined in global_defaults_package.R
@@ -1102,7 +1112,7 @@ app_ui <- function(request) {
                  selectizeInput(
                    inputId = "default_naics",
                    label = h6("NAICS industry code to start with"),
-                   choices = setNames(naics_counts$NAICS, naics_counts$label_w_subs), # all details not just 3-digit list
+                   choices = NULL,# NULL loads faster; will update server side, in app_server  # setNames(naics_counts$NAICS, naics_counts$label_w_subs), # all details not just 3-digit list
                    selected = EJAM:::global_or_param("default_naics"),
                    width = 400,
                    multiple = TRUE,
@@ -1334,18 +1344,9 @@ app_ui <- function(request) {
                                      choices = list(Yes = TRUE, No = FALSE),
                                      selected = EJAM:::global_or_param("default_allow_median_in_barplot_indicators")),
                  ######################################################## #
-                 ### ejscreenapi only: Map colors, weights, opacity ####
-                 ### ONLY in ejscreenapi:
-                 numericInput(inputId = "circleweight_in", label = "ejscreenapi only: weight of circles in maps", value = EJAM:::global_or_param("default_circleweight")),
-                 ## ejscreenapi only:
-                 # opacitymin   <- 0
-                 # opacitymax   <- 0.5
-                 # opacitystep  <- 0.025
-                 # opacitystart <- 0.5
-                 # opacityratio <- 2 / 5
-                 # base_color_default      <- "blue"  ;
-                 # cluster_color_default   <- "red"   ;
-                 # highlight_color_default <- 'orange';
+                 ### Map colors, weights, opacity ####
+                 # not used (yet)
+                 # numericInput(inputId = "circleweight_in", label = "weight of circles in maps", value = EJAM:::global_or_param("default_circleweight")),
 
                  ######################################################## #
                  ## DOWNLOAD RESULTS ####
@@ -1391,10 +1392,10 @@ app_ui <- function(request) {
                  h3("Advanced tab"),
                  radioButtons(inputId = "show_advanced_settings", "Start with Advanced tab shown?", choices = c(Yes = TRUE, No = FALSE),
                               inline = TRUE,
-                              selected =  EJAM:::global_or_param("default_show_advanced_settings")), # see global_defaults_shiny_public.R
+                              selected =  as.logical(EJAM:::global_or_param("default_show_advanced_settings"))), # see global_defaults_shiny_public.R
                  radioButtons(inputId = "can_show_advanced_settings", "Provide buttons to let user Show/Hide advanced tab?", choices = c(Yes = TRUE, No = FALSE),
                               inline = TRUE,
-                              selected = EJAM:::global_or_param("default_can_show_advanced_settings")),
+                              selected = as.logical(EJAM:::global_or_param("default_can_show_advanced_settings"))),
 
                  ##################################################### #
                  ### testing modes ####
@@ -1441,66 +1442,6 @@ app_ui <- function(request) {
 
         ################################################################################ #
 
-        ######################################################## #
-        #
-        # . ----------------------------------------------- ####
-        ## . ####
-        # EJSCREEN API MODULE -  tabPanel   ####
-        ## may move to another tab. or in a conditional UI panel.
-        ## see default_hide_ejscreenapi_tab in global_defaults_*.R
-
-        #  , tabPanel(title = 'EJSCREEN Batch Tool',
-        #
-        #          h3("Access to EJSCREEN results via the API"),
-        #          h4("(slow, fewer features, and cannot aggregate overall, but exactly replicates EJSCREEN web app)"),
-        #          br(),
-        #
-        #          # notes  ## ##
-        #          # If a module needs to use a reactive expression, the outer function should take the reactive expression as a parameter.
-        #          # If a module needs to update a reactiveVal that is in the calling envt, it can take it as a param and then just modify it, right?
-        #          # If a module wants to return reactive expressions to the calling app, then return a list of reactive expressions from the function.
-        #          # If a module needs to access an input that isn’t part of the module, the
-        #          #   containing app should pass the input value wrapped in a reactive expression (i.e. reactive(...)):
-        #          #   myModule("myModule1", reactive(input$checkbox1))
-        #
-        #          mod_ejscreenapi_ui("x2",
-        #
-        #                             simpleradiusdefault_for_ui = 2
-        #          )
-        #
-        #          # uiOutput("mod_ejscreenapi_ui_TO_SHOW_IN_APP_UI")  # this approach would use the module UI from the outer app server, not here
-        #          # mod_ejscreenapi_ui_test("x1")
-        #
-        # )
-        # , # uncomment if relevant
-
-        ######################################################## #
-
-        # ejscreenapi mini-webapp link ####
-        ### obsolete
-        # span('tool for batch use of the EJSCREEN API: ',
-        #
-        # a('ejscreenapi tool for expert use',
-        # href = 'https://',                                 ## offline
-        # target = '_blank', rel = 'noreferrer noopener'))
-        ######################################################## #
-
-        # EJSCREEN single-site-report widget ####
-        ### obsolete while API down
-        # span('widget for querying EJSCREEN by place name',
-        # div(HTML('
-        #   <iframe
-        #   src="https://www.epa.gov/sites/production/files/widgets/ejscreenwidget.html"  ## offline
-        #   id="ejscreen"
-        #   width="220"
-        #   height="255"
-        #   scrolling="no"
-        #   frameborder="0"
-        #   marginwidth="0"
-        #   marginheight="0">
-        #     </iframe>
-        #     '
-        # )))
         ######################################################## #
         ## . ####
 

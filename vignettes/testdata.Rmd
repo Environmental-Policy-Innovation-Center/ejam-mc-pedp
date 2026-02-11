@@ -115,8 +115,7 @@ For documentation on each input or output item (R object), see
 This code snippet provides a useful list of test/ sample data
 objects in EJAM and related packages:
 
-**POINT DATA (LAT/LON COORDINATES)** for testing `ejamit()`, `mapfast()`,
-`ejscreenit()`, `getblocksnearby()`, etc.
+**POINT DATA (LAT/LON COORDINATES)** for testing `ejamit()`, `mapfast()`, `getblocksnearby()`, etc.
 
 See all files and all dataset examples related to one topic:
 ```{r}
@@ -154,7 +153,7 @@ x[grepl("^test[^op_]", x$Item), ]
 cat("\n\n")
 ```
 
-**EXAMPLES OF OUTPUTS** from `ejamit()`, `ejscreenit()`, `getblocksnearby()`, etc.,
+**EXAMPLES OF OUTPUTS** from `ejamit()`, `getblocksnearby()`, etc.,
 you can use as inputs to `ejam2report()`, `ejam2excel()`, `ejam2ratios()`,
 `ejam2barplot()`, `doaggregate()`, etc.
 
@@ -169,4 +168,4 @@ Note that the largest files used by the package are mostly the block-related dat
 
 Some datasets get downloaded by the package at installation or launch or as needed. See the article on [Updating EJAM Datasets](dev-update-datasets.html) for more information on these. 
 
-Also see [reference documentation for each dataset](../reference/index.html#datasets-with-indicators-etc-).
+Also see [reference documentation for each dataset](../reference/index.html#datasets-with-indicators-raw-data-means-percentiles-).

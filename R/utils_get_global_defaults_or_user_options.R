@@ -29,7 +29,7 @@ app_logo_HTML_global_or_param = function(app_logo_now = EJAM:::global_or_param("
       app_logo_html = paste0(
         ' <img id="titleLogo" src=',
         app_logo_now,
-        ' alt="logo" title="logo" style="margin: 0px; padding-bottom: 4px; padding-top: 4px; padding-left: 4px; padding-right: 4px; width: 40px; height: 40px">'
+        ' alt="logo" title="logo" align="center" style="margin: 0px; margin-right: 4px; padding-bottom: 4px; padding-top: 4px; padding-left: 4px; padding-right: 4px; width: 40px; height: 40px">'
       )
     )
   } else {
@@ -44,7 +44,7 @@ app_logo_HTML_global_or_param = function(app_logo_now = EJAM:::global_or_param("
 #' @param user_specified_options named list of any optional arguments that were in the call to [ejamapp()]
 #' @param bookmarking_allowed same as [shiny::shinyApp] enableBookmarking param
 #'
-#' @returns a list of global defaults or user options that [ejamapp()]
+#' @return a list of global defaults or user options that [ejamapp()]
 #'   uses as the golem_opts parameter in [golem::with_golem_options()]
 #'   and that later can be retrieved by server or ui via [golem::get_golem_options()]
 #'   or via [global_or_param()] (which both do almost the same thing).
@@ -124,8 +124,8 @@ get_global_defaults_or_user_options <- function(user_specified_options = NULL, b
   # We handle isPublic in this special way below since it has to be available in this calling envt
   # so that when we source global_defaults_shiny_public.R local=T it can be checked and used to set defaults correctly.
 
-  if ("isPublic" %in% names(user_specified_options)) {
-    isPublic <- user_specified_options$isPublic
+  if ("isPublic" %in% names(global_defaults_or_user_options)) {
+    isPublic <- global_defaults_or_user_options$isPublic
   }
   source(system.file("global_defaults_shiny_public.R", package = "EJAM"), local = TRUE) # local=T avoids filling global env with the lists like help_texts etc.
   global_defaults_or_user_options <- update_global_defaults_or_user_options(global_defaults_shiny_public)

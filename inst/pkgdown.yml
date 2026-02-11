@@ -1,5 +1,5 @@
 pandoc: 3.6.3
-pkgdown: 2.1.3
+pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   analyzing: analyzing.html
@@ -10,17 +10,20 @@ articles:
   dev-future-plans: dev-future-plans.html
   dev-run-shinytests: dev-run-shinytests.html
   dev-run-unit-tests: dev-run-unit-tests.html
+  dev-speed: dev-speed.html
   dev-update-datasets: dev-update-datasets.html
   dev-update-documentation: dev-update-documentation.html
   dev-update-package: dev-update-package.html
   distances: distances.html
+  ejscreen-map-descriptions: ejscreen-map-descriptions.html
+  ejscreen: ejscreen.html
   installing: installing.html
   naics: naics.html
   testdata: testdata.html
   webapp: webapp.html
   whatis: whatis.html
   zipcodes: zipcodes.html
-last_built: 2025-10-05T15:59Z
+last_built: 2026-02-03T03:25Z
 urls:
   reference: https://ejanalysis.github.io/EJAM/reference
   article: https://ejanalysis.github.io/EJAM/articles

@@ -29,7 +29,7 @@ doaggregate(
 )
 }
 \arguments{
-\item{sites2blocks}{data.table of distances in miles between all sites (facilities) and
+\item{sites2blocks}{table in \href{https://r-datatable.com}{data.table} format, of distances in miles between all sites (facilities) and
 nearby Census block internal points, with columns ejam_uniq_id, blockid, distance,
 created by getblocksnearby  function.
 See \link{testoutput_getblocksnearby_10pts_1miles} dataset in package, as input to this function}
@@ -101,12 +101,12 @@ Set to FALSE to prevent long output showing in console in RStudio when in intera
 \value{
 list with named elements:
 \itemize{
-\item \strong{\code{results_overall}}   one row data.table, like results_bysite, but just one row with
+\item \strong{\code{results_overall}}   one row table in \href{https://r-datatable.com}{data.table} format, like results_bysite, but just one row with
 aggregated results for all unique residents.
-\item \strong{\code{results_bysite}}   results for individual sites (buffers) - a data.table of results,
+\item \strong{\code{results_bysite}}   results for individual sites (buffers) - a table in \href{https://r-datatable.com}{data.table} format, of results,
 one row per ejam_uniq_id, one column per indicator
 \item \strong{results_bybg_people}  results for each blockgroup, to allow for showing the distribution of each
-indicator across everyone within each residential population group.
+indicator across everyone within each residential population group. table in \href{https://r-datatable.com}{data.table} format.
 \item \strong{longnames}  descriptive long names for the indicators in the above outputs
 \item \strong{count_of_blocks_near_multiple_sites}  additional detail
 }
@@ -117,18 +117,18 @@ Also see outputs of \code{\link[=ejamit]{ejamit()}} which are similar but provid
 Used by ejamit() and the shiny app to summarize blockgroups scores at each site and overall.
 }
 \details{
-\code{\link[=getblocksnearby]{getblocksnearby()}} and doaggregate() are the two key functions that run \code{\link[=ejamit]{ejamit()}}.
-\code{doaggregate()} takes a set of sites like facilities and the
+\code{\link[=getblocksnearby]{getblocksnearby()}} and \code{\link[=doaggregate]{doaggregate()}} are the two key functions that run \code{\link[=ejamit]{ejamit()}}.
+\code{\link[=doaggregate]{doaggregate()}} takes a set of sites like facilities and the
 set of blocks that are near each,
 combines those with indicator scores for blockgroups, and
 aggregates the numbers within each place and across all overall.
 
 For all examples, see \code{\link[=getblocksnearbyviaQuadTree]{getblocksnearbyviaQuadTree()}}
 
-\code{doaggregate()} is the code run after \code{\link[=getblocksnearby]{getblocksnearby()}} (or a related function for
+\code{\link[=doaggregate]{doaggregate()}} is the code run after \code{\link[=getblocksnearby]{getblocksnearby()}} (or a related function for
 polygons or FIPS Census units) has identified which blocks are nearby.
 
-\code{doaggregate()} aggregates the blockgroup scores to create a summary of each indicator,
+\code{\link[=doaggregate]{doaggregate()}} aggregates the blockgroup scores to create a summary of each indicator,
 as a raw score and US percentile and State percentile,
 in each buffer (i.e., near each facility):
 \itemize{
@@ -144,10 +144,10 @@ the correct denominator like count of those for whom the poverty ratio is known.
 
 This function requires the following datasets:
 \itemize{
-\item \link{blockwts}: data.table with these columns: blockid , bgid, blockwt
-\item \link{quaddata} data.table used to create localtree, a quad tree index of block points
+\item \link{blockwts}: table in \href{https://r-datatable.com}{data.table} format with these columns: blockid , bgid, blockwt
+\item \link{quaddata} table in \href{https://r-datatable.com}{data.table} format used to create localtree, a quad tree index of block points
 (and localtree that is created when package is loaded)
-\item \link{blockgroupstats} - A data.table (such as EJSCREEN residential population and environmental data by blockgroup)
+\item \link{blockgroupstats} - A table in \href{https://r-datatable.com}{data.table} format (such as EJSCREEN residential population and environmental data by blockgroup)
 }
 }
 \section{\strong{Identification of nearby residents -- methodology:}}{
@@ -191,7 +191,7 @@ the Decennial census blocks can provide, such as a dasymetric map approach.
 }
 
 \examples{
-structure.of.output.list(testoutput_doaggregate_10pts_1miles)
+EJAM:::structure.of.output.list(testoutput_doaggregate_10pts_1miles)
 
 }
 \seealso{

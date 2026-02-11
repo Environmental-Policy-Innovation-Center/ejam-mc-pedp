@@ -62,7 +62,7 @@ metadata_mapping <- list(
   avg.in.us       =	default_metadata,
   statestats      = default_metadata,
   usastats        = default_metadata,
-  high_pctiles_tied_with_min =	default_metadata,
+  high_pctiles_tied_with_min =	default_metadata, ##  NO LONGER USING high_pctiles_tied_with_min ***
 
   # datacreate_bgpts.R
   bgpts =	default_metadata,
@@ -146,23 +146,11 @@ metadata_mapping <- list(
   # [2,] "testoutput_doaggregate_100pts_1miles"
   # [3,] "testoutput_doaggregate_10pts_1miles"
 
-  # [7,] "testoutput_ejscreenapi_1pts_1miles"
-  # [8,] "testoutput_ejscreenapi_plus_5"
-  # [9,] "testoutput_ejscreenit_5"
-  # [10,] "testoutput_ejscreenit_50"
-  # [11,] "testoutput_ejscreenit_500"
-  # [12,] "testoutput_ejscreenRESTbroker_1pts_1miles"
-
   testoutput_ejamit_10pts_1miles = default_metadata,
   testoutput_ejamit_100pts_1miles = default_metadata,
   testoutput_ejamit_1000pts_1miles = default_metadata,
 
   # skip most of them
-
-  testoutput_ejscreenRESTbroker_1pts_1miles = default_metadata,
-
-  ejscreenRESTbroker2table_na_filler = default_metadata,
-
 
   test_metadata_custom = list(
     custominfo = 0,

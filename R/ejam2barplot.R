@@ -13,7 +13,7 @@
 #'   but could be c(names_d_ratio_to_state_avg , names_d_subgroups_ratio_to_state_avg).
 #'   Should not be a mix of State and US ratios, however.
 #' @param main title of plot - must change to note it vs. State if not comparing to US avg.
-#' @param ... passed to [plot_barplot_ratios_ez()]
+#' @param ... passed to [plot_barplot_ratios_ez()], to change color scheme, etc.
 #' @examples
 #'
 #' # Check a long list of indicators for any that are elevated
@@ -41,7 +41,7 @@
 #' # Environmental only
 #'
 #' ejam2barplot(out,
-#'   varnames = c(names_e_ratio_to_avg, names_e_ratio_to_state_avg),
+#'   varnames = c(names_e_ratio_to_avg), # names_e_ratio_to_state_avg
 #'   main = "Environmental Indicators at Selected Sites Compared to Averages")
 #'
 #'  ## select your own ratio-type indicators that are available
@@ -55,20 +55,7 @@
 #'  )
 #'    }
 #'
-#'  # helper functions related to ejam2barplot()
-#'
-#'   plot_barplot_ratios_ez(
-#'     out,
-#'     varnames = c(names_d_ratio_to_avg , names_d_subgroups_ratio_to_avg)
-#'   )
-#'
-#'   # same plot but with function that would need more work to format inputs:
-#'   plot_barplot_ratios(
-#'       unlist(out$results_overall[ ,
-#'       c(..names_d_ratio_to_avg , ..names_d_subgroups_ratio_to_avg) ])
-#'       )
-#'
-#' @return ggplot
+#' @return ggplot plot
 #'
 #' @export
 #'
@@ -77,7 +64,8 @@ ejam2barplot = function(ejamitout, varnames = c(names_d_ratio_to_avg , names_d_s
                         main = "Residential Populations at the Analyzed Locations Compared to US Overall",
                         ...) {
 
-  if (is.null(sitenumber)) {
+  if (length(sitenumber) > 1) {stop("ejam2barplot() requires that the sitenumber parameter if provided be a single number")}
+  if (is.null(sitenumber) || is.na(sitenumber) || 0 %in% sitenumber || any(sitenumber <= 0)) {
     # ejamitout <- ejamitout$results_overall
     single_location <- FALSE
     row_index <- NULL

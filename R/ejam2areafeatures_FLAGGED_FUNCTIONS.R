@@ -50,7 +50,7 @@
 #' shortlabels = EJAM:::flagged_areas_shortlabels_from_ejam(out)
 #' ejam2barplot_areafeatures(out, shortlabels = shortlabels)
 #'
-#' @returns ggplot2 plot
+#' @return ggplot2 plot
 #'
 #' @export
 #'
@@ -89,7 +89,7 @@ ejam2barplot_areafeatures <- function(ejamitout,
 #' - The "pctno" or % indicators are summarized as what % of the
 #'   residents analyzed lack the critical service.
 #'
-#' @returns a data frame with the summary of flagged areas
+#' @return a data frame with the summary of flagged areas
 #' @seealso [ejam2barplot_areafeatures()] [batch.summarize()]
 #'
 #' @export
@@ -99,7 +99,7 @@ ejam2areafeatures <- function(ejamitout) {
   ejamitout$results_summarized$flagged_areas
 }
 ################## #
-# same as ejam2areafeatures - just a more consistent but less friendly name, used by other internal functions
+# same as ejam2areafeatures - just a more consistent but less easy-to-type/recall name, used by other internal functions
 
 flagged_areas_from_ejam <- function(ejamitout) {
   ejamitout$results_summarized$flagged_areas

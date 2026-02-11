@@ -362,7 +362,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
                                             )[3]
 ) {
 
-  acsendyear_carto_tiger = acsendyear()
+  acs_endyear_carto_tiger = acs_endyear()
 
   # for a vector of  FIPS,
   # was using looped/batched arcgis API to obtain map boundaries of just those census units
@@ -386,8 +386,10 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
   if (length(fips) == 0) {stop('no valid fips')}
 
   tidycensus_ok <- TRUE
+  # >>> check if census api key available *** ####
   if (nchar(Sys.getenv("CENSUS_API_KEY")) == 0) {
     tidycensus_ok <- FALSE
+    warning("envt var CENSUS_API_KEY not found - tidycensus::get_acs() may require having set up a census api key - see ?tidycensus::census_api_key  ")
   }
   if (myservice[1] %in% c("cartographic", "tiger") && tidycensus_ok) {
     ## > tidycensus ok ####
@@ -433,9 +435,9 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
       state = mystates,
       # county =  substr(unique(fips), 3,5), # this function expects county fips to be only the county portion without the 2 state digits
       geometry = TRUE,
-      year = as.numeric(acsendyear_carto_tiger),
+      year = as.numeric(acs_endyear_carto_tiger),
       survey = 'acs5',
-      # key = , # API key would go here
+      # key = , # API key would go here, e.g. Sys.getenv("CENSUS_API_KEY")
       show_call = TRUE
     )
 
@@ -453,10 +455,10 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     ##  popvarname likely but not necessarily the same as pop from fips2pop() which is ACS 5yr from blockgroupstats
     ##  and pop gets added by shapefile_addcols() now via fips2pop()
     #
-    # popvarname = paste0("pop_est_acs5_", substr(acsendyear_carto_tiger, 3, 4))
+    # popvarname = paste0("pop_est_acs5_", substr(acs_endyear_carto_tiger, 3, 4))
     # popvarname = "pop_est" # simpler
     # names(shp) <- gsub("estimate", popvarname, names(shp))
-    # cat("Population estimate", popvarname, "is from B01001_001 in American Community Survey 5yr survey ending", acsendyear_carto_tiger, " \n")
+    # cat("Population estimate", popvarname, "is from B01001_001 in American Community Survey 5yr survey ending", acs_endyear_carto_tiger, " \n")
     # names(shp) <- gsub("moe", "pop_moe", names(shp))
 
     shp <- shp[ , c('NAME', 'FIPS', 'geometry')]
@@ -531,7 +533,7 @@ shapes_counties_from_countyfips <- function(countyfips = '10001', outFields = c(
     # else:
     ## > tidycensus NOT ok ####
     if (myservice[1] %in% c("cartographic", "tiger") && !tidycensus_ok) {
-      # those were requested but failed due to problem with api key or tidycensus package
+      # those were requested but failed due to problem with census api key or tidycensus package
       warning(paste0("need tidycensus package and census API key to use myservice = '", myservice[1], "', so using default service instead"))
       myservice <- "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Boundaries_2022/FeatureServer/2/query"
     }
@@ -862,11 +864,10 @@ shapes_places_from_placefips <- function(fips, myservice = 'tiger', year = 2024)
 
   ST <- unique(fips2state_abbrev(fips[ok])) # added later by shapefile_addcols() but needed here to download right states
 
-
-
-  # >>> should check if census api key available, if needed for tiger *** ####
-
-
+  # >>> check if census api key available *** ####
+  if (nchar(Sys.getenv("CENSUS_API_KEY")) == 0) {
+    warning("envt var CENSUS_API_KEY not found - tigris::places() may require having set up a census api key - see ?tidycensus::census_api_key  ")
+  }
 
   # Downloads ALL places in relevant STATES...  and last step will drop unrequested places
   if (myservice[1] == 'tiger') {
@@ -1046,7 +1047,7 @@ shapefile_addcols <- function(shp, addthese = c('fipstype', 'pop', 'NAME', 'STAT
   }
   if ('STATE_ABBR' %in% addthese) {
     suppressWarnings({
-      shp$STATE_ABBR <- fips2state_abbrev(fipsvector) # NA if fips is NA
+      shp$STATE_ABBR <- fips2stateabbrev(fipsvector) # NA if fips is NA
     })
   }
   if ('STATE_NAME' %in% addthese) {

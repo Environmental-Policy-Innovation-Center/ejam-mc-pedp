@@ -24,8 +24,6 @@
 test_that("popup_from_ejscreen() works even if 1 row or 1 indicator", {
   expect_no_error({
     suppressWarnings({
-      x = popup_from_ejscreen(testoutput_ejscreenapi_plus_5)
-
       x = popup_from_ejscreen(testoutput_ejamit_10pts_1miles$results_bysite[1:2,])
 
       # only one place (one row)
@@ -216,7 +214,7 @@ test_that("mapfastej_counties() works", {     # slow
 # what if no CENSUS_API_KEY, and different services tried
 ## see places where it does or does not do this, e.g. :
 # if (nchar(Sys.getenv("CENSUS_API_KEY")) == 0) {
-#   stop("this requires having set up a census api key - see ?tidycensus::census_api_key  ")
+#   warning("envt var CENSUS_API_KEY not found - this requires having set up a census api key - see ?tidycensus::census_api_key  ")
 # }
 
 ftypes <- c("blockgroups", "tracts", "cities", "counties", "states")
@@ -270,7 +268,7 @@ for (ftype in ftypes) {
 test_that("map_blockgroups_over_blocks() works", {
   expect_no_error({
     junk = capture.output({
-      y <- plotblocksnearby(testpoints_10[5,],
+      y <- plot_blocks_nearby(testpoints_10[5,],
                             radius = 0.5,
                             returnmap = TRUE)
       x = map_blockgroups_over_blocks(y)
@@ -342,6 +340,10 @@ test_that("shapes_blockgroups_from_bgfips() works", {
 })
 ############################################## #
 test_that("mapfast_gg() works", {
+  if (!pkg_available('maps')) {
+    warning("maps package is needed for unit test of mapfast_gg()")
+    skip("maps package is needed for unit test of mapfast_gg()")
+    }
   expect_no_error({
     x = mapfast_gg(testpoints_10)
     x

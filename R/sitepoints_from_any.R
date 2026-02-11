@@ -68,15 +68,15 @@ sitepoints_from_latlon_or_sitepoints = function(sitepoints = NULL, lat = NULL, l
 #'  sitepoints_from_any(pts)
 #'  pts = data.frame(Longitude = testpoints_10$lon, Latitude = testpoints_10$lat)
 #'  sitepoints_from_any(pts)
-#'  pts = data.table(Lat = testpoints_10$lat, Long = testpoints_10$lon)
+#'  pts = data.table::data.table(Lat = testpoints_10$lat, Long = testpoints_10$lon)
 #'  sitepoints_from_any(pts)
 #'
 #'  sitepoints_from_anything(testpoints_bad, set_invalid_to_na = F, invalid_msg_table = T)
 #'
-#'  \donttest{
-#'  if (interactive()) {
-#'    pts <- sitepoints_from_any()
-#'  }}
+#'    ## Try this in an interactive R session:
+#'    ##
+#'    #   pts <- sitepoints_from_any()
+#'
 #'  \donttest{
 #'  pts = system.file("testdata/latlon/testpoints_10.xlsx", package = "EJAM")
 #'  sitepoints_from_any(pts)

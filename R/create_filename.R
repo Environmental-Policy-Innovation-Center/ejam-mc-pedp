@@ -1,6 +1,6 @@
 
 ##################### #
-# lubridate:: could do this, but this works ok
+# lubridate:: could do this, but this works ok. Ignores timezone issues, though.
 # format date and time to use as part of a file name to save results in
 Sys.time_txt = function(time = Sys.time()) {
   format(time, '%Y-%m-%d %H.%M')
@@ -30,7 +30,7 @@ time_plus_x_seconds = function(seconds = 60, start_time = Sys.time()) {
 #'
 #' @examples
 #' # specify title only
-#' create_filename(title = 'Summary of Analysis', ext=".txt")
+#' EJAM:::create_filename(title = 'Summary of Analysis', ext=".txt")
 #'
 #' # test / see how it works for various combinations of input parameters
 #' parameters_table = expand.grid(
@@ -43,7 +43,7 @@ time_plus_x_seconds = function(seconds = 60, start_time = Sys.time()) {
 #' )
 #' cbind(output_filename =
 #'   cbind(
-#'     purrr::pmap(parameters_table, create_filename)
+#'     purrr::pmap(parameters_table, EJAM:::create_filename)
 #'   ),
 #'   parameters_table
 #' )
