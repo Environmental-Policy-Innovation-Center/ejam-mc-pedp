@@ -41,7 +41,7 @@ RUN install2.r --error --skipinstalled \
     attempt \
     collapse \
     config \
-    data.table \
+    data.table@1.17.2 \
     DBI \
     desc \
     doSNOW \
