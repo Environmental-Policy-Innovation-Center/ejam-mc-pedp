@@ -1,6 +1,6 @@
-FROM rocker/r-ver:4.4.1
+FROM rocker/rstudio:latest
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
     curl \
     unzip \
     libcurl4-openssl-dev \
@@ -12,12 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libproj-dev \
     libgdal-dev \
     libmagick++-dev \
-    libfreetype6-dev \
-    libpng-dev \
-    libtiff5-dev \
-    libjpeg-dev \
-    libharfbuzz-dev \
-    libfribidi-dev \
     texlive \
     texlive-latex-extra \
     texlive-fonts-extra \
@@ -32,11 +26,8 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/aws
 RUN mkdir -p /home/epic
 WORKDIR /home/epic
 
-## direct install data.table latest version
-RUN R -e "install.packages('data.table', repos = 'https://cloud.r-project.org')"
-
-# Install CRAN packages and clean cache in the SAME layer
-RUN install2.r --error --skipinstalled \
+# Install required R packages from CRAN
+RUN install2.r --error \
     s2 \
     sf \
     tidyverse \
@@ -44,6 +35,7 @@ RUN install2.r --error --skipinstalled \
     attempt \
     collapse \
     config \
+    data.table \
     DBI \
     desc \
     doSNOW \
@@ -93,10 +85,7 @@ RUN install2.r --error --skipinstalled \
     tidygeocoder \
     units \
     remotes \
-    && rm -rf /tmp/downloaded_packages /tmp/*.rds \
-    && rm -rf /usr/local/lib/R/site-library/*/doc \
-    && rm -rf /usr/local/lib/R/site-library/*/help \
-    && rm -rf /usr/local/lib/R/site-library/*/html
+    && rm -rf /tmp/downloaded_packages /tmp/*.rds
 
 # GitHub packages
 RUN R -e "remotes::install_github('mikejohnson51/AOI')" && \
