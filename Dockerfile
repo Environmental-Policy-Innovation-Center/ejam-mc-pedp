@@ -32,6 +32,9 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/aws
 RUN mkdir -p /home/epic
 WORKDIR /home/epic
 
+## direct install data.table latest version
+RUN R -e "install.packages('data.table', repos = 'https://cloud.r-project.org')"
+
 # Install CRAN packages and clean cache in the SAME layer
 RUN install2.r --error --skipinstalled \
     s2 \
@@ -41,7 +44,6 @@ RUN install2.r --error --skipinstalled \
     attempt \
     collapse \
     config \
-    data.table@1.17.2 \
     DBI \
     desc \
     doSNOW \
